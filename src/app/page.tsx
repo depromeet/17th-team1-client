@@ -256,14 +256,16 @@ const GlobePrototype = () => {
     // zoom이 클수록 멀리서 보는 것 (altitude가 높음)
     // zoom이 작을수록 가까이서 보는 것 (altitude가 낮음)
 
-    if (zoom > 4) return 15; // 매우 멀리서 볼 때 - 강한 클러스터링
-    if (zoom > 3) return 10; // 멀리서 볼 때 - 중간 클러스터링
-    if (zoom > 2) return 5; // 중간 거리 - 약한 클러스터링
-    if (zoom > 1.5) return 2; // 가까이서 볼 때 - 매우 약한 클러스터링
-    return 0; // 매우 가까이서 볼 때 - 클러스터링 해제
+    if (zoom > 6) return 50; // 매우 멀리 - 최강 클러스터링 (유럽 전체 클러스터링)
+    if (zoom > 5) return 40; // 멀리 - 강한 클러스터링 (대륙별 클러스터링)
+    if (zoom > 4) return 30; // 중간 거리 - 중간 클러스터링 (지역별 클러스터링)
+    if (zoom > 3) return 20; // 가까이 - 약한 클러스터링 (인근 국가별)
+    if (zoom > 2) return 15; // 더 가까이 - 매우 약한 클러스터링
+    if (zoom > 1.5) return 10; // 매우 가까이 - 최소 클러스터링
+    return 0; // 극도로 가까이 - 클러스터링 해제
   };
 
-  // 브라우저 기본 확대/축소 방지
+  // 브라우저 기본 확대/축소 방지 및 Globe 줌 감지
   useEffect(() => {
     const preventZoom = (e: WheelEvent) => {
       if (e.ctrlKey) {
@@ -286,6 +288,30 @@ const GlobePrototype = () => {
       }
     };
 
+    // Globe 컨테이너에서 휠 이벤트 감지
+    const handleGlobeWheel = (e: WheelEvent) => {
+      // 휠 이벤트 발생 시 잠시 후 줌 레벨 체크
+      setTimeout(() => {
+        if (globeRef.current) {
+          try {
+            const camera = globeRef.current.camera();
+            const controls = globeRef.current.controls();
+            if (camera && controls) {
+              const distance = controls.getDistance
+                ? controls.getDistance()
+                : camera.position.length();
+              const globeRadius = globeRef.current.getGlobeRadius();
+              const altitude = distance / globeRadius - 1;
+
+              setZoomLevel(altitude);
+            }
+          } catch (error) {
+            // 에러 무시
+          }
+        }
+      }, 50);
+    };
+
     // 이벤트 리스너 추가
     document.addEventListener('wheel', preventZoom, { passive: false });
     document.addEventListener('keydown', preventKeyboardZoom);
@@ -293,11 +319,22 @@ const GlobePrototype = () => {
       passive: false,
     });
 
+    // Globe 컨테이너에 휠 이벤트 리스너 추가
+    if (globeEl.current) {
+      globeEl.current.addEventListener('wheel', handleGlobeWheel, {
+        passive: true,
+      });
+    }
+
     return () => {
       // 클린업
       document.removeEventListener('wheel', preventZoom);
       document.removeEventListener('keydown', preventKeyboardZoom);
       document.removeEventListener('touchstart', preventTouchZoom);
+
+      if (globeEl.current) {
+        globeEl.current.removeEventListener('wheel', handleGlobeWheel);
+      }
     };
   }, []);
 
@@ -306,24 +343,39 @@ const GlobePrototype = () => {
     if (!globeRef.current) return;
 
     const checkZoomLevel = () => {
-      if (globeRef.current) {
-        const camera = globeRef.current.camera();
-        if (camera && camera.position) {
-          const currentAltitude = camera.position.length() / globeRef.current.getGlobeRadius() - 1;
-          
-          // 현재 줌 레벨과 차이가 클 때만 업데이트
-          if (Math.abs(currentAltitude - zoomLevel) > 0.2) {
-            setZoomLevel(currentAltitude);
+      if (globeRef.current && globeRef.current.camera) {
+        try {
+          const camera = globeRef.current.camera();
+          const controls = globeRef.current.controls();
+
+          if (camera && camera.position && controls) {
+            // 카메라 거리 직접 계산
+            const distance = camera.position.distanceTo({ x: 0, y: 0, z: 0 });
+            const globeRadius = globeRef.current.getGlobeRadius();
+            const altitude = distance / globeRadius - 1;
+
+            // 컨트롤러의 거리도 확인
+            const controlDistance = controls.getDistance
+              ? controls.getDistance()
+              : distance;
+            const controlAltitude = controlDistance / globeRadius - 1;
+
+            // 더 정확한 값 사용
+            const finalAltitude = Math.max(altitude, controlAltitude);
+
+            setZoomLevel(finalAltitude);
           }
+        } catch (error) {
+          // 에러 무시
         }
       }
     };
 
-    // 주기적으로 줌 레벨 체크 (onZoom 이벤트 대신)
-    const interval = setInterval(checkZoomLevel, 200);
+    // 더 자주 체크하여 실시간 반응성 향상
+    const interval = setInterval(checkZoomLevel, 100);
 
     return () => clearInterval(interval);
-  }, [zoomLevel]); // zoomLevel을 의존성에 포함하되, 큰 변화가 있을 때만 업데이트
+  }, []); // 의존성 배열을 비워서 무한 루프 방지
 
   useEffect(() => {
     // Globe.gl 동적 로딩
@@ -471,6 +523,32 @@ const GlobePrototype = () => {
         globe.controls().minDistance = 101; // 최소 거리 설정
         globe.controls().maxDistance = 1000; // 최대 거리 설정
 
+        // 줌 이벤트 리스너 추가
+        const controls = globe.controls();
+        if (controls) {
+          const onZoomChange = () => {
+            if (globeRef.current) {
+              try {
+                const camera = globeRef.current.camera();
+                const distance = controls.getDistance
+                  ? controls.getDistance()
+                  : camera.position.length();
+                const globeRadius = globeRef.current.getGlobeRadius();
+                const altitude = distance / globeRadius - 1;
+
+                setZoomLevel(altitude);
+              } catch (error) {
+                // 에러 무시
+              }
+            }
+          };
+
+          // 다양한 이벤트에 리스너 추가
+          controls.addEventListener('change', onZoomChange);
+          controls.addEventListener('start', onZoomChange);
+          controls.addEventListener('end', onZoomChange);
+        }
+
         // 렌더러 품질 개선
         const renderer = globe.renderer();
         if (renderer) {
@@ -539,7 +617,7 @@ const GlobePrototype = () => {
     if (!globeRef.current) return;
 
     // 줌 레벨이 너무 높으면 (너무 멀리서 보면) 라벨 숨기기
-    if (zoomLevel > 6) {
+    if (zoomLevel > 10) {
       globeRef.current.htmlElementsData([]);
       setClusteredData([]);
       return;
@@ -558,7 +636,7 @@ const GlobePrototype = () => {
   // 클러스터 데이터가 변경될 때 HTML 라벨 업데이트
   useEffect(() => {
     if (!globeRef.current || clusteredData.length === 0) return;
-    
+
     // HTML 라벨 업데이트
     globeRef.current
       .htmlElementsData(clusteredData)
@@ -786,7 +864,7 @@ const GlobePrototype = () => {
       )}
 
       {/* 클러스터링 정보 */}
-      {clusteredData.length > 0 && zoomLevel <= 6 && (
+      {clusteredData.length > 0 && zoomLevel <= 10 && (
         <div
           style={{
             color: '#8892b0',
@@ -795,8 +873,8 @@ const GlobePrototype = () => {
             textAlign: 'center',
           }}
         >
-          현재 줌 레벨: {zoomLevel.toFixed(1)} | 클러스터:{' '}
-          {clusteredData.length}개
+          현재 줌 레벨: {zoomLevel.toFixed(2)} | 클러스터 거리:{' '}
+          {getClusterDistance(zoomLevel)} | 클러스터: {clusteredData.length}개
         </div>
       )}
 

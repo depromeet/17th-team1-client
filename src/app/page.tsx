@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const GlobePrototype = () => {
   const globeEl = useRef<HTMLDivElement>(null);
   const globeRef = useRef<any>(null);
-  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(2.5);
@@ -378,6 +377,7 @@ const GlobePrototype = () => {
   }, []); // 의존성 배열을 비워서 무한 루프 방지
 
   useEffect(() => {
+    console.log('🌍 Globe 로딩 시작...');
     // Globe.gl 동적 로딩
     const loadGlobe = async () => {
       try {
@@ -385,20 +385,26 @@ const GlobePrototype = () => {
         setGlobeError(null);
 
         if (!globeEl.current) {
+          console.error('Globe container not found');
           setGlobeError('Globe container not found');
           return;
         }
 
+        console.log('Globe.gl 라이브러리 로딩 중...');
         const Globe = (await import('globe.gl')).default;
 
         if (!Globe) {
+          console.error('Failed to load Globe.gl library');
           setGlobeError('Failed to load Globe.gl library');
           return;
         }
 
+        console.log('Globe.gl 라이브러리 로딩 완료');
+
         // 기존 내용 제거
         globeEl.current.innerHTML = '';
 
+        console.log('Globe 인스턴스 생성 중...');
         const globe = new Globe(globeEl.current)
           // Blue Marble 고해상도 지구본 이미지 사용
           .globeImageUrl(
@@ -423,31 +429,85 @@ const GlobePrototype = () => {
 
         // 카메라 변경 이벤트 리스너 제거 (주기적 체크로 대체)
 
-        // 국가 데이터 로드
-        fetch('//unpkg.com/world-atlas/countries-110m.json')
-          .then((res) => res.json())
+        // 국가 데이터 로드 (GeoJSON 버전 사용)
+        console.log('🌐 국가 데이터 fetch 시작...');
+        fetch(
+          'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson'
+        )
+          .then((res) => {
+            console.log('📡 fetch 응답 상태:', res.status, res.ok);
+            if (!res.ok) {
+              throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+          })
           .then((countriesData) => {
+            console.log('🗺️ 국가 데이터 원본:', countriesData);
+            console.log('🗺️ 국가 데이터 타입:', typeof countriesData);
+            console.log('🗺️ features 존재:', !!countriesData?.features);
+            console.log(
+              '🗺️ 국가 데이터 로드됨:',
+              countriesData?.features?.length
+            );
+
+            // GeoJSON 데이터에서 features 추출
+            const features = countriesData?.features || [];
+            console.log('🌍 처리된 features:', features.length);
+
+            // 첫 번째 feature 샘플 확인
+            if (features.length > 0) {
+              console.log('� 첫 번째 국가 샘플:', features[0]);
+              console.log('📝 properties:', features[0].properties);
+            }
+
             // 현재 패턴의 방문한 국가들의 ISO 코드 계산
             const currentVisitedISOCodes = [
               ...new Set(currentPattern.countries.map((c) => getISOCode(c.id))),
             ];
+            console.log('📍 방문한 국가 ISO 코드:', currentVisitedISOCodes);
 
-            // countriesData가 undefined이거나 features가 없는 경우 빈 배열 사용
-            const features = countriesData?.features || [];
+            // countriesData가 undefined이거나 features가 없는 경우 위에서 처리된 features 사용
+            console.log('🌍 전체 국가 features:', features.length);
 
+            // 모든 국가 데이터를 로드 (필터링 제거)
             globe
-              .polygonsData(
-                features.filter((d: any) =>
-                  currentVisitedISOCodes.includes(d.properties.ISO_A3)
-                )
-              )
+              .polygonsData(features)
               .polygonCapColor((feat: any) => {
-                const isoCode = feat.properties.ISO_A3;
+                // properties 구조 확인용 로그 (처음 5개만)
+                if (Math.random() < 0.01) {
+                  // 1% 확률로만 로그 출력
+                  console.log('🔍 폴리곤 properties:', feat.properties);
+                  console.log('🔍 가능한 ISO 필드들:', {
+                    ISO_A3: feat.properties?.ISO_A3,
+                    iso_a3: feat.properties?.iso_a3,
+                    ISO3: feat.properties?.ISO3,
+                    iso3: feat.properties?.iso3,
+                    ADM0_A3: feat.properties?.ADM0_A3,
+                    name: feat.properties?.name || feat.properties?.NAME,
+                  });
+                }
+
+                // Feature의 id 필드에서 ISO 코드 가져오기 (GeoJSON 표준)
+                const isoCode = feat.id; // properties가 아니라 최상위 id 필드 사용
+
+                console.log(
+                  `🗺️ 국가 ${
+                    feat.properties?.name || 'Unknown'
+                  }: ISO=${isoCode}`
+                );
+
                 const countryData = currentPattern.countries.find(
                   (c: any) => getISOCode(c.id) === isoCode
                 );
 
-                // 선택된 국가인지 확인 (selectedCountry는 country.id 형태)
+                // 방문하지 않은 국가는 매우 투명하게
+                if (!countryData) return 'rgba(100, 100, 100, 0.02)';
+
+                console.log(
+                  `✅ 매칭된 국가: ${countryData.name}, 색상: ${countryData.color}`
+                );
+
+                // 선택된 국가인지 확인
                 const isSelected =
                   selectedCountry &&
                   currentPattern.countries.find(
@@ -456,64 +516,56 @@ const GlobePrototype = () => {
                   );
 
                 if (isSelected) {
-                  return countryData?.color || '#ff6b6b'; // 밝은 색상
-                } else if (countryData) {
-                  return `${countryData.color}88`; // 반투명 색상
-                } else {
-                  return 'rgba(100, 100, 100, 0.2)'; // 기본 회색
+                  return countryData.color;
                 }
-              })
-              .polygonSideColor((feat: any) => {
-                const isoCode = feat.properties.ISO_A3;
-                const isSelected =
-                  selectedCountry &&
-                  currentPattern.countries.find(
-                    (c) =>
-                      c.id === selectedCountry && getISOCode(c.id) === isoCode
-                  );
-                return isSelected ? '#555555' : '#333333';
-              })
-              .polygonStrokeColor((feat: any) => {
-                const isoCode = feat.properties.ISO_A3;
-                const isSelected =
-                  selectedCountry &&
-                  currentPattern.countries.find(
-                    (c) =>
-                      c.id === selectedCountry && getISOCode(c.id) === isoCode
-                  );
-                return isSelected ? '#ffffff' : '#111111';
-              })
-              .polygonAltitude((feat: any) => {
-                const isoCode = feat.properties.ISO_A3;
-                const isSelected =
-                  selectedCountry &&
-                  currentPattern.countries.find(
-                    (c) =>
-                      c.id === selectedCountry && getISOCode(c.id) === isoCode
-                  );
-                return isSelected ? 0.03 : 0.005;
-              })
-              .polygonLabel('')
-              .onPolygonClick((polygon: any) => {
-                const countryISOCode = polygon.properties.ISO_A3;
 
-                // 클릭된 ISO 코드에 해당하는 첫 번째 도시 찾기
-                const clickedCountry = currentPattern.countries.find(
-                  (c: any) => getISOCode(c.id) === countryISOCode
+                // 기본적으로 방문한 국가는 살짝 표시
+                return `${countryData.color}44`;
+              })
+              .polygonSideColor(() => 'rgba(0, 100, 0, 0.15)')
+              .polygonStrokeColor(() => 'rgba(255, 255, 255, 0.5)') // 밝은 흰색 국경선
+              .polygonAltitude(0.01)
+              .polygonLabel((feat: any) => {
+                const isoCode = feat.properties.ISO_A3;
+                const countryData = currentPattern.countries.find(
+                  (c: any) => getISOCode(c.id) === isoCode
                 );
-
-                if (clickedCountry) {
-                  setSelectedCountry(clickedCountry.id);
-                  globe.pointOfView(
-                    {
-                      lat: clickedCountry.lat,
-                      lng: clickedCountry.lng,
-                      altitude: 1.5,
-                    },
-                    1000
-                  );
-                }
+                return countryData ? countryData.name : '';
               });
+
+            console.log('🌍 폴리곤 설정 완료');
+
+            // 폴리곤 클릭 이벤트 추가
+            globe.onPolygonClick((polygon: any) => {
+              const countryISOCode = polygon.properties.ISO_A3;
+
+              // 클릭된 ISO 코드에 해당하는 첫 번째 도시 찾기
+              const clickedCountry = currentPattern.countries.find(
+                (c: any) => getISOCode(c.id) === countryISOCode
+              );
+
+              if (clickedCountry) {
+                setSelectedCountry(clickedCountry.id);
+                globe.pointOfView(
+                  {
+                    lat: clickedCountry.lat,
+                    lng: clickedCountry.lng,
+                    altitude: 1.5,
+                  },
+                  1000
+                );
+              }
+            });
+          })
+          .catch((error) => {
+            console.error('❌ 국가 데이터 로드 실패:', error);
+            console.error('❌ 에러 상세:', error.message);
+            console.error('❌ 에러 스택:', error.stack);
+            console.log('🔄 대체 방법으로 시도...');
+
+            // fetch 실패 시 빈 폴리곤으로 설정
+            globe.polygonsData([]);
+            console.log('📊 빈 폴리곤 데이터 설정 완료');
           });
 
         // 자동 회전
@@ -614,24 +666,145 @@ const GlobePrototype = () => {
 
   // 줌 레벨 변경에 따른 클러스터링 업데이트 (별도 useEffect로 분리)
   useEffect(() => {
+    console.log('🎯 줌 레벨 변경됨:', zoomLevel);
+
     if (!globeRef.current) return;
 
     // 줌 레벨이 너무 높으면 (너무 멀리서 보면) 라벨 숨기기
     if (zoomLevel > 10) {
+      console.log('줌 레벨이 너무 높음. 라벨 숨김');
       globeRef.current.htmlElementsData([]);
       setClusteredData([]);
       return;
     }
 
     const clusterDistance = getClusterDistance(zoomLevel);
+    console.log(`클러스터 거리: ${clusterDistance}`);
+
     const clusters = clusterLocations(
       currentPattern.countries,
       clusterDistance
     );
 
+    console.log(`생성된 클러스터: ${clusters.length}개`);
+
     // 클러스터 데이터 업데이트
     setClusteredData(clusters);
+    console.log('클러스터 데이터 업데이트됨:', clusters.length, clusters);
   }, [zoomLevel, currentGlobeIndex]); // currentPattern.countries 대신 currentGlobeIndex 사용
+
+  // 클러스터 데이터 변경 감지
+  useEffect(() => {
+    console.log('🔍 clusteredData 상태 변경됨:', clusteredData.length);
+    clusteredData.forEach((cluster, index) => {
+      console.log(
+        `클러스터 ${index}: ${cluster.name} (${cluster.count}개 아이템)`
+      );
+      if (cluster.items) {
+        cluster.items.forEach((item: any) => {
+          console.log(`  - ${item.name} (${getISOCode(item.id)})`);
+        });
+      }
+    });
+
+    // 폴리곤 색상 강제 업데이트
+    if (globeRef.current && clusteredData.length > 0) {
+      console.log('🎨 폴리곤 색상 강제 업데이트 시작...');
+
+      // 현재 폴리곤 데이터 가져오기
+      const currentPolygons = globeRef.current.polygonsData();
+      console.log(
+        '📊 현재 폴리곤 데이터:',
+        currentPolygons ? currentPolygons.length : 'null'
+      );
+
+      if (currentPolygons && currentPolygons.length > 0) {
+        console.log('✅ 폴리곤 데이터 존재, 색상 함수 설정 중...');
+
+        // 폴리곤 색상 함수를 새로 설정
+        globeRef.current.polygonCapColor((feat: any) => {
+          const isoCode = feat.id; // properties가 아니라 최상위 id 필드 사용
+          const countryData = currentPattern.countries.find(
+            (c: any) => getISOCode(c.id) === isoCode
+          );
+
+          if (!countryData) return 'rgba(100, 100, 100, 0.1)';
+
+          // 선택된 국가인지 확인
+          const isSelected =
+            selectedCountry &&
+            currentPattern.countries.find(
+              (c) => c.id === selectedCountry && getISOCode(c.id) === isoCode
+            );
+
+          if (isSelected) {
+            console.log(`선택된 국가: ${isoCode}`);
+            return countryData.color;
+          }
+
+          // 라벨이 있는 국가인지 확인
+          const hasLabel = clusteredData.some(
+            (cluster) =>
+              cluster.items?.some(
+                (item: any) => getISOCode(item.id) === isoCode
+              ) || getISOCode(cluster.id) === isoCode
+          );
+
+          console.log(
+            `국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${
+              hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
+            }`
+          );
+
+          // 라벨이 있으면 완전 색상, 없으면 매우 어둡고 투명하게
+          return hasLabel ? countryData.color : 'rgba(50,50,50,0.1)';
+        });
+
+        console.log('🎨 폴리곤 색상 업데이트 완료');
+      } else {
+        console.log('❌ 폴리곤 데이터가 없음 - 나중에 다시 시도');
+
+        // 폴리곤 데이터가 없다면 조금 후에 다시 시도
+        setTimeout(() => {
+          if (globeRef.current) {
+            const retryPolygons = globeRef.current.polygonsData();
+            console.log(
+              '🔄 재시도 - 폴리곤 데이터:',
+              retryPolygons ? retryPolygons.length : 'null'
+            );
+
+            if (retryPolygons && retryPolygons.length > 0) {
+              console.log('🎯 재시도 성공! 폴리곤 색상 함수 설정');
+              globeRef.current.polygonCapColor((feat: any) => {
+                const isoCode = feat.id; // properties가 아니라 최상위 id 필드 사용
+                const countryData = currentPattern.countries.find(
+                  (c: any) => getISOCode(c.id) === isoCode
+                );
+
+                if (!countryData) return 'rgba(100, 100, 100, 0.1)';
+
+                // 라벨이 있는 국가인지 확인
+                const hasLabel = clusteredData.some(
+                  (cluster) =>
+                    cluster.items?.some(
+                      (item: any) => getISOCode(item.id) === isoCode
+                    ) || getISOCode(cluster.id) === isoCode
+                );
+
+                console.log(
+                  `[재시도] 국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${
+                    hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
+                  }`
+                );
+                return hasLabel ? countryData.color : 'rgba(50,50,50,0.1)';
+              });
+              console.log('🎨 [재시도] 폴리곤 색상 업데이트 완료');
+            }
+          }
+        }, 1000);
+      }
+    }
+  }, [clusteredData, selectedCountry, currentGlobeIndex]);
 
   // 클러스터 데이터가 변경될 때 HTML 라벨 업데이트
   useEffect(() => {

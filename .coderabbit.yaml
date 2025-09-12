@@ -1,0 +1,105 @@
+# CodeRabbit configuration file
+# For more information, see https://docs.coderabbit.ai
+
+# Language used for codebase reviews
+language: ko
+
+# Base branch for comparing pull requests
+base_branch: develop
+
+# Code review configurations
+reviews:
+  # General review instructions
+  instructions: |
+    - React, TypeScript, Next.js, Tailwind CSS 프로젝트입니다.
+    - 코드 리뷰 시 한국어로 피드백을 제공해주세요.
+    - 성능, 보안, 가독성을 우선적으로 검토해주세요.
+    - React 모범 사례와 TypeScript 타입 안전성을 확인해주세요.
+    - Tailwind CSS 모범 사례와 유틸리티 클래스 사용법을 확인해주세요.
+    - 접근성(accessibility) 가이드라인을 준수하는지 확인해주세요.
+
+  # Path-based review instructions
+  path_instructions:
+    - path: "**/*.{ts,tsx}"
+      instructions: |
+        TypeScript 코드를 검토할 때:
+        - 타입 정의가 명확하고 적절한지 확인
+        - any 타입 사용을 지양하고 있는지 확인
+        - 타입 가드나 유틸리티 타입을 적절히 활용하고 있는지 확인
+        - 인터페이스와 타입 별칭의 사용이 일관적인지 확인
+
+    - path: "**/*.{jsx,tsx}"
+      instructions: |
+        React 컴포넌트를 검토할 때:
+        - 컴포넌트가 단일 책임 원칙을 따르는지 확인
+        - hooks의 의존성 배열이 올바르게 설정되어 있는지 확인
+        - 불필요한 리렌더링을 방지하기 위한 최적화가 적용되어 있는지 확인
+        - 접근성 속성(aria-*, role 등)이 적절히 사용되고 있는지 확인
+        - Tailwind CSS 클래스가 적절히 사용되고 있는지 확인
+        - 인라인 스타일 대신 Tailwind 유틸리티 클래스를 사용하는지 확인
+        - 반응형 디자인을 위한 Tailwind 클래스(sm:, md:, lg: 등)가 적절히 사용되는지 확인
+
+    - path: "**/*.test.{ts,tsx,js,jsx}"
+      instructions: |
+        테스트 코드를 검토할 때:
+        - 테스트 케이스가 충분히 다양한 시나리오를 커버하는지 확인
+        - 테스트 이름이 명확하고 의도를 잘 표현하는지 확인
+        - 테스트가 독립적이고 격리되어 있는지 확인
+        - Mock과 Stub이 적절히 사용되고 있는지 확인
+
+    - path: "**/*.css"
+      instructions: |
+        CSS/Tailwind 코드를 검토할 때:
+        - Tailwind CSS 설정과 충돌하지 않는지 확인
+        - 커스텀 CSS가 정말 필요한 경우인지 확인 (Tailwind로 대체 가능한지)
+        - CSS 변수와 Tailwind 테마 설정이 일관되게 사용되는지 확인
+        - 불필요한 중복 스타일이 있는지 확인
+        - 성능에 영향을 줄 수 있는 스타일이 있는지 확인
+
+    - path: "tailwind.config.{js,ts}"
+      instructions: |
+        Tailwind 설정 파일을 검토할 때:
+        - 커스텀 테마 설정이 프로젝트 요구사항과 일치하는지 확인
+        - 플러그인 설정이 올바르게 구성되어 있는지 확인
+        - purge/content 설정이 적절히 구성되어 있는지 확인
+        - 커스텀 유틸리티 클래스가 필요한지 검토
+
+  # AST-grep tool configuration for advanced code analysis
+  tools:
+    ast-grep:
+      essential_rules: true
+      rule_dirs:
+        - "rules"
+
+# Code generation settings
+code_generation:
+  docstrings:
+    path_instructions:
+      - path: "**/*.{ts,tsx}"
+        instructions: |
+          모든 독스트링은 한국어로 작성하고, 함수의 목적과 매개변수, 반환값에 대한 명확한 설명을 포함해주세요.
+          JSDoc 형식을 사용하여 작성해주세요.
+
+# Additional configuration options
+chat:
+  auto_reply: false
+  
+early_access: false
+
+# Review settings
+auto_review:
+  enabled: true
+  drafts: false
+
+# Knowledge base settings  
+knowledge_base:
+  learnings:
+    scope: global
+    
+# Comment settings
+comment:
+  tone: FRIENDLY
+  behavior: 
+    - request_changes: ask
+    - nitpick: comment
+    - compliment: comment

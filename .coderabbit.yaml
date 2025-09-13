@@ -88,8 +88,9 @@ early_access: false
 
 # Review settings
 auto_review:
-  enabled: true
+  enabled: true                   
   drafts: false
+  base_branches: ["develop"]
 
 # Knowledge base settings  
 knowledge_base:

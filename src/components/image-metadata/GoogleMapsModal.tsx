@@ -17,6 +17,23 @@ declare global {
     }
 }
 
+/**
+ * 이미지 메타데이터의 위치를 기반으로 Google Map을 보여주고 사용자가 위치를 검색·선택하여 저장할 수 있는 모달형 컴포넌트입니다.
+ *
+ * 상세:
+ * - 모달이 열리면 Google Maps API 로드 후 지도를 초기화하고, imageMetadata.location을 중심으로 드래그 가능한 마커를 생성합니다.
+ * - 마커를 드래그하거나 지도를 클릭하면 해당 좌표로 이동하고 PlacesService / Geocoder를 사용해 한국어 이름(우선) 또는 주소를 조회하여 화면에 표시합니다.
+ * - 검색 입력을 통해 장소 검색(textSearch)을 수행하고, 각 결과에 대해 상세 정보를 조회해 가능하면 한국어명을 우선 적용한 결과 목록을 보여줍니다.
+ * - 검색 결과를 선택하면 지도 중심과 마커를 해당 장소로 이동시키고 주소를 업데이트합니다.
+ * - 저장 버튼을 누르면 선택된 좌표와 주소(선택된 장소의 이름을 우선)를 onLocationUpdate 콜백으로 반환한 뒤 모달을 닫습니다.
+ *
+ * @param isOpen - 모달 열림 여부. false면 아무것도 렌더링하지 않습니다.
+ * @param onClose - 모달을 닫기 위한 콜백 함수.
+ * @param imageMetadata - 초기 중심 좌표와 보조 정보를 포함하는 이미지 메타데이터 객체 (null 허용). 내부에서 location.latitude, location.longitude, location.address, location.nearbyPlaces 등을 사용합니다.
+ * @param onLocationUpdate - 사용자가 저장을 확정했을 때 호출되는 콜백: (lat: number, lng: number, address: string) => void.
+ *
+ * @returns JSX.Element | null - isOpen이 true일 때 모달 JSX를 반환하고, false면 null을 반환합니다.
+ */
 export function GoogleMapsModal({
     isOpen,
     onClose,

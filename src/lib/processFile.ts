@@ -1,6 +1,16 @@
 import { ImageMetadata } from "@/types/imageMetadata";
 import exifr from "exifr";
 
+/**
+ * 주어진 위도/경도에 인접한 장소 목록을 가져옵니다.
+ *
+ * 서버의 `/api/places` 엔드포인트를 호출하여 근처 장소 배열을 반환합니다.
+ * 네트워크 오류나 파싱 오류가 발생하면 빈 배열을 반환합니다.
+ *
+ * @param lat - 위도 (decimal)
+ * @param lng - 경도 (decimal)
+ * @returns 근처 장소 문자열 배열(서버의 `data.places`), 오류 시 빈 배열
+ */
 async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
   try {
     const response = await fetch(`/api/places?lat=${lat}&lng=${lng}`);
@@ -11,6 +21,19 @@ async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
   }
 }
 
+/**
+ * 주어진 이미지 파일을 처리하여 EXIF, 위치, 카메라/설정 정보 및 미리보기 URL을 포함하는 ImageMetadata 객체를 생성합니다.
+ *
+ * 처리 내용 요약:
+ * - HEIC 파일이면 가능하면 JPEG로 변환하거나 썸네일을 생성해 imagePreview를 설정합니다.
+ * - exifr로 메타데이터를 파싱하여 가로/세로, 촬영 기기 정보, 노출/조리개/셔터/초점거리/플래시 상태 등을 추출합니다.
+ * - GPS 좌표가 있으면 근처 장소 목록을 조회하고(내부 API) Google Geocoding으로 역지오코딩해 주소를 얻어 location 및 nearbyPlaces를 구성합니다.
+ * - DateTimeOriginal을 ISO 타임스탬프로 변환하고 Orientation을 설정합니다.
+ * - 성공 시 status는 `"completed"`, 처리 중 오류 발생 시 status는 `"error"`로 설정되며 error 필드에 메시지를 담아 반환합니다.
+ *
+ * @param file - 처리할 이미지 파일(브라우저 File 객체)
+ * @returns 처리 결과를 담은 ImageMetadata 객체(비동기 Promise)
+ */
 export async function processSingleFile(file: File): Promise<ImageMetadata> {
   const id = Math.random().toString(36).substr(2, 9);
   const extracted: ImageMetadata = {

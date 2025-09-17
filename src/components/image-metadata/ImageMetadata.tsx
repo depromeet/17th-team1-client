@@ -12,6 +12,18 @@ interface ImageMetadataProps {
   initialCity?: string;
 }
 
+/**
+ * 이미지 업로드·메타데이터 처리 및 지도 기반 위치 편집을 제공하는 React 클라이언트 컴포넌트입니다.
+ *
+ * 상세:
+ * - 사용자가 이미지를 업로드하면 각 파일을 처리하여 ImageMetadata 목록을 관리하고, 첫 결과를 상세 뷰로 자동 선택합니다.
+ * - 목록 보기(썸네일 그리드), 단일 이미지 상세 뷰(캐러셀 네비게이션, 촬영 시점 배지, 위치 표시) 및 Google Maps 모달을 통한 위치 편집을 지원합니다.
+ * - 위치 편집 시 해당 이미지의 location 필드를 메타데이터 목록과 현재 선택된 이미지 둘 다에 반영합니다.
+ * - 저장 동작은 현재 선택된 이미지와 키워드를 콘솔에 기록합니다.
+ *
+ * @param initialCity - 초기 도시 문자열(예: "Seoul, Korea"). 컴포넌트는 첫 번째 콤마 이전 부분을 주요 도시명으로 사용합니다.
+ * @returns 렌더된 JSX 요소 또는 렌더할 내용이 없을 경우 null
+ */
 export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

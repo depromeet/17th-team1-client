@@ -11,7 +11,7 @@ export const GLOBE_CONFIG = {
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
   FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이) - ZOOM_LEVELS.CLUSTERING.DETAILED와 동일
   MIN_DISTANCE: 110, // 최소 카메라 거리 (Globe.gl 단위 기준)
-  MAX_DISTANCE: 400, // 최대 카메라 거리 (Globe.gl 단위 기준)
+  MAX_DISTANCE: 500, // 최대 카메라 거리 (Globe.gl 단위 기준)
   ATMOSPHERE_ALTITUDE: 0, // 대기권 두께 (지구 반지름 배수)
   POLYGON_ALTITUDE: 0.01, // 국경선/폴리곤 높이 (지구 표면 기준)
   HTML_ALTITUDE: 0.01, // HTML 라벨 높이 (지구 표면 기준)

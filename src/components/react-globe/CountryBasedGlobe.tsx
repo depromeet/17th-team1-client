@@ -65,27 +65,19 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     useEffect(() => {
       const loadCountries = async () => {
         try {
-          console.log("Starting to load countries data...");
           setGlobeLoading(true);
           setGlobeError(null);
 
-          console.log("Fetching from:", EXTERNAL_URLS.WORLD_GEOJSON);
           const response = await fetch(EXTERNAL_URLS.WORLD_GEOJSON);
-          console.log("Response status:", response.status, response.ok);
-
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const countriesData = await response.json();
           const features = countriesData?.features || [];
-          console.log("Loaded", features.length, "country features");
-
           setCountriesData(features);
           setGlobeLoading(false);
-          console.log("Countries data loaded successfully, globeLoading set to false");
         } catch (error) {
-          console.error("Error loading countries:", error);
           const errorMessage = error instanceof Error ? error.message : String(error);
           setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
           setGlobeLoading(false);
@@ -105,12 +97,15 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       }
 
       const el = document.createElement("div");
-      el.style.position = "relative";
-      el.style.zIndex = "999";
-      el.style.pointerEvents = "auto";
+      // HTML 컨테이너는 정확히 지구본의 좌표에 위치 (0,0 기준점)
+      el.style.position = "absolute";
+      el.style.top = "0px";
+      el.style.left = "0px";
       el.style.width = "0px";
       el.style.height = "0px";
       el.style.overflow = "visible";
+      el.style.pointerEvents = "none"; // 컨테이너는 이벤트 차단
+      el.style.zIndex = "999";
 
       const { angleOffset, dynamicDistance } = calculateLabelPosition(
         d,
@@ -190,27 +185,18 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       const maxAttempts = 50; // 최대 5초까지 시도 (100ms * 50)
 
       const trySetupControls = () => {
-        console.log(`Setup attempt ${attempts + 1}, globeRef.current:`, !!globeRef.current, "globeLoading:", globeLoading);
-
         if (globeRef.current && !globeLoading) {
-          console.log("Globe ready! Setting up controls...");
-
           // 초기 시점 설정
           globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
 
           // 줌 제한 설정
           try {
             const controls = globeRef.current.controls();
-            console.log("Controls object:", controls);
-
             if (controls) {
-              console.log("Setting zoom limits:", GLOBE_CONFIG.MIN_DISTANCE, GLOBE_CONFIG.MAX_DISTANCE);
               controls.minDistance = GLOBE_CONFIG.MIN_DISTANCE;
               controls.maxDistance = GLOBE_CONFIG.MAX_DISTANCE;
               controls.enableZoom = true;
               controls.zoomSpeed = 0.5;
-
-              console.log("Applied limits - min:", controls.minDistance, "max:", controls.maxDistance);
               return; // 성공, 더 이상 시도하지 않음
             }
           } catch (error) {
@@ -223,8 +209,6 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         if (attempts < maxAttempts) {
           const nextTimer = setTimeout(trySetupControls, 100);
           timers.push(nextTimer);
-        } else {
-          console.error("Failed to setup globe controls after", maxAttempts, "attempts");
         }
       };
 

@@ -16,16 +16,34 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
   // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
 
   return {
-    // SVG에 dot이 포함되어 있어서 제거
-    // SVG 기반 계단식 연결선
-    connectorLine: `
+    // 중심 dot
+    dot: `
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 27px;
-      height: 21px;
-      transform: ${offsetX > 0 ? 'scaleX(1)' : 'scaleX(-1)'};
+      top: -3px;
+      left: -3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      z-index: 6;
+      pointer-events: none;
+    `,
+    // 단색 점선 수평선
+    horizontalLine: `
+      position: absolute;
+      top: -0.5px;
+      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
+      width: ${Math.abs(offsetX * 0.7)}px;
+      height: 1px;
+      background-image: repeating-linear-gradient(
+        to right,
+        white 0px,
+        white 3px,
+        transparent 2px,
+        transparent 8px
+      );
       z-index: 5;
+      pointer-events: none;
     `,
     label: `
       background-color: white;
@@ -71,16 +89,34 @@ export const createClusterLabelStyles = (index: number = 0, angleOffset: number 
   // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
 
   return {
-    // SVG에 dot이 포함되어 있어서 제거
-    // SVG 기반 계단식 연결선
-    connectorLine: `
+    // 중심 dot
+    dot: `
       position: absolute;
-      top: ${offsetY}px;
-      left: ${offsetX}px;
-      width: 27px;
-      height: 21px;
-      transform: ${offsetX > 0 ? 'scaleX(1)' : 'scaleX(-1)'};
+      top: -3px;
+      left: -3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      z-index: 6;
+      pointer-events: none;
+    `,
+    // 단색 점선 수평선
+    horizontalLine: `
+      position: absolute;
+      top: -0.5px;
+      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
+      width: ${Math.abs(offsetX * 0.7)}px;
+      height: 1px;
+      background-image: repeating-linear-gradient(
+        to right,
+        white 0px,
+        white 3px,
+        transparent 2px,
+        transparent 8px
+      );
       z-index: 5;
+      pointer-events: none;
     `,
     label: `
       background-color: ${COLORS.CLUSTER_BG};

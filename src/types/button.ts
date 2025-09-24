@@ -1,8 +1,8 @@
-import type { ReactGlobeRef } from "@/components/react-globe/ReactGlobe";
+import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
 
 // BackButton Component
 export interface BackButtonProps {
   isZoomed: boolean;
-  globeRef: React.RefObject<ReactGlobeRef | null>;
+  globeRef: React.RefObject<CountryBasedGlobeRef | null>;
   onReset: () => void;
 }

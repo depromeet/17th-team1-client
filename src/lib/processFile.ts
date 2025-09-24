@@ -1,4 +1,4 @@
-import { ImageMetadata } from "@/types/imageMetadata";
+import type { ImageMetadata } from "@/types/imageMetadata";
 import exifr from "exifr";
 
 // 서버 API로 근처 장소 가져오기

@@ -10,8 +10,8 @@ export const GLOBE_CONFIG = {
   CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준) - ZOOM_LEVELS.CLUSTERING.CLOSE와 동일
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
   FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이) - ZOOM_LEVELS.CLUSTERING.DETAILED와 동일
-  MIN_DISTANCE: 50, // 클러스터링 최소 거리 (px)
-  MAX_DISTANCE: 500, // 클러스터링 최대 거리 (px)
+  MIN_DISTANCE: 110, // 최소 카메라 거리 (Globe.gl 단위 기준)
+  MAX_DISTANCE: 400, // 최대 카메라 거리 (Globe.gl 단위 기준)
   ATMOSPHERE_ALTITUDE: 0, // 대기권 두께 (지구 반지름 배수)
   POLYGON_ALTITUDE: 0.01, // 국경선/폴리곤 높이 (지구 표면 기준)
   HTML_ALTITUDE: 0.01, // HTML 라벨 높이 (지구 표면 기준)
@@ -28,7 +28,7 @@ export const ANIMATION_DURATION = {
   CAMERA_MOVE: 1500, // 카메라 이동 애니메이션 시간 (더 빠르게)
   INITIAL_SETUP: 1000, // 초기 설정 완료 대기 시간
   ZOOM_UPDATE_DELAY: 50, // 줌 업데이트 디바운스 시간 (더 빠르게)
-  SETUP_DELAY: 500, // 설정 지연 시간
+  SETUP_DELAY: 100, // 설정 지연 시간 (더 빠르게)
 } as const;
 
 // 색상 설정

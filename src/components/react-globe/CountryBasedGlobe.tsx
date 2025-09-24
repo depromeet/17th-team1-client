@@ -65,19 +65,27 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     useEffect(() => {
       const loadCountries = async () => {
         try {
+          console.log("Starting to load countries data...");
           setGlobeLoading(true);
           setGlobeError(null);
 
+          console.log("Fetching from:", EXTERNAL_URLS.WORLD_GEOJSON);
           const response = await fetch(EXTERNAL_URLS.WORLD_GEOJSON);
+          console.log("Response status:", response.status, response.ok);
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const countriesData = await response.json();
           const features = countriesData?.features || [];
+          console.log("Loaded", features.length, "country features");
+
           setCountriesData(features);
           setGlobeLoading(false);
+          console.log("Countries data loaded successfully, globeLoading set to false");
         } catch (error) {
+          console.error("Error loading countries:", error);
           const errorMessage = error instanceof Error ? error.message : String(error);
           setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
           setGlobeLoading(false);
@@ -174,16 +182,55 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     useEffect(() => {
       if (typeof window === "undefined") return;
 
-      const timer = setTimeout(() => {
+      // Timer 변수들을 배열로 관리
+      const timers: NodeJS.Timeout[] = [];
+
+      // Globe가 완전히 로드될 때까지 반복적으로 시도
+      let attempts = 0;
+      const maxAttempts = 50; // 최대 5초까지 시도 (100ms * 50)
+
+      const trySetupControls = () => {
+        console.log(`Setup attempt ${attempts + 1}, globeRef.current:`, !!globeRef.current, "globeLoading:", globeLoading);
+
         if (globeRef.current && !globeLoading) {
+          console.log("Globe ready! Setting up controls...");
+
+          // 초기 시점 설정
           globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
 
-          if (globeRef.current.controls) {
-            globeRef.current.controls().minDistance = GLOBE_CONFIG.MIN_DISTANCE;
-            globeRef.current.controls().maxDistance = GLOBE_CONFIG.MAX_DISTANCE;
+          // 줌 제한 설정
+          try {
+            const controls = globeRef.current.controls();
+            console.log("Controls object:", controls);
+
+            if (controls) {
+              console.log("Setting zoom limits:", GLOBE_CONFIG.MIN_DISTANCE, GLOBE_CONFIG.MAX_DISTANCE);
+              controls.minDistance = GLOBE_CONFIG.MIN_DISTANCE;
+              controls.maxDistance = GLOBE_CONFIG.MAX_DISTANCE;
+              controls.enableZoom = true;
+              controls.zoomSpeed = 0.5;
+
+              console.log("Applied limits - min:", controls.minDistance, "max:", controls.maxDistance);
+              return; // 성공, 더 이상 시도하지 않음
+            }
+          } catch (error) {
+            console.error("Error accessing controls:", error);
           }
         }
-      }, ANIMATION_DURATION.SETUP_DELAY);
+
+        // Globe가 준비되지 않았으면 다시 시도
+        attempts++;
+        if (attempts < maxAttempts) {
+          const nextTimer = setTimeout(trySetupControls, 100);
+          timers.push(nextTimer);
+        } else {
+          console.error("Failed to setup globe controls after", maxAttempts, "attempts");
+        }
+      };
+
+      // 첫 번째 시도
+      const initialTimer = setTimeout(trySetupControls, ANIMATION_DURATION.SETUP_DELAY);
+      timers.push(initialTimer);
 
       const { preventZoom, preventKeyboardZoom, preventTouchZoom } = createZoomPreventListeners();
 
@@ -195,7 +242,8 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         document.removeEventListener("wheel", preventZoom);
         document.removeEventListener("keydown", preventKeyboardZoom);
         document.removeEventListener("touchstart", preventTouchZoom);
-        clearTimeout(timer);
+        // 모든 타이머 정리
+        timers.forEach(timer => clearTimeout(timer));
       };
     }, [globeLoading]);
 

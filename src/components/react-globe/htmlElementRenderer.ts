@@ -1,5 +1,4 @@
 import { ANIMATION_DURATION, GLOBE_CONFIG } from "@/constants/globe";
-import { GROUP_RADIUS, ZOOM_LEVELS } from "@/constants/zoomLevels";
 import { createClusterLabelStyles } from "@/styles/globeStyles";
 import * as THREE from "three";
 
@@ -49,93 +48,52 @@ export const calculateScreenPosition = (lat: number, lng: number, globeRef: Reac
   return { x: screenX, y: screenY };
 };
 
-// 라벨 위치 계산 함수
+// 라벨 위치 계산 함수 (간단한 왼쪽/오른쪽 고정)
 export const calculateLabelPosition = (
   d: any,
   htmlElements: any[],
-  zoomLevel: number,
+  _zoomLevel: number, // 사용하지 않음
   globeRef: React.RefObject<any>,
 ) => {
   const currentPos = calculateScreenPosition(d.lat, d.lng, globeRef);
 
-  // 주변 라벨들을 그룹핑하여 균등 각도 배치
-  const groupRadius = zoomLevel <= ZOOM_LEVELS.RENDERING.CITY_LEVEL ? GROUP_RADIUS.CITY_LEVEL : GROUP_RADIUS.DEFAULT; // 도시단계에서 조금 더 타이트하게
-  const neighbors = htmlElements
-    .filter((other) => {
-      const otherPos = calculateScreenPosition(other.lat, other.lng, globeRef);
-      const distance = Math.sqrt((currentPos.x - otherPos.x) ** 2 + (currentPos.y - otherPos.y) ** 2);
-      return distance < groupRadius;
-    })
-    .sort((a, b) => {
-      // 안정적인 순서를 위해 id 기준 정렬
-      const aId = String(a.id);
-      const bId = String(b.id);
-      return aId < bId ? -1 : aId > bId ? 1 : 0;
-    });
+  // 단순히 ID를 기반으로 왼쪽/오른쪽 결정 (줌 레벨 무관)
+  const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
+  const isLeftSide = labelIndex % 2 === 1;
+  const angleOffset = isLeftSide ? 180 : 0; // 왼쪽(180°) 또는 오른쪽(0°)
 
-  const groupSize = Math.max(neighbors.length, 1);
-  const myGroupIndex = Math.max(
-    neighbors.findIndex((item) => item.id === d.id),
-    0,
-  );
-  const angleStep = 360 / groupSize;
-  // 도시(개별) 라벨 단계에서는 거리도 동적 조정 (혼잡할수록 더 밖으로 배치)
-  const isCityLevel = d.count === 1;
-  // 기본 각도 분배 + 미세 분산(jitter)로 겹침 감소
-  const jitter = myGroupIndex % 2 === 0 ? -8 : 8;
-  const angleOffset = (myGroupIndex * angleStep + jitter + 360) % 360;
-  // 혼잡할수록 더 멀리 라벨을 배치해 겹침 해소
-  const dynamicDistance = isCityLevel
-    ? Math.min(220, 90 + groupSize * 10) // 90~220px
-    : Math.min(260, 120 + groupSize * 12); // 120~260px
+  // 고정 거리 사용 (줌 레벨 무관)
+  const fixedDistance = 100;
 
-  return { angleOffset, dynamicDistance, currentPos, isCityLevel };
+  return { angleOffset, dynamicDistance: fixedDistance, currentPos, isCityLevel: d.count === 1 };
 };
 
-// 화면 경계 제한 계산
+// 화면 경계 제한 계산 (단순화)
 export const calculateClampedDistance = (
   dynamicDistance: number,
   angleOffset: number,
   currentPos: { x: number; y: number },
-  labelIndex: number,
   isCityLevel: boolean,
   globeRef: React.RefObject<any>,
 ) => {
-  let clampedDistance = dynamicDistance;
-  try {
-    const renderer = globeRef.current?.renderer?.() || globeRef.current?.renderer?.();
-    const width = renderer?.domElement?.width ?? window.innerWidth;
-    const height = renderer?.domElement?.height ?? window.innerHeight;
-    const margin = 16; // 화면 여백
-
-    const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
-    const baseAngle = baseAngles[labelIndex % baseAngles.length];
-    const finalAngleDeg = (baseAngle + angleOffset) % 360;
-    const radians = (finalAngleDeg * Math.PI) / 180;
-    const ux = Math.cos(radians);
-    const uy = Math.sin(radians);
-
-    const minX = margin;
-    const maxX = width - margin;
-    const minY = margin;
-    const maxY = height - margin;
-
-    const maxDistX = Math.abs(ux) < 1e-4 ? Infinity : ux > 0 ? (maxX - currentPos.x) / ux : (minX - currentPos.x) / ux;
-    const maxDistY = Math.abs(uy) < 1e-4 ? Infinity : uy > 0 ? (maxY - currentPos.y) / uy : (minY - currentPos.y) / uy;
-
-    const maxAllowed = Math.max(0, Math.min(maxDistX, maxDistY));
-    const minBaseline = isCityLevel ? 80 : 110;
-    clampedDistance = Math.max(Math.min(dynamicDistance, maxAllowed), minBaseline);
-  } catch {}
-
-  return clampedDistance;
+  // 단순히 고정 거리 반환 (화면 경계 계산 제거)
+  return dynamicDistance;
 };
 
 // 개별 도시 HTML 생성
-export const createCityHTML = (d: any, styles: any, displayFlag: string, cityName: string) => {
+export const createCityHTML = (styles: any, displayFlag: string, cityName: string) => {
   return `
-    <div style="${styles.centerPoint}"></div>
-    <div style="${styles.dottedLine}"></div>
+    <div style="${styles.connectorLine}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="21" viewBox="0 0 27 21" fill="none">
+        <path d="M14.0911 1V0.589219H13.864L13.7432 0.78156L14.0911 1ZM0.80917 18.6636C0.80917 19.8735 1.79004 20.8544 3 20.8544C4.20996 20.8544 5.19083 19.8735 5.19083 18.6636C5.19083 17.4536 4.20996 16.4727 3 16.4727C1.79004 16.4727 0.80917 17.4536 0.80917 18.6636ZM3 18.6636L3.34789 18.882L3.81001 18.146L3.46213 17.9276L3.11424 17.7091L2.65211 18.4451L3 18.6636ZM4.38638 16.4556L4.73427 16.6741L5.65853 15.2021L5.31064 14.9837L4.96276 14.7652L4.0385 16.2372L4.38638 16.4556ZM6.2349 13.5117L6.58278 13.7301L7.50704 12.2582L7.15915 12.0397L6.81127 11.8213L5.88701 13.2933L6.2349 13.5117ZM8.08341 10.5678L8.4313 10.7862L9.35555 9.31424L9.00767 9.0958L8.65978 8.87736L7.73552 10.3493L8.08341 10.5678ZM9.93192 7.62384L10.2798 7.84228L11.2041 6.37031L10.8562 6.15187L10.5083 5.93343L9.58404 7.4054L9.93192 7.62384ZM11.7804 4.67991L12.1283 4.89835L13.0526 3.42639L12.7047 3.20795L12.3568 2.98951L11.4326 4.46147L11.7804 4.67991ZM13.6289 1.73598L13.9768 1.95442L14.439 1.21844L14.0911 1L13.7432 0.78156L13.2811 1.51754L13.6289 1.73598ZM14.0911 1V1.41078H14.887V1V0.589219H14.0911V1ZM16.4787 1V1.41078H18.0705V1V0.589219H16.4787V1ZM19.6623 1V1.41078H21.2541V1V0.589219H19.6623V1ZM22.8458 1V1.41078H24.4376V1V0.589219H22.8458V1ZM26.0294 1V1.41078H26.8253V1V0.589219H26.0294V1Z" fill="url(#paint0_linear_35_12720)"/>
+        <defs>
+          <linearGradient id="paint0_linear_35_12720" x1="-1.10781" y1="21.539" x2="35.0409" y2="1" gradientUnits="userSpaceOnUse">
+            <stop stop-color="white"/>
+            <stop offset="1" stop-color="#999999"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     <div style="${styles.label}
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(148,203,255,0.2);
@@ -171,8 +129,17 @@ export const createCityHTML = (d: any, styles: any, displayFlag: string, cityNam
 // 대륙 클러스터 HTML 생성
 export const createContinentHTML = (d: any, styles: any) => {
   return `
-    <div style="${styles.centerPoint}"></div>
-    <div style="${styles.dottedLine}"></div>
+    <div style="${styles.connectorLine}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="21" viewBox="0 0 27 21" fill="none">
+        <path d="M14.0911 1V0.589219H13.864L13.7432 0.78156L14.0911 1ZM0.80917 18.6636C0.80917 19.8735 1.79004 20.8544 3 20.8544C4.20996 20.8544 5.19083 19.8735 5.19083 18.6636C5.19083 17.4536 4.20996 16.4727 3 16.4727C1.79004 16.4727 0.80917 17.4536 0.80917 18.6636ZM3 18.6636L3.34789 18.882L3.81001 18.146L3.46213 17.9276L3.11424 17.7091L2.65211 18.4451L3 18.6636ZM4.38638 16.4556L4.73427 16.6741L5.65853 15.2021L5.31064 14.9837L4.96276 14.7652L4.0385 16.2372L4.38638 16.4556ZM6.2349 13.5117L6.58278 13.7301L7.50704 12.2582L7.15915 12.0397L6.81127 11.8213L5.88701 13.2933L6.2349 13.5117ZM8.08341 10.5678L8.4313 10.7862L9.35555 9.31424L9.00767 9.0958L8.65978 8.87736L7.73552 10.3493L8.08341 10.5678ZM9.93192 7.62384L10.2798 7.84228L11.2041 6.37031L10.8562 6.15187L10.5083 5.93343L9.58404 7.4054L9.93192 7.62384ZM11.7804 4.67991L12.1283 4.89835L13.0526 3.42639L12.7047 3.20795L12.3568 2.98951L11.4326 4.46147L11.7804 4.67991ZM13.6289 1.73598L13.9768 1.95442L14.439 1.21844L14.0911 1L13.7432 0.78156L13.2811 1.51754L13.6289 1.73598ZM14.0911 1V1.41078H14.887V1V0.589219H14.0911V1ZM16.4787 1V1.41078H18.0705V1V0.589219H16.4787V1ZM19.6623 1V1.41078H21.2541V1V0.589219H19.6623V1ZM22.8458 1V1.41078H24.4376V1V0.589219H22.8458V1ZM26.0294 1V1.41078H26.8253V1V0.589219H26.0294V1Z" fill="url(#paint0_linear_35_12720)"/>
+        <defs>
+          <linearGradient id="paint0_linear_35_12720" x1="-1.10781" y1="21.539" x2="35.0409" y2="1" gradientUnits="userSpaceOnUse">
+            <stop stop-color="white"/>
+            <stop offset="1" stop-color="#999999"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     <div style="${styles.label}
       background: rgba(255, 255, 255, 0.2);
       border-radius: 50px;
@@ -201,15 +168,23 @@ export const createContinentHTML = (d: any, styles: any) => {
 
 // 국가 클러스터 HTML 생성
 export const createCountryHTML = (
-  d: any,
   styles: any,
   countryName: string,
   countNumber: string | null,
   flagEmoji: string,
 ) => {
   return `
-    <div style="${styles.centerPoint}"></div>
-    <div style="${styles.dottedLine}"></div>
+    <div style="${styles.connectorLine}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="27" height="21" viewBox="0 0 27 21" fill="none">
+        <path d="M14.0911 1V0.589219H13.864L13.7432 0.78156L14.0911 1ZM0.80917 18.6636C0.80917 19.8735 1.79004 20.8544 3 20.8544C4.20996 20.8544 5.19083 19.8735 5.19083 18.6636C5.19083 17.4536 4.20996 16.4727 3 16.4727C1.79004 16.4727 0.80917 17.4536 0.80917 18.6636ZM3 18.6636L3.34789 18.882L3.81001 18.146L3.46213 17.9276L3.11424 17.7091L2.65211 18.4451L3 18.6636ZM4.38638 16.4556L4.73427 16.6741L5.65853 15.2021L5.31064 14.9837L4.96276 14.7652L4.0385 16.2372L4.38638 16.4556ZM6.2349 13.5117L6.58278 13.7301L7.50704 12.2582L7.15915 12.0397L6.81127 11.8213L5.88701 13.2933L6.2349 13.5117ZM8.08341 10.5678L8.4313 10.7862L9.35555 9.31424L9.00767 9.0958L8.65978 8.87736L7.73552 10.3493L8.08341 10.5678ZM9.93192 7.62384L10.2798 7.84228L11.2041 6.37031L10.8562 6.15187L10.5083 5.93343L9.58404 7.4054L9.93192 7.62384ZM11.7804 4.67991L12.1283 4.89835L13.0526 3.42639L12.7047 3.20795L12.3568 2.98951L11.4326 4.46147L11.7804 4.67991ZM13.6289 1.73598L13.9768 1.95442L14.439 1.21844L14.0911 1L13.7432 0.78156L13.2811 1.51754L13.6289 1.73598ZM14.0911 1V1.41078H14.887V1V0.589219H14.0911V1ZM16.4787 1V1.41078H18.0705V1V0.589219H16.4787V1ZM19.6623 1V1.41078H21.2541V1V0.589219H19.6623V1ZM22.8458 1V1.41078H24.4376V1V0.589219H22.8458V1ZM26.0294 1V1.41078H26.8253V1V0.589219H26.0294V1Z" fill="url(#paint0_linear_35_12720)"/>
+        <defs>
+          <linearGradient id="paint0_linear_35_12720" x1="-1.10781" y1="21.539" x2="35.0409" y2="1" gradientUnits="userSpaceOnUse">
+            <stop stop-color="white"/>
+            <stop offset="1" stop-color="#999999"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     <div style="${styles.label}
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(148,203,255,0.2);
@@ -282,8 +257,6 @@ export const createClickHandler = (params: RenderElementParams) => {
     setIsAnimating,
     onClusterSelect,
     phaseTargetRef,
-    isAnimating,
-    displayPhase,
     onZoomChange,
     onCountrySelect,
   } = params;
@@ -424,7 +397,6 @@ export const renderHtmlElement = (params: RenderElementParams): HTMLElement => {
     dynamicDistance,
     angleOffset,
     currentPos,
-    labelIndex,
     isCityLevel,
     globeRef,
   );
@@ -435,7 +407,7 @@ export const renderHtmlElement = (params: RenderElementParams): HTMLElement => {
     const cityName = (baseItem.name ?? d.name).split(",")[0];
     const styles = createClusterLabelStyles(labelIndex, angleOffset, clampedDistance);
 
-    el.innerHTML = createCityHTML(d, styles, displayFlag, cityName);
+    el.innerHTML = createCityHTML(styles, displayFlag, cityName);
   } else {
     const styles = createClusterLabelStyles(labelIndex, angleOffset, clampedDistance);
 
@@ -458,7 +430,7 @@ export const renderHtmlElement = (params: RenderElementParams): HTMLElement => {
       const countNumber = nameAndCount.length > 1 ? nameAndCount[1] : null;
       const flagEmoji = d.flag || (d.items && d.items[0]?.flag) || "";
 
-      el.innerHTML = createCountryHTML(d, styles, countryName, countNumber, flagEmoji);
+      el.innerHTML = createCountryHTML(styles, countryName, countNumber, flagEmoji);
     }
   }
 

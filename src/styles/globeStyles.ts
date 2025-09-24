@@ -1,13 +1,10 @@
 import { COLORS } from "@/constants/globe";
-import { calculateDottedLine } from "@/utils/globeUtils";
 
 // 개별 라벨 스타일 생성
 // styles.ts
 export const createSingleLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 50) => {
-  // 기본 각도 + 오프셋 각도
-  const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8방향
-  const baseAngle = baseAngles[index % baseAngles.length];
-  const finalAngle = (baseAngle + angleOffset) % 360;
+  // 왼쪽/오른쪽 두 방향으로만 배치
+  const finalAngle = angleOffset;
 
   // 각도를 라디안으로 변환
   const radians = (finalAngle * Math.PI) / 180;
@@ -16,35 +13,18 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
   const offsetX = Math.cos(radians) * distance;
   const offsetY = Math.sin(radians) * distance;
 
-  const { lineLength, angle } = calculateDottedLine(offsetX, offsetY);
+  // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
 
   return {
-    centerPoint: `
-      position: absolute;
-      top: -3px;
-      left: -3px;
-      width: 6px;
-      height: 6px;
-      background-color: #fff;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      z-index: 10;
-    `,
-    dottedLine: `
+    // SVG에 dot이 포함되어 있어서 제거
+    // SVG 기반 계단식 연결선
+    connectorLine: `
       position: absolute;
       top: 0;
       left: 0;
-      width: ${lineLength}px;
-      height: 2px;
-      background: repeating-linear-gradient(
-        to right,
-        #fff 0px,
-        #fff 4px,
-        transparent 4px,
-        transparent 8px
-      );
-      transform: rotate(${angle}deg);
-      transform-origin: 0 1px;
+      width: 27px;
+      height: 21px;
+      transform: ${offsetX > 0 ? 'scaleX(1)' : 'scaleX(-1)'};
       z-index: 5;
     `,
     label: `
@@ -78,10 +58,8 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
 
 // 클러스터 라벨 스타일 생성
 export const createClusterLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
-  // 기본 각도 + 오프셋 각도
-  const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
-  const baseAngle = baseAngles[index % baseAngles.length];
-  const finalAngle = (baseAngle + angleOffset) % 360;
+  // 왼쪽/오른쪽 두 방향으로만 배치
+  const finalAngle = angleOffset;
 
   // 각도를 라디안으로 변환
   const radians = (finalAngle * Math.PI) / 180;
@@ -90,34 +68,18 @@ export const createClusterLabelStyles = (index: number = 0, angleOffset: number 
   const offsetX = Math.cos(radians) * distance;
   const offsetY = Math.sin(radians) * distance;
 
-  const { lineLength, angle } = calculateDottedLine(offsetX, offsetY);
+  // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
 
   return {
-    centerPoint: `
+    // SVG에 dot이 포함되어 있어서 제거
+    // SVG 기반 계단식 연결선
+    connectorLine: `
       position: absolute;
-      top: -3px;
-      left: -3px;
-      width: 6px;
-      height: 6px;
-      background-color: #fff;
-      border-radius: 50%;
-      z-index: 10;
-    `,
-    dottedLine: `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: ${lineLength}px;
-      height: 2px;
-      background: repeating-linear-gradient(
-        to right,
-        #fff 0px,
-        #fff 4px,
-        transparent 4px,
-        transparent 8px
-      );
-      transform: rotate(${angle}deg);
-      transform-origin: 0 1px;
+      top: ${offsetY}px;
+      left: ${offsetX}px;
+      width: 27px;
+      height: 21px;
+      transform: ${offsetX > 0 ? 'scaleX(1)' : 'scaleX(-1)'};
       z-index: 5;
     `,
     label: `

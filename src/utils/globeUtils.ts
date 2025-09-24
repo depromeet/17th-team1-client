@@ -5,9 +5,9 @@ export const getISOCode = (countryId: string): string => {
   return ISO_CODE_MAP[countryId] || countryId;
 };
 
-// 점선 각도 및 길이 계산
+// 점선 각도 및 길이 계산 (이미지 디자인에 맞춰 짧은 고정 길이)
 export const calculateDottedLine = (offsetX: number = LABEL_OFFSET.X, offsetY: number = LABEL_OFFSET.Y) => {
-  const lineLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+  const lineLength = 20; // 고정된 짧은 라인 길이 (기존: 전체 거리 계산)
   const angle = (Math.atan2(offsetY, offsetX) * 180) / Math.PI;
   return { lineLength, angle };
 };

@@ -47,7 +47,7 @@ const GlobePrototype = () => {
 
   return (
     <div
-      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary flex flex-col max-w-[512px] mx-auto relative font-sans px-4"
+      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary flex flex-col min-w-[512px] mx-auto relative font-sans px-4"
       style={{
         height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
       }}

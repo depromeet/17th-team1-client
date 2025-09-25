@@ -8,8 +8,8 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { PatternSelector } from "@/components/globe/PatternSelector";
 import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
-import { useGlobeState } from "@/hooks/useGlobeState";
 import { travelPatterns } from "@/data/travelPatterns";
+import { useGlobeState } from "@/hooks/useGlobeState";
 
 // CountryBasedGlobe을 동적 import로 로드 (SSR 방지)
 const CountryBasedGlobe = dynamic(() => import("@/components/react-globe/CountryBasedGlobe"), {
@@ -67,18 +67,10 @@ const GlobePrototype = () => {
       </div>
 
       {/* 하단 버튼들 */}
-      <GlobeFooter
-        isZoomed={isZoomed}
-        onBackClick={resetGlobe}
-        showBackButton={hasBackButton}
-      />
+      <GlobeFooter isZoomed={isZoomed} onBackClick={resetGlobe} showBackButton={hasBackButton} />
 
       {/* 돌아가기 버튼 */}
-      <BackButton
-        isZoomed={hasBackButton}
-        globeRef={globeRef}
-        onReset={resetGlobe}
-      />
+      <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
     </div>
   );
 };

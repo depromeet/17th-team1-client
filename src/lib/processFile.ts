@@ -1,5 +1,5 @@
-import type { ImageMetadata } from "@/types/imageMetadata";
 import exifr from "exifr";
+import type { ImageMetadata } from "@/types/imageMetadata";
 
 // 서버 API로 근처 장소 가져오기
 async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
@@ -35,8 +35,7 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
     status: "processing",
   };
 
-  const isHeic =
-    file.type.toLowerCase().includes("heic") || /\.heic$/i.test(file.name);
+  const isHeic = file.type.toLowerCase().includes("heic") || /\.heic$/i.test(file.name);
   if (isHeic) {
     try {
       const { default: heic2any } = await import("heic2any");
@@ -59,9 +58,7 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
           // Uint8Array를 새로운 Uint8Array로 복사하여 타입 안전성 확보
           const thumbArray = new Uint8Array(thumb);
           // 메모리 누수 방지: 기존 Object URL 해제
-          const newUrl = URL.createObjectURL(
-            new Blob([thumbArray], { type: "image/jpeg" })
-          );
+          const newUrl = URL.createObjectURL(new Blob([thumbArray], { type: "image/jpeg" }));
           URL.revokeObjectURL(extracted.imagePreview);
           extracted.imagePreview = newUrl;
         }
@@ -82,19 +79,11 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
         model: exifData.Model || "",
         software: exifData.Software || "",
       };
-    if (
-      exifData.ISO ||
-      exifData.FNumber ||
-      exifData.ExposureTime ||
-      exifData.FocalLength ||
-      exifData.Flash
-    )
+    if (exifData.ISO || exifData.FNumber || exifData.ExposureTime || exifData.FocalLength || exifData.Flash)
       extracted.settings = {
         iso: exifData.ISO || 0,
         aperture: exifData.FNumber || 0,
-        shutterSpeed: exifData.ExposureTime
-          ? `1/${Math.round(1 / exifData.ExposureTime)}s`
-          : "",
+        shutterSpeed: exifData.ExposureTime ? `1/${Math.round(1 / exifData.ExposureTime)}s` : "",
         focalLength: exifData.FocalLength || 0,
         flash: exifData.Flash ? exifData.Flash !== 0 : false,
       };
@@ -112,8 +101,7 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
         nearbyPlaces: [address, ...nearbyPlaces],
       };
     }
-    if (exifData.DateTimeOriginal)
-      extracted.timestamp = new Date(exifData.DateTimeOriginal).toISOString();
+    if (exifData.DateTimeOriginal) extracted.timestamp = new Date(exifData.DateTimeOriginal).toISOString();
     if (exifData.Orientation) extracted.orientation = exifData.Orientation;
     extracted.status = "completed";
     return extracted;

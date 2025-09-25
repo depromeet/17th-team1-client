@@ -4,12 +4,10 @@ export function FixedSaveButton({ onClick, disabled }: { onClick?: () => void; d
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`w-full py-4 rounded-[18px] text-base font-medium ${disabled ? 'bg-[#1b1c20] text-gray-500 cursor-not-allowed' : 'bg-gray-700 text-white'}`}
+        className={`w-full py-4 rounded-[18px] text-base font-medium ${disabled ? "bg-[#1b1c20] text-gray-500 cursor-not-allowed" : "bg-gray-700 text-white"}`}
       >
         저장하기
       </button>
     </div>
   );
 }
-
-

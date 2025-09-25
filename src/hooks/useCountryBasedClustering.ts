@@ -1,234 +1,147 @@
 "use client";
 
-import { getContinent, getContinentClusterName, getCountryName } from "@/constants/countryMapping";
-import { CLUSTERING_DISTANCE_MAP, ZOOM_LEVELS } from "@/constants/zoomLevels";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 
-interface CountryData {
-  id: string;
-  name: string;
-  flag: string;
-  lat: number;
-  lng: number;
-  color: string;
-}
+/**
+ * 기획 요구사항에 맞는 새로운 클러스터링 시스템:
+ * 1. 대륙 ↔ 국가: 줌 레벨에 따라 동적 변경
+ * 2. 국가 → 도시: 클릭으로만 제어 (줌 레벨 무관)
+ * 3. 지구본 회전 시: 도시 모드에서 국가 모드로 자동 복귀
+ */
+import {
+  createClusterSelectHandler,
+  createGlobeRotationHandler,
+  createZoomChangeHandler,
+} from "./clustering/clusterHandlers";
+import { clusterLocations, getClusterDistance } from "./clustering/clusterLogic";
+import { safeCallback, withErrorHandling } from "./clustering/errorHandling";
+import type { ClusterData, ClusteringState, CountryData, UseCountryBasedClusteringProps } from "./clustering/types";
 
-interface ClusterData {
-  id: string;
-  name: string;
-  flag: string;
-  lat: number;
-  lng: number;
-  color: string;
-  items: CountryData[];
-  count: number;
-  clusterType?: "individual_city" | "country_cluster" | "continent_cluster";
-  isExpanded?: boolean;
-}
-
-interface UseCountryBasedClusteringProps {
-  countries: CountryData[];
-  zoomLevel: number;
-  selectedClusterData?: CountryData[];
-}
-
-interface ClusteringState {
-  mode: "country" | "city" | "continent"; // 현재 표시 모드
-  expandedCountry: string | null; // 확장된 국가 ID
-  selectedCluster: string | null; // 선택된 클러스터 ID
-  clusteredData: ClusterData[];
-  isZoomed: boolean;
-}
-
-export const useCountryBasedClustering = ({ countries, zoomLevel, selectedClusterData }: UseCountryBasedClusteringProps) => {
+export const useCountryBasedClustering = ({
+  countries,
+  zoomLevel,
+  selectedClusterData,
+}: UseCountryBasedClusteringProps) => {
+  // State management - 기획에 맞게 업데이트
   const [state, setState] = useState<ClusteringState>({
-    mode: "continent",
+    mode: "country", // 기획: 기본은 국가별 클러스터링
     expandedCountry: null,
     selectedCluster: null,
     clusteredData: [],
     isZoomed: false,
+    lastInteraction: Date.now(),
+    clickBasedExpansion: false,
+    rotationPosition: { lat: 0, lng: 0 },
+    lastSignificantRotation: Date.now(),
   });
 
   const [zoomStack, setZoomStack] = useState<number[]>([]);
   const [selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
+  const [lastRotation, setLastRotation] = useState({ lat: 0, lng: 0 });
+
+  // 기획 요구사항: 모드 동기화 (줌 레벨에 따라 대륙/국가 전환)
+  useEffect(() => {
+    if (state.mode !== "city") {
+      // 도시 모드가 아니면 줌 레벨에 따라 모드 결정
+      const shouldBeContinentMode = zoomLevel >= ZOOM_LEVELS.DEFAULT;
+      const newMode = shouldBeContinentMode ? "continent" : "country";
+
+      if (state.mode !== newMode) {
+        setState((prev) => ({
+          ...prev,
+          mode: newMode,
+        }));
+      }
+    }
+  }, [zoomLevel, state.mode]);
 
   // 줌 상태 감지
   useEffect(() => {
     const isCurrentlyZoomed = zoomLevel < ZOOM_LEVELS.ZOOM_THRESHOLD;
-    setState(prev => ({ ...prev, isZoomed: isCurrentlyZoomed }));
+    setState((prev) => ({ ...prev, isZoomed: isCurrentlyZoomed }));
   }, [zoomLevel]);
 
-  // 줌 레벨에 따른 클러스터링 거리 계산
-  const getClusterDistance = useCallback((zoom: number): number => {
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.VERY_FAR) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.VERY_FAR];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.FAR) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.FAR];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.MEDIUM) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.MEDIUM];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.CLOSE) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.CLOSE];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.VERY_CLOSE) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.VERY_CLOSE];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.ZOOMED_IN) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.ZOOMED_IN];
-    if (zoom >= ZOOM_LEVELS.CLUSTERING.DETAILED) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.DETAILED];
-    return 1;
-  }, []);
-
-  // 거리 기반 클러스터링 함수
-  const clusterLocations = useCallback(
-    (locations: CountryData[], clusterDistance: number, currentZoomLevel: number): ClusterData[] => {
-      // 매우 가까운 줌에서는 개별 도시 표시
-      if (currentZoomLevel <= ZOOM_LEVELS.CLUSTERING.DETAILED || clusterDistance <= 0) {
-        return locations.map((location) => ({
-          id: `${location.id}_${location.lat}_${location.lng}`,
-          name: location.name,
-          flag: location.flag,
-          lat: location.lat,
-          lng: location.lng,
-          color: location.color,
-          items: [location],
-          count: 1,
-          clusterType: "individual_city" as const,
-        }));
-      }
-
-      const clusters: ClusterData[] = [];
-      const processed = new Set<string>();
-
-      locations.forEach((location) => {
-        const locationKey = `${location.id}_${location.lat}_${location.lng}`;
-        if (processed.has(locationKey)) return;
-
-        const nearbyLocations: CountryData[] = [location];
-        processed.add(locationKey);
-
-        // 주변 위치들 찾기
-        locations.forEach((otherLocation) => {
-          const otherLocationKey = `${otherLocation.id}_${otherLocation.lat}_${otherLocation.lng}`;
-          if (processed.has(otherLocationKey)) return;
-
-          let shouldCluster = false;
-
-          if (currentZoomLevel >= ZOOM_LEVELS.DEFAULT) {
-            // 디폴트 줌: 같은 대륙끼리만 클러스터링
-            const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
-            shouldCluster = sameContinent;
-          } else {
-            // 줌인 상태: 같은 국가끼리만 클러스터링
-            const sameCountry = location.id === otherLocation.id;
-            shouldCluster = sameCountry;
-          }
-
-          if (!shouldCluster) return;
-
-          const distance = Math.sqrt((location.lat - otherLocation.lat) ** 2 + (location.lng - otherLocation.lng) ** 2);
-
-          if (distance <= clusterDistance) {
-            nearbyLocations.push(otherLocation);
-            processed.add(otherLocationKey);
-          }
-        });
-
-        // 클러스터 생성
-        const centerLat = nearbyLocations.reduce((sum, loc) => sum + loc.lat, 0) / nearbyLocations.length;
-        const centerLng = nearbyLocations.reduce((sum, loc) => sum + loc.lng, 0) / nearbyLocations.length;
-
-        let clusterName: string;
-        if (currentZoomLevel >= ZOOM_LEVELS.DEFAULT) {
-          const countryIds = nearbyLocations.map((loc) => loc.id);
-          clusterName = getContinentClusterName(countryIds);
-        } else {
-          const countryName = getCountryName(location.id);
-          clusterName = nearbyLocations.length > 1 ? `${countryName} +${nearbyLocations.length}` : countryName;
-        }
-
-        clusters.push({
-          id: `cluster_${location.id}_${centerLat}_${centerLng}`,
-          name: clusterName,
-          flag: location.flag,
-          lat: centerLat,
-          lng: centerLng,
-          color: location.color,
-          items: nearbyLocations,
-          count: nearbyLocations.length,
-          clusterType: currentZoomLevel >= ZOOM_LEVELS.DEFAULT ? "continent_cluster" : "country_cluster",
-        });
-      });
-
-      return clusters;
-    },
-    [getClusterDistance],
-  );
-
-  // 클러스터 데이터 계산
+  // 기획 요구사항에 맞는 클러스터 데이터 계산
   const clusteredData = useMemo(() => {
-    const dataToCluster = selectedClusterData && selectedClusterData.length > 0 ? selectedClusterData : countries;
+    try {
+      const dataToCluster = selectedClusterData && selectedClusterData.length > 0 ? selectedClusterData : countries;
 
-    if (!dataToCluster || dataToCluster.length === 0) return [];
+      if (!dataToCluster || dataToCluster.length === 0) return [];
 
-    const clusterDistance = getClusterDistance(zoomLevel);
-    return clusterLocations(dataToCluster, clusterDistance, zoomLevel);
-  }, [countries, zoomLevel, selectedClusterData, clusterLocations, getClusterDistance]);
+      const clusterDistance = getClusterDistance(zoomLevel);
+      return withErrorHandling(clusterLocations, "Failed to cluster locations")(
+        dataToCluster,
+        clusterDistance,
+        zoomLevel,
+        state.mode, // 모드를 포함하여 호출
+        state.expandedCountry, // 확장된 국가 정보 포함
+      );
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Clustering calculation failed:", error);
+      }
+      return [];
+    }
+  }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry]);
 
   // 상태 업데이트
   useEffect(() => {
-    setState(prev => ({ ...prev, clusteredData }));
+    setState((prev) => ({ ...prev, clusteredData }));
   }, [clusteredData]);
 
-  // 현재 표시할 아이템들 (클러스터된 데이터 그대로 사용)
-  const visibleItems = useMemo(() => {
-    return clusteredData;
-  }, [clusteredData]);
+  // 현재 표시할 아이템들
+  const visibleItems = useMemo(() => clusteredData, [clusteredData]);
 
-  // 클러스터 선택 핸들러
+  // 핸들러 생성 - 기획 요구사항에 맞게 업데이트
   const handleClusterSelect = useCallback(
-    (cluster: ClusterData) => {
-      setZoomStack(prev => [...prev, zoomLevel]);
-      setSelectionStack(stack => [...stack, selectedClusterData ? [...selectedClusterData] : null]);
-      setState(prev => ({ ...prev, selectedCluster: cluster.id }));
-
-      // 상위 컴포넌트에 클러스터 아이템들 전달
-      return cluster.items;
-    },
+    createClusterSelectHandler(
+      setState,
+      setZoomStack,
+      setSelectionStack,
+      setLastRotation,
+      zoomLevel,
+      selectedClusterData,
+      // 대률 클릭 시 줌인 함수 없음 - 내부에서 처리
+    ),
     [zoomLevel, selectedClusterData],
   );
 
-  // 줌 변경 핸들러
   const handleZoomChange = useCallback(
-    (newZoomLevel: number) => {
-      const rounded = Number(newZoomLevel.toFixed(2));
-
-      // 줌아웃 시작을 감지하면 직전 단계로 스냅
-      if (rounded > zoomLevel + ZOOM_LEVELS.THRESHOLDS.ZOOM_DETECTION && zoomStack.length > 0) {
-        const last = zoomStack[zoomStack.length - 1];
-        setZoomStack(s => s.slice(0, -1));
-
-        // 선택 경로도 한 단계 상위로 복원
-        setSelectionStack(stack => {
-          if (stack.length === 0) return stack;
-          const newStack = stack.slice(0, -1);
-          return newStack;
-        });
-
-        return { snapTo: last };
-      }
-
-      // 상위로 충분히 멀어지면 초기화
-      if (rounded >= ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_OUT && selectedClusterData) {
-        setState(prev => ({ ...prev, selectedCluster: null }));
-        setZoomStack([]);
-        setSelectionStack([]);
-        return { reset: true };
-      }
-
-      return { newZoom: rounded };
-    },
-    [zoomLevel, zoomStack, selectedClusterData],
+    createZoomChangeHandler(
+      setState,
+      setZoomStack,
+      setSelectionStack,
+      zoomLevel,
+      zoomStack,
+      selectedClusterData,
+      state.mode,
+    ),
+    [zoomLevel, zoomStack, selectedClusterData, state.mode],
   );
 
-  // 현재 상태 리셋 (줌 아웃 등)
+  const handleGlobeRotation = useCallback(
+    createGlobeRotationHandler(
+      setState,
+      setSelectionStack,
+      setLastRotation,
+      state.mode,
+      state.selectedCluster,
+      lastRotation,
+      selectionStack.length,
+    ),
+    [state.mode, state.selectedCluster, lastRotation, selectionStack.length],
+  );
+
   const resetGlobe = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      mode: "continent",
+      mode: "country", // 기획: 기본은 국가별 클러스터링
       expandedCountry: null,
       selectedCluster: null,
+      clickBasedExpansion: false,
+      rotationPosition: { lat: 0, lng: 0 },
+      lastSignificantRotation: Date.now(),
     }));
     setZoomStack([]);
     setSelectionStack([]);
@@ -239,6 +152,9 @@ export const useCountryBasedClustering = ({ countries, zoomLevel, selectedCluste
     clusteredData: state.clusteredData,
     isZoomed: state.isZoomed,
     shouldShowClusters: true,
+    mode: state.mode,
+    expandedCountry: state.expandedCountry,
+    clickBasedExpansion: state.clickBasedExpansion,
 
     // 데이터
     visibleItems,
@@ -246,7 +162,17 @@ export const useCountryBasedClustering = ({ countries, zoomLevel, selectedCluste
     // 핸들러
     handleClusterSelect,
     handleZoomChange,
+    handleGlobeRotation,
     resetGlobe,
+
+    // 디버깅
+    debug: {
+      zoomStack: zoomStack.length,
+      selectionStack: selectionStack.length,
+      lastRotation,
+      rotationPosition: state.rotationPosition,
+      lastSignificantRotation: state.lastSignificantRotation,
+    },
   };
 };
 

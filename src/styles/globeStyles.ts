@@ -1,7 +1,12 @@
 import { COLORS } from "@/constants/globe";
 
-// 개별 라벨 스타일 생성
-// styles.ts
+/**
+ * 기획서에 맞는 새로운 클러스터 스타일
+ * - 대륙 버블: 반투명 배경, 진한 획색 텍스트
+ * - 국가 버블: 반투명 배경, 흰색 텍스트, 도시 개수 원형 배지
+ */
+
+// 기획서에 맞는 도시 개별 라벨 스타일
 export const createSingleLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 50) => {
   // 왼쪽/오른쪽 두 방향으로만 배치
   const finalAngle = angleOffset;
@@ -46,23 +51,25 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
       pointer-events: none;
     `,
     label: `
-      background-color: white;
-      color: #333;
-      padding: 8px 16px;
-      border-radius: 25px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: none;
-      text-align: center;
+      display: inline-flex;
+      padding: 6px;
+      align-items: center;
+      gap: 5px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      background: rgba(255, 255, 255, 0.20);
+      box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+      color: #FFF;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 128%;
+      font-feature-settings: 'liga' off, 'clig' off;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: max-content;
-      gap: 6px;
       pointer-events: auto;
       position: absolute;
       z-index: ${20 + index};
@@ -74,22 +81,14 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
   };
 };
 
-// 클러스터 라벨 스타일 생성
-export const createClusterLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
-  // 왼쪽/오른쪽 두 방향으로만 배치
+// 기획서에 맞는 대륙 클러스터 스타일
+export const createContinentClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
   const finalAngle = angleOffset;
-
-  // 각도를 라디안으로 변환
   const radians = (finalAngle * Math.PI) / 180;
-
-  // x, y 좌표 계산
   const offsetX = Math.cos(radians) * distance;
   const offsetY = Math.sin(radians) * distance;
 
-  // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
-
   return {
-    // 중심 dot
     dot: `
       position: absolute;
       top: -3px;
@@ -101,7 +100,6 @@ export const createClusterLabelStyles = (index: number = 0, angleOffset: number 
       z-index: 6;
       pointer-events: none;
     `,
-    // 단색 점선 수평선
     horizontalLine: `
       position: absolute;
       top: -0.5px;
@@ -119,15 +117,21 @@ export const createClusterLabelStyles = (index: number = 0, angleOffset: number 
       pointer-events: none;
     `,
     label: `
-      background-color: ${COLORS.CLUSTER_BG};
-      color: white;
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-      border: 2px solid ${COLORS.CLUSTER};
-      text-align: center;
+      display: inline-flex;
+      padding: 12px 16px;
+      align-items: center;
+      gap: 5px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.20);
+      box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+      color: #FFF;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 128%;
+      font-feature-settings: 'liga' off, 'clig' off;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
@@ -141,3 +145,91 @@ export const createClusterLabelStyles = (index: number = 0, angleOffset: number 
     `,
   };
 };
+
+// 기획서에 맞는 국가 클러스터 스타일
+export const createCountryClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
+  const finalAngle = angleOffset;
+  const radians = (finalAngle * Math.PI) / 180;
+  const offsetX = Math.cos(radians) * distance;
+  const offsetY = Math.sin(radians) * distance;
+
+  return {
+    dot: `
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      z-index: 6;
+      pointer-events: none;
+    `,
+    horizontalLine: `
+      position: absolute;
+      top: -0.5px;
+      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
+      width: ${Math.abs(offsetX * 0.7)}px;
+      height: 1px;
+      background-image: repeating-linear-gradient(
+        to right,
+        white 0px,
+        white 3px,
+        transparent 2px,
+        transparent 8px
+      );
+      z-index: 5;
+      pointer-events: none;
+    `,
+    label: `
+      display: inline-flex;
+      padding: 6px 12px 6px 12px;
+      align-items: center;
+      gap: 5px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      background: rgba(255, 255, 255, 0.20);
+      box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+      color: #FFF;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 128%;
+      font-feature-settings: 'liga' off, 'clig' off;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      pointer-events: auto;
+      position: absolute;
+      z-index: ${20 + index};
+      top: ${offsetY}px;
+      left: ${offsetX}px;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    `,
+    countBadge: `
+      display: flex;
+      width: 20px;
+      height: 20px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: 1000px;
+      background: rgba(255, 255, 255, 0.20);
+      color: #FFF;
+      text-align: center;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 128%;
+      font-feature-settings: 'liga' off, 'clig' off;
+    `,
+  };
+};
+
+// 기존 호환성을 위한 함수 (기존 createClusterLabelStyles 대체)
+export const createClusterLabelStyles = createCountryClusterStyles;

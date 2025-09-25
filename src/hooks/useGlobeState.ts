@@ -16,7 +16,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
   useEffect(() => {
     const isCurrentlyZoomed = zoomLevel < ZOOM_LEVELS.ZOOM_THRESHOLD; // 기본값보다 작으면 줌 인 된 것
-    console.log("Zoom debug:", { zoomLevel, isCurrentlyZoomed });
     setIsZoomed(isCurrentlyZoomed);
   }, [zoomLevel]);
 

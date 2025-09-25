@@ -28,12 +28,7 @@ export const Input = ({
 }: React.ComponentProps<"input"> & VariantProps<typeof inputVariants> & { variant?: "success" | "fail" }) => {
   return (
     <div className={cn("relative", className)}>
-      <input
-        type={type}
-        data-slot="input"
-        className={cn(inputVariants({ isDark }), className)}
-        {...props}
-      />
+      <input type={type} data-slot="input" className={cn(inputVariants({ isDark }), className)} {...props} />
     </div>
   );
 };

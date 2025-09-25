@@ -62,14 +62,14 @@ export const GROUP_RADIUS = {
 
 // 브라우저 뷰포트 기본값 (SSR 폴백용)
 export const VIEWPORT_DEFAULTS = {
-  WIDTH: 600,   // SSR 시 기본 너비
-  HEIGHT: 800,  // SSR 시 기본 높이
+  WIDTH: 600, // SSR 시 기본 너비
+  HEIGHT: 800, // SSR 시 기본 높이
 } as const;
 
 // Globe 컴포넌트 크기 제한
 export const GLOBE_SIZE_LIMITS = {
-  MAX_WIDTH: 512,   // Globe 최대 너비 (성능 최적화)
-  MAX_HEIGHT: 800,  // Globe 최대 높이 (성능 최적화)
+  MAX_WIDTH: 512, // Globe 최대 너비 (성능 최적화)
+  MAX_HEIGHT: 800, // Globe 최대 높이 (성능 최적화)
 } as const;
 
 // 타입 정의

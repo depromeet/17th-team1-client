@@ -1,3 +1,10 @@
+/**
+ * 기획서에 맞는 HTML 엘리먼트 렌더러
+ * - 대륙 버블: 국기 없이 텍스트만, 반투명 배경, 진한 회색 텍스트
+ * - 국가 버블: 국기 + 텍스트 + 도시 개수 원형 배지, 반투명 배경, 흰색 텍스트
+ * - 도시 버블: 국기 + 도시명, 반투명 배경
+ */
+
 // 라벨 위치 계산 함수 (클릭 기반 시스템용)
 export const calculateLabelPosition = (
   d: any,
@@ -28,47 +35,46 @@ export const calculateClampedDistance = (
   return dynamicDistance;
 };
 
-// 개별 도시 HTML 생성
+// 기획서에 맞는 개별 도시 HTML 생성
 export const createCityHTML = (styles: any, displayFlag: string, cityName: string) => {
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
     <!-- 점선 -->
     <div style="${styles.horizontalLine}"></div>
-    <div style="${styles.label}
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(148,203,255,0.2);
-      border-radius: 50px;
-      padding: 8px 12px;
-      backdrop-filter: blur(8px);
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      position: relative;
-      pointer-events: auto;
-      width: max-content;
-    ">
+    <div style="${styles.label}">
       <!-- 좌측 국기 이모지 -->
       <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
       <!-- 도시명 -->
-      <span style="
-        color: #ffffff;
-        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 15px;
-        font-weight: 500;
-        line-height: 19px;
-        white-space: nowrap;
-      ">
+      <span>
         ${cityName}
       </span>
     </div>
   `;
 };
 
+// 기획서에 맞는 대륙 클러스터 HTML 생성 (국기 표시 안함)
+export const createContinentClusterHTML = (
+  styles: any,
+  continentName: string,
+  countryCount: number,
+  flagEmoji: string,
+) => {
+  return `
+    <!-- 중심 dot -->
+    <div style="${styles.dot}"></div>
+    <!-- 단색 수평선 -->
+    <div style="${styles.horizontalLine}"></div>
+    <div style="${styles.label}">
+      <!-- 대륙명만 표시 (국기 없음) -->
+      <span>
+        ${continentName}
+      </span>
+    </div>
+  `;
+};
 
-// 국가 클러스터 HTML 생성 (클릭 기반 시스템용)
+// 기획서에 맞는 국가 클러스터 HTML 생성
 export const createCountryClusterHTML = (
   styles: any,
   countryName: string,
@@ -81,94 +87,31 @@ export const createCountryClusterHTML = (
     <div style="${styles.dot}"></div>
     <!-- 단색 수평선 -->
     <div style="${styles.horizontalLine}"></div>
-    <div style="${styles.label}
-      background: rgba(255, 255, 255, ${isExpanded ? '0.3' : '0.2'});
-      border: 1px solid rgba(148,203,255,${isExpanded ? '0.4' : '0.2'});
-      border-radius: 50px;
-      padding: 8px 12px;
-      backdrop-filter: blur(8px);
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      position: relative;
-      pointer-events: auto;
-      width: max-content;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    ">
+    <div style="${styles.label}">
       <!-- 좌측 국기 이모지 -->
       <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
       <!-- 국가명 -->
-      <span style="
-        color: #ffffff;
-        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 15px;
-        font-weight: 500;
-        line-height: 19px;
-        white-space: nowrap;
-      ">
+      <span>
         ${countryName}
       </span>
-      <!-- 도시 개수 뱃지 -->
-      ${
-        cityCount > 1
-          ? `
-        <div style="
-          background: rgba(89, 190, 229, ${isExpanded ? '0.7' : '0.5'});
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        ">
-          <span style="
-            color: #ffffff;
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 12px;
-            font-weight: 500;
-            line-height: 15px;
-            text-align: center;
-          ">
-            ${cityCount}
-          </span>
-        </div>
-      `
-          : ""
-      }
-      <!-- 확장 상태 표시 -->
-      ${
-        isExpanded
-          ? `
-        <div style="
-          width: 0;
-          height: 0;
-          border-left: 4px solid transparent;
-          border-right: 4px solid transparent;
-          border-bottom: 6px solid #ffffff;
-          margin-left: 2px;
-        "></div>
-      `
-          : ""
-      }
+      <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
+      ${cityCount > 1 ? `<div style="${styles.countBadge}">
+        <span>
+          ${cityCount}
+        </span>
+      </div>` : ''}
     </div>
   `;
 };
 
-// 클릭 기반 시스템용 클릭 핸들러
-export const createCountryClusterClickHandler = (
-  countryId: string,
-  onCountryClick: (countryId: string) => void,
-) => {
+// 클러스터 클릭 핸들러 (대륙/국가 구분) - 개선된 버전
+export const createClusterClickHandler = (clusterId: string, onClusterClick: (clusterId: string) => void) => {
   return (event: any) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // 국가 클릭 시 확장/축소 토글
-    onCountryClick(countryId);
+    // 클러스터 클릭 시 확장
+    onClusterClick(clusterId);
   };
 };
 
@@ -183,4 +126,3 @@ export const createCityClickHandler = (cityName: string) => {
     window.location.href = `/image-metadata?city=${q}`;
   };
 };
-

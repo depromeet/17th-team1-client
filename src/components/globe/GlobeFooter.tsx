@@ -1,5 +1,5 @@
-import { HeadlessToast, HeadlessToastProvider } from "@/components/common/toast";
 import { useState } from "react";
+import { HeadlessToast, HeadlessToastProvider } from "@/components/common/toast";
 
 interface GlobeFooterProps {
   isZoomed: boolean;

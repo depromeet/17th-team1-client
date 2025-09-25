@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 type PhotoState = {
   file: File | null;
@@ -12,7 +12,7 @@ const useImage = (initialKeys: string[], initialLabels?: Record<string, string>)
   const [photos, setPhotos] = useState<Photos>(() => {
     const initialPhotos: Photos = {};
 
-    initialKeys.forEach(key => {
+    initialKeys.forEach((key) => {
       initialPhotos[key] = { file: null, url: null, label: initialLabels?.[key] };
     });
 
@@ -22,13 +22,13 @@ const useImage = (initialKeys: string[], initialLabels?: Record<string, string>)
   const handleSelectFile = (photoType: keyof typeof photos) => (file: File) => {
     const previewUrl = URL.createObjectURL(file);
 
-    setPhotos(prev => ({
+    setPhotos((prev) => ({
       ...prev,
       [photoType]: {
         ...prev[photoType],
         file: file,
-        url: previewUrl
-      }
+        url: previewUrl,
+      },
     }));
   };
 
@@ -38,20 +38,20 @@ const useImage = (initialKeys: string[], initialLabels?: Record<string, string>)
       URL.revokeObjectURL(url);
     }
 
-    setPhotos(prev => ({
+    setPhotos((prev) => ({
       ...prev,
       [photoType]: {
         ...prev[photoType],
         file: null,
-        url: null
-      }
+        url: null,
+      },
     }));
   };
 
   return {
     photos,
     handleSelectFile,
-    handleRemove
+    handleRemove,
   };
 };
 

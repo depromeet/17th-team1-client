@@ -1,5 +1,5 @@
-import type { ClusterData, CountryData } from "@/types/globe";
 import { useMemo } from "react";
+import type { ClusterData, CountryData } from "@/types/globe";
 
 interface UseHtmlElementsParams {
   isAnimating: boolean;

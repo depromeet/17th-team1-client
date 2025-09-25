@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko&region=kr`,
     );
     const data = await response.json();
     return NextResponse.json({ results: data.results });

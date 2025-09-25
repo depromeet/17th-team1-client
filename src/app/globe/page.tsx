@@ -66,7 +66,7 @@ const GlobePrototype = () => {
       </div>
 
       {/* 하단 버튼들 */}
-      <GlobeFooter isZoomed={isZoomed} onBackClick={resetGlobe} showBackButton={hasBackButton} />
+      <GlobeFooter isZoomed={isZoomed} />
 
       {/* 돌아가기 버튼 */}
       <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />

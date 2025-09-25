@@ -90,8 +90,6 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
 
 // 기획서에 맞는 대륙 클러스터 스타일
 export const createContinentClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
-  const finalAngle = angleOffset;
-  const radians = (finalAngle * Math.PI) / 180;
   const lineLength = distance * 0.7;
   // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
   const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)
@@ -146,10 +144,9 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
       font-weight: 500;
       line-height: 128%;
       font-feature-settings: 'liga' off, 'clig' off;
-      cursor: pointer;
+      cursor: default;
       user-select: none;
-      transition: all 0.2s ease;
-      pointer-events: auto;
+      pointer-events: none;
       position: absolute;
       z-index: ${20 + index};
       top: ${offsetY}px;
@@ -162,8 +159,6 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
 
 // 기획서에 맞는 국가 클러스터 스타일
 export const createCountryClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
-  const finalAngle = angleOffset;
-  const radians = (finalAngle * Math.PI) / 180;
   const lineLength = distance * 0.7;
   // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
   const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)

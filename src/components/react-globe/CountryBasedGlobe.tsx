@@ -171,18 +171,9 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           const clickHandler = createCityClickHandler(d.name);
           el.addEventListener("click", clickHandler);
         } else if (d.clusterType === "continent_cluster") {
-          // 대륙 클러스터 표시 (텍스트로 +숫자)
+          // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
           el.innerHTML = createContinentClusterHTML(styles, d.name, d.count, d.flag);
-
-          const clickHandler = createClusterClickHandler(d.id, (clusterId: string) => {
-            const cluster = clusteredData.find((c) => c.id === clusterId);
-            if (cluster && localHandleClusterSelect) {
-              const clusterItems = localHandleClusterSelect(cluster);
-              globalHandleClusterSelect({ ...cluster, items: clusterItems });
-              onClusterSelect?.(cluster);
-            }
-          });
-          el.addEventListener("click", clickHandler);
+          // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
         } else if (d.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
           el.innerHTML = createCountryClusterHTML(

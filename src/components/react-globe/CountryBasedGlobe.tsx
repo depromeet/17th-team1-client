@@ -13,8 +13,9 @@ import {
   createCountryClusterStyles,
   createSingleLabelStyles,
 } from "@/styles/globeStyles";
+import { calculateAnimationDuration, calculateAutoFitCamera } from "@/utils/autoFitUtils";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
-import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
+import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/utils/globeUtils";
 import {
   calculateClampedDistance,
   calculateLabelPosition,
@@ -153,7 +154,12 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         );
 
         // 기획에 맞는 스타일 선택
-        let styles;
+        let styles: {
+          dot: string;
+          horizontalLine: string;
+          label: string;
+        };
+
         if (d.clusterType === "continent_cluster") {
           styles = createContinentClusterStyles(0, angleOffset, clampedDistance);
         } else if (d.clusterType === "country_cluster") {
@@ -190,6 +196,46 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
               const clusterItems = localHandleClusterSelect(cluster);
               globalHandleClusterSelect({ ...cluster, items: clusterItems });
               onClusterSelect?.(cluster);
+
+              // 자동 fit 기능: 클러스터의 도시들이 모두 보이도록 카메라 이동
+              if (clusterItems && clusterItems.length > 0 && globeRef.current) {
+                const autoFitCamera = calculateAutoFitCamera(clusterItems);
+                const currentPov = globeRef.current.pointOfView();
+
+                const animationDuration = calculateAnimationDuration(
+                  currentPov.lat || 0,
+                  currentPov.lng || 0,
+                  currentPov.altitude || 2.5,
+                  autoFitCamera.lat,
+                  autoFitCamera.lng,
+                  autoFitCamera.altitude,
+                );
+
+                // 개발 환경에서 디버깅 정보 출력
+                if (process.env.NODE_ENV === "development") {
+                  console.log("Auto-fit camera calculation:", {
+                    clusterName: d.name,
+                    cityCount: clusterItems.length,
+                    boundingBox: autoFitCamera.boundingBox,
+                    targetPosition: {
+                      lat: autoFitCamera.lat,
+                      lng: autoFitCamera.lng,
+                      altitude: autoFitCamera.altitude,
+                    },
+                    animationDuration,
+                  });
+                }
+
+                // 부드러운 카메라 이동
+                globeRef.current.pointOfView(
+                  {
+                    lat: autoFitCamera.lat,
+                    lng: autoFitCamera.lng,
+                    altitude: autoFitCamera.altitude,
+                  },
+                  animationDuration,
+                );
+              }
             }
           });
           el.addEventListener("click", clickHandler);
@@ -318,7 +364,9 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         document.removeEventListener("keydown", preventKeyboardZoom);
         document.removeEventListener("touchstart", preventTouchZoom);
         // 모든 타이머 정리
-        timers.forEach((timer) => clearTimeout(timer));
+        timers.forEach((timer) => {
+          clearTimeout(timer);
+        });
       };
     }, [globeLoading]);
 
@@ -375,7 +423,6 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
           polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-          polygonLabel={(feature: any) => getPolygonLabel(feature, currentPattern?.countries || [], getISOCode)}
           htmlElementsData={visibleItems}
           htmlElement={getHtmlElement}
           htmlAltitude={() => 0}

@@ -75,18 +75,11 @@ const estimateBubbleWidth = (cluster: ClusterData): number => {
 export const clusterLocations = (
   locations: CountryData[],
   _clusterDistance: number,
-  currentZoomLevel: number,
+  _currentZoomLevel: number,
   globeRef: React.RefObject<GlobeInstance | null>,
   mode: "country" | "city" | "continent" = "country",
   expandedCountry: string | null = null,
 ): ClusterData[] => {
-  console.log("🔍 clusterLocations called with:", {
-    locationsCount: locations.length,
-    currentZoomLevel,
-    mode,
-    expandedCountry,
-    hasGlobeRef: !!globeRef.current,
-  });
 
   if (!locations || locations.length === 0) {
     return [];
@@ -95,21 +88,27 @@ export const clusterLocations = (
   // 기획 요구사항 1: 도시 모드일 때는 클릭된 국가의 도시들만 개별 표시
   if (mode === "city" && expandedCountry) {
     const countryLocations = locations.filter((loc) => loc.id === expandedCountry);
-    console.log("🏙️ City mode, returning individual cities:", countryLocations.length);
     return createIndividualCityClusters(countryLocations);
   }
 
-  // globeRef가 없으면 겹침 감지 불가능하므로 기본 클러스터링
-  if (!globeRef.current) {
-    console.log("⚠️ Globe not ready, returning country clusters without overlap detection");
+  // globeRef가 없거나 getScreenCoords 함수가 준비되지 않았으면 기본 클러스터링
+  if (!globeRef.current || typeof globeRef.current.getScreenCoords !== 'function') {
     return createCountryClusters(locations);
   }
 
-  console.log("🌍 Starting overlap detection clustering...");
+  // Globe가 준비되었지만 첫 번째 좌표 변환이 실패하면 잠시 대기
+  try {
+    const testPos = globeRef.current.getScreenCoords(0, 0);
+    if (!testPos || typeof testPos.x !== 'number' || typeof testPos.y !== 'number') {
+      return createCountryClusters(locations);
+    }
+  } catch (error) {
+    return createCountryClusters(locations);
+  }
+
   const globe = globeRef.current;
   const countryClusters = createCountryClusters(locations);
   
-  console.log("📍 Country clusters created:", countryClusters.length);
 
   const clustersWithPos = countryClusters.map((cluster) => {
     const screenPos = globe.getScreenCoords(cluster.lat, cluster.lng);
@@ -124,11 +123,6 @@ export const clusterLocations = (
     };
   });
 
-  console.log("📐 Clusters with positions:", clustersWithPos.map(c => ({
-    name: c.name,
-    screenPos: c.screenPos,
-    effectiveWidth: c.effectiveWidth
-  })));
 
   const processedIds = new Set<string>();
   const finalClusters: ClusterData[] = [];
@@ -166,12 +160,6 @@ export const clusterLocations = (
         const overlapThreshold = (currentCluster.effectiveWidth + candidateCluster.effectiveWidth) * 0.4;
 
         if (distance < overlapThreshold) {
-          console.log("🔗 Overlap detected:", {
-            cluster1: currentCluster.name,
-            cluster2: candidateCluster.name,
-            distance: distance.toFixed(1),
-            threshold: overlapThreshold.toFixed(1)
-          });
           
           processedIds.add(candidateCluster.id);
           queue.push(candidateCluster);
@@ -183,8 +171,6 @@ export const clusterLocations = (
     // 겹치는 클러스터가 2개 이상이면 대륙별로 그룹핑
     if (overlappingClusters.length > 1) {
       overlappingGroupsFound++;
-      console.log(`🌍 Overlapping group ${overlappingGroupsFound} found with ${overlappingClusters.length} clusters:`, 
-        overlappingClusters.map(c => c.name));
       
       const continentGroups = new Map<string, typeof overlappingClusters>();
 
@@ -198,11 +184,6 @@ export const clusterLocations = (
         continentGroups.get(continent)!.push(cluster);
       });
 
-      console.log("🗺️ Continent groups:", Array.from(continentGroups.entries()).map(([continent, clusters]) => ({
-        continent,
-        clustersCount: clusters.length,
-        clusters: clusters.map(c => c.name)
-      })));
 
       // 각 대륙 그룹에 대해 클러스터 생성
       continentGroups.forEach((group, continent) => {
@@ -243,11 +224,6 @@ export const clusterLocations = (
             clusterType: "continent_cluster" as const,
           };
 
-          console.log("🎯 Created continent cluster:", {
-            name: continentCluster.name,
-            countriesCount: uniqueCountries.length,
-            totalItems: allItems.length
-          });
 
           finalClusters.push(continentCluster);
         } else {
@@ -261,13 +237,6 @@ export const clusterLocations = (
     }
   }
 
-  console.log("✅ Final clustering result:", {
-    originalClusters: countryClusters.length,
-    overlappingGroups: overlappingGroupsFound,
-    finalClusters: finalClusters.length,
-    continentClusters: finalClusters.filter(c => c.clusterType === "continent_cluster").length,
-    countryClusters: finalClusters.filter(c => c.clusterType === "country_cluster").length,
-  });
 
   return finalClusters;
 };;

@@ -22,7 +22,6 @@ const GlobePrototype = () => {
 
   // Globe 상태 관리
   const {
-    selectedCountry,
     currentGlobeIndex,
     isZoomed,
     selectedClusterData,
@@ -43,7 +42,7 @@ const GlobePrototype = () => {
       }}
     >
       {/* 상단 헤더 */}
-      <GlobeHeader isZoomed={selectedCountry !== null} />
+      <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} />
 
       {/* Country Based Globe 컴포넌트 */}
       <div className="flex-1 flex items-center justify-center relative">

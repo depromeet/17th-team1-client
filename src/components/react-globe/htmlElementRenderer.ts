@@ -95,11 +95,15 @@ export const createCountryClusterHTML = (
         ${countryName}
       </span>
       <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
-      ${cityCount > 1 ? `<div style="${styles.countBadge}">
+      ${
+        cityCount > 1
+          ? `<div style="${styles.countBadge}">
         <span>
           ${cityCount}
         </span>
-      </div>` : ''}
+      </div>`
+          : ""
+      }
     </div>
   `;
 };

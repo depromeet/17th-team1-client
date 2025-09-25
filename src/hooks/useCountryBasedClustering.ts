@@ -22,6 +22,7 @@ export const useCountryBasedClustering = ({
   countries,
   zoomLevel,
   selectedClusterData,
+  globeRef,
 }: UseCountryBasedClusteringProps) => {
   // State management - 기획에 맞게 업데이트
   const [state, setState] = useState<ClusteringState>({
@@ -39,22 +40,6 @@ export const useCountryBasedClustering = ({
   const [zoomStack, setZoomStack] = useState<number[]>([]);
   const [selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [lastRotation, setLastRotation] = useState({ lat: 0, lng: 0 });
-
-  // 기획 요구사항: 모드 동기화 (줌 레벨에 따라 대륙/국가 전환)
-  useEffect(() => {
-    if (state.mode !== "city") {
-      // 도시 모드가 아니면 줌 레벨에 따라 모드 결정
-      const shouldBeContinentMode = zoomLevel >= ZOOM_LEVELS.DEFAULT;
-      const newMode = shouldBeContinentMode ? "continent" : "country";
-
-      if (state.mode !== newMode) {
-        setState((prev) => ({
-          ...prev,
-          mode: newMode,
-        }));
-      }
-    }
-  }, [zoomLevel, state.mode]);
 
   // 줌 상태 감지
   useEffect(() => {
@@ -74,6 +59,7 @@ export const useCountryBasedClustering = ({
         dataToCluster,
         clusterDistance,
         zoomLevel,
+        globeRef, // globeRef 전달
         state.mode, // 모드를 포함하여 호출
         state.expandedCountry, // 확장된 국가 정보 포함
       );
@@ -83,7 +69,7 @@ export const useCountryBasedClustering = ({
       }
       return [];
     }
-  }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry]);
+  }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry, globeRef]);
 
   // 상태 업데이트
   useEffect(() => {

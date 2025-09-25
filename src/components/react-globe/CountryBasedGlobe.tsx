@@ -64,8 +64,14 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       handleCountrySelect: globalHandleCountrySelect,
       handleZoomChange: globalHandleZoomChange,
       handleClusterSelect: globalHandleClusterSelect,
+      handlePatternChange: localHandlePatternChange, // 이름 변경
       resetGlobe,
     } = useGlobeState(travelPatterns);
+
+    // 부모로부터 받은 currentGlobeIndex를 내부 상태에 동기화
+    useEffect(() => {
+      localHandlePatternChange(currentGlobeIndex);
+    }, [currentGlobeIndex, localHandlePatternChange]);
 
     // 클러스터링 시스템 사용
     const {
@@ -79,6 +85,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       countries: currentPattern?.countries || [],
       zoomLevel,
       selectedClusterData: selectedClusterData || undefined,
+      globeRef,
     });
 
     // 부모 컴포넌트에 globeRef 노출

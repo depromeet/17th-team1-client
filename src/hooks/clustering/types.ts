@@ -33,8 +33,11 @@ export interface ClusteringState {
   lastSignificantRotation: number;
 }
 
+import type { GlobeInstance } from "globe.gl";
+
 export interface UseCountryBasedClusteringProps {
   countries: CountryData[];
   zoomLevel: number;
   selectedClusterData?: CountryData[];
+  globeRef: React.RefObject<GlobeInstance | null>;
 }

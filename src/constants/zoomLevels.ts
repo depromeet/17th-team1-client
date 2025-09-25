@@ -71,6 +71,26 @@ export const GLOBE_SIZE_LIMITS = {
   MAX_WIDTH: 512, // Globe 최대 너비 (성능 최적화)
   MAX_HEIGHT: 800, // Globe 최대 높이 (성능 최적화)
 } as const;
+// 대륙 클러스터링 관련 상수
+export const CONTINENT_CLUSTERING = {
+  // 대륙-국가 전환 임계값
+  CONTINENT_TO_COUNTRY_THRESHOLD: 1.8,
+
+  // 겹침 감지 관련
+  OVERLAP_DETECTION: {
+    PADDING: 20, // 버블 주변 패딩 (px)
+    MINIMUM_DISTANCE: 10, // 최소 거리 (px)
+    CONTINENT_MERGE_THRESHOLD: 2, // 같은 대륙에서 합칠 최소 국가 수
+  },
+
+  // 대륙 버블 스타일 관련
+  BUBBLE_STYLE: {
+    FONT_SIZE: 16, // 대륙 클러스터 폰트 크기
+    PADDING: 32, // 대륙 클러스터 패딩 (16 * 2)
+    FLAG_WIDTH: 24, // 플래그 너비
+    GAP: 5, // 요소 간 간격
+  },
+} as const;
 
 // 타입 정의
 export type ZoomLevel = typeof ZOOM_LEVELS;

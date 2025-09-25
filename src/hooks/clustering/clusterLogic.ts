@@ -80,7 +80,6 @@ export const clusterLocations = (
   mode: "country" | "city" | "continent" = "country",
   expandedCountry: string | null = null,
 ): ClusterData[] => {
-
   if (!locations || locations.length === 0) {
     return [];
   }
@@ -92,28 +91,28 @@ export const clusterLocations = (
   }
 
   // globeRef가 없거나 getScreenCoords 함수가 준비되지 않았으면 기본 클러스터링
-  if (!globeRef.current || typeof globeRef.current.getScreenCoords !== 'function') {
+  if (!globeRef.current || typeof globeRef.current.getScreenCoords !== "function") {
     return createCountryClusters(locations);
   }
 
   // Globe가 준비되었지만 첫 번째 좌표 변환이 실패하면 잠시 대기
   try {
     const testPos = globeRef.current.getScreenCoords(0, 0);
-    if (!testPos || typeof testPos.x !== 'number' || typeof testPos.y !== 'number') {
+    if (!testPos || typeof testPos.x !== "number" || typeof testPos.y !== "number") {
       return createCountryClusters(locations);
     }
   } catch (error) {
+    console.error(error);
     return createCountryClusters(locations);
   }
 
   const globe = globeRef.current;
   const countryClusters = createCountryClusters(locations);
-  
 
   const clustersWithPos = countryClusters.map((cluster) => {
     const screenPos = globe.getScreenCoords(cluster.lat, cluster.lng);
     const bubbleWidth = estimateBubbleWidth(cluster);
-    
+
     return {
       ...cluster,
       screenPos,
@@ -123,10 +122,8 @@ export const clusterLocations = (
     };
   });
 
-
   const processedIds = new Set<string>();
   const finalClusters: ClusterData[] = [];
-  let overlappingGroupsFound = 0;
 
   // 향상된 겹침 감지 및 대륙 클러스터링 로직
   for (let i = 0; i < clustersWithPos.length; i++) {
@@ -155,12 +152,11 @@ export const clusterLocations = (
           currentCluster.screenPos.x - candidateCluster.screenPos.x,
           currentCluster.screenPos.y - candidateCluster.screenPos.y,
         );
-        
+
         // 더 엄격한 겹침 판단: 두 버블이 실제로 많이 겹칠 때만 클러스터링
         const overlapThreshold = (currentCluster.effectiveWidth + candidateCluster.effectiveWidth) * 0.4;
 
         if (distance < overlapThreshold) {
-          
           processedIds.add(candidateCluster.id);
           queue.push(candidateCluster);
           overlappingClusters.push(candidateCluster);
@@ -170,8 +166,6 @@ export const clusterLocations = (
 
     // 겹치는 클러스터가 2개 이상이면 대륙별로 그룹핑
     if (overlappingClusters.length > 1) {
-      overlappingGroupsFound++;
-      
       const continentGroups = new Map<string, typeof overlappingClusters>();
 
       // 겹치는 국가들을 대륙별로 분류
@@ -181,9 +175,8 @@ export const clusterLocations = (
         if (!continentGroups.has(continent)) {
           continentGroups.set(continent, []);
         }
-        continentGroups.get(continent)!.push(cluster);
+        (continentGroups.get(continent) as ClusterData[]).push(cluster);
       });
-
 
       // 각 대륙 그룹에 대해 클러스터 생성
       continentGroups.forEach((group, continent) => {
@@ -191,26 +184,24 @@ export const clusterLocations = (
           // 같은 대륙의 여러 국가가 겹치는 경우 → 대륙 클러스터 생성
           const allItems = group.flatMap((cluster) => cluster.items);
           const uniqueCountries = [...new Set(allItems.map((item) => item.id))];
-          
+
           // 대륙 클러스터의 중심점 계산 (가중평균)
           let totalWeight = 0;
           let weightedLat = 0;
           let weightedLng = 0;
-          
+
           group.forEach((cluster) => {
             const weight = cluster.count;
             weightedLat += cluster.lat * weight;
             weightedLng += cluster.lng * weight;
             totalWeight += weight;
           });
-          
+
           const centerLat = weightedLat / totalWeight;
           const centerLng = weightedLng / totalWeight;
 
           // 대륙의 대표 플래그 선정 (가장 많은 아이템을 가진 국가의 플래그)
-          const representativeCluster = group.reduce((prev, current) => 
-            prev.count > current.count ? prev : current
-          );
+          const representativeCluster = group.reduce((prev, current) => (prev.count > current.count ? prev : current));
 
           const continentCluster = {
             id: `continent_${continent}_${Date.now()}_${i}`,
@@ -224,7 +215,6 @@ export const clusterLocations = (
             clusterType: "continent_cluster" as const,
           };
 
-
           finalClusters.push(continentCluster);
         } else {
           // 대륙에 국가가 1개만 있으면 원래 클러스터 유지
@@ -237,9 +227,8 @@ export const clusterLocations = (
     }
   }
 
-
   return finalClusters;
-};;
+};
 
 // 현재 선택된 국가의 도시들을 개별로 표시하는 함수
 export const expandCountryCities = (locations: CountryData[], countryId: string): ClusterData[] => {

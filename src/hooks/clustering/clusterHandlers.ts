@@ -1,11 +1,5 @@
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
-import {
-  AUTO_CLUSTER_DELAY,
-  getContinentZoomTarget,
-  isSignificantRotation,
-  shouldExpandCluster,
-  shouldZoomToCountries,
-} from "./clusterLogic";
+import { AUTO_CLUSTER_DELAY, getContinentZoomTarget, isSignificantRotation } from "./clusterLogic";
 import type { ClusterData, ClusteringState, CountryData } from "./types";
 
 /**
@@ -18,10 +12,8 @@ import type { ClusterData, ClusteringState, CountryData } from "./types";
 // 클러스터 선택 핸들러 - 기획 요구사항에 맞게 새로 작성
 export const createClusterSelectHandler = (
   setState: React.Dispatch<React.SetStateAction<ClusteringState>>,
-  setZoomStack: React.Dispatch<React.SetStateAction<number[]>>,
   setSelectionStack: React.Dispatch<React.SetStateAction<(CountryData[] | null)[]>>,
   setLastRotation: React.Dispatch<React.SetStateAction<{ lat: number; lng: number }>>,
-  zoomLevel: number,
   selectedClusterData: CountryData[] | undefined,
   onZoomTo?: (targetZoom: number, lat?: number, lng?: number) => void,
 ) => {
@@ -121,9 +113,6 @@ export const createZoomChangeHandler = (
   setState: React.Dispatch<React.SetStateAction<ClusteringState>>,
   setZoomStack: React.Dispatch<React.SetStateAction<number[]>>,
   setSelectionStack: React.Dispatch<React.SetStateAction<(CountryData[] | null)[]>>,
-  zoomLevel: number,
-  zoomStack: number[],
-  selectedClusterData: CountryData[] | undefined,
   mode: string,
 ) => {
   return (newZoomLevel: number) => {

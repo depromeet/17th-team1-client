@@ -14,9 +14,14 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
   // 각도를 라디안으로 변환
   const radians = (finalAngle * Math.PI) / 180;
 
-  // x, y 좌표 계산
-  const offsetX = Math.cos(radians) * distance;
-  const offsetY = Math.sin(radians) * distance;
+  // 45도 상단 각도 점선에 맞춘 x, y 좌표 계산 (대각선 끝점)
+  const lineLength = distance * 0.7;
+  // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
+  const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)
+  const diagonalEndY = lineLength * Math.sin(Math.PI / 4); // sin(45°)
+
+  const offsetX = angleOffset === 0 ? diagonalEndX : -diagonalEndX;
+  const offsetY = angleOffset === 0 ? -diagonalEndY : -diagonalEndY;
 
   // ㄱ자 연결선에서는 lineLength와 angle 사용하지 않음
 
@@ -33,18 +38,20 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
       z-index: 6;
       pointer-events: none;
     `,
-    // 단색 점선 수평선
+    // 45도 각도 그라데이션 점선
     horizontalLine: `
       position: absolute;
-      top: -0.5px;
-      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
-      width: ${Math.abs(offsetX * 0.7)}px;
+      top: 0px;
+      left: 0px;
+      width: ${lineLength}px;
       height: 1px;
+      transform-origin: 0 0;
+      transform: rotate(${offsetX > 0 ? -45 : -135}deg);
       background-image: repeating-linear-gradient(
         to right,
         white 0px,
         white 3px,
-        transparent 2px,
+        transparent 3px,
         transparent 8px
       );
       z-index: 5;
@@ -85,8 +92,13 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
 export const createContinentClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
   const finalAngle = angleOffset;
   const radians = (finalAngle * Math.PI) / 180;
-  const offsetX = Math.cos(radians) * distance;
-  const offsetY = Math.sin(radians) * distance;
+  const lineLength = distance * 0.7;
+  // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
+  const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)
+  const diagonalEndY = lineLength * Math.sin(Math.PI / 4); // sin(45°)
+
+  const offsetX = angleOffset === 0 ? diagonalEndX : -diagonalEndX;
+  const offsetY = angleOffset === 0 ? -diagonalEndY : -diagonalEndY;
 
   return {
     dot: `
@@ -102,15 +114,17 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
     `,
     horizontalLine: `
       position: absolute;
-      top: -0.5px;
-      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
-      width: ${Math.abs(offsetX * 0.7)}px;
+      top: 0px;
+      left: 0px;
+      width: ${lineLength}px;
       height: 1px;
+      transform-origin: 0 0;
+      transform: rotate(${offsetX > 0 ? -45 : -135}deg);
       background-image: repeating-linear-gradient(
         to right,
         white 0px,
         white 3px,
-        transparent 2px,
+        transparent 3px,
         transparent 8px
       );
       z-index: 5;
@@ -150,8 +164,13 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
 export const createCountryClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
   const finalAngle = angleOffset;
   const radians = (finalAngle * Math.PI) / 180;
-  const offsetX = Math.cos(radians) * distance;
-  const offsetY = Math.sin(radians) * distance;
+  const lineLength = distance * 0.7;
+  // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
+  const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)
+  const diagonalEndY = lineLength * Math.sin(Math.PI / 4); // sin(45°)
+
+  const offsetX = angleOffset === 0 ? diagonalEndX : -diagonalEndX;
+  const offsetY = angleOffset === 0 ? -diagonalEndY : -diagonalEndY;
 
   return {
     dot: `
@@ -167,15 +186,17 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
     `,
     horizontalLine: `
       position: absolute;
-      top: -0.5px;
-      left: ${offsetX > 0 ? 0 : offsetX * 0.7}px;
-      width: ${Math.abs(offsetX * 0.7)}px;
+      top: 0px;
+      left: 0px;
+      width: ${lineLength}px;
       height: 1px;
+      transform-origin: 0 0;
+      transform: rotate(${offsetX > 0 ? -45 : -135}deg);
       background-image: repeating-linear-gradient(
         to right,
         white 0px,
         white 3px,
-        transparent 2px,
+        transparent 3px,
         transparent 8px
       );
       z-index: 5;

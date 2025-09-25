@@ -29,7 +29,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
         </HeadlessToastProvider>
 
         {/* 기본 버튼들 - opacity로 제어하여 layout shift 방지 */}
-        <div className={`space-y-2 transition-opacity duration-500 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+        <div className="w-full">
           <button
             type="button"
             onClick={() => setOpen(true)}

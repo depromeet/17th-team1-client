@@ -6,7 +6,8 @@ import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
 import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
-import { useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
+import { useCountryBasedClustering, type ClusterData } from "@/hooks/useCountryBasedClustering";
+import { useGlobeState } from "@/hooks/useGlobeState";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
 import {
@@ -24,8 +25,11 @@ const Globe = dynamic(() => import("react-globe.gl"), {
 });
 
 interface CountryBasedGlobeProps {
-  countries: any[];
+  travelPatterns: any[];
+  currentGlobeIndex: number;
   onCountrySelect: (countryId: string | null) => void;
+  onClusterSelect?: (cluster: ClusterData) => void;
+  onZoomChange?: (zoom: number) => void;
 }
 
 export interface CountryBasedGlobeRef {
@@ -33,7 +37,7 @@ export interface CountryBasedGlobeRef {
 }
 
 const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProps>(
-  ({ countries, onCountrySelect }, ref) => {
+  ({ travelPatterns, currentGlobeIndex, onCountrySelect, onClusterSelect, onZoomChange }, ref) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
@@ -43,16 +47,32 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       height: typeof window !== "undefined" ? window.innerHeight : VIEWPORT_DEFAULTS.HEIGHT,
     });
 
-    // 새로운 클러스터링 시스템 사용
+    // Globe state 관리
     const {
-      mode,
-      expandedCountry,
-      countryClusterData,
+      selectedCountry,
+      zoomLevel,
+      selectedClusterData,
+      snapZoomTo,
+      isZoomed,
+      travelPatternsWithFlags,
+      currentPattern,
+      handleCountrySelect: globalHandleCountrySelect,
+      handleZoomChange: globalHandleZoomChange,
+      handleClusterSelect: globalHandleClusterSelect,
+      resetGlobe,
+    } = useGlobeState(travelPatterns);
+
+    // 클러스터링 시스템 사용
+    const {
+      clusteredData,
       visibleItems,
-      handleCountryClick,
-      handleGlobeRotation,
-      resetToCountryView,
-    } = useCountryBasedClustering({ countries });
+      handleClusterSelect: localHandleClusterSelect,
+      handleZoomChange: localHandleZoomChange,
+    } = useCountryBasedClustering({
+      countries: currentPattern?.countries || [],
+      zoomLevel,
+      selectedClusterData: selectedClusterData || undefined
+    });
 
     // 부모 컴포넌트에 globeRef 노출
     useImperativeHandle(ref, () => ({
@@ -110,7 +130,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       const { angleOffset, dynamicDistance } = calculateLabelPosition(
         d,
         visibleItems,
-        2, // 고정 줌 레벨
+        zoomLevel,
         globeRef,
       );
 
@@ -122,41 +142,70 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         globeRef,
       );
 
-      const styles = createClusterLabelStyles(0, angleOffset, clampedDistance);
+      const styles = createClusterLabelStyles(zoomLevel, angleOffset, clampedDistance);
 
-      if (mode === "country") {
-        // 국가 클러스터 표시
-        const cluster = countryClusterData.find(c => c.id === d.id);
-        if (cluster) {
-          el.innerHTML = createCountryClusterHTML(
-            styles,
-            cluster.name,
-            cluster.count,
-            cluster.flag,
-            cluster.isExpanded
-          );
-
-          const clickHandler = createCountryClusterClickHandler(cluster.id, handleCountryClick);
-          el.addEventListener("click", clickHandler);
-        }
-      } else {
+      if (d.clusterType === "individual_city") {
         // 개별 도시 표시
         const cityName = d.name.split(",")[0];
         el.innerHTML = createCityHTML(styles, d.flag, cityName);
 
         const clickHandler = createCityClickHandler(d.name);
         el.addEventListener("click", clickHandler);
+      } else {
+        // 클러스터 표시 (국가 또는 대륙)
+        el.innerHTML = createCountryClusterHTML(
+          styles,
+          d.name,
+          d.count,
+          d.flag,
+          false // 확장 상태는 항상 false
+        );
+
+        const clickHandler = createCountryClusterClickHandler(d.id, (clusterId: string) => {
+          const cluster = clusteredData.find(c => c.id === clusterId);
+          if (cluster && localHandleClusterSelect) {
+            const clusterItems = localHandleClusterSelect(cluster);
+            globalHandleClusterSelect({ ...cluster, items: clusterItems });
+            onClusterSelect?.(cluster);
+          }
+        });
+        el.addEventListener("click", clickHandler);
       }
 
       return el;
-    }, [mode, countryClusterData, visibleItems, handleCountryClick]);
+    }, [clusteredData, visibleItems, zoomLevel, localHandleClusterSelect, globalHandleClusterSelect, onClusterSelect]);
 
-    // 지구본 회전 감지
-    const handleZoomChange = useCallback((pov: any) => {
-      if (pov && typeof pov.lat === "number" && typeof pov.lng === "number") {
-        handleGlobeRotation(pov.lat, pov.lng);
+    // 줌 변경 핸들러
+    const handleZoomChangeInternal = useCallback((pov: any) => {
+      if (pov && typeof pov.altitude === "number") {
+        let newZoom = pov.altitude;
+
+        // 줌 범위 제한
+        if (newZoom < GLOBE_CONFIG.MIN_ZOOM) {
+          newZoom = GLOBE_CONFIG.MIN_ZOOM;
+          if (globeRef.current) {
+            globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MIN_ZOOM }, 0);
+          }
+        } else if (newZoom > GLOBE_CONFIG.MAX_ZOOM) {
+          newZoom = GLOBE_CONFIG.MAX_ZOOM;
+          if (globeRef.current) {
+            globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MAX_ZOOM }, 0);
+          }
+        }
+
+        // 외부에서 스냅 지시가 있으면 해당 값으로 고정
+        if (typeof snapZoomTo === "number") {
+          newZoom = snapZoomTo;
+          if (globeRef.current) {
+            globeRef.current.pointOfView({ altitude: newZoom }, 0);
+          }
+        }
+
+        // 글로벌 줌 핸들러 호출
+        globalHandleZoomChange(newZoom);
+        onZoomChange?.(newZoom);
       }
-    }, [handleGlobeRotation]);
+    }, [globalHandleZoomChange, snapZoomTo, onZoomChange]);
 
     // 윈도우 리사이즈 감지
     useEffect(() => {
@@ -270,16 +319,16 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         atmosphereColor={COLORS.ATMOSPHERE}
         atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
         polygonsData={countriesData}
-        polygonCapColor={(feature: any) => getPolygonColor(feature, countries, getISOCode)}
+        polygonCapColor={(feature: any) => getPolygonColor(feature, currentPattern?.countries || [], getISOCode)}
         polygonSideColor={() => COLORS.POLYGON_SIDE}
         polygonStrokeColor={() => COLORS.POLYGON_STROKE}
         polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-        polygonLabel={(feature: any) => getPolygonLabel(feature, countries, getISOCode)}
+        polygonLabel={(feature: any) => getPolygonLabel(feature, currentPattern?.countries || [], getISOCode)}
         htmlElementsData={visibleItems}
         htmlElement={getHtmlElement}
         htmlAltitude={() => 0}
         enablePointerInteraction={true}
-        onZoom={handleZoomChange}
+        onZoom={handleZoomChangeInternal}
       />
     );
   },

@@ -3,9 +3,11 @@ import { useState } from "react";
 
 interface GlobeFooterProps {
   isZoomed: boolean;
+  onBackClick?: () => void;
+  showBackButton?: boolean;
 }
 
-export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
+export const GlobeFooter = ({ isZoomed, onBackClick, showBackButton = false }: GlobeFooterProps) => {
   const [open, setOpen] = useState<boolean>(false);
 
   return (
@@ -14,6 +16,18 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
       className={`px-4 pb-4 transition-opacity duration-500 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
       <div className="relative space-y-2 flex flex-col items-center">
+        {/* 돌아가기 버튼 - 줌인 상태이고 showBackButton이 true일 때만 표시 */}
+        {showBackButton && isZoomed && (
+          <div className="absolute top-0 left-0 right-0 flex justify-center opacity-100 transition-opacity duration-500 z-10">
+            <button
+              type="button"
+              onClick={onBackClick}
+              className="bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm hover:bg-black/70 transition-colors"
+            >
+              ← 돌아가기
+            </button>
+          </div>
+        )}
         <HeadlessToastProvider viewportClassName="absolute bottom-full left-0 right-0 translate-y-[-16px] w-full max-w-[400px] mx-auto bg-[#21272D] rounded-xl">
           <HeadlessToast
             open={open}
@@ -28,21 +42,26 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
           </HeadlessToast>
         </HeadlessToastProvider>
 
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="w-full max-w-[400px] text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
-        >
-          내 지구본 자랑하기
-        </button>
+        {/* 기본 버튼들 - 줌인 상태가 아닐 때만 표시 */}
+        {!isZoomed && (
+          <>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="w-full max-w-[400px] text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
+            >
+              내 지구본 자랑하기
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="w-full max-w-[400px] bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
-        >
-          홈으로 이동
-        </button>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="w-full max-w-[400px] bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
+            >
+              홈으로 이동
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

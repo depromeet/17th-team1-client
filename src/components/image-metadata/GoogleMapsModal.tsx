@@ -27,7 +27,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
   const [isSearching, setIsSearching] = useState(false);
   const [currentAddress, setCurrentAddress] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
+  const [_isHovering, setIsHovering] = useState(false);
 
   // 위치에서 주소 업데이트하는 함수
   const updateAddressFromLocation = (lat: number, lng: number) => {
@@ -46,7 +46,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
       (
         results: google.maps.places.PlaceResult[] | null,
         status: google.maps.places.PlacesServiceStatus,
-        pagination: google.maps.places.PlaceSearchPagination | null,
+        _pagination: google.maps.places.PlaceSearchPagination | null,
       ) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
           const nearestPlace = results[0];
@@ -130,7 +130,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
           (
             results: google.maps.places.PlaceResult[] | null,
             status: google.maps.places.PlacesServiceStatus,
-            pagination: google.maps.places.PlaceSearchPagination | null,
+            _pagination: google.maps.places.PlaceSearchPagination | null,
           ) => {
             if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
               const place = results[0];
@@ -159,7 +159,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
         (
           results: google.maps.places.PlaceResult[] | null,
           status: google.maps.places.PlacesServiceStatus,
-          pagination: google.maps.places.PlaceSearchPagination | null,
+          _pagination: google.maps.places.PlaceSearchPagination | null,
         ) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
             const place = results[0];
@@ -213,7 +213,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
     if (!isOpen) return;
 
     function waitForGoogleMaps() {
-      if (window.google && window.google.maps && window.google.maps.places) {
+      if (window.google?.maps?.places) {
         initMap();
       } else {
         setTimeout(waitForGoogleMaps, 200);
@@ -223,7 +223,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
     waitForGoogleMaps();
 
     return () => {};
-  }, [isOpen]);
+  }, [isOpen, initMap]);
 
   const initMap = () => {
     if (!mapRef.current || !imageMetadata?.location) return;
@@ -303,7 +303,7 @@ export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpda
       (
         results: google.maps.places.PlaceResult[] | null,
         status: google.maps.places.PlacesServiceStatus,
-        pagination: google.maps.places.PlaceSearchPagination | null,
+        _pagination: google.maps.places.PlaceSearchPagination | null,
       ) => {
         setIsSearching(false);
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {

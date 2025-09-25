@@ -10,7 +10,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null);
   const [zoomStack, setZoomStack] = useState<number[]>([]);
   const [snapZoomTo, setSnapZoomTo] = useState<number | null>(ZOOM_LEVELS.DEFAULT);
-  const [selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
+  const [_selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
 
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
@@ -43,9 +43,9 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   }, []);
 
   // 히스테리시스 임계값 (줌인/줌아웃 다르게)
-  const CITY_TO_COUNTRY_IN = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_IN; // 도시→나라 (줌인 시 진입 기준)
+  const _CITY_TO_COUNTRY_IN = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_IN; // 도시→나라 (줌인 시 진입 기준)
   const CITY_TO_COUNTRY_OUT = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_OUT; // 도시→나라 (줌아웃 시 이탈 기준)
-  const COUNTRY_TO_ROOT_IN = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_IN; // 나라→루트 (줌인 시 진입 기준)
+  const _COUNTRY_TO_ROOT_IN = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_IN; // 나라→루트 (줌인 시 진입 기준)
   const COUNTRY_TO_ROOT_OUT = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_OUT; // 나라→루트 (줌아웃 시 이탈 기준)
 
   const handleZoomChange = useCallback(
@@ -107,7 +107,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         return prev;
       });
     },
-    [selectedClusterData, zoomStack],
+    [selectedClusterData, zoomStack, CITY_TO_COUNTRY_OUT, COUNTRY_TO_ROOT_OUT],
   );
 
   // 클러스터 선택 핸들러

@@ -1,5 +1,3 @@
-import { COLORS } from "@/constants/globe";
-
 /**
  * 기획서에 맞는 새로운 클러스터 스타일
  * - 대륙 버블: 반투명 배경, 진한 획색 텍스트
@@ -12,7 +10,7 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
   const finalAngle = angleOffset;
 
   // 각도를 라디안으로 변환
-  const radians = (finalAngle * Math.PI) / 180;
+  const _radians = (finalAngle * Math.PI) / 180;
 
   // 45도 상단 각도 점선에 맞춘 x, y 좌표 계산 (대각선 끝점)
   const lineLength = distance * 0.7;

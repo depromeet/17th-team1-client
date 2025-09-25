@@ -77,5 +77,6 @@ export const useHtmlElements = ({
     selectedClusterData,
     clusteredData,
     currentPatternCountries,
+    prevZoomRef.current,
   ]);
 };

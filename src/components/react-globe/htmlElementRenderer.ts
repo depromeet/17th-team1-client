@@ -7,9 +7,12 @@
 
 // 라벨 위치 계산 함수 (클릭 기반 시스템용)
 export const calculateLabelPosition = (
+  // biome-ignore lint/suspicious/noExplicitAny: Globe.gl library type
   d: any,
+  // biome-ignore lint/suspicious/noExplicitAny: Globe.gl library type
   htmlElements: any[],
   _zoomLevel: number, // 사용하지 않음
+  // biome-ignore lint/suspicious/noExplicitAny: Globe.gl library type
   _globeRef: React.RefObject<any>, // 사용하지 않음
 ) => {
   // 단순히 ID를 기반으로 왼쪽/오른쪽 결정
@@ -29,6 +32,7 @@ export const calculateClampedDistance = (
   _angleOffset: number, // 사용하지 않음
   _currentPos: { x: number; y: number }, // 사용하지 않음
   _isCityLevel: boolean, // 사용하지 않음
+  // biome-ignore lint/suspicious/noExplicitAny: Globe.gl library type
   _globeRef: React.RefObject<any>, // 사용하지 않음
 ) => {
   // 단순히 고정 거리 반환
@@ -36,7 +40,12 @@ export const calculateClampedDistance = (
 };
 
 // 기획서에 맞는 개별 도시 HTML 생성
-export const createCityHTML = (styles: any, displayFlag: string, cityName: string) => {
+export const createCityHTML = (
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
+  styles: any,
+  displayFlag: string,
+  cityName: string,
+) => {
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
@@ -55,10 +64,11 @@ export const createCityHTML = (styles: any, displayFlag: string, cityName: strin
 
 // 기획서에 맞는 대륙 클러스터 HTML 생성 (국기 표시 안함)
 export const createContinentClusterHTML = (
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
   styles: any,
   continentName: string,
-  countryCount: number,
-  flagEmoji: string,
+  _countryCount: number,
+  _flagEmoji: string,
 ) => {
   return `
     <!-- 중심 dot -->
@@ -76,11 +86,12 @@ export const createContinentClusterHTML = (
 
 // 기획서에 맞는 국가 클러스터 HTML 생성
 export const createCountryClusterHTML = (
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
   styles: any,
   countryName: string,
   cityCount: number,
   flagEmoji: string,
-  isExpanded: boolean = false,
+  _isExpanded: boolean = false,
 ) => {
   return `
     <!-- 중심 dot -->
@@ -110,7 +121,10 @@ export const createCountryClusterHTML = (
 
 // 클러스터 클릭 핸들러 (대륙/국가 구분) - 개선된 버전
 export const createClusterClickHandler = (clusterId: string, onClusterClick: (clusterId: string) => void) => {
-  return (event: any) => {
+  return (
+    // biome-ignore lint/suspicious/noExplicitAny: Event handler type
+    event: any,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -121,7 +135,10 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 
 // 도시 클릭 핸들러 (기존 로직 유지)
 export const createCityClickHandler = (cityName: string) => {
-  return (event: any) => {
+  return (
+    // biome-ignore lint/suspicious/noExplicitAny: Event handler type
+    event: any,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 

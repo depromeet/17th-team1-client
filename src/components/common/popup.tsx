@@ -30,7 +30,7 @@ export const Popup = ({
   VariantProps<typeof popupVariants> & {
     asChild?: boolean;
   }) => {
-  const Comp: any = asChild ? Slot : "div";
+  const Comp = asChild ? Slot : "div";
 
   return <Comp data-slot="popup" className={cn(popupVariants({ variant, size, className }))} {...props} />;
 };

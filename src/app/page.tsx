@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const router = useRouter();
   // TODO: API 연동 시 실제 hasGlobe 상태를 가져오는 로직으로 변경
-  const [hasGlobe, setHasGlobe] = useState(true);
+  const [hasGlobe, _setHasGlobe] = useState(true);
 
   useEffect(() => {
     if (hasGlobe) {

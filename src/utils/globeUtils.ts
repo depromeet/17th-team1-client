@@ -13,8 +13,15 @@ export const calculateDottedLine = (offsetX: number = LABEL_OFFSET.X, offsetY: n
 };
 
 // 폴리곤 색상 계산
-export const getPolygonColor = (feature: any, countries: any[], getISOCode: (id: string) => string) => {
+export const getPolygonColor = (
+  // biome-ignore lint/suspicious/noExplicitAny: GeoJSON feature type
+  feature: any,
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
+  countries: any[],
+  getISOCode: (id: string) => string,
+) => {
   const isoCode = feature.id;
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
 
   // 여행 데이터가 없는 국가는 비활성 색상
@@ -23,6 +30,7 @@ export const getPolygonColor = (feature: any, countries: any[], getISOCode: (id:
   // 여행 데이터가 있는 국가는 globe 레벨 색상 적용
   // 해당 국가의 도시 수 계산
   const countryCode = getISOCode(countryData.id);
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   const cityCount = countries.filter((c: any) => getISOCode(c.id) === countryCode).length;
 
   if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상: 가장 밝은 파란색
@@ -31,8 +39,15 @@ export const getPolygonColor = (feature: any, countries: any[], getISOCode: (id:
 };
 
 // 폴리곤 레이블 생성
-export const getPolygonLabel = (feature: any, countries: any[], getISOCode: (id: string) => string): string => {
+export const getPolygonLabel = (
+  // biome-ignore lint/suspicious/noExplicitAny: GeoJSON feature type
+  feature: any,
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
+  countries: any[],
+  getISOCode: (id: string) => string,
+): string => {
   const isoCode = feature.properties?.ISO_A3 || feature.id;
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
   return countryData ? `${countryData.flag} ${countryData.name}` : "";
 };

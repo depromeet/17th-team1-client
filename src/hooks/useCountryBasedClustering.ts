@@ -15,7 +15,7 @@ import {
   createZoomChangeHandler,
 } from "./clustering/clusterHandlers";
 import { clusterLocations, getClusterDistance } from "./clustering/clusterLogic";
-import { safeCallback, withErrorHandling } from "./clustering/errorHandling";
+import { withErrorHandling } from "./clustering/errorHandling";
 import type { ClusterData, ClusteringState, CountryData, UseCountryBasedClusteringProps } from "./clustering/types";
 
 export const useCountryBasedClustering = ({
@@ -81,29 +81,13 @@ export const useCountryBasedClustering = ({
 
   // 핸들러 생성 - 기획 요구사항에 맞게 업데이트
   const handleClusterSelect = useCallback(
-    createClusterSelectHandler(
-      setState,
-      setZoomStack,
-      setSelectionStack,
-      setLastRotation,
-      zoomLevel,
-      selectedClusterData,
-      // 대률 클릭 시 줌인 함수 없음 - 내부에서 처리
-    ),
-    [zoomLevel, selectedClusterData],
+    createClusterSelectHandler(setState, setSelectionStack, setLastRotation, selectedClusterData),
+    [],
   );
 
   const handleZoomChange = useCallback(
-    createZoomChangeHandler(
-      setState,
-      setZoomStack,
-      setSelectionStack,
-      zoomLevel,
-      zoomStack,
-      selectedClusterData,
-      state.mode,
-    ),
-    [zoomLevel, zoomStack, selectedClusterData, state.mode],
+    createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode),
+    [],
   );
 
   const handleGlobeRotation = useCallback(
@@ -116,7 +100,7 @@ export const useCountryBasedClustering = ({
       lastRotation,
       selectionStack.length,
     ),
-    [state.mode, state.selectedCluster, lastRotation, selectionStack.length],
+    [],
   );
 
   const resetGlobe = useCallback(() => {

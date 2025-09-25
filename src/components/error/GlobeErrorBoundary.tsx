@@ -24,6 +24,7 @@ const GlobeErrorFallback: React.FC<GlobeErrorFallbackProps> = ({ error, retry })
           {isNetworkError ? "인터넷 연결을 확인하고 다시 시도해 주세요" : "일시적인 문제가 발생했습니다"}
         </p>
         <button
+          type="button"
           onClick={retry}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium transition-colors"
         >

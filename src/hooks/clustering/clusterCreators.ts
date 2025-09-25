@@ -18,7 +18,7 @@ export const createContinentClusters = (locations: CountryData[]): ClusterData[]
     if (!continentGroups.has(continent)) {
       continentGroups.set(continent, []);
     }
-    continentGroups.get(continent)!.push(location);
+    continentGroups.get(continent)?.push(location);
   });
 
   // 각 대륙을 하나의 클러스터로 생성
@@ -52,7 +52,7 @@ export const createCountryClusters = (locations: CountryData[]): ClusterData[] =
     if (!countryGroups.has(countryId)) {
       countryGroups.set(countryId, []);
     }
-    countryGroups.get(countryId)!.push(location);
+    countryGroups.get(countryId)?.push(location);
   });
 
   // 각 국가를 하나의 클러스터로 생성
@@ -60,7 +60,7 @@ export const createCountryClusters = (locations: CountryData[]): ClusterData[] =
     const centerLat = items.reduce((sum, item) => sum + item.lat, 0) / items.length;
     const centerLng = items.reduce((sum, item) => sum + item.lng, 0) / items.length;
     const countryName = getCountryName(countryId);
-    const cityCount = items.length;
+    const _cityCount = items.length;
 
     return {
       id: `country_${countryId}`,

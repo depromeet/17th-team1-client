@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     );
     const data = await response.json();
     return NextResponse.json({ results: data.results });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: "Geocoding failed" }, { status: 500 });
   }
 }

@@ -73,6 +73,7 @@ const DefaultErrorFallback: React.FC<{ error?: Error; retry: () => void }> = ({ 
         </details>
       )}
       <button
+        type="button"
         onClick={retry}
         className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition-colors"
       >

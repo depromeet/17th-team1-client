@@ -351,28 +351,38 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     }
 
     return (
-      <Globe
-        ref={globeRef as any}
-        width={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
-        height={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
-        backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl={globeImageUrl}
-        showAtmosphere={true}
-        atmosphereColor={COLORS.ATMOSPHERE}
-        atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
-        polygonsData={countriesData}
-        polygonCapColor={(feature: any) => getPolygonColor(feature, currentPattern?.countries || [], getISOCode)}
-        polygonSideColor={() => COLORS.POLYGON_SIDE}
-        polygonStrokeColor={() => COLORS.POLYGON_STROKE}
-        polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-        polygonLabel={(feature: any) => getPolygonLabel(feature, currentPattern?.countries || [], getISOCode)}
-        htmlElementsData={visibleItems}
-        htmlElement={getHtmlElement}
-        htmlAltitude={() => 0}
-        enablePointerInteraction={true}
-        onZoom={handleZoomChangeInternal}
-        // 지구본 회전 감지도 여기서 처리됨
-      />
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Globe
+          ref={globeRef as any}
+          width={Math.max(GLOBE_SIZE_LIMITS.MIN_WIDTH, windowSize.width)}
+          height={GLOBE_SIZE_LIMITS.MIN_WIDTH}
+          backgroundColor="rgba(0,0,0,0)"
+          globeImageUrl={globeImageUrl}
+          showAtmosphere={true}
+          atmosphereColor={COLORS.ATMOSPHERE}
+          atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
+          polygonsData={countriesData}
+          polygonCapColor={(feature: any) => getPolygonColor(feature, currentPattern?.countries || [], getISOCode)}
+          polygonSideColor={() => COLORS.POLYGON_SIDE}
+          polygonStrokeColor={() => COLORS.POLYGON_STROKE}
+          polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
+          polygonLabel={(feature: any) => getPolygonLabel(feature, currentPattern?.countries || [], getISOCode)}
+          htmlElementsData={visibleItems}
+          htmlElement={getHtmlElement}
+          htmlAltitude={() => 0}
+          enablePointerInteraction={true}
+          onZoom={handleZoomChangeInternal}
+          // 지구본 회전 감지도 여기서 처리됨
+        />
+      </div>
     );
   },
 );

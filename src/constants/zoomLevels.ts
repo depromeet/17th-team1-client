@@ -68,7 +68,7 @@ export const VIEWPORT_DEFAULTS = {
 
 // Globe 컴포넌트 크기 제한
 export const GLOBE_SIZE_LIMITS = {
-  MAX_WIDTH: 512, // Globe 최대 너비 (성능 최적화)
+  MIN_WIDTH: 512, // Globe 최소 너비 (모바일 대응)
   MAX_HEIGHT: 800, // Globe 최대 높이 (성능 최적화)
 } as const;
 // 대륙 클러스터링 관련 상수

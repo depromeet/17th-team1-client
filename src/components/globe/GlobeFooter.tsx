@@ -11,7 +11,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
   return (
     <div
       aria-hidden={isZoomed}
-      className={`px-4 pb-4 transition-opacity duration-500 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`px-4 pb-4 transition-opacity duration-500 min-w-[512px] mx-auto ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
       <div className="space-y-2 flex flex-col items-center">
         <HeadlessToastProvider viewportClassName="absolute bottom-full left-0 right-0 translate-y-[-16px] w-full max-w-[400px] mx-auto bg-[#21272D] rounded-xl">

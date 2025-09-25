@@ -36,24 +36,28 @@ const GlobePrototype = () => {
 
   return (
     <div
-      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary flex flex-col relative font-sans px-4"
+      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary relative font-sans"
       style={{
         height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
       }}
     >
-      {/* 상단 헤더 */}
-      <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} />
+      {/* 상단 헤더 - position absolute */}
+      <div className="absolute top-0 left-0 right-0 z-10 px-4">
+        <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} />
+      </div>
 
-      {/* Country Based Globe 컴포넌트 */}
-      <div className="flex-1 flex items-center justify-center relative max-w-[512px] mx-auto w-full">
+      {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
+      <div className="w-full h-full relative">
         {/* 패턴 선택 버튼들 - 테스트용 */}
-        <PatternSelector
-          patterns={travelPatterns}
-          currentIndex={currentGlobeIndex}
-          onPatternChange={handlePatternChange}
-        />
+        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-10 max-w-[512px] mx-auto">
+          <PatternSelector
+            patterns={travelPatterns}
+            currentIndex={currentGlobeIndex}
+            onPatternChange={handlePatternChange}
+          />
+        </div>
 
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full">
           <CountryBasedGlobe
             ref={globeRef}
             travelPatterns={travelPatterns}
@@ -65,8 +69,10 @@ const GlobePrototype = () => {
         </div>
       </div>
 
-      {/* 하단 버튼들 */}
-      <GlobeFooter isZoomed={isZoomed} />
+      {/* 하단 버튼들 - position absolute */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-4">
+        <GlobeFooter isZoomed={isZoomed} />
+      </div>
 
       {/* 돌아가기 버튼 */}
       <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />

@@ -6,10 +6,10 @@
 // 기본 줌 레벨
 export const ZOOM_LEVELS = {
   // 초기/기본 줌 레벨
-  DEFAULT: 2.5,
+  DEFAULT: 7,
 
   // 줌 상태 판단 기준
-  ZOOM_THRESHOLD: 2.4, // 이보다 작으면 줌인된 상태
+  ZOOM_THRESHOLD: 4, // 이보다 작으면 줌인된 상태
 
   // 클러스터링 거리 계산용 줌 레벨
   CLUSTERING: {

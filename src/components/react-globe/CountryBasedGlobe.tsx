@@ -362,8 +362,8 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       >
         <Globe
           ref={globeRef as any}
-          width={Math.max(GLOBE_SIZE_LIMITS.MIN_WIDTH, windowSize.width)}
-          height={GLOBE_SIZE_LIMITS.MIN_WIDTH}
+          width={windowSize.width}
+          height={Math.min(512, windowSize.width)}
           backgroundColor="rgba(0,0,0,0)"
           globeImageUrl={globeImageUrl}
           showAtmosphere={true}

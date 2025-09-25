@@ -11,9 +11,9 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
   return (
     <div
       aria-hidden={isZoomed}
-      className={`px-4 pb-4 transition-opacity duration-500 min-w-[512px] mx-auto ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`px-4 pb-4 transition-opacity duration-500 w-full max-w-[512px] mx-auto ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
-      <div className="space-y-2 flex flex-col items-center">
+      <div className="space-y-2">
         <HeadlessToastProvider viewportClassName="absolute bottom-full left-0 right-0 translate-y-[-16px] w-full max-w-[400px] mx-auto bg-[#21272D] rounded-xl">
           <HeadlessToast
             open={open}
@@ -29,11 +29,11 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
         </HeadlessToastProvider>
 
         {/* 기본 버튼들 - opacity로 제어하여 layout shift 방지 */}
-        <div className="w-full">
+        <div className="max-w-[400px] mx-auto space-y-2">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="w-full max-w-[400px] text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
+            className="w-full text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
           >
             내 지구본 자랑하기
           </button>
@@ -41,7 +41,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="w-full max-w-[400px] bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
+            className="w-full bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
           >
             홈으로 이동
           </button>

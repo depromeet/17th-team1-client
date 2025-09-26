@@ -67,7 +67,6 @@ export const createGlobeRotationHandler = (
   mode: string,
   selectedCluster: string | null,
   lastRotation: { lat: number; lng: number },
-  selectionStackLength: number,
   isZoomAnimating: boolean, // 줌 애니메이션 상태 추가
 ) => {
   return (lat: number, lng: number) => {
@@ -92,10 +91,8 @@ export const createGlobeRotationHandler = (
             lastInteraction: Date.now(),
           }));
 
-          // 선택 스택을 한 단계 복원
-          if (selectionStackLength > 0) {
-            setSelectionStack((stack) => stack.slice(0, -1));
-          }
+          // 선택 스택을 완전히 초기화하여 전체 패턴 데이터 표시
+          setSelectionStack([]);
         }, AUTO_CLUSTER_DELAY);
 
         // 회전 위치 업데이트

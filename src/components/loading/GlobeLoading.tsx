@@ -52,7 +52,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
         >
           {/* Globe Image */}
           <div className="relative w-full h-full rounded-full overflow-hidden">
-            <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
+            {/* <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" /> */}
           </div>
         </div>
       </div>

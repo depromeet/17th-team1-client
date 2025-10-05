@@ -1,4 +1,4 @@
-import ImageMetadata from "@/components/image-metadata/ImageMetadata";
+import ImageMetadata from "@/components/imageMetadata/ImageMetadata";
 
 type PageProps = {
   searchParams: Promise<{ city?: string }>;

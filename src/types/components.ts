@@ -26,8 +26,8 @@ export type SearchProps = {
   onSearchChange: (value: string) => void;
 };
 
-// 페이지 Props 패턴
+// 페이지 Props 패턴 (Next.js 15+)
 export type PageProps = {
-  params?: Record<string, string>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  params?: Promise<Record<string, string>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };

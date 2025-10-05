@@ -1,4 +1,4 @@
-import { SearchInput } from "@/components/common/input";
+import { SearchInput } from "@/components/common/Input";
 import type { SearchProps } from "@/types/components";
 
 type NationSelectHeaderProps = SearchProps;

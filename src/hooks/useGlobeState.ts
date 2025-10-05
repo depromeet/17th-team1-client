@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
-import type { ClusterData } from "@/hooks/useCountryBasedClustering";
+import type { ClusterData } from "@/hooks/useClustering";
 import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {

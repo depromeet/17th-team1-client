@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Chip } from "@/components/common/chip";
+import { Chip } from "@/components/common/Chip";
 import type { City } from "@/types/city";
 
 type SelectedCitiesProps = {

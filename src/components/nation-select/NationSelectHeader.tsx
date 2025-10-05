@@ -1,9 +1,7 @@
 import { SearchInput } from "@/components/common/input";
+import type { SearchProps } from "@/types/components";
 
-interface NationSelectHeaderProps {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-}
+type NationSelectHeaderProps = SearchProps;
 
 export const NationSelectHeader = ({ searchValue, onSearchChange }: NationSelectHeaderProps) => {
   return (

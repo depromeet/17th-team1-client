@@ -1,63 +1,32 @@
 "use client";
 
-import React from "react";
+import type React from "react";
+import { type FallbackProps, ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-  errorInfo?: React.ErrorInfo;
-}
-
-interface ErrorBoundaryProps {
+export type ErrorBoundaryProps = {
   children: React.ReactNode;
-  fallback?: React.ComponentType<{ error?: Error; retry: () => void }>;
-}
+  fallback?: React.ComponentType<FallbackProps>;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+};
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return {
-      hasError: true,
-      error,
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({
-      error,
-      errorInfo,
-    });
-
+export const ErrorBoundary = ({ children, fallback, onError }: ErrorBoundaryProps) => {
+  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
     // 에러 로깅 (개발 환경에서만)
     if (process.env.NODE_ENV === "development") {
       console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
-  }
-
-  retry = () => {
-    this.setState({
-      hasError: false,
-      error: undefined,
-      errorInfo: undefined,
-    });
+    onError?.(error, errorInfo);
   };
 
-  render() {
-    if (this.state.hasError) {
-      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      return <FallbackComponent error={this.state.error} retry={this.retry} />;
-    }
-
-    return this.props.children;
-  }
-}
+  return (
+    <ReactErrorBoundary FallbackComponent={fallback || DefaultErrorFallback} onError={handleError}>
+      {children}
+    </ReactErrorBoundary>
+  );
+};
 
 // 기본 에러 폴백 컴포넌트
-const DefaultErrorFallback: React.FC<{ error?: Error; retry: () => void }> = ({ error, retry }) => {
+export const DefaultErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
   return (
     <div className="min-h-[400px] bg-black text-white flex flex-col items-center justify-center p-8 rounded-2xl border border-gray-800">
       <div className="text-6xl mb-4">⚠️</div>
@@ -74,7 +43,7 @@ const DefaultErrorFallback: React.FC<{ error?: Error; retry: () => void }> = ({ 
       )}
       <button
         type="button"
-        onClick={retry}
+        onClick={resetErrorBoundary}
         className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition-colors"
       >
         다시 시도
@@ -82,5 +51,3 @@ const DefaultErrorFallback: React.FC<{ error?: Error; retry: () => void }> = ({ 
     </div>
   );
 };
-
-export { ErrorBoundary, DefaultErrorFallback };

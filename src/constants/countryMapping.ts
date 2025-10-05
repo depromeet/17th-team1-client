@@ -1,7 +1,6 @@
+import type { KoreanContinent } from "../types/geography";
 import { generateCountriesByContinent } from "../utils/countryDataGenerator";
 import { buildAlpha3ToFlagMap } from "../utils/flagEmoji";
-
-type KoreanContinent = "아시아" | "유럽" | "북아메리카" | "남아메리카" | "오세아니아" | "아프리카";
 
 // 전 세계 ISO 3166-1 alpha-3 기준으로 대륙별 매핑 데이터
 export const COUNTRIES_BY_CONTINENT: Record<KoreanContinent, Record<string, string>> = generateCountriesByContinent();

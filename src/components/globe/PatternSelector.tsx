@@ -1,10 +1,10 @@
 import type { TravelPattern } from "@/types/travelPatterns";
 
-interface PatternSelectorProps {
+type PatternSelectorProps = {
   patterns: TravelPattern[];
   currentIndex: number;
   onPatternChange: (index: number) => void;
-}
+};
 
 export const PatternSelector = ({ patterns, currentIndex, onPatternChange }: PatternSelectorProps) => {
   return (

@@ -2,11 +2,11 @@ import { Button } from "@/components/common/button";
 import type { City } from "@/types/city";
 import { SelectedCities } from "./SelectedCities";
 
-interface NationSelectFooterProps {
+type NationSelectFooterProps = {
   selectedCities: City[];
   onRemoveCity: (cityId: string) => void;
   onCreateGlobe: () => void;
-}
+};
 
 export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe }: NationSelectFooterProps) => {
   const isButtonEnabled = selectedCities.length > 0;

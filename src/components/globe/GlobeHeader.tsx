@@ -1,9 +1,9 @@
-interface GlobeHeaderProps {
+type GlobeHeaderProps = {
   isZoomed: boolean;
   travelInsight?: string;
   cityCount?: number;
   countryCount?: number;
-}
+};
 
 // 마크다운 문법 제거 함수
 const removeMarkdown = (text?: string) => {

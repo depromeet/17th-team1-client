@@ -30,6 +30,7 @@
     "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-error-boundary": "^6.0.0",
     "react-globe.gl": "^2.36.0",
     "react-hot-toast": "^2.6.0",
     "tailwind-merge": "^3.3.1",

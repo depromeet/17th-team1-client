@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 import { Chip } from "@/components/common/chip";
 import type { City } from "@/types/city";
 
-interface SelectedCitiesProps {
+type SelectedCitiesProps = {
   selectedCities: City[];
   onRemoveCity: (cityId: string) => void;
-}
+};
 
 export const SelectedCities = ({ selectedCities, onRemoveCity }: SelectedCitiesProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

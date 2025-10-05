@@ -2,13 +2,13 @@ import { CloseIcon, PlusIcon } from "@/assets/icons";
 import { Button } from "@/components/common/button";
 import type { City } from "@/types/city";
 
-interface CityItemProps {
+type CityItemProps = {
   city: City;
   isSelected: boolean;
   onAdd: (city: City) => void;
   onRemove: (cityId: string) => void;
   showDivider?: boolean;
-}
+};
 
 export const CityItem = ({ city, isSelected, onAdd, onRemove, showDivider }: CityItemProps) => {
   const handleClick = () => {

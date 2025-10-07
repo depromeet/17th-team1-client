@@ -27,6 +27,10 @@
       },
       "correctness": {
         "noUnusedImports": "error"
+      },
+      "style": {
+        "useConst": "error",
+        "noNegationElse": "warn"
       }
     }
   },

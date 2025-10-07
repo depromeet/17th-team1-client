@@ -534,15 +534,16 @@ export const useClustering = ({
   const visibleItems = useMemo(() => clusteredData, [clusteredData]);
 
   // 핸들러 생성
+  // biome-ignore lint/correctness/useExhaustiveDependencies: setState는 안정적인 함수이므로 의존성에서 제외
   const handleClusterSelect = useCallback(
     createClusterSelectHandler(setState, setSelectionStack, setLastRotation, selectedClusterData),
-    [],
+    [selectedClusterData],
   );
 
-  const handleZoomChange = useCallback(
-    createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode),
-    [],
-  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: setState는 안정적인 함수이므로 의존성에서 제외
+  const handleZoomChange = useCallback(createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode), [
+    state.mode,
+  ]);
 
   const handleGlobeRotation = useCallback(
     (lat: number, lng: number) => {

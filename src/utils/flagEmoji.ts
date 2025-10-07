@@ -1,9 +1,5 @@
 import worldCountries from "world-countries";
-
-type WorldCountry = {
-  cca2?: string;
-  cca3: string;
-};
+import type { WorldCountry } from "../types/geography";
 
 // A-Z를 지역 표시 문자로 변환하여 국기 이모지 생성
 export const alpha2ToFlagEmoji = (alpha2: string): string => {

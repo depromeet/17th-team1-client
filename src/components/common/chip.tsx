@@ -24,12 +24,13 @@ export const chipVariants = cva(
   },
 );
 
-export interface ChipProps extends React.ComponentProps<"div">, VariantProps<typeof chipVariants> {
-  asChild?: boolean;
-  onRemove?: () => void;
-  removable?: boolean;
-  icon?: React.ReactNode;
-}
+export type ChipProps = React.ComponentProps<"div"> &
+  VariantProps<typeof chipVariants> & {
+    asChild?: boolean;
+    onRemove?: () => void;
+    removable?: boolean;
+    icon?: React.ReactNode;
+  };
 
 export const Chip = ({
   className,

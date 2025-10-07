@@ -1,14 +1,5 @@
 import worldCountries from "world-countries";
-
-type WorldCountry = {
-  cca3: string;
-  region?: string;
-  subregion?: string;
-  name?: { common?: string };
-  translations?: { [key: string]: { common?: string } };
-};
-
-type KoreanContinent = "아시아" | "유럽" | "북아메리카" | "남아메리카" | "오세아니아" | "아프리카";
+import type { KoreanContinent, WorldCountry } from "../types/geography";
 
 const englishRegionToKorean = (region?: string, subregion?: string): KoreanContinent | "기타" => {
   if (region === "Asia") return "아시아";

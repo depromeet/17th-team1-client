@@ -4,7 +4,7 @@ import { useId } from "react";
 import type { City } from "@/types/city";
 import { CityItem } from "./CityItem";
 
-interface PopularCitiesListProps {
+type PopularCitiesListProps = {
   cities: City[];
   selectedCityIds: Set<string>;
   onAddCity: (city: City) => void;
@@ -12,7 +12,7 @@ interface PopularCitiesListProps {
   isLoading?: boolean;
   isSearching?: boolean;
   hasSearched?: boolean;
-}
+};
 
 export const PopularCitiesList = ({
   cities,

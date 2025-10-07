@@ -40,13 +40,13 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
   const handleClear = () => {
     if (onChange) {
       const event = {
-        target: { value: "" }
+        target: { value: "" },
       } as React.ChangeEvent<HTMLInputElement>;
       onChange(event);
     }
   };
 
-  const hasValue = typeof value === 'string' && value.length > 0;
+  const hasValue = typeof value === "string" && value.length > 0;
 
   return (
     <div className={cn("relative", className)}>

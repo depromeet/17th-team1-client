@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ImageMetadata } from "@/types/imageMetadata";
 
-interface GoogleMapsModalProps {
+type GoogleMapsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   imageMetadata: ImageMetadata | null;
   onLocationUpdate: (lat: number, lng: number, address: string) => void;
-}
+};
 
 // global 선언은 실제 window.google API 타입을 참조
 declare global {

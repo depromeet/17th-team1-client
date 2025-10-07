@@ -1,14 +1,13 @@
 "use client";
 
 import type React from "react";
+import type { ErrorFallbackProps } from "@/types/components";
+import type { ErrorBoundaryProps } from "./ErrorBoundary";
 import { ErrorBoundary } from "./ErrorBoundary";
 
-interface GlobeErrorFallbackProps {
-  error?: Error;
-  retry: () => void;
-}
+type GlobeErrorFallbackProps = ErrorFallbackProps;
 
-const GlobeErrorFallback: React.FC<GlobeErrorFallbackProps> = ({ error, retry }) => {
+const GlobeErrorFallback: React.FC<GlobeErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   const isNetworkError =
     error?.message.includes("fetch") || error?.message.includes("network") || error?.message.includes("HTTP error");
 
@@ -25,7 +24,7 @@ const GlobeErrorFallback: React.FC<GlobeErrorFallbackProps> = ({ error, retry })
         </p>
         <button
           type="button"
-          onClick={retry}
+          onClick={resetErrorBoundary}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium transition-colors"
         >
           다시 시도
@@ -35,9 +34,7 @@ const GlobeErrorFallback: React.FC<GlobeErrorFallbackProps> = ({ error, retry })
   );
 };
 
-interface GlobeErrorBoundaryProps {
-  children: React.ReactNode;
-}
+type GlobeErrorBoundaryProps = ErrorBoundaryProps;
 
 export const GlobeErrorBoundary: React.FC<GlobeErrorBoundaryProps> = ({ children }) => {
   return <ErrorBoundary fallback={GlobeErrorFallback}>{children}</ErrorBoundary>;

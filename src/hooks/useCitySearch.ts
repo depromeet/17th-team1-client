@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { searchCities } from "@/services/cityService";
 import type { City } from "@/types/city";
 
-interface UseCitySearchOptions {
+type UseCitySearchOptions = {
   debounceDelay?: number;
-}
+};
 
-interface UseCitySearchReturn {
+type UseCitySearchReturn = {
   searchResults: City[];
   isSearching: boolean;
   searchError: string | null;
@@ -14,7 +14,7 @@ interface UseCitySearchReturn {
   setSearchKeyword: (keyword: string) => void;
   clearSearch: () => void;
   hasSearched: boolean;
-}
+};
 
 export const useCitySearch = ({ debounceDelay = 500 }: UseCitySearchOptions = {}): UseCitySearchReturn => {
   const latestRequestIdRef = useRef(0);

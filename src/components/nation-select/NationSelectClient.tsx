@@ -9,9 +9,9 @@ import { NationSelectFooter } from "./NationSelectFooter";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
 
-interface NationSelectClientProps {
+type NationSelectClientProps = {
   initialCities: City[];
-}
+};
 
 export const NationSelectClient = ({ initialCities }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { ClusterData } from "@/types/globe";
 import type { CountryData } from "@/types/travelPatterns";
 
-interface UseHtmlElementsParams {
+type UseHtmlElementsParams = {
   isAnimating: boolean;
   displayPhase: "root" | "country" | "city";
   phaseTargetRef: React.MutableRefObject<"root" | "country" | "city" | null>;
@@ -11,7 +11,7 @@ interface UseHtmlElementsParams {
   selectedClusterData: ClusterData[] | null;
   clusteredData: ClusterData[];
   currentPatternCountries: CountryData[];
-}
+};
 
 export const useHtmlElements = ({
   isAnimating,

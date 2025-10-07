@@ -9,9 +9,9 @@ import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageMetadataHeader } from "./ImageMetadataHeader";
 import { LoadingOverlay } from "./LoadingOverlay";
 
-interface ImageMetadataProps {
+type ImageMetadataProps = {
   initialCity?: string;
-}
+};
 
 export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);

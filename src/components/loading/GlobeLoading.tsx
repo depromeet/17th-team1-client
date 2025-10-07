@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { LoadingProps } from "@/types/components";
 
-interface GlobeLoadingProps {
-  duration?: number; // 애니메이션 지속 시간 (ms)
-  onComplete?: () => void; // 로딩 완료 콜백
-}
+type GlobeLoadingProps = LoadingProps;
 
 export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps) => {
   const [progress, setProgress] = useState(1);

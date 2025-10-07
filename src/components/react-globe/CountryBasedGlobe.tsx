@@ -8,30 +8,13 @@ import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/const
 import { VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
 import { type ClusterData, useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
-import type { TravelPattern } from "@/types/travelPatterns";
-
-// 타입 정의
-interface PointOfView {
-  lat?: number;
-  lng?: number;
-  altitude?: number;
-}
-
-interface GeoJSONFeature {
-  properties: {
-    NAME?: string;
-    ISO_A2?: string;
-    [key: string]: unknown;
-  };
-  geometry: unknown;
-  type: string;
-}
-
 import {
   createContinentClusterStyles,
   createCountryClusterStyles,
   createSingleLabelStyles,
 } from "@/styles/globeStyles";
+import type { GeoJSONFeature, PointOfView } from "@/types/geography";
+import type { TravelPattern } from "@/types/travelPatterns";
 import { calculateAnimationDuration, calculateAutoFitCamera } from "@/utils/autoFitUtils";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/utils/globeUtils";
@@ -49,12 +32,12 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
 
-interface CountryBasedGlobeProps {
+type CountryBasedGlobeProps = {
   travelPatterns: TravelPattern[];
   currentGlobeIndex: number;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
-}
+};
 
 export interface CountryBasedGlobeRef {
   globeRef: React.RefObject<GlobeInstance | null>;

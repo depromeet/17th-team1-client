@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { GooglePlaceDetailsResponse, GooglePlacesNearbyResponse, PlaceWithDistance } from "@/types/google-places";
+import type { GooglePlaceDetailsResponse, GooglePlacesNearbyResponse, PlaceWithDistance } from "@/types/googlePlaces";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

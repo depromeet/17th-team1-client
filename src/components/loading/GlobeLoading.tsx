@@ -50,6 +50,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
         >
           {/* Globe Image */}
           <div className="relative w-full h-full rounded-full overflow-hidden">
+            {/* biome-ignore lint/performance/noImgElement: Loading screen visual, optimization not needed */}
             <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
           </div>
         </div>

@@ -1,10 +1,9 @@
-import ImageMetadata from "@/components/image-metadata/ImageMetadata";
+import ImageMetadata from "@/components/imageMetadata/ImageMetadata";
+import type { PageProps } from "@/types/components";
 
-type PageProps = {
-  searchParams: Promise<{ city?: string }>;
-};
+type ImageMetadataPageProps = PageProps<never, { city?: string }>;
 
-export default async function Page({ searchParams }: PageProps) {
+export default async function Page({ searchParams }: ImageMetadataPageProps) {
   const params = await searchParams;
-  return <ImageMetadata initialCity={params.city} />;
+  return <ImageMetadata initialCity={params?.city} />;
 }

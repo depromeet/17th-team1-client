@@ -27,7 +27,10 @@ export type SearchProps = {
 };
 
 // 페이지 Props 패턴
-export type PageProps = {
-  params?: Record<string, string>;
-  searchParams?: Record<string, string | string[] | undefined>;
+export type PageProps<
+  TParams = Record<string, string>,
+  TSearchParams = Record<string, string | string[] | undefined>,
+> = {
+  params?: Promise<TParams>;
+  searchParams?: Promise<TSearchParams>;
 };

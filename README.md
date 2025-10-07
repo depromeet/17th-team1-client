@@ -20,6 +20,27 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## HTTPS 개발 환경
+
+HTTPS가 필요한 기능을 개발할 때는 로컬 HTTPS 서버를 사용할 수 있습니다.
+
+### 초기 설정
+
+1. mkcert 설치 (Mac):
+```bash
+brew install mkcert
+```
+
+2. 로컬 CA 등록:
+```bash
+mkcert -install
+```
+
+### 실행 방법
+
+- 기본 (HTTP): `pnpm run dev`
+- HTTPS 버전: `pnpm run dev:https`
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

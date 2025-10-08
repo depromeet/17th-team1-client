@@ -139,6 +139,28 @@ pnpm ruler:apply
 - **이벤트 핸들러**: `handle[Action][Target]` 또는 `on[Action][Target]`
 - **Boolean 변수**: `is`, `has`, `should` 접두사
 
+## HTTPS 개발 환경
+
+HTTPS가 필요한 기능을 개발할 때는 로컬 HTTPS 서버를 사용할 수 있습니다.
+
+### 초기 설정
+
+1. mkcert 설치 (Mac):
+```bash
+brew install mkcert
+```
+
+2. 로컬 CA 등록:
+```bash
+mkcert -install
+```
+
+### 실행 방법
+
+- 기본 (HTTP): `pnpm run dev`
+- HTTPS 버전: `pnpm run dev:https`
+
+## Learn More
 자세한 내용은 [CONVENTIONS.md](.ruler/CONVENTIONS.md)를 참고하세요.
 
 ## Features

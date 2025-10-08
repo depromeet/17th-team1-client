@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 .serena
+certificates
 
 # START Ruler Generated Files
 /.cursor/rules/ruler_cursor_instructions.mdc

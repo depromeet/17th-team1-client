@@ -1,18 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
-import { ErrorContent } from "./ErrorContent";
 
 export default function ErrorPage() {
-  return (
-    <Suspense fallback={<ErrorFallback />}>
-      <ErrorContent />
-    </Suspense>
-  );
-}
-
-function ErrorFallback() {
   const router = useRouter();
 
   const handleRetry = () => {
@@ -42,7 +32,6 @@ function ErrorFallback() {
           <p className="text-gray-600 mb-6">로그인 중 오류가 발생했습니다.</p>
         </div>
 
-        {/* 액션 버튼들 */}
         <div className="space-y-3">
           <button
             type="button"

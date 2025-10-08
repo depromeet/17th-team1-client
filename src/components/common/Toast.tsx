@@ -3,11 +3,11 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
 import * as React from "react";
 
-export interface HeadlessToastProviderProps {
+export type HeadlessToastProviderProps = {
   children: React.ReactNode;
   /** 토스트들이 쌓이는 영역의 className (레이아웃/포지션 제어) */
   viewportClassName?: string;
-}
+};
 
 /**
  * Radix Toast Provider + Viewport 래퍼.
@@ -22,7 +22,7 @@ export function HeadlessToastProvider({ children, viewportClassName }: HeadlessT
   );
 }
 
-export interface HeadlessToastProps extends React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root> {
+export type HeadlessToastProps = React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root> & {
   /** 이모지 혹은 아이콘 노드 (예: "😥") */
   leading?: React.ReactNode;
   /** 본문 텍스트 노드 (리치 텍스트 가능) */
@@ -41,7 +41,7 @@ export interface HeadlessToastProps extends React.ComponentPropsWithoutRef<typeo
   defaultOpen?: boolean;
   /** 자동 닫힘 시간(ms) */
   duration?: number;
-}
+};
 
 /**
  * Headless Toast 컴포넌트

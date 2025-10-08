@@ -6,35 +6,17 @@ import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
 import { VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
-import { type ClusterData, useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
+import { type ClusterData, useClustering } from "@/hooks/useClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
-import type { TravelPattern } from "@/types/travelPatterns";
-
-// 타입 정의
-interface PointOfView {
-  lat?: number;
-  lng?: number;
-  altitude?: number;
-}
-
-interface GeoJSONFeature {
-  properties: {
-    NAME?: string;
-    ISO_A2?: string;
-    [key: string]: unknown;
-  };
-  geometry: unknown;
-  type: string;
-}
-
 import {
   createContinentClusterStyles,
   createCountryClusterStyles,
   createSingleLabelStyles,
 } from "@/styles/globeStyles";
+import type { GeoJSONFeature, PointOfView } from "@/types/geography";
+import type { TravelPattern } from "@/types/travelPatterns";
 import { calculateAnimationDuration, calculateAutoFitCamera } from "@/utils/autoFitUtils";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
-import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/utils/globeUtils";
 import {
   calculateClampedDistance,
   calculateLabelPosition,
@@ -43,25 +25,26 @@ import {
   createClusterClickHandler,
   createContinentClusterHTML,
   createCountryClusterHTML,
-} from "./htmlElementRenderer";
+} from "@/utils/globeRenderer";
+import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/utils/globeUtils";
 
-const Globe = dynamic(() => import("react-globe.gl"), {
+const GlobeComponent = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
 
-interface CountryBasedGlobeProps {
+type GlobeProps = {
   travelPatterns: TravelPattern[];
   currentGlobeIndex: number;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
-}
+};
 
-export interface CountryBasedGlobeRef {
+export interface GlobeRef {
   globeRef: React.RefObject<GlobeInstance | null>;
   resetGlobe: () => void;
 }
 
-const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProps>(
+const Globe = forwardRef<GlobeRef, GlobeProps>(
   ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
@@ -127,7 +110,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       handleClusterSelect: localHandleClusterSelect,
       handleGlobeRotation,
       resetGlobe: resetClustering,
-    } = useCountryBasedClustering({
+    } = useClustering({
       countries: currentPattern?.countries || [],
       zoomLevel,
       selectedClusterData: selectedClusterData || undefined,
@@ -140,7 +123,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       globeRef,
       resetGlobe: () => {
         resetGlobe(); // useGlobeState의 resetGlobe
-        resetClustering(); // useCountryBasedClustering의 resetGlobe
+        resetClustering(); // useClustering의 resetGlobe
       },
     }));
 
@@ -468,7 +451,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           justifyContent: "center",
         }}
       >
-        <Globe
+        <GlobeComponent
           ref={globeRef as React.RefObject<GlobeInstance>}
           width={windowSize.width}
           height={windowSize.height}
@@ -496,6 +479,6 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
   },
 );
 
-CountryBasedGlobe.displayName = "CountryBasedGlobe";
+Globe.displayName = "Globe";
 
-export default CountryBasedGlobe;
+export default Globe;

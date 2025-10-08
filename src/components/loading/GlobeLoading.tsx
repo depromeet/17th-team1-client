@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { LoadingProps } from "@/types/components";
 
-interface GlobeLoadingProps {
-  duration?: number; // 애니메이션 지속 시간 (ms)
-  onComplete?: () => void; // 로딩 완료 콜백
-}
+type GlobeLoadingProps = LoadingProps;
 
 export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps) => {
   const [progress, setProgress] = useState(1);
@@ -52,6 +50,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
         >
           {/* Globe Image */}
           <div className="relative w-full h-full rounded-full overflow-hidden">
+            {/* biome-ignore lint/performance/noImgElement: Loading screen visual, optimization not needed */}
             <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
           </div>
         </div>

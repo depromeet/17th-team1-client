@@ -2,27 +2,25 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { BackButton } from "@/components/common/button";
+import { BackButton } from "@/components/common/Button";
+import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 // Components
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
-import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
-// CountryBasedGlobe을 동적 import로 로드 (SSR 방지)
-const CountryBasedGlobe = dynamic(() => import("@/components/react-globe/CountryBasedGlobe"), {
+const Globe = dynamic(() => import("@/components/globe/Globe"), {
   ssr: false,
-  // loading: () => <div>🌍 지구본 생성 중...</div>,
   loading: () => <div></div>,
 });
 
 const GlobePrototype = () => {
-  const globeRef = useRef<CountryBasedGlobeRef>(null);
+  const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [travelInsight, setTravelInsight] = useState<string>("");
@@ -109,7 +107,7 @@ const GlobePrototype = () => {
       {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
       <div className="w-full h-full relative">
         <div className="w-full h-full">
-          <CountryBasedGlobe
+          <Globe
             ref={globeRef}
             travelPatterns={travelPatterns}
             currentGlobeIndex={0}

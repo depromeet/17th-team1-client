@@ -13,6 +13,7 @@
     "reporter": "biome check --reporter=summary",
     "ci": "biome ci",
     "tokens:build": "node scripts/build-tokens.js",
+    "ruler:apply": "pnpm exec ruler apply",
     "prepare": "husky"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-error-boundary": "^6.0.0",
     "react-globe.gl": "^2.36.0",
     "react-hot-toast": "^2.6.0",
     "tailwind-merge": "^3.3.1",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
+    "@intellectronica/ruler": "^0.3.10",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.83.1",

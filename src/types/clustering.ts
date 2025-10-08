@@ -36,7 +36,7 @@ export interface ClusteringState {
 
 import type { GlobeInstance } from "globe.gl";
 
-export interface UseCountryBasedClusteringProps {
+export interface UseClusteringProps {
   countries: CountryData[];
   zoomLevel: number;
   selectedClusterData?: CountryData[];

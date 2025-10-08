@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { HeadlessToast, HeadlessToastProvider } from "@/components/common/toast";
+import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
 
-interface GlobeFooterProps {
+type GlobeFooterProps = {
   isZoomed: boolean;
-}
+};
 
 export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
   const [open, setOpen] = useState<boolean>(false);

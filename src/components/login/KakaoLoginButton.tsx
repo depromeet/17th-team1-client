@@ -10,7 +10,7 @@ const KakaoLoginButton = () => {
   const handleLogin = () => {
     const redirectOrigin = env.REDIRECT_ORIGIN;
 
-    const url = "https://globber.store/oauth2/authorization/kakao";
+    const url = `${env.API_BASE_URL}/oauth2/authorization/kakao`;
     const finalUrl = `${url}?redirect=${encodeURIComponent(redirectOrigin)}`;
     router.push(finalUrl);
   };

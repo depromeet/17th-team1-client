@@ -24,28 +24,22 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const maxAgeSeconds = 60 * 60 * 24 * 7; // 7 days
 
-    // 토큰, 멤버 ID, UUID 모두 쿠키에 저장
-    cookieStore.set("kakao_access_token", cleanToken, {
+    // 로컬 환경에서는 domain을 설정하지 않음
+    const isLocalhost = env.REDIRECT_ORIGIN.includes("localhost");
+    const cookieOptions = {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
-      domain: ".globber-fe.store",
-    });
+      ...(isLocalhost ? {} : { domain: env.COOKIE_DOMAIN }),
+    };
 
-    cookieStore.set("member_id", memberId.toString(), {
-      path: "/",
-      maxAge: maxAgeSeconds,
-      httpOnly: false,
-      domain: ".globber-fe.store",
-    });
+    // 토큰, 멤버 ID, UUID 모두 쿠키에 저장
+    cookieStore.set("kakao_access_token", cleanToken, cookieOptions);
+
+    cookieStore.set("member_id", memberId.toString(), cookieOptions);
 
     if (uuid) {
-      cookieStore.set("uuid", uuid, {
-        path: "/",
-        maxAge: maxAgeSeconds,
-        httpOnly: false,
-        domain: ".globber-fe.store",
-      });
+      cookieStore.set("uuid", uuid, cookieOptions);
     }
 
     console.log(`멤버 ID 저장 완료: ${memberId}${uuid ? `, UUID: ${uuid}` : ""}`);
@@ -63,20 +57,19 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const maxAgeSeconds = 60 * 60 * 24 * 7;
 
-    cookieStore.set("kakao_access_token", cleanToken, {
+    // 로컬 환경에서는 domain을 설정하지 않음
+    const isLocalhost = env.REDIRECT_ORIGIN.includes("localhost");
+    const cookieOptions = {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
-      domain: ".globber-fe.store",
-    });
+      ...(isLocalhost ? {} : { domain: env.COOKIE_DOMAIN }),
+    };
+
+    cookieStore.set("kakao_access_token", cleanToken, cookieOptions);
 
     if (uuid) {
-      cookieStore.set("uuid", uuid, {
-        path: "/",
-        maxAge: maxAgeSeconds,
-        httpOnly: false,
-        domain: ".globber-fe.store",
-      });
+      cookieStore.set("uuid", uuid, cookieOptions);
     }
 
     if (firstLogin === "true") {

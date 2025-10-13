@@ -22,14 +22,18 @@ export const CityItem = ({ city, isSelected, onAdd, onRemove, showDivider }: Cit
   return (
     <div>
       <div className="flex items-center justify-between py-[18px]">
-        <span className={`font-medium ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}>
+        <button
+          type="button"
+          className={`font-medium cursor-pointer text-left ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}
+          onClick={handleClick}
+        >
           {city.flag} {city.name}, {city.country}
-        </span>
+        </button>
         <Button
           variant="gray"
           size="xs"
           onClick={handleClick}
-          className={`w-6 items-center justify-center ${isSelected ? "bg-transparent" : ""}`}
+          className={`w-6 cursor-pointer items-center justify-center ${isSelected ? "bg-transparent" : ""}`}
         >
           {isSelected ? <CloseIcon width={10} height={10} /> : <PlusIcon width={10} height={10} />}
         </Button>

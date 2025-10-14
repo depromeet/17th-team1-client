@@ -54,13 +54,12 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: jiohjung/globber-fe:latest
+          tags: jiohjung/globber-fe:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
             NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
             NEXT_PUBLIC_REDIRECT_ORIGIN=${{ secrets.NEXT_PUBLIC_REDIRECT_ORIGIN }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -78,7 +77,7 @@ jobs:
         run: |
           ssh jiohgpt@${{ secrets.GCP_VM_IP }} << EOF
             echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-            docker pull jiohjung/globber-fe:latest
+            docker pull jiohjung/globber-fe:${{ github.sha }}
             echo "Stopping container"
             docker stop globber-fe || true
             echo "Removing container"
@@ -97,7 +96,7 @@ jobs:
               -p 3000:80 \
               -e TZ=Asia/Seoul \
               -e GOOGLE_MAPS_SERVER_API_KEY=${{ secrets.GOOGLE_MAPS_SERVER_API_KEY }} \
-              jiohjung/globber-fe:latest
+              jiohjung/globber-fe:${{ github.sha }}
           EOF
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

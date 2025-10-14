@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
 
   const cleanToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
 
+  // 로컬 개발 환경 여부 (NODE_ENV 기반)
+  const isLocalDev = env.IS_LOCAL_DEV;
+
   try {
     // 멤버 ID 조회 API 호출
     const memberId = await getMemberId(cleanToken);
@@ -24,13 +27,11 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const maxAgeSeconds = 60 * 60 * 24 * 7; // 7 days
 
-    // 로컬 환경에서는 domain을 설정하지 않음
-    const isLocalhost = env.REDIRECT_ORIGIN.includes("localhost");
     const cookieOptions = {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
-      ...(isLocalhost ? {} : { domain: env.COOKIE_DOMAIN }),
+      ...(isLocalDev ? {} : { domain: env.COOKIE_DOMAIN }),
     };
 
     // 토큰, 멤버 ID, UUID 모두 쿠키에 저장
@@ -57,13 +58,11 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const maxAgeSeconds = 60 * 60 * 24 * 7;
 
-    // 로컬 환경에서는 domain을 설정하지 않음
-    const isLocalhost = env.REDIRECT_ORIGIN.includes("localhost");
     const cookieOptions = {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
-      ...(isLocalhost ? {} : { domain: env.COOKIE_DOMAIN }),
+      ...(isLocalDev ? {} : { domain: env.COOKIE_DOMAIN }),
     };
 
     cookieStore.set("kakao_access_token", cleanToken, cookieOptions);

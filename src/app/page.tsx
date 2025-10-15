@@ -13,7 +13,7 @@ export default async function Home() {
 
     try {
       // 멤버 여행 데이터 조회
-      travelData = await getMemberTravels(parseInt(memberId, 10), token);
+      travelData = await getMemberTravels(token);
     } catch {
       // API 호출 실패 시 국가 선택 페이지로 이동
       redirect("/nation-select");

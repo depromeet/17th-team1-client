@@ -22,7 +22,7 @@ export const getMemberId = async (token: string): Promise<number> => {
 };
 
 // 멤버 여행 데이터 조회 API
-export const getMemberTravels = async (memberId: number, token?: string): Promise<MemberTravelsResponse | null> => {
+export const getMemberTravels = async (token?: string): Promise<MemberTravelsResponse | null> => {
   try {
     // 서버 컴포넌트에서 호출 시 token을 파라미터로 전달
     let authToken = token;
@@ -34,8 +34,7 @@ export const getMemberTravels = async (memberId: number, token?: string): Promis
     }
 
     if (!authToken) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-
-    const data = await apiGet<MemberTravelsResponse>(`/api/v1/member-travels/${memberId}`, {}, authToken);
+    const data = await apiGet<MemberTravelsResponse>(`/api/v1/member-travels`, {}, authToken);
     return data;
   } catch (error) {
     console.error("Failed to fetch member travels:", error);
@@ -43,21 +42,23 @@ export const getMemberTravels = async (memberId: number, token?: string): Promis
   }
 };
 
+
 // 멤버 여행 기록 생성 API
 export const createMemberTravels = async (cities: City[]): Promise<CreateTravelRecordsResponse> => {
   try {
-    const { token, memberId } = getAuthInfo();
+    const { token } = getAuthInfo();
 
-    if (!token || !memberId) {
+    if (!token) {
       throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
     }
 
     const travelRecords = convertCitiesToTravelRecords(cities);
     const data = await apiPost<CreateTravelRecordsResponse>(
-      `/api/v1/member-travels/${parseInt(memberId, 10)}`,
+      `/api/v1/member-travels`,
       travelRecords,
-      token,
+      token
     );
+
     return data;
   } catch (error) {
     console.error("Failed to create member travels:", error);

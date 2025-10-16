@@ -23,8 +23,6 @@ export const PopularCitiesList = ({
   hasSearched = false,
 }: PopularCitiesListProps) => {
   const clipPathId = useId();
-  const selectedCities = cities.filter((city) => selectedCityIds.has(city.id));
-  const availableCities = cities.filter((city) => !selectedCityIds.has(city.id));
 
   if (isSearching) {
     return (
@@ -75,25 +73,14 @@ export const PopularCitiesList = ({
 
   return (
     <div className="space-y-0">
-      {selectedCities.map((city, index) => (
+      {cities.map((city, index) => (
         <CityItem
           key={city.id}
           city={city}
-          isSelected={true}
+          isSelected={selectedCityIds.has(city.id)}
           onAdd={onAddCity}
           onRemove={onRemoveCity}
-          showDivider={index < selectedCities.length - 1 || availableCities.length > 0}
-        />
-      ))}
-
-      {availableCities.map((city, index) => (
-        <CityItem
-          key={city.id}
-          city={city}
-          isSelected={false}
-          onAdd={onAddCity}
-          onRemove={onRemoveCity}
-          showDivider={index < availableCities.length - 1}
+          showDivider={index < cities.length - 1}
         />
       ))}
     </div>

@@ -41,9 +41,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   }, []);
 
   // 히스테리시스 임계값 (줌인/줌아웃 다르게)
-  const _CITY_TO_COUNTRY_IN = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_IN; // 도시→나라 (줌인 시 진입 기준)
   const CITY_TO_COUNTRY_OUT = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_OUT; // 도시→나라 (줌아웃 시 이탈 기준)
-  const _COUNTRY_TO_ROOT_IN = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_IN; // 나라→루트 (줌인 시 진입 기준)
   const COUNTRY_TO_ROOT_OUT = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_OUT; // 나라→루트 (줌아웃 시 이탈 기준)
 
   const handleZoomChange = useCallback(
@@ -59,17 +57,22 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         // 줌아웃 시작을 감지하면 직전 단계로 스냅
         if (rounded > prev + ZOOM_LEVELS.THRESHOLDS.ZOOM_DETECTION && zoomStack.length > 0) {
           const last = zoomStack[zoomStack.length - 1];
+
           setSnapZoomTo(last);
           setZoomStack((s) => s.slice(0, -1));
+
           // 선택 경로도 한 단계 상위로 복원
           setSelectionStack((stack) => {
             if (stack.length === 0) {
               setSelectedClusterData(null);
+
               return stack;
             }
             const newStack = stack.slice(0, -1);
             const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+
             setSelectedClusterData(parent || null);
+
             return newStack;
           });
           return prev;
@@ -89,9 +92,12 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
           if (prev <= CITY_TO_COUNTRY_OUT && rounded >= CITY_TO_COUNTRY_OUT) {
             setSelectionStack((stack) => {
               if (stack.length === 0) return stack;
+
               const newStack = stack.slice(0, -1);
               const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+
               setSelectedClusterData(parent || null);
+
               return newStack;
             });
           }

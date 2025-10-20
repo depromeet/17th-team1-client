@@ -67,6 +67,7 @@ const estimateBubbleWidth = (cluster: ClusterData): number => {
     const fontSize = 16;
     const textWidth = calculateDynamicTextWidth(cluster.name, fontSize);
     const padding = 16 * 2;
+
     return textWidth + flagWidth + padding + gap;
   }
 
@@ -76,6 +77,7 @@ const estimateBubbleWidth = (cluster: ClusterData): number => {
     const padding = 12 * 2;
     const countBadgeWidth = cluster.count > 1 ? 20 : 0;
     const badgeGap = cluster.count > 1 ? gap : 0;
+
     return textWidth + flagWidth + padding + countBadgeWidth + badgeGap;
   }
 
@@ -83,46 +85,13 @@ const estimateBubbleWidth = (cluster: ClusterData): number => {
   const fontSize = 15;
   const textWidth = calculateDynamicTextWidth(cluster.name, fontSize);
   const padding = 6 * 2;
+
   return textWidth + flagWidth + padding + gap;
 };
 
 // ============================================
 // 클러스터 생성 함수들
 // ============================================
-
-/**
- * 대륙별 클러스터링 - "유럽 +11" 형태
- */
-const _createContinentClusters = (locations: CountryData[]): ClusterData[] => {
-  const continentGroups = new Map<string, CountryData[]>();
-
-  locations.forEach((location) => {
-    const continent = getContinent(location.id);
-    if (!continentGroups.has(continent)) {
-      continentGroups.set(continent, []);
-    }
-    continentGroups.get(continent)?.push(location);
-  });
-
-  return Array.from(continentGroups.entries()).map(([continent, items]) => {
-    const centerLat = items.reduce((sum, item) => sum + item.lat, 0) / items.length;
-    const centerLng = items.reduce((sum, item) => sum + item.lng, 0) / items.length;
-    const countryIds = [...new Set(items.map((item) => item.id))];
-    const countryCount = countryIds.length;
-
-    return {
-      id: `continent_${continent}`,
-      name: countryCount > 1 ? `${continent} +${countryCount}` : continent,
-      flag: items[0].flag,
-      lat: centerLat,
-      lng: centerLng,
-      color: items[0].color,
-      items,
-      count: items.length,
-      clusterType: "continent_cluster" as const,
-    };
-  });
-};
 
 /**
  * 국가별 클러스터링 - "몽골 5", "터키에 5" 형태
@@ -279,7 +248,7 @@ const clusterLocations = (
       continentGroups.forEach((group, continent) => {
         if (group.length > 1) {
           const allItems = group.flatMap((cluster) => cluster.items);
-          const uniqueCountries = [...new Set(allItems.map((item) => item.id))];
+          const uniqueCountries = [...new Set(allItems.map(({ id }) => id))];
 
           let totalWeight = 0;
           let weightedLat = 0;
@@ -406,6 +375,7 @@ const createGlobeRotationHandler = (
 
       if (isRotated) {
         setTimeout(() => {
+          // 모드를 국가로 변경
           setState((prev) => ({
             ...prev,
             mode: "country",
@@ -415,6 +385,7 @@ const createGlobeRotationHandler = (
             lastInteraction: Date.now(),
           }));
 
+          // 선택 스택 되돌리기
           setSelectionStack((stack) => {
             const newStack = stack.length === 0 ? stack : stack.slice(0, -1);
 
@@ -522,6 +493,7 @@ export const useClustering = ({
       if (process.env.NODE_ENV === "development") {
         console.error("Clustering calculation failed:", error);
       }
+
       return [];
     }
   }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry, globeRef]);

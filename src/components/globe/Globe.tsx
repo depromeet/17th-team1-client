@@ -143,11 +143,14 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
 
           const countriesData = await response.json();
           console.log("countriesData", countriesData);
+
           const features = countriesData?.features || [];
+
           setCountriesData(features);
           setGlobeLoading(false);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
+
           setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
           setGlobeLoading(false);
           setCountriesData([]);
@@ -232,7 +235,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           );
 
           const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {
-            const cluster = clusteredData.find((c) => c.id === clusterId);
+            const cluster = clusteredData.find(({ id }) => id === clusterId);
             if (cluster && localHandleClusterSelect) {
               const clusterItems = localHandleClusterSelect(cluster);
               globalHandleClusterSelect({ ...cluster, items: clusterItems });
@@ -472,7 +475,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           htmlAltitude={() => 0}
           enablePointerInteraction={true}
           onZoom={handleZoomChangeInternal}
-          // 지구본 회전 감지도 여기서 처리됨
         />
       </div>
     );

@@ -29,8 +29,9 @@ export const CityItem = ({ city, isSelected, onAdd, onRemove, showDivider }: Cit
           {city.flag} {city.name}, {city.country}
         </span>
         <div
-          className={`inline-flex justify-center items-center rounded-md p-1 h-6 text-xs w-6 text-white ${isSelected ? "bg-transparent" : "bg-[#293949]"
-            }`}
+          className={`inline-flex justify-center items-center rounded-md p-1 h-6 text-xs w-6 text-white ${
+            isSelected ? "bg-transparent" : "bg-[#293949]"
+          }`}
         >
           {isSelected ? <CloseIcon width={10} height={10} /> : <PlusIcon width={10} height={10} />}
         </div>

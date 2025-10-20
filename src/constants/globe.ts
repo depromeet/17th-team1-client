@@ -36,14 +36,13 @@ export const COLORS = {
   ATMOSPHERE: "#4a90e2", // 대기권 색상 (파란색)
   CLUSTER: "#4a90e2", // 클러스터 마커 색상
   CLUSTER_BG: "#2c3e50", // 클러스터 배경 색상 (어두운 회색)
-  // POLYGON_SIDE: "rgba(100,100,100, 0.1)", // 폴리곤 측면 색상
-  // POLYGON_STROKE: "gray", // 국경선 색상 (흰색 10%와 유사)
   POLYGON_SIDE: "rgba(105,105,105, 0.1)", // 폴리곤 측면 색상 (dimgray와 동일한 색상)
-  POLYGON_STROKE: "dimgray", // 국경선 색상 (흰색 10%와 유사)
+  POLYGON_STROKE: "dimgray", // 국경선 색상
   INACTIVE_POLYGON: "#94cbff33", // 비활성 폴리곤 색상 (매우 연한 회색)
-  GLOBE_LV1: "#0084b0", // 지구본 레벨 1 색상
-  GLOBE_LV2: "#00caed", // 지구본 레벨 2 색상
-  GLOBE_LV3: "#67e8ff", // 지구본 레벨 3 색상
+  // Globe Leveling Color (디자인 시스템 기준)
+  GLOBE_LV1: "#0084B0", // Blue 200 - 1개 이상 도시
+  GLOBE_LV2: "#00CAED", // Blue 100 - 5개 이상 도시
+  GLOBE_LV3: "#67E8FF", // Blue 0 - 8개 이상 도시
   WHITE_LABEL: "rgba(255,255,255,0.8)", // 흰색 라벨 텍스트 색상
   WHITE_BORDER: "rgba(255,255,255,0.6)", // 흰색 테두리 색상
 } as const;

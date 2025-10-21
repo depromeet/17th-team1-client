@@ -1,52 +1,77 @@
 import { useState } from "react";
-import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
+import GlobeIcon from "@/assets/icons/globe.svg";
+import ListIcon from "@/assets/icons/list.svg";
+import PlusIcon from "@/assets/icons/plus.svg";
+import ShareIcon from "@/assets/icons/share.svg";
 
 type GlobeFooterProps = {
   isZoomed: boolean;
 };
 
 export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<"globe" | "list">("globe");
 
   return (
     <div
       aria-hidden={isZoomed}
-      className={`px-4 pb-4 transition-opacity duration-500 w-full max-w-[512px] mx-auto ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex items-center justify-center gap-11 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
-      <div className="space-y-2">
-        <HeadlessToastProvider viewportClassName="absolute bottom-full left-4 right-4 translate-y-[-16px] max-w-[400px] mx-auto">
-          <HeadlessToast
-            open={open}
-            onOpenChange={setOpen}
-            className="toast-anim w-full flex items-center rounded-xl bg-[#21272D] text-white pl-3 pr-8 py-3 shadow-lg transition-all duration-200 will-change-[opacity,transform] data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-1 motion-reduce:transition-none"
-            leadingClassName="w-6 h-6 flex items-center justify-center flex-shrink-0 mr-2"
-            contentClassName="font-semibold text-sm tracking-[-0.02em] leading-none"
-            leading={<span className="text-[20px]">😥</span>}
-            duration={3000}
-          >
-            기능을 준비하고 있어요. 런칭데이에 만나요!
-          </HeadlessToast>
-        </HeadlessToastProvider>
+      {/* 공유 버튼 */}
+      <button
+        type="button"
+        className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80"
+        style={{
+          background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #ffffff2e 0%, #ffffff14 56.15%, #ffffff09 100%)",
+        }}
+        aria-label="공유하기"
+      >
+        <ShareIcon className="w-8 h-8" />
+      </button>
 
-        {/* 기본 버튼들 - opacity로 제어하여 layout shift 방지 */}
-        <div className="max-w-[400px] mx-auto space-y-2">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="w-full text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
-          >
-            내 지구본 자랑하기
-          </button>
+      {/* 리스트 뷰/글로브 뷰 토글 */}
+      <div className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden">
+        {/* 슬라이더 배경 */}
+        <div
+          className="absolute w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})` }}
+        />
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="w-full bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
-          >
-            홈으로 이동
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setViewMode("list")}
+          className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors"
+          aria-label="리스트 보기"
+        >
+          <ListIcon
+            className="w-8 h-8"
+            style={{ color: viewMode === "list" ? "var(--color-surface-primary)" : "white" }}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setViewMode("globe")}
+          className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors"
+          aria-label="글로브 보기"
+        >
+          <GlobeIcon
+            className="w-8 h-8"
+            style={{ color: viewMode === "globe" ? "var(--color-surface-primary)" : "white" }}
+          />
+        </button>
       </div>
+
+      {/* 기록/도시 추가 버튼 */}
+      <button
+        type="button"
+        className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80"
+        style={{
+          background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
+        }}
+        aria-label="새 항목 추가"
+      >
+        <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
+      </button>
     </div>
   );
 };

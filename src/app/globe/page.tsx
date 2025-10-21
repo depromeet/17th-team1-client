@@ -118,7 +118,7 @@ const GlobePrototype = () => {
       </div>
 
       {/* 하단 버튼들 - position absolute */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-4">
+      <div className="absolute bottom-[56px] left-0 right-0 z-10 px-4">
         <GlobeFooter isZoomed={isZoomed} />
       </div>
 

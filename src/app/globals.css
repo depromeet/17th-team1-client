@@ -141,3 +141,14 @@ body {
 .spin {
   animation: spin 1s linear infinite;
 }
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

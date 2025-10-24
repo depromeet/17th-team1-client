@@ -94,7 +94,7 @@ jobs:
               --name globber-fe \
               --network globber_fe_bridge \
               --ip 172.28.0.2 \
-              -p 3000:80 \
+              -p 80:80 \
               -e TZ=Asia/Seoul \
               -e GOOGLE_MAPS_SERVER_API_KEY=${{ secrets.GOOGLE_MAPS_SERVER_API_KEY }} \
               jiohjung/globber-fe:latest

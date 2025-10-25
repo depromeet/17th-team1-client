@@ -25,7 +25,7 @@ export function Tag({ iconType = "custom", icon, text, onRemove }: TagProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-neutral-900 text-white pl-2 pr-2.5 py-1.5 rounded-lg">
+    <div className="flex items-center gap-2 bg-[#00000066] text-white pl-2 pr-2.5 py-1.5 rounded-lg">
       {/* Left Icon */}
       <div className="flex-shrink-0">{renderIcon()}</div>
 
@@ -40,7 +40,7 @@ export function Tag({ iconType = "custom", icon, text, onRemove }: TagProps) {
           aria-label="Remove tag"
           type="button"
         >
-          <CloseIcon width={8} height={8} className="text-text-thirdly" />
+          <CloseIcon width={8} height={8} className="text-[#A8B8C6]" />
         </button>
       )}
     </div>

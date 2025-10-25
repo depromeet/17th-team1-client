@@ -161,22 +161,24 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
               style={{ borderBottomColor: "rgba(255, 255, 255, 0.04)" }}
             >
               {/* 국가 헤더 */}
-              <div className="flex flex-col gap-3 mb-3">
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-1">
                   <p className="font-bold text-sm text-white tracking-tight">
                     {group.flag} {group.countryName}
                   </p>
-                  <div
-                    className="flex items-center justify-center size-[20px] rounded-[1000px]"
-                    style={{ backgroundColor: "rgba(105, 212, 255, 0.3)" }}
-                  >
-                    <p
-                      className="font-medium text-white text-center whitespace-nowrap"
-                      style={{ fontSize: "12px", lineHeight: "1.28" }}
+                  {group.cities.length > 1 && (
+                    <div
+                      className="flex items-center justify-center size-[20px] rounded-[1000px]"
+                      style={{ backgroundColor: "rgba(105, 212, 255, 0.3)" }}
                     >
-                      {group.cities.length}
-                    </p>
-                  </div>
+                      <p
+                        className="font-medium text-white text-center whitespace-nowrap"
+                        style={{ fontSize: "12px", lineHeight: "1.28" }}
+                      >
+                        {group.cities.length}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* 도시 칩 목록 */}

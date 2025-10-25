@@ -3,14 +3,14 @@
 import type React from "react";
 import { CalendarIcon, CloseIcon, MapPinIcon } from "@/assets/icons";
 
-interface TagProps {
+interface MetadataChipProps {
   iconType?: "calendar" | "location" | "custom";
   icon?: React.ReactNode;
   text: string;
   onRemove?: () => void;
 }
 
-export function Tag({ iconType = "custom", icon, text, onRemove }: TagProps) {
+export function MetadataChip({ iconType = "custom", icon, text, onRemove }: MetadataChipProps) {
   const renderIcon = () => {
     if (iconType === "calendar") {
       return <CalendarIcon width={16} height={16} />;
@@ -37,7 +37,7 @@ export function Tag({ iconType = "custom", icon, text, onRemove }: TagProps) {
         <button
           onClick={onRemove}
           className="flex-shrink-0 ml-auto hover:opacity-70 transition-opacity"
-          aria-label="Remove tag"
+          aria-label="Remove MetadataChip"
           type="button"
         >
           <CloseIcon width={8} height={8} className="text-[#A8B8C6]" />

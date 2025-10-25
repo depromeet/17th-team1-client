@@ -10,7 +10,7 @@ interface MetadataChipProps {
   onRemove?: () => void;
 }
 
-export function MetadataChip({ iconType = "custom", icon, text, onRemove }: MetadataChipProps) {
+export const MetadataChip = ({ iconType = "custom", icon, text, onRemove }: MetadataChipProps) => {
   const renderIcon = () => {
     if (iconType === "calendar") {
       return <CalendarIcon width={16} height={16} />;
@@ -45,4 +45,4 @@ export function MetadataChip({ iconType = "custom", icon, text, onRemove }: Meta
       )}
     </div>
   );
-}
+};

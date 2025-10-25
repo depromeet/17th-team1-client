@@ -13,7 +13,7 @@ interface TagSelectorProps {
   className?: string;
 }
 
-export function TagSelector({ selectedTag, onSelect, onRemove, placeholder = "태그 지정", className }: TagSelectorProps) {
+export const TagSelector = ({ selectedTag, onSelect, onRemove, placeholder = "태그 지정", className }: TagSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (tag: ImageTag) => {
@@ -64,4 +64,4 @@ export function TagSelector({ selectedTag, onSelect, onRemove, placeholder = "�
       )}
     </div>
   );
-}
+};

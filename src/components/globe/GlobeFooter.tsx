@@ -38,7 +38,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
   return (
     <div
       aria-hidden={isZoomed}
-      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
       {/* 설명 문구 - 지구본 뷰일 때만 표시 */}
       {viewMode === "globe" && (

@@ -80,7 +80,7 @@ const GlobePrototype = () => {
 
   if (travelPatterns.length === 0) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900">
+      <div className="w-full h-screen flex items-center justify-center">
         <div className="text-white text-xl text-center">
           <div>🌍 여행 데이터가 없습니다</div>
           <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
@@ -91,7 +91,7 @@ const GlobePrototype = () => {
 
   return (
     <div
-      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary relative font-sans flex flex-col"
+      className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col"
       style={{
         height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
       }}
@@ -122,7 +122,12 @@ const GlobePrototype = () => {
           </div>
 
           {/* 하단 버튼들 - position absolute */}
-          <div className="absolute bottom-[56px] left-0 right-0 z-10 px-4">
+          <div
+            className="absolute bottom-[56px] left-0 right-0 z-10 px-4"
+            style={{
+              position: "absolute",
+            }}
+          >
             <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
 
@@ -144,14 +149,20 @@ const GlobePrototype = () => {
           </div>
 
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
-          <div className="flex-1 flex flex-col items-center overflow-hidden pb-[140px]">
+          <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
             <div className="max-w-[512px] w-full h-full mt-4">
               <ListView travelPatterns={travelPatterns} />
             </div>
           </div>
 
           {/* 하단 버튼들 - 푸터 영역 (absolute 제거) */}
-          <div className="fixed bottom-[56px] left-0 right-0 z-10 px-4">
+          <div
+            className="bottom-0 left-0 right-0 z-10 h-[156px]"
+            style={{
+              position: "fixed",
+              background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
+            }}
+          >
             <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
         </>

@@ -197,20 +197,20 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
     `,
     label: `
       display: inline-flex;
-      padding: 6px 12px 6px 12px;
+      padding: 6px 30px 6px 12px;
       align-items: center;
       gap: 5px;
       border-radius: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.20);
-      background: rgba(255, 255, 255, 0.20);
+      border: 1px solid #b3daff;
+      background: rgba(31, 74, 105, 0.5);
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #FFF;
       font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 15px;
+      font-size: 14px;
       font-style: normal;
       font-weight: 500;
-      line-height: 128%;
+      line-height: 1.5;
       font-feature-settings: 'liga' off, 'clig' off;
       cursor: pointer;
       user-select: none;
@@ -218,29 +218,46 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       pointer-events: auto;
       position: absolute;
       z-index: ${20 + index};
-      top: ${offsetY}px;
+      top: ${offsetY + 15}px;
       left: ${offsetX}px;
       transform: translate(-50%, -50%);
       white-space: nowrap;
     `,
     countBadge: `
       display: flex;
-      width: 20px;
+      width: auto;
+      min-width: 22px;
       height: 20px;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 0;
+      padding: 2px 5px;
       border-radius: 1000px;
-      background: rgba(255, 255, 255, 0.20);
+      background: rgba(89, 190, 229, 0.5);
       color: #FFF;
       text-align: center;
       font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 12px;
       font-style: normal;
       font-weight: 500;
-      line-height: 128%;
+      line-height: 1.28;
       font-feature-settings: 'liga' off, 'clig' off;
+    `,
+    actionButton: `
+      position: absolute;
+      z-index: ${20 + index + 1};
+      top: ${offsetY + 15}px;
+      left: ${offsetX + 35}px;
+      width: 37px;
+      height: 44px;
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: -20px;
+      transform: translateY(-50%);
     `,
   };
 };

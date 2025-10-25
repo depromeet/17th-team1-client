@@ -25,7 +25,7 @@ export function MetadataChip({ iconType = "custom", icon, text, onRemove }: Meta
   };
 
   return (
-    <div className="flex items-center gap-2 bg-[#00000066] text-white pl-2 pr-2.5 py-1.5 rounded-lg">
+    <div className="flex items-center gap-2 bg-[#000000]/40 text-white pl-2 pr-2.5 py-1.5 rounded-lg">
       {/* Left Icon */}
       <div className="flex-shrink-0">{renderIcon()}</div>
 

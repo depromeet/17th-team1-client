@@ -10,7 +10,7 @@ export const headerVariants = cva("flex items-center justify-between w-full px-4
       default: "bg-white",
       dark: "bg-black",
       transparent: "bg-transparent",
-      navy: "bg-[#001326]",
+      navy: "bg-surface-secondary",
     },
   },
   defaultVariants: {
@@ -28,7 +28,7 @@ export type HeaderProps = React.ComponentProps<"header"> &
     title?: string;
     rightButton?: React.ReactNode;
     rightIcon?: "dot" | React.ReactNode;
-    onRightIconClick?: () => void;
+    onRightButtonClick?: () => void;
   };
 
 export const Header = React.forwardRef<HTMLElement, HeaderProps>(
@@ -44,7 +44,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
       title,
       rightButton,
       rightIcon,
-      onRightIconClick,
+      onRightButtonClick,
       ...props
     },
     ref,
@@ -88,7 +88,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
         return (
           <button
             type="button"
-            onClick={onRightIconClick}
+            onClick={onRightButtonClick}
             className="flex items-center justify-center w-11 h-11 cursor-pointer hover:opacity-70 transition-opacity"
             aria-label="More options"
           >
@@ -101,7 +101,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
         return (
           <button
             type="button"
-            onClick={onRightIconClick}
+            onClick={onRightButtonClick}
             className="flex items-center justify-center w-11 h-11 cursor-pointer hover:opacity-70 transition-opacity"
             aria-label="Right action"
           >
@@ -130,7 +130,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
 
           {/* 오른쪽 텍스트 버튼 */}
           {rightButton && (
-            <button type="button" className="text-base font-bold text-state-focused">
+            <button type="button" onClick={onRightButtonClick} className="text-base font-bold text-state-focused cursor-pointer" aria-label="Right action">
               {rightButton}
             </button>
           )}

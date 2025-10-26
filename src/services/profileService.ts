@@ -1,4 +1,4 @@
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, apiPatch } from "@/lib/apiClient";
 import type { ProfileData, ProfileResponse } from "@/types/member";
 import { getAuthInfo } from "@/utils/cookies";
 
@@ -37,6 +37,46 @@ export const getMyProfile = async (token?: string): Promise<ProfileData> => {
     return data.data;
   } catch (error) {
     console.error("Failed to fetch profile:", error);
+    throw error;
+  }
+};
+
+/**
+ * 프로필 정보를 업데이트합니다.
+ *
+ * @param updateData - 업데이트할 프로필 데이터 (nickname, profileImageUrl)
+ * @param token - 선택사항. 인증 토큰. 클라이언트 컴포넌트에서는 제공되지 않으면 쿠키에서 가져옵니다.
+ * @returns 업데이트된 프로필 정보
+ * @throws 인증 정보가 없거나 API 요청이 실패할 경우
+ *
+ * @example
+ * // 클라이언트 컴포넌트에서
+ * const updatedProfile = await updateMyProfile({
+ *   nickname: "새로운닉네임",
+ *   profileImageUrl: "data:image/..."
+ * });
+ */
+export const updateMyProfile = async (
+  updateData: Partial<Pick<ProfileData, "nickname" | "profileImageUrl">>,
+  token?: string,
+): Promise<ProfileData> => {
+  try {
+    let authToken = token;
+
+    // 토큰이 없을 경우, 클라이언트 환경에서만 쿠키에서 가져오기
+    if (!authToken && typeof document !== "undefined") {
+      const { token: clientToken } = getAuthInfo();
+      authToken = clientToken || undefined;
+    }
+
+    if (!authToken) {
+      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    }
+
+    const data = await apiPatch<ProfileResponse>("/api/v1/profiles/me", updateData, authToken);
+    return data.data;
+  } catch (error) {
+    console.error("Failed to update profile:", error);
     throw error;
   }
 };

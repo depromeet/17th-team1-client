@@ -113,6 +113,27 @@ export const apiPut = async <T>(endpoint: string, data?: unknown, token?: string
   }
 };
 
+export const apiPatch = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
+  try {
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+    }
+
+    return await parseJsonSafely<T>(response);
+  } catch (error) {
+    console.error(`API PATCH Error (${endpoint}):`, error);
+    throw error;
+  }
+};
+
 export const apiDelete = async <T>(endpoint: string, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;

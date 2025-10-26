@@ -9,6 +9,7 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
+import { updateMyProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
 
 type ProfileClientProps = {
@@ -47,23 +48,14 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
   const handleSaveProfile = useCallback(async (nickname: string, image?: string) => {
     try {
-      // TODO: 실제 프로필 업데이트 API 호출 (닉네임, 프로필 이미지)
-      // const response = await fetch('/api/v1/profiles', {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ nickname, profileImageUrl: image }),
-      // });
-      // if (!response.ok) throw new Error('Profile update failed');
-      setUserProfile((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          nickname,
-          profileImageUrl: image ?? prev.profileImageUrl,
-        };
+      const updatedProfile = await updateMyProfile({
+        nickname,
+        profileImageUrl: image,
       });
+      setUserProfile(updatedProfile);
     } catch (error) {
       console.error("프로필 업데이트 실패:", error);
+      throw error;
     }
   }, []);
 

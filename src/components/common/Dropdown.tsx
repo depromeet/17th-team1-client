@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -18,13 +17,7 @@ type DropdownProps = {
   className?: string;
 };
 
-export const Dropdown = ({
-  value,
-  onValueChange,
-  options,
-  placeholder = "선택해주세요",
-  className,
-}: DropdownProps) => {
+export const Dropdown = ({ value, onValueChange, options, placeholder = "선택해주세요", className }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -85,9 +78,7 @@ export const Dropdown = ({
                   />
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>
-                {index < options.length - 1 && (
-                  <div className="h-px bg-[rgba(255,255,255,0.1)]" />
-                )}
+                {index < options.length - 1 && <div className="h-px bg-[rgba(255,255,255,0.1)]" />}
               </div>
             ))}
           </SelectPrimitive.Viewport>

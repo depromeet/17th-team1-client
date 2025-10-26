@@ -9,7 +9,7 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
-import { updateMyProfile } from "@/services/profileService";
+import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
 
 type ProfileClientProps = {
@@ -46,18 +46,29 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     setIsEditProfileOpen(true);
   }, []);
 
-  const handleSaveProfile = useCallback(async (nickname: string, image?: string) => {
-    try {
-      const updatedProfile = await updateMyProfile({
-        nickname,
-        profileImageUrl: image,
-      });
-      setUserProfile(updatedProfile);
-    } catch (error) {
-      console.error("프로필 업데이트 실패:", error);
-      throw error;
-    }
-  }, []);
+  const handleSaveProfile = useCallback(
+    async (nickname: string, imageFile?: File) => {
+      try {
+        setIsLoading(true);
+
+        if (!userProfile) return;
+
+        // 이미지가 있으면 함께 업로드, 없으면 닉네임만 업데이트
+        const updatedProfile = await uploadAndUpdateProfile(
+          nickname,
+          userProfile.memberId,
+          imageFile,
+        );
+        setUserProfile(updatedProfile);
+      } catch (error) {
+        console.error("프로필 업데이트 실패:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userProfile],
+  );
 
   const handleTermsClick = useCallback(() => {
     // TODO: 약관 페이지로 이동
@@ -140,6 +151,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
           onOpenChange={setIsEditProfileOpen}
           initialName={userProfile.nickname}
           initialImage={userProfile.profileImageUrl ?? undefined}
+          memberId={userProfile.memberId}
           onSave={handleSaveProfile}
         />
       </div>

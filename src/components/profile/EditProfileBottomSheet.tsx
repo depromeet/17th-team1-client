@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useId, useState } from "react";
+
 import {
   BottomSheet,
   BottomSheetBody,
@@ -19,7 +20,8 @@ type EditProfileBottomSheetProps = {
   onOpenChange: (open: boolean) => void;
   initialName?: string;
   initialImage?: string;
-  onSave: (name: string, image?: string) => void | Promise<void>;
+  memberId?: number;
+  onSave: (name: string, imageFile?: File) => void | Promise<void>;
 };
 
 export const EditProfileBottomSheet = ({
@@ -32,31 +34,36 @@ export const EditProfileBottomSheet = ({
   const nicknameId = useId();
   const [name, setName] = useState(initialName);
   const [image, setImage] = useState(initialImage);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setImage(result);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // 파일 저장 (저장 버튼 클릭 시 업로드)
+    setSelectedImageFile(file);
+
+    // 로컬 프리뷰 표시
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setImage(result);
+    };
+    reader.readAsDataURL(file);
   }, []);
 
   const handleSave = useCallback(async () => {
     try {
       setIsLoading(true);
-      await onSave(name, image);
+      await onSave(name, selectedImageFile);
       onOpenChange(false);
     } catch (error) {
       console.error("프로필 저장 실패:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [name, image, onSave, onOpenChange]);
+  }, [name, selectedImageFile, onSave, onOpenChange]);
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
@@ -99,9 +106,22 @@ export const EditProfileBottomSheet = ({
               )}
             </div>
 
-            <label className="text-xs font-medium text-text-secondary underline cursor-pointer hover:text-text-primary transition-colors">
-              이미지 변경
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+            <label
+              className={cn(
+                "text-xs font-medium underline transition-colors",
+                isLoading
+                  ? "text-text-thirdly cursor-not-allowed"
+                  : "text-text-secondary cursor-pointer hover:text-text-primary",
+              )}
+            >
+              {isLoading ? "저장 중..." : "이미지 변경"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={isLoading}
+                className="hidden"
+              />
             </label>
           </div>
 

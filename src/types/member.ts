@@ -87,3 +87,19 @@ export interface ProfileData {
 
 // 프로필 조회 API 응답
 export interface ProfileResponse extends ApiResponse<ProfileData> {}
+
+// S3 업로드 URL 요청 데이터
+export interface S3UploadUrlParams {
+  uploadType: string;
+  resourceId: number;
+  fileName: string;
+  contentType: string;
+}
+
+// S3 업로드 URL 응답 데이터
+export interface S3UploadUrlData {
+  presignedUrl: string;
+  s3Key: string;
+}
+
+export interface S3UploadUrlResponse extends ApiResponse<S3UploadUrlData> {}

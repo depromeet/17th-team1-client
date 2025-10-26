@@ -1,4 +1,4 @@
-export { ProfileHeader } from "./ProfileHeader";
 export { ProfileCard } from "./ProfileCard";
-export { SettingSection } from "./SettingSection";
+export { ProfileHeader } from "./ProfileHeader";
 export { SettingItem } from "./SettingItem";
+export { SettingSection } from "./SettingSection";

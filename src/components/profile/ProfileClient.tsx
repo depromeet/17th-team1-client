@@ -9,6 +9,7 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
+import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
 
@@ -26,13 +27,22 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   const handleLogoutConfirm = useCallback(async () => {
     try {
       setIsLoading(true);
-      // TODO: 실제 로그아웃 API 호출
-      // const response = await fetch('/api/auth/logout', { method: 'POST' });
-      // if (!response.ok) throw new Error('Logout failed');
+
+      // 서버에 로그아웃 요청 및 클라이언트 쿠키 삭제
+      await logout();
+
+      // 다이얼로그 닫기
       setIsLogoutDialogOpen(false);
+
+      // 로그인 페이지로 이동
       router.push("/login");
     } catch (error) {
-      console.error("로그아웃 실패:", error);
+      const errorMessage = error instanceof Error ? error.message : "로그아웃에 실패했습니다.";
+
+      alert(errorMessage);
+
+      setIsLogoutDialogOpen(false);
+      router.push("/login");
     } finally {
       setIsLoading(false);
     }

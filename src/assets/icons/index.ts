@@ -7,6 +7,8 @@ export { default as DotIcon } from "./dot.svg";
 export { default as KakaoIcon } from "./kakao.svg";
 export { default as MapPinIcon } from "./map-pin.svg";
 export { default as MenuIcon } from "./menu.svg";
+export { default as PeopleIcon } from "./people.svg";
 export { default as PlusIcon } from "./plus.svg";
 export { default as ReturnIcon } from "./return.svg";
 export { default as SearchIcon } from "./search.svg";
+export { default as XIcon } from "./x.svg";

@@ -1,8 +1,11 @@
-// 멤버 ID 조회 응답
-export interface MemberIdResponse {
+// 공통 Response 타입
+export interface ApiResponse<T> {
   status: string;
-  data: number;
+  data: T;
 }
+
+// 멤버 ID 조회 응답
+export interface MemberIdResponse extends ApiResponse<number> {}
 
 // 여행 기록 생성 API
 export interface TravelRecord {
@@ -14,13 +17,13 @@ export interface TravelRecord {
 }
 
 // 여행 기록 생성 API 응답
-export interface CreateTravelRecordsResponse {
-  status: string;
+export interface CreateTravelRecordsData {
+  recordsCreated?: number;
+  [key: string]: unknown;
+}
+
+export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {
   message: string;
-  data?: {
-    recordsCreated?: number;
-    [key: string]: unknown;
-  };
 }
 
 // 지구본 조회 API 응답
@@ -43,18 +46,14 @@ export interface GlobeCity {
   countryCode: string;
 }
 
-export interface GlobeResponse {
-  status: string;
-  data: GlobeData;
-}
+export interface GlobeResponse extends ApiResponse<GlobeData> {}
 
 // AI 인사이트 응답
-export interface TravelInsightResponse {
-  status: string;
-  data: {
-    title: string;
-  };
+export interface TravelInsightData {
+  title: string;
 }
+
+export interface TravelInsightResponse extends ApiResponse<TravelInsightData> {}
 
 // 멤버 여행 데이터 조회 응답
 export interface MemberTravelCity {
@@ -75,7 +74,16 @@ export interface MemberTravelsData {
   travels: MemberTravel[];
 }
 
-export interface MemberTravelsResponse {
-  status: string;
-  data: MemberTravelsData;
+export interface MemberTravelsResponse extends ApiResponse<MemberTravelsData> {}
+
+// 프로필 정보 타입
+export interface ProfileData {
+  memberId: number;
+  nickname: string;
+  email: string;
+  profileImageUrl: string | null;
+  authProvider: string;
 }
+
+// 프로필 조회 API 응답
+export interface ProfileResponse extends ApiResponse<ProfileData> {}

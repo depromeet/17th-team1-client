@@ -1,12 +1,28 @@
-
+import { cookies } from "next/headers";
 import { RecordClient } from "@/components/record/RecordClient";
-import { getRecordData } from "@/services/memberService";
+import { getMemberTravels } from "@/services/memberService";
+import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
+import type { RecordResponse } from "@/types/record";
 
 export const dynamic = "force-dynamic";
 
 export default async function RecordPage() {
   try {
-    const recordData = await getRecordData();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("kakao_access_token")?.value;
+
+    if (!token) {
+      return <RecordClient initialData={null} />;
+    }
+
+    const memberTravels = await getMemberTravels(token);
+
+    if (!memberTravels) {
+      return <RecordClient initialData={null} />;
+    }
+
+    const recordData: RecordResponse =
+      convertMemberTravelsToRecordResponse(memberTravels);
     return <RecordClient initialData={recordData} />;
   } catch (error) {
     console.error("Failed to fetch record data:", error);

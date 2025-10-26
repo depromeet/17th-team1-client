@@ -141,7 +141,7 @@ const GlobePrototype = () => {
           {/* 상단 헤더 */}
           <div className="px-4">
             <GlobeHeader
-              isZoomed={isZoomed || selectedClusterData !== null}
+              isZoomed={false}
               travelInsight={travelInsight}
               cityCount={cityCount}
               countryCount={countryCount}
@@ -163,7 +163,7 @@ const GlobePrototype = () => {
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}
           >
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
         </>
       )}

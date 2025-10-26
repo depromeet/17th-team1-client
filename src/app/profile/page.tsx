@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
@@ -16,6 +17,7 @@ type UserProfile = {
 const ProfilePage = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   // 임시 사용자 정보 (실제로는 API에서 받아올 데이터)
   const [userProfile] = useState<UserProfile>({
@@ -23,12 +25,13 @@ const ProfilePage = () => {
     email: "adgasg@naver.com",
   });
 
-  const handleLogout = useCallback(async () => {
+  const handleLogoutConfirm = useCallback(async () => {
     try {
       setIsLoading(true);
       // TODO: 실제 로그아웃 API 호출
       // const response = await fetch('/api/auth/logout', { method: 'POST' });
       // if (!response.ok) throw new Error('Logout failed');
+      setIsLogoutDialogOpen(false);
       router.push("/login");
     } catch (error) {
       console.error("로그아웃 실패:", error);
@@ -36,6 +39,10 @@ const ProfilePage = () => {
       setIsLoading(false);
     }
   }, [router]);
+
+  const handleLogoutClick = useCallback(() => {
+    setIsLogoutDialogOpen(true);
+  }, []);
 
   const handleEditProfile = useCallback(() => {
     // TODO: 프로필 수정 페이지로 이동
@@ -90,11 +97,19 @@ const ProfilePage = () => {
 
           {/* Logout Button */}
           <div className="px-4 py-7.5 w-full shrink-0">
-            <Button onClick={handleLogout} disabled={isLoading} variant="gray" size="lg" className="w-full">
+            <Button onClick={handleLogoutClick} disabled={isLoading} variant="gray" size="lg" className="w-full">
               {isLoading ? "로그아웃 중..." : "로그아웃"}
             </Button>
           </div>
         </div>
+
+        {/* Logout Dialog */}
+        <LogoutDialog
+          isOpen={isLogoutDialogOpen}
+          onOpenChange={setIsLogoutDialogOpen}
+          onConfirm={handleLogoutConfirm}
+          isLoading={isLoading}
+        />
       </div>
     </main>
   );

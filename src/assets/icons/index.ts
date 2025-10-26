@@ -1,5 +1,12 @@
+export { default as BackIcon } from "./back.svg";
+export { default as CalendarIcon } from "./calendar.svg";
+export { default as ChevronDownIcon } from "./chevron-down.svg";
+export { default as ChevronUpIcon } from "./chevron-up.svg";
 export { default as CloseIcon } from "./close.svg";
+export { default as DotIcon } from "./dot.svg";
 export { default as KakaoIcon } from "./kakao.svg";
+export { default as MapPinIcon } from "./map-pin.svg";
+export { default as MenuIcon } from "./menu.svg";
 export { default as PlusIcon } from "./plus.svg";
 export { default as ReturnIcon } from "./return.svg";
 export { default as SearchIcon } from "./search.svg";

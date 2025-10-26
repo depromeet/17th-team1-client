@@ -7,6 +7,7 @@ import type {
   MemberTravelsResponse,
   TravelInsightResponse,
 } from "@/types/member";
+import type { RecordResponse } from "@/types/record";
 import { getAuthInfo } from "@/utils/cookies";
 import { convertCitiesToTravelRecords } from "@/utils/travelUtils";
 
@@ -94,5 +95,22 @@ export const getTravelInsight = async (memberId: number): Promise<string> => {
   } catch (error) {
     console.error("Failed to fetch travel insight:", error);
     return "";
+  }
+};
+
+// 여행 기록 조회 API
+export const getRecordData = async (): Promise<RecordResponse | null> => {
+  try {
+    const { token, memberId } = getAuthInfo();
+
+    if (!token || !memberId) {
+      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    }
+
+    const data = await apiGet<RecordResponse>(`/api/v1/member-travels/${memberId}/records`, {}, token);
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch record data:", error);
+    return null;
   }
 };

@@ -6,6 +6,8 @@ import ShareIcon from "@/assets/icons/share.svg";
 
 type GlobeFooterProps = {
   isZoomed: boolean;
+  viewMode?: "globe" | "list";
+  onViewModeChange?: (mode: "globe" | "list") => void;
 };
 
 const DESCRIPTIONS = [
@@ -22,8 +24,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
   return nextIndex;
 };
 
-export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
-  const [viewMode, setViewMode] = useState<"globe" | "list">("globe");
+export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
 
   useEffect(() => {
@@ -37,20 +38,22 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
   return (
     <div
       aria-hidden={isZoomed}
-      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
-      {/* 설명 문구 */}
-      <div className="mb-14 text-center min-h-[28px]">
-        <p
-          key={descriptionIndex}
-          className="text-sm font-medium text-text-secondary"
-          style={{
-            animation: "slideInFromTop 0.5s ease-out",
-          }}
-        >
-          {DESCRIPTIONS[descriptionIndex]}
-        </p>
-      </div>
+      {/* 설명 문구 - 지구본 뷰일 때만 표시 */}
+      {viewMode === "globe" && (
+        <div className="mb-14 text-center min-h-[28px]">
+          <p
+            key={descriptionIndex}
+            className="text-sm font-medium text-text-secondary"
+            style={{
+              animation: "slideInFromTop 0.5s ease-out",
+            }}
+          >
+            {DESCRIPTIONS[descriptionIndex]}
+          </p>
+        </div>
+      )}
 
       {/* 버튼 래퍼 */}
       <div className="flex items-center justify-center gap-11">
@@ -77,7 +80,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
 
           <button
             type="button"
-            onClick={() => setViewMode("list")}
+            onClick={() => onViewModeChange?.("list")}
             className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
             aria-label="리스트 보기"
           >
@@ -89,7 +92,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
 
           <button
             type="button"
-            onClick={() => setViewMode("globe")}
+            onClick={() => onViewModeChange?.("globe")}
             className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
             aria-label="글로브 보기"
           >

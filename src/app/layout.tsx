@@ -27,7 +27,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="antialiased min-h-screen bg-gradient-to-b from-gray-800 to-gray-900">
+      <body
+        className="antialiased min-h-screen"
+        style={{ background: "linear-gradient(180deg, #001D39 0%, #0D0C14 100%)" }}
+      >
         <ClientLayout>
           <div className="w-full min-h-screen">{children}</div>
         </ClientLayout>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogActions, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { cn } from "@/utils/cn";
@@ -12,6 +13,17 @@ type LogoutDialogProps = {
 };
 
 export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = false }: LogoutDialogProps) => {
+  const handleConfirm = useCallback(async () => {
+    try {
+      await onConfirm();
+    } catch (err) {
+      console.error("로그아웃 실패:", err);
+
+      const errorMessage = err instanceof Error ? err.message : "로그아웃에 실패했습니다. 다시 시도해주세요.";
+      alert(errorMessage);
+    }
+  }, [onConfirm]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
@@ -41,7 +53,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
             아니요
           </Button>
           <Button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             disabled={isLoading}
             variant="primary"
             size="lg"

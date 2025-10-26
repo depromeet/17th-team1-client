@@ -33,11 +33,21 @@ export const DialogOverlay = ({ className, ...props }: React.ComponentProps<type
   );
 };
 
+type DialogContentProps = React.ComponentProps<typeof DialogPrimitive.Content> & {
+  /**
+   * Accessible description for screen readers when no visible DialogDescription is provided.
+   * This text is visually hidden but announced to assistive technologies.
+   * @default "Dialog content"
+   */
+  ariaDescription?: string;
+};
+
 export const DialogContent = ({
   className,
   children,
+  ariaDescription = "Dialog content",
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) => {
+}: DialogContentProps) => {
   return (
     <DialogPortal>
       <DialogOverlay className="bg-black/40" />
@@ -54,7 +64,7 @@ export const DialogContent = ({
         onOpenAutoFocus={(e) => e.preventDefault()}
         {...props}
       >
-        <DialogPrimitive.Description className="sr-only">description</DialogPrimitive.Description>
+        <DialogPrimitive.Description className="sr-only">{ariaDescription}</DialogPrimitive.Description>
         {children}
       </DialogPrimitive.Content>
     </DialogPortal>

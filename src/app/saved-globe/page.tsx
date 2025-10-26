@@ -2,7 +2,7 @@
 
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "@/components/common/Dropdown";
 
 type SavedGlobe = {
@@ -19,37 +19,34 @@ export default function SavedGlobePage() {
   const [globes, setGlobes] = useState<SavedGlobe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
-  const [savedStates, setSavedStates] = useState<Record<number, boolean>>({});
+  const [error, setError] = useState<string | null>(null);
+
+  const loadGlobes = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // TODO: API에서 저장된 지구본 리스트 가져오기
+      // 임시 데이터
+      const mockGlobes: SavedGlobe[] = [
+        { memberId: 1, name: "장민지", isSaved: true },
+        { memberId: 2, name: "김정우", isSaved: true },
+        { memberId: 3, name: "이유정", isSaved: true },
+        { memberId: 4, name: "유민", isSaved: true },
+        { memberId: 5, name: "건우", isSaved: true },
+      ];
+
+      setGlobes(mockGlobes);
+    } catch {
+      setError("저장된 지구본을 불러오는데 실패했습니다");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadGlobes = async () => {
-      try {
-        // TODO: API에서 저장된 지구본 리스트 가져오기
-        // 임시 데이터
-        const mockGlobes: SavedGlobe[] = [
-          { memberId: 1, name: "장민지", isSaved: true },
-          { memberId: 2, name: "김정우", isSaved: true },
-          { memberId: 3, name: "이유정", isSaved: true },
-          { memberId: 4, name: "유민", isSaved: true },
-          { memberId: 5, name: "건우", isSaved: true },
-          { memberId: 6, name: "sjdkdjf", isSaved: true },
-        ];
-
-        setGlobes(mockGlobes);
-        const initialSavedStates: Record<number, boolean> = {};
-        mockGlobes.forEach((globe) => {
-          initialSavedStates[globe.memberId] = globe.isSaved;
-        });
-        setSavedStates(initialSavedStates);
-      } catch {
-        // 에러 처리
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadGlobes();
-  }, []);
+  }, [loadGlobes]);
 
   const getSortedGlobes = () => {
     const sorted = [...globes];
@@ -60,10 +57,7 @@ export default function SavedGlobePage() {
   };
 
   const handleSaveToggle = (memberId: number) => {
-    setSavedStates((prev) => ({
-      ...prev,
-      [memberId]: !prev[memberId],
-    }));
+    setGlobes((prev) => prev.map((g) => (g.memberId === memberId ? { ...g, isSaved: !g.isSaved } : g)));
   };
 
   const handleGlobeCardClick = (memberId: number) => {
@@ -93,7 +87,47 @@ export default function SavedGlobePage() {
           <div className="w-10" />
         </div>
 
-        {!hasGlobes && !isLoading ? (
+        {error ? (
+          // Error State
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-6 px-4">
+              {/* Error Icon */}
+              <div className="w-16 h-16 rounded-full bg-[rgba(255,80,80,0.1)] flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-[#ff5050]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <title>Error</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+
+              {/* Error Message */}
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h2 className="text-xl font-bold text-white tracking-[-0.4px]">오류가 발생했습니다</h2>
+                <p className="text-base font-medium text-[var(--color-text-secondary,#a8b8c6)] tracking-[-0.32px]">
+                  {error}
+                </p>
+              </div>
+
+              {/* Retry Button */}
+              <button
+                type="button"
+                onClick={() => loadGlobes()}
+                className="px-6 py-3 bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.15)] rounded-xl text-white font-semibold transition-colors"
+              >
+                다시 시도
+              </button>
+            </div>
+          </div>
+        ) : !hasGlobes && !isLoading ? (
           // Empty State
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center gap-8 z-10">
@@ -185,18 +219,18 @@ export default function SavedGlobePage() {
                       handleSaveToggle(globe.memberId);
                     }}
                     className="flex-shrink-0 w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity"
-                    aria-label={savedStates[globe.memberId] ? "저장 해제" : "저장"}
+                    aria-label={globe.isSaved ? "저장 해제" : "저장"}
                   >
                     <svg
                       className="w-5 h-5"
                       viewBox="0 0 20 24"
-                      fill={savedStates[globe.memberId] ? "currentColor" : "none"}
+                      fill={globe.isSaved ? "currentColor" : "none"}
                       stroke="currentColor"
                       strokeWidth="1.5"
                       color="white"
                       role="img"
                     >
-                      <title>{savedStates[globe.memberId] ? "저장됨" : "저장 안 됨"}</title>
+                      <title>{globe.isSaved ? "저장됨" : "저장 안 됨"}</title>
                       <path d="M2 2v20l8-5 8 5V2H2z" />
                     </svg>
                   </button>

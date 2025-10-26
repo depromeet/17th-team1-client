@@ -1,6 +1,6 @@
 import { apiGet, apiPatch, apiPost } from "@/lib/apiClient";
 import type { ProfileData, ProfileResponse, S3UploadUrlParams, S3UploadUrlResponse } from "@/types/member";
-import { getAuthInfo } from "@/utils/cookies";
+import { getValidatedAuthToken } from "@/utils/cookies";
 
 /**
  * 현재 로그인한 사용자의 프로필 정보를 조회합니다.
@@ -21,17 +21,7 @@ import { getAuthInfo } from "@/utils/cookies";
  */
 export const getMyProfile = async (token?: string): Promise<ProfileData> => {
   try {
-    let authToken = token;
-
-    // 토큰이 없을 경우, 클라이언트 환경에서만 쿠키에서 가져오기
-    if (!authToken && typeof document !== "undefined") {
-      const { token: clientToken } = getAuthInfo();
-      authToken = clientToken || undefined;
-    }
-
-    if (!authToken) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
+    const authToken = getValidatedAuthToken(token);
 
     const data = await apiGet<ProfileResponse>("/api/v1/profiles/me", {}, authToken);
     return data.data;
@@ -62,17 +52,7 @@ export const getS3UploadUrl = async (
   token?: string,
 ): Promise<{ presignedUrl: string; s3Key: string }> => {
   try {
-    let authToken = token;
-
-    // 토큰이 없을 경우, 클라이언트 환경에서만 쿠키에서 가져오기
-    if (!authToken && typeof document !== "undefined") {
-      const { token: clientToken } = getAuthInfo();
-      authToken = clientToken || undefined;
-    }
-
-    if (!authToken) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
+    const authToken = getValidatedAuthToken(token);
 
     const response = await apiPost<S3UploadUrlResponse>("/api/v1/s3/upload-url", uploadData, authToken);
     return response.data;
@@ -109,17 +89,7 @@ export const uploadAndUpdateProfile = async (
   token?: string,
 ): Promise<ProfileData> => {
   try {
-    let authToken = token;
-
-    // 토큰이 없을 경우, 클라이언트 환경에서만 쿠키에서 가져오기
-    if (!authToken && typeof document !== "undefined") {
-      const { token: clientToken } = getAuthInfo();
-      authToken = clientToken || undefined;
-    }
-
-    if (!authToken) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
+    const authToken = getValidatedAuthToken(token);
 
     // 이미지가 있으면 S3 업로드 후 이미지 정보 업데이트
     if (imageFile) {

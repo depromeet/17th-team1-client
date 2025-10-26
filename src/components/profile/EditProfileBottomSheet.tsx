@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 
 import {
   BottomSheet,
@@ -37,15 +37,36 @@ export const EditProfileBottomSheet = ({
   const [selectedImageFile, setSelectedImageFile] = useState<File | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const hasChanges = useMemo(
+    () => name !== initialName || selectedImageFile !== undefined,
+    [name, initialName, selectedImageFile],
+  );
+
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 파일 크기 제한 (예: 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert("이미지 크기는 5MB 이하여야 합니다.");
+      return;
+    }
+
+    // 파일 타입 검증
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 업로드 가능합니다.");
+      return;
+    }
 
     // 파일 저장 (저장 버튼 클릭 시 업로드)
     setSelectedImageFile(file);
 
     // 로컬 프리뷰 표시
     const reader = new FileReader();
+    reader.onerror = () => {
+      alert("이미지를 불러오는데 실패했습니다.");
+    };
     reader.onload = (event) => {
       const result = event.target?.result as string;
       setImage(result);
@@ -60,10 +81,17 @@ export const EditProfileBottomSheet = ({
       onOpenChange(false);
     } catch (error) {
       console.error("프로필 저장 실패:", error);
+      alert("프로필 저장에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsLoading(false);
     }
   }, [name, selectedImageFile, onSave, onOpenChange]);
+
+  useEffect(() => {
+    setName(initialName);
+    setImage(initialImage);
+    setSelectedImageFile(undefined);
+  }, [initialName, initialImage]);
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
@@ -83,11 +111,11 @@ export const EditProfileBottomSheet = ({
 
           <Button
             onClick={handleSave}
-            disabled={isLoading || name === initialName || name.length === 0}
+            disabled={isLoading || !hasChanges || name.length === 0}
             className={cn(
               "absolute right-4 top-1/2 -translate-y-1/2",
               "bg-transparent text-base font-bold px-2 py-1.5",
-              isLoading || name === initialName || name.length === 0 ? "text-text-thirdly" : "text-blue-theme",
+              isLoading || !hasChanges || name.length === 0 ? "text-text-thirdly" : "text-blue-theme",
             )}
             variant="primary"
           >

@@ -85,6 +85,8 @@ export const BottomSheetTitle = ({ className, ...props }: React.ComponentProps<t
 export const BottomSheetCloseButton = ({ className, ...props }: React.ComponentProps<"button">) => {
   return (
     <button
+      type="button"
+      aria-label="닫기"
       data-slot="bottom-sheet-close-button"
       className={cn(
         "absolute left-4 top-1/2 -translate-y-1/2",

@@ -18,13 +18,11 @@ export interface TravelRecord {
 
 // 여행 기록 생성 API 응답
 export interface CreateTravelRecordsData {
-  recordsCreated?: number;
-  [key: string]: unknown;
-}
-
-export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {
+  recordsCreated: number;
   message: string;
 }
+
+export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {}
 
 // 지구본 조회 API 응답
 export interface GlobeData {

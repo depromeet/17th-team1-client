@@ -51,14 +51,21 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       try {
         setIsLoading(true);
 
-        if (!userProfile) return;
+        if (!userProfile) {
+          setIsLoading(false);
+          setIsEditProfileOpen(false);
+
+          alert("프로필 정보를 불러올 수 없습니다.");
+          return;
+        }
 
         // 이미지가 있으면 함께 업로드, 없으면 닉네임만 업데이트
         const updatedProfile = await uploadAndUpdateProfile(nickname, userProfile.memberId, imageFile);
         setUserProfile(updatedProfile);
-      } catch (error) {
-        console.error("프로필 업데이트 실패:", error);
-        throw error;
+      } catch {
+        console.error("프로필 업데이트 실패");
+
+        alert("프로필 업데이트에 실패했습니다. 다시 시도해주세요.");
       } finally {
         setIsLoading(false);
       }

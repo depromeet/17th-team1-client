@@ -142,8 +142,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           }
 
           const countriesData = await response.json();
-          console.log("countriesData", countriesData);
-
           const features = countriesData?.features || [];
 
           setCountriesData(features);

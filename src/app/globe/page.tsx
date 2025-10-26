@@ -122,12 +122,7 @@ const GlobePrototype = () => {
           </div>
 
           {/* 하단 버튼들 - position absolute */}
-          <div
-            className="absolute bottom-[56px] left-0 right-0 z-10 px-4"
-            style={{
-              position: "absolute",
-            }}
-          >
+          <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
             <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
 
@@ -157,9 +152,8 @@ const GlobePrototype = () => {
 
           {/* 하단 버튼들 - 푸터 영역 (absolute 제거) */}
           <div
-            className="bottom-0 left-0 right-0 z-10 h-[156px]"
+            className="fixed bottom-0 left-0 right-0 z-10 h-[156px]"
             style={{
-              position: "fixed",
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}
           >

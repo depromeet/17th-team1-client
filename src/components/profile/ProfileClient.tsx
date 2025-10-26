@@ -1,8 +1,8 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-
 import { Button } from "@/components/common/Button";
 import { EditProfileBottomSheet } from "@/components/profile/EditProfileBottomSheet";
 import { LogoutDialog } from "@/components/profile/LogoutDialog";
@@ -54,11 +54,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         if (!userProfile) return;
 
         // 이미지가 있으면 함께 업로드, 없으면 닉네임만 업데이트
-        const updatedProfile = await uploadAndUpdateProfile(
-          nickname,
-          userProfile.memberId,
-          imageFile,
-        );
+        const updatedProfile = await uploadAndUpdateProfile(nickname, userProfile.memberId, imageFile);
         setUserProfile(updatedProfile);
       } catch (error) {
         console.error("프로필 업데이트 실패:", error);
@@ -80,45 +76,33 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     router.push("/withdrawal");
   }, [router]);
 
-  if (!userProfile) {
-    return (
-      <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
-        <div className="bg-surface-secondary relative w-full max-w-[402px] min-h-screen h-full flex flex-col items-center justify-center gap-4">
-          <p className="text-text-primary">프로필 정보를 불러올 수 없습니다.</p>
-          <Button onClick={() => router.back()} variant="primary" size="lg">
-            뒤로 가기
-          </Button>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
-      <div className="bg-surface-secondary relative w-full max-w-[402px] min-h-screen h-full flex flex-col">
-        <div className="relative w-full min-h-screen flex flex-col">
-          {/* Header */}
-          <div className="h-11 w-full shrink-0 relative">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="absolute left-4 top-0 flex gap-2.5 items-center p-2.5 h-full"
-              aria-label="뒤로 가기"
-            >
-              <span className="text-text-primary text-lg">‹</span>
-            </button>
-            <div className="absolute flex flex-col justify-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <p className="font-bold text-lg text-text-primary">나의 프로필</p>
-            </div>
+      <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
+        {/* Header */}
+        <div className="h-11 w-full shrink-0 flex items-center justify-between px-4 relative">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex gap-2.5 items-center p-2.5 -ml-2.5"
+            aria-label="뒤로 가기"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <div className="flex-1 flex justify-center">
+            <p className="font-bold text-lg text-text-primary">나의 프로필</p>
           </div>
+          <div className="w-10" />
+        </div>
 
-          {/* Main Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-5 min-w-0">
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto flex flex-col">
+          <div className="px-4 py-5 flex flex-col gap-5 min-w-0">
             {/* Profile Card Section */}
             <ProfileCard
-              name={userProfile.nickname}
-              email={userProfile.email}
-              profileImage={userProfile.profileImageUrl ?? undefined}
+              name={userProfile?.nickname ?? ""}
+              email={userProfile?.email ?? ""}
+              profileImage={userProfile?.profileImageUrl ?? undefined}
               onEditClick={handleEditProfile}
             />
 
@@ -128,13 +112,13 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
               <SettingItem label="회원 탈퇴하기" onClick={handleWithdrawalClick} />
             </SettingSection>
           </div>
+        </div>
 
-          {/* Logout Button */}
-          <div className="px-4 py-7.5 w-full shrink-0">
-            <Button onClick={handleLogoutClick} disabled={isLoading} variant="gray" size="lg" className="w-full">
-              {isLoading ? "로그아웃 중..." : "로그아웃"}
-            </Button>
-          </div>
+        {/* Logout Button */}
+        <div className="px-4 py-7.5 w-full shrink-0">
+          <Button onClick={handleLogoutClick} disabled={isLoading} variant="gray" size="lg" className="w-full">
+            {isLoading ? "로그아웃 중..." : "로그아웃"}
+          </Button>
         </div>
 
         {/* Logout Dialog */}
@@ -149,9 +133,9 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         <EditProfileBottomSheet
           isOpen={isEditProfileOpen}
           onOpenChange={setIsEditProfileOpen}
-          initialName={userProfile.nickname}
-          initialImage={userProfile.profileImageUrl ?? undefined}
-          memberId={userProfile.memberId}
+          initialName={userProfile?.nickname}
+          initialImage={userProfile?.profileImageUrl ?? undefined}
+          memberId={userProfile?.memberId}
           onSave={handleSaveProfile}
         />
       </div>

@@ -76,11 +76,11 @@ export const EditProfileBottomSheet = ({
 
           <Button
             onClick={handleSave}
-            disabled={isLoading || name === initialName}
+            disabled={isLoading || name === initialName || name.length === 0}
             className={cn(
               "absolute right-4 top-1/2 -translate-y-1/2",
               "bg-transparent text-base font-bold px-2 py-1.5",
-              isLoading || name === initialName ? "text-text-thirdly" : "text-blue-theme",
+              isLoading || name === initialName || name.length === 0 ? "text-text-thirdly" : "text-blue-theme",
             )}
             variant="primary"
           >
@@ -115,7 +115,12 @@ export const EditProfileBottomSheet = ({
                 id={nicknameId}
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= 20) {
+                    setName(value);
+                  }
+                }}
                 maxLength={20}
                 placeholder="닉네임을 입력하세요"
                 className={cn(
@@ -132,7 +137,14 @@ export const EditProfileBottomSheet = ({
                 }}
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                <span className="text-xs font-medium text-text-thirdly">{name.length} / 20</span>
+                <span
+                  className={cn(
+                    "text-xs font-medium transition-colors",
+                    name.length === 20 ? "text-white" : "text-text-thirdly",
+                  )}
+                >
+                  {name.length} / 20
+                </span>
               </div>
             </div>
           </div>

@@ -21,7 +21,7 @@ type ListViewProps = {
   travelPatterns: TravelPattern[];
 };
 
-interface GroupedByCountry {
+type GroupedByCountry = {
   countryCode: string;
   countryName: string;
   flag: string;
@@ -31,7 +31,7 @@ interface GroupedByCountry {
     lat: number;
     lng: number;
   }>;
-}
+};
 
 const ListView = ({ travelPatterns }: ListViewProps) => {
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");

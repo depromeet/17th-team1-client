@@ -4,6 +4,7 @@ export { default as ChevronDownIcon } from "./chevron-down.svg";
 export { default as ChevronUpIcon } from "./chevron-up.svg";
 export { default as CloseIcon } from "./close.svg";
 export { default as DotIcon } from "./dot.svg";
+export { default as GalleryIcon } from "./gallery.svg";
 export { default as KakaoIcon } from "./kakao.svg";
 export { default as MapPinIcon } from "./map-pin.svg";
 export { default as MenuIcon } from "./menu.svg";

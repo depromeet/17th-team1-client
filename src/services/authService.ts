@@ -39,14 +39,30 @@ const clearAuthCookies = (): void => {
   if (typeof document === "undefined") return;
 
   const cookies = ["kakao_access_token", "member_id", "uuid"];
-  const domain = window.location.hostname;
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === "localhost" || /^[0-9.]+$/.test(hostname);
 
-  for (const cookieName of cookies) {
-    // 현재 도메인에서 삭제
-    // biome-ignore lint/suspicious/noDocumentCookie: 쿠키 삭제를 위해 document.cookie에 직접 할당해야 합니다.
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    // 상위 도메인에서 삭제
-    // biome-ignore lint/suspicious/noDocumentCookie: 쿠키 삭제를 위해 document.cookie에 직접 할당해야 합니다.
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+  // domain 후보: (1) 지정 안 함, (2) 현재 호스트, (3) 부모 도메인들(.example.com 등)
+  const parentDomains = isLocalhost
+    ? []
+    : (() => {
+        const parts = hostname.split(".");
+        const acc: string[] = [];
+        for (let i = 1; i < parts.length - 0; i++) {
+          const d = `.${parts.slice(i).join(".")}`;
+          acc.push(d);
+        }
+        return Array.from(new Set([hostname, ...acc]));
+      })();
+
+  const domainCandidates: (string | undefined)[] = [undefined, ...parentDomains];
+
+  for (const name of cookies) {
+    for (const d of domainCandidates) {
+      const domainAttr = d ? `; domain=${d}` : "";
+
+      // biome-ignore lint/suspicious/noDocumentCookie: 쿠키 삭제를 위해 document.cookie에 직접 할당해야 합니다.
+      document.cookie = `${name}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainAttr}`;
+    }
   }
 };

@@ -13,7 +13,13 @@ interface TagSelectorProps {
   className?: string;
 }
 
-export const TagSelector = ({ selectedTag, onSelect, onRemove, placeholder = "태그 지정", className }: TagSelectorProps) => {
+export const TagSelector = ({
+  selectedTag,
+  onSelect,
+  onRemove,
+  placeholder = "태그 지정",
+  className,
+}: TagSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (tag: ImageTag) => {
@@ -53,9 +59,7 @@ export const TagSelector = ({ selectedTag, onSelect, onRemove, placeholder = "�
               type="button"
               key={tag}
               onClick={() => handleSelect(tag)}
-              className={cn(
-                "w-full px-4 py-2.5 text-left text-xs text-white transition-colors cursor-pointer",
-              )}
+              className={cn("w-full px-4 py-2.5 text-left text-xs text-white transition-colors cursor-pointer")}
             >
               {TAG_LABELS[tag]}
             </button>

@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { Header } from "@/components/common/Header";
 import { EditProfileBottomSheet } from "@/components/profile/EditProfileBottomSheet";
 import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
@@ -42,7 +42,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       alert(errorMessage);
 
       setIsLogoutDialogOpen(false);
-      router.push("/login");
+      // [TODO]: error fallback 페이지로 이동
     } finally {
       setIsLoading(false);
     }
@@ -72,8 +72,8 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         // 이미지가 있으면 함께 업로드, 없으면 닉네임만 업데이트
         const updatedProfile = await uploadAndUpdateProfile(nickname, userProfile.memberId, imageFile);
         setUserProfile(updatedProfile);
-      } catch {
-        console.error("프로필 업데이트 실패");
+      } catch (error) {
+        console.error("프로필 업데이트 실패", error);
 
         alert("프로필 업데이트에 실패했습니다. 다시 시도해주세요.");
       } finally {
@@ -96,21 +96,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   return (
     <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
       <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
-        {/* Header */}
-        <div className="h-11 w-full shrink-0 flex items-center justify-between px-4 relative">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex gap-2.5 items-center p-2.5 -ml-2.5"
-            aria-label="뒤로 가기"
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          <div className="flex-1 flex justify-center">
-            <p className="font-bold text-lg text-text-primary">나의 프로필</p>
-          </div>
-          <div className="w-10" />
-        </div>
+        <Header variant="navy" leftIcon="back" onBack={() => router.back()} title="나의 프로필" />
 
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto flex flex-col">
@@ -152,7 +138,6 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
           onOpenChange={setIsEditProfileOpen}
           initialName={userProfile?.nickname}
           initialImage={userProfile?.profileImageUrl ?? undefined}
-          memberId={userProfile?.memberId}
           onSave={handleSaveProfile}
         />
       </div>

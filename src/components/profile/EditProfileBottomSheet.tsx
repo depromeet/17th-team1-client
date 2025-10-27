@@ -20,7 +20,6 @@ type EditProfileBottomSheetProps = {
   onOpenChange: (open: boolean) => void;
   initialName?: string;
   initialImage?: string;
-  memberId?: number;
   onSave: (name: string, imageFile?: File) => void | Promise<void>;
 };
 
@@ -95,7 +94,7 @@ export const EditProfileBottomSheet = ({
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
-      <BottomSheetContent className="min-h-[812px]">
+      <BottomSheetContent className="min-h-[812px] max-w-[512px]">
         <BottomSheetHeader className="w-full h-11 relative">
           <BottomSheetCloseButton
             onClick={() => onOpenChange(false)}

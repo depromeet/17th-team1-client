@@ -132,7 +132,12 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
 
           {/* 오른쪽 텍스트 버튼 */}
           {rightButton && (
-            <button type="button" onClick={onRightButtonClick} className="text-base font-bold text-state-focused cursor-pointer" aria-label="Right action">
+            <button
+              type="button"
+              onClick={onRightButtonClick}
+              className="text-base font-bold text-state-focused cursor-pointer"
+              aria-label="Right action"
+            >
               {rightButton}
             </button>
           )}

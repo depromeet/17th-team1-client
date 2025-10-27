@@ -33,7 +33,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
         {/* Error Message */}
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="text-xl font-bold text-white tracking-[-0.4px]">오류가 발생했습니다</h2>
-          <p className="text-base font-medium text-[var(--color-text-secondary,#a8b8c6)] tracking-[-0.32px]">{error}</p>
+          <p className="text-base font-medium text-(--color-text-secondary,#a8b8c6) tracking-[-0.32px]">{error}</p>
         </div>
 
         {/* Retry Button */}
@@ -78,7 +78,7 @@ const EmptyState = () => {
         {/* Text Content */}
         <div className="flex flex-col items-center gap-2 w-[247px] text-center">
           <h2 className="text-xl font-bold text-white tracking-[-0.4px]">저장된 지구본이 없어요 🥲</h2>
-          <p className="text-base font-medium text-[var(--color-text-secondary,#a8b8c6)] tracking-[-0.32px]">
+          <p className="text-base font-medium text-(--color-text-secondary,#a8b8c6) tracking-[-0.32px]">
             친구의 지구본을 둘러보고 저장해보세요
           </p>
         </div>
@@ -135,12 +135,12 @@ const GlobeList = ({
             {/* Left Content */}
             <div className="flex items-center gap-2.5">
               {/* Profile Image */}
-              <div className="w-11 h-11 rounded-full bg-[rgba(255,255,255,0.1)] flex-shrink-0 overflow-hidden">
+              <div className="w-11 h-11 rounded-full bg-[rgba(255,255,255,0.1)] shrink-0 overflow-hidden">
                 {globe.profileImage ? (
                   // biome-ignore lint/performance/noImgElement: Profile image placeholder, optimization not needed
                   <img src={globe.profileImage} alt={globe.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
+                  <div className="w-full h-full bg-linear-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
                 )}
               </div>
 
@@ -155,7 +155,7 @@ const GlobeList = ({
                 e.stopPropagation();
                 onSaveToggle(globe.memberId);
               }}
-              className="flex-shrink-0 w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity"
+              className="shrink-0 w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity"
               aria-label={globe.isSaved ? "저장 해제" : "저장"}
             >
               <svg

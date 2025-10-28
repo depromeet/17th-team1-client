@@ -12,4 +12,5 @@ export { default as PeopleIcon } from "./people.svg";
 export { default as PlusIcon } from "./plus.svg";
 export { default as ReturnIcon } from "./return.svg";
 export { default as SearchIcon } from "./search.svg";
+export { default as WarningIcon } from "./warning.svg";
 export { default as XIcon } from "./x.svg";

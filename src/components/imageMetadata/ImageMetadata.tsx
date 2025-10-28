@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useCallback, useId, useMemo, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
-import { MetadataChip } from "@/components/imageMetadata/MetadataChip";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
 import { Header } from "../common/Header";
 import { GoogleMapsModal } from "./GoogleMapsModal";
+import { ImageCarousel } from "./ImageCarousel";
 import { ImageMetadataHeader } from "./ImageMetadataHeader";
 import { LoadingOverlay } from "./LoadingOverlay";
+import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
   initialCity?: string;
@@ -19,7 +20,6 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
   const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
@@ -49,7 +49,6 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
       setMetadataList((prev) => {
         const next = prev.length > 0 ? [...prev, ...results] : results;
         setSelectedImage(next[prev.length]);
-        setCurrentIndex(prev.length);
         return next;
       });
     } finally {
@@ -86,6 +85,16 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     if (selectedImage?.id === selectedImageForMaps.id) {
       setSelectedImage((prev) => (prev ? { ...prev, location: updatedLocation } : null));
     }
+  };
+
+  const handleRemove = (id: string) => {
+    setMetadataList((prev) => {
+      const filtered = prev.filter((item) => item.id !== id);
+      if (filtered.length === 0) {
+        setSelectedImage(null);
+      }
+      return filtered;
+    });
   };
 
   const handleSave = () => {
@@ -170,16 +179,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   }
 
   if (selectedImage) {
-    const images = metadataList.length > 0 ? metadataList : [selectedImage];
-    const shown = images[currentIndex] || selectedImage;
-    const formatMonth = (ts?: string) =>
-      ts
-        ? (() => {
-          const d = new Date(ts);
-          return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
-        })()
-        : "";
-    const displayLocation = shown.location?.nearbyPlaces?.[1] || shown.location?.address || "";
+    const isSingleImage = metadataList.length === 1;
 
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
@@ -193,60 +193,25 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           rightButtonDisabled={true}
           onRightClick={() => console.log("dot")}
         />
-        <div className="px-6 mb-6">
-          <div className="bg-white rounded-2xl overflow-hidden">
-            <div className="relative select-none">
-              <div className="w-full overflow-hidden">
-                <div
-                  className="flex transition-transform duration-300"
-                  style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-                >
-                  {images.map((img) => (
-                    <div key={img.id} className="w-full h-[50vh] flex-shrink-0 bg-black relative">
-                      <Image
-                        src={img.imagePreview}
-                        alt={img.fileName}
-                        fill
-                        className="object-cover object-center"
-                        sizes="100vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute top-3 left-3">
-                <MetadataChip iconType="calendar" text={formatMonth(shown.timestamp) || "정보 없음"} />
-              </div>
-              <div className="absolute top-3 left-28">
-                <button
-                  type="button"
-                  onClick={() => handleLocationClick(shown)}
-                  aria-label="Open location in maps"
-                  className="cursor-pointer hover:opacity-80 transition-opacity border-0 p-0 bg-transparent"
-                >
-                  <MetadataChip iconType="location" text={displayLocation || "정보 없음"} />
-                </button>
-              </div>
-              {images.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-8 h-8 rounded-full"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentIndex((i) => Math.min(images.length - 1, i + 1))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-8 h-8 rounded-full"
-                  >
-                    ›
-                  </button>
-                </>
-              )}
+        <div
+          className={
+            isSingleImage
+              ? "px-4"
+              : "flex gap-4 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          }
+        >
+          {metadataList.map((metadata) => (
+            <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
+              <ImageCarousel
+                images={[metadata]}
+                onRemove={handleRemove}
+                onLocationClick={handleLocationClick}
+              />
             </div>
-          </div>
+          ))}
+        </div>
+        <div className="px-4">
+          <MemoryTextarea />
         </div>
         <GoogleMapsModal
           isOpen={isMapsModalOpen}

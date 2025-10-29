@@ -235,7 +235,7 @@ export default function SavedGlobePage() {
     return (
       <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
         <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
-          <Header variant="navy" leftIcon="back" onBack={() => router.back()} title="저장된 지구본" />
+          <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="저장된 지구본" />
 
           <ErrorState error={error} onRetry={loadGlobes} />
         </div>
@@ -247,7 +247,7 @@ export default function SavedGlobePage() {
     return (
       <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
         <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
-          <Header variant="navy" leftIcon="back" onBack={() => router.back()} title="저장된 지구본" />
+          <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="저장된 지구본" />
 
           <EmptyState />
         </div>
@@ -258,7 +258,7 @@ export default function SavedGlobePage() {
   return (
     <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
       <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
-        <Header variant="navy" leftIcon="back" onBack={() => router.back()} title="저장된 지구본" />
+        <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="저장된 지구본" />
 
         <GlobeList
           sortedGlobes={sortedGlobes}

@@ -99,6 +99,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
 
   const handleSave = () => {
     // TODO: Implement actual save functionality
+    console.log("save");
   };
 
   if (metadataList.length === 0) {
@@ -113,7 +114,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           onLeftClick={() => console.log("close")}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
-          onRightClick={() => console.log("dot")}
+          onRightClick={handleSave}
         />
         <div className="px-6 mb-6 h-[calc(100vh-160px)] flex items-center justify-center">
           <div className="text-center flex flex-col justify-center relative overflow-hidden">
@@ -202,11 +203,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
         >
           {metadataList.map((metadata) => (
             <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel
-                images={[metadata]}
-                onRemove={handleRemove}
-                onLocationClick={handleLocationClick}
-              />
+              <ImageCarousel images={[metadata]} onRemove={handleRemove} onLocationClick={handleLocationClick} />
             </div>
           ))}
         </div>

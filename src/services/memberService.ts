@@ -42,7 +42,6 @@ export const getMemberTravels = async (token?: string): Promise<MemberTravelsRes
   }
 };
 
-
 // 멤버 여행 기록 생성 API
 export const createMemberTravels = async (cities: City[]): Promise<CreateTravelRecordsResponse> => {
   try {
@@ -53,11 +52,7 @@ export const createMemberTravels = async (cities: City[]): Promise<CreateTravelR
     }
 
     const travelRecords = convertCitiesToTravelRecords(cities);
-    const data = await apiPost<CreateTravelRecordsResponse>(
-      `/api/v1/member-travels`,
-      travelRecords,
-      token
-    );
+    const data = await apiPost<CreateTravelRecordsResponse>(`/api/v1/member-travels`, travelRecords, token);
 
     return data;
   } catch (error) {

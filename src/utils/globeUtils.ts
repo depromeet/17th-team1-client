@@ -33,9 +33,10 @@ export const getPolygonColor = (
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   const cityCount = countries.filter((c: any) => getISOCode(c.id) === countryCode).length;
 
-  if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상: 가장 밝은 파란색
-  if (cityCount >= 5) return COLORS.GLOBE_LV2; // 5개 이상: 중간 파란색
-  return COLORS.GLOBE_LV1; // 1개 이상: 어두운 파란색
+  // Globe Leveling Color 기준 (기획 문서 참조)
+  if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상 도시: Blue 0 (#67E8FF)
+  if (cityCount >= 5) return COLORS.GLOBE_LV2; // 5개 이상 도시: Blue 100 (#00CAED)
+  return COLORS.GLOBE_LV1; // 1개 이상 도시: Blue 200 (#0084B0)
 };
 
 // 브라우저 줌 방지 이벤트 리스너

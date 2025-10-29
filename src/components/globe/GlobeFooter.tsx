@@ -8,6 +8,7 @@ type GlobeFooterProps = {
   isZoomed: boolean;
   viewMode?: "globe" | "list";
   onViewModeChange?: (mode: "globe" | "list") => void;
+  onCaptureScreenshot?: () => void;
 };
 
 const DESCRIPTIONS = [
@@ -24,7 +25,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
   return nextIndex;
 };
 
-export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
+export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange, onCaptureScreenshot }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
         {/* 공유 버튼 */}
         <button
           type="button"
+          onClick={onCaptureScreenshot}
           className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
           style={{
             background:

@@ -73,6 +73,25 @@ const GlobePrototype = () => {
     setIsLoading(false);
   };
 
+  // 스크린샷 캡처 함수
+  const handleCaptureScreenshot = async () => {
+    if (!globeRef.current) return;
+
+    try {
+      const imageDataUrl = await globeRef.current.captureScreenshot();
+
+      // 이미지 다운로드
+      const link = document.createElement("a");
+      link.href = imageDataUrl;
+      link.download = `globe-screenshot-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to capture screenshot:", error);
+    }
+  };
+
   // 로딩 중이거나 데이터가 없는 경우
   if (isLoading) {
     return <GlobeLoading onComplete={handleLoadingComplete} />;
@@ -123,7 +142,12 @@ const GlobePrototype = () => {
 
           {/* 하단 버튼들 - position absolute */}
           <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter
+              isZoomed={isZoomed}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onCaptureScreenshot={handleCaptureScreenshot}
+            />
           </div>
 
           {/* 돌아가기 버튼 */}

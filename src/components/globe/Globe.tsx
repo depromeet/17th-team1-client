@@ -42,6 +42,7 @@ type GlobeProps = {
 export interface GlobeRef {
   globeRef: React.RefObject<GlobeInstance | null>;
   resetGlobe: () => void;
+  captureScreenshot: () => Promise<string>;
 }
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
@@ -124,6 +125,55 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       resetGlobe: () => {
         resetGlobe(); // useGlobeState의 resetGlobe
         resetClustering(); // useClustering의 resetGlobe
+      },
+      captureScreenshot: async () => {
+        if (!globeRef.current) {
+          throw new Error("Globe is not initialized");
+        }
+
+        // 방법 1: Globe.gl의 내부 renderer를 통한 접근
+        type GlobeWithInternals = GlobeInstance & {
+          renderer?: () => {
+            domElement: HTMLCanvasElement;
+            render: (scene: unknown, camera: unknown) => void;
+          } | undefined;
+          scene?: () => unknown;
+          camera?: () => unknown;
+        };
+
+        const globe = globeRef.current as GlobeWithInternals;
+        const renderer = globe.renderer?.();
+        const scene = globe.scene?.();
+        const camera = globe.camera?.();
+
+        if (renderer && scene && camera) {
+          // 현재 프레임을 명시적으로 렌더링
+          renderer.render(scene, camera);
+
+          // 캔버스를 이미지로 변환
+          return new Promise<string>((resolve) => {
+            requestAnimationFrame(() => {
+              resolve(renderer.domElement.toDataURL("image/png"));
+            });
+          });
+        }
+
+        // 방법 2: DOM에서 직접 캔버스 찾기 (fallback)
+        const container = renderer?.domElement?.parentElement;
+        if (!container) {
+          throw new Error("Globe container not found");
+        }
+
+        const canvas = container.querySelector("canvas");
+        if (!canvas) {
+          throw new Error("Canvas element not found");
+        }
+
+        return new Promise<string>((resolve) => {
+          requestAnimationFrame(() => {
+            resolve(canvas.toDataURL("image/png"));
+          });
+        });
       },
     }));
 

@@ -4,7 +4,6 @@ import { KakaoIcon } from "@/assets/icons";
 import { env } from "@/config/env";
 
 const KakaoLoginButton = () => {
-
   const handleLogin = () => {
     const redirectOrigin = env.REDIRECT_ORIGIN;
 

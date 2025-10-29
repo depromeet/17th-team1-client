@@ -1,8 +1,11 @@
-// 멤버 ID 조회 응답
-export interface MemberIdResponse {
+// 공통 Response 타입
+export interface ApiResponse<T> {
   status: string;
-  data: number;
+  data: T;
 }
+
+// 멤버 ID 조회 응답
+export interface MemberIdResponse extends ApiResponse<number> {}
 
 // 여행 기록 생성 API
 export interface TravelRecord {
@@ -14,14 +17,12 @@ export interface TravelRecord {
 }
 
 // 여행 기록 생성 API 응답
-export interface CreateTravelRecordsResponse {
-  status: string;
+export interface CreateTravelRecordsData {
+  recordsCreated: number;
   message: string;
-  data?: {
-    recordsCreated?: number;
-    [key: string]: unknown;
-  };
 }
+
+export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {}
 
 // 지구본 조회 API 응답
 export interface GlobeData {
@@ -43,18 +44,14 @@ export interface GlobeCity {
   countryCode: string;
 }
 
-export interface GlobeResponse {
-  status: string;
-  data: GlobeData;
-}
+export interface GlobeResponse extends ApiResponse<GlobeData> {}
 
 // AI 인사이트 응답
-export interface TravelInsightResponse {
-  status: string;
-  data: {
-    title: string;
-  };
+export interface TravelInsightData {
+  title: string;
 }
+
+export interface TravelInsightResponse extends ApiResponse<TravelInsightData> {}
 
 // 멤버 여행 데이터 조회 응답
 export interface MemberTravelCity {
@@ -75,7 +72,32 @@ export interface MemberTravelsData {
   travels: MemberTravel[];
 }
 
-export interface MemberTravelsResponse {
-  status: string;
-  data: MemberTravelsData;
+export interface MemberTravelsResponse extends ApiResponse<MemberTravelsData> {}
+
+// 프로필 정보 타입
+export interface ProfileData {
+  memberId: number;
+  nickname: string;
+  email: string;
+  profileImageUrl: string | null;
+  authProvider: string;
 }
+
+// 프로필 조회 API 응답
+export interface ProfileResponse extends ApiResponse<ProfileData> {}
+
+// S3 업로드 URL 요청 데이터
+export interface S3UploadUrlParams {
+  uploadType: string;
+  resourceId: number;
+  fileName: string;
+  contentType: string;
+}
+
+// S3 업로드 URL 응답 데이터
+export interface S3UploadUrlData {
+  presignedUrl: string;
+  s3Key: string;
+}
+
+export interface S3UploadUrlResponse extends ApiResponse<S3UploadUrlData> {}

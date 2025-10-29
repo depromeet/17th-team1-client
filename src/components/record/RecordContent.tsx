@@ -3,6 +3,10 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import type { RecordResponse, Continent } from "@/types/record";
+import {
+  getContinent as getKoreanContinent,
+  COUNTRY_CODE_TO_FLAG,
+} from "@/constants/countryMapping";
 
 interface RecordContentProps {
   initialData: RecordResponse | null;
@@ -10,243 +14,25 @@ interface RecordContentProps {
   onContinentChange: (continent: Continent) => void;
 }
 
-// 국가 코드를 대륙으로 매핑하는 함수
+// 국가 코드를 대륙으로 매핑하는 함수 (공용 매핑 재사용)
 const getContinentFromCountryCode = (countryCode: string): Continent => {
-  const continentMap: Record<string, Continent> = {
-    // 아시아
-    JPN: "아시아",
-    KOR: "아시아",
-    CHN: "아시아",
-    THA: "아시아",
-    VNM: "아시아",
-    SGP: "아시아",
-    MYS: "아시아",
-    IDN: "아시아",
-    PHL: "아시아",
-    IND: "아시아",
-    MMR: "아시아",
-    KHM: "아시아",
-    LAO: "아시아",
-    BGD: "아시아",
-    LKA: "아시아",
-    NPL: "아시아",
-    BTN: "아시아",
-    MNG: "아시아",
-    KAZ: "아시아",
-    UZB: "아시아",
-    KGZ: "아시아",
-    TJK: "아시아",
-    TKM: "아시아",
-    AFG: "아시아",
-    IRN: "아시아",
-    IRQ: "아시아",
-    SYR: "아시아",
-    LBN: "아시아",
-    JOR: "아시아",
-    ISR: "아시아",
-    PSE: "아시아",
-    SAU: "아시아",
-    ARE: "아시아",
-    QAT: "아시아",
-    BHR: "아시아",
-    KWT: "아시아",
-    OMN: "아시아",
-    YEM: "아시아",
-    GEO: "아시아",
-    ARM: "아시아",
-    AZE: "아시아",
-    TUR: "아시아",
-    CYP: "아시아",
-
-    // 유럽
-    GBR: "유럽",
-    FRA: "유럽",
-    DEU: "유럽",
-    ITA: "유럽",
-    ESP: "유럽",
-    NLD: "유럽",
-    BEL: "유럽",
-    CHE: "유럽",
-    AUT: "유럽",
-    POL: "유럽",
-    CZE: "유럽",
-    HUN: "유럽",
-    ROU: "유럽",
-    BGR: "유럽",
-    GRC: "유럽",
-    PRT: "유럽",
-    DNK: "유럽",
-    SWE: "유럽",
-    NOR: "유럽",
-    FIN: "유럽",
-    ISL: "유럽",
-    IRL: "유럽",
-    LUX: "유럽",
-    SVN: "유럽",
-    HRV: "유럽",
-    SRB: "유럽",
-    MKD: "유럽",
-    ALB: "유럽",
-    MNE: "유럽",
-    BIH: "유럽",
-    LTU: "유럽",
-    LVA: "유럽",
-    EST: "유럽",
-    BLR: "유럽",
-    MDA: "유럽",
-    UKR: "유럽",
-    RUS: "유럽",
-    SVK: "유럽",
-
-    // 북미
-    USA: "북미",
-    CAN: "북미",
-    MEX: "북미",
-    GTM: "북미",
-    BLZ: "북미",
-    SLV: "북미",
-    HND: "북미",
-    NIC: "북미",
-    CRI: "북미",
-    PAN: "북미",
-    CUB: "북미",
-    JAM: "북미",
-    DOM: "북미",
-    HTI: "북미",
-    BHS: "북미",
-    BRB: "북미",
-
-    // 남미
-    BRA: "남미",
-    ARG: "남미",
-    CHL: "남미",
-    PER: "남미",
-    COL: "남미",
-    VEN: "남미",
-    ECU: "남미",
-    BOL: "남미",
-    PRY: "남미",
-    URY: "남미",
-    GUY: "남미",
-    SUR: "남미",
-
-    // 아프리카
-    ZAF: "아프리카",
-    EGY: "아프리카",
-    NGA: "아프리카",
-    KEN: "아프리카",
-    MAR: "아프리카",
-    TUN: "아프리카",
-    DZA: "아프리카",
-    LBY: "아프리카",
-    ETH: "아프리카",
-    GHA: "아프리카",
-    UGA: "아프리카",
-    TZA: "아프리카",
-
-    // 오세아니아
-    AUS: "오세아니아",
-    NZL: "오세아니아",
-    FJI: "오세아니아",
-    PNG: "오세아니아",
-  };
-
-  return continentMap[countryCode] || "아시아";
+  const korean = getKoreanContinent(countryCode); // "북아메리카" 등
+  if (korean === "북아메리카") return "북미";
+  if (korean === "남아메리카") return "남미";
+  if (
+    korean === "아시아" ||
+    korean === "유럽" ||
+    korean === "아프리카" ||
+    korean === "오세아니아"
+  ) {
+    return korean as Continent;
+  }
+  return "아시아";
 };
 
-// 국가 코드를 이모지로 매핑하는 함수
-const getCountryFlag = (countryCode: string): string => {
-  const flagMap: Record<string, string> = {
-    JPN: "🇯🇵",
-    KOR: "🇰🇷",
-    CHN: "🇨🇳",
-    THA: "🇹🇭",
-    VNM: "🇻🇳",
-    SGP: "🇸🇬",
-    MYS: "🇲🇾",
-    IDN: "🇮🇩",
-    PHL: "🇵🇭",
-    IND: "🇮🇳",
-    MMR: "🇲🇲",
-    KHM: "🇰🇭",
-    USA: "🇺🇸",
-    CAN: "🇨🇦",
-    MEX: "🇲🇽",
-    GBR: "🇬🇧",
-    FRA: "🇫🇷",
-    DEU: "🇩🇪",
-    ITA: "🇮🇹",
-    ESP: "🇪🇸",
-    NLD: "🇳🇱",
-    BEL: "🇧🇪",
-    CHE: "🇨🇭",
-    AUT: "🇦🇹",
-    POL: "🇵🇱",
-    CZE: "🇨🇿",
-    HUN: "🇭🇺",
-    ROU: "🇷🇴",
-    BGR: "🇧🇬",
-    GRC: "🇬🇷",
-    PRT: "🇵🇹",
-    DNK: "🇩🇰",
-    SWE: "🇸🇪",
-    NOR: "🇳🇴",
-    FIN: "🇫🇮",
-    ISL: "🇮🇸",
-    IRL: "🇮🇪",
-    LUX: "🇱🇺",
-    SVN: "🇸🇮",
-    HRV: "🇭🇷",
-    SRB: "🇷🇸",
-    MKD: "🇲🇰",
-    ALB: "🇦🇱",
-    MNE: "🇲🇪",
-    BIH: "🇧🇦",
-    LTU: "🇱🇹",
-    LVA: "🇱🇻",
-    EST: "🇪🇪",
-    BLR: "🇧🇾",
-    MDA: "🇲🇩",
-    UKR: "🇺🇦",
-    RUS: "🇷🇺",
-    SVK: "🇸🇰",
-    TUR: "🇹🇷",
-    CYP: "🇨🇾",
-    GEO: "🇬🇪",
-    ARM: "🇦🇲",
-    AZE: "🇦🇿",
-    BRA: "🇧🇷",
-    ARG: "🇦🇷",
-    CHL: "🇨🇱",
-    PER: "🇵🇪",
-    COL: "🇨🇴",
-    VEN: "🇻🇪",
-    ECU: "🇪🇨",
-    BOL: "🇧🇴",
-    PRY: "🇵🇾",
-    URY: "🇺🇾",
-    GUY: "🇬🇾",
-    SUR: "🇸🇷",
-    ZAF: "🇿🇦",
-    EGY: "🇪🇬",
-    NGA: "🇳🇬",
-    KEN: "🇰🇪",
-    MAR: "🇲🇦",
-    TUN: "🇹🇳",
-    DZA: "🇩🇿",
-    LBY: "🇱🇾",
-    ETH: "🇪🇹",
-    GHA: "🇬🇭",
-    UGA: "🇺🇬",
-    TZA: "🇹🇿",
-    AUS: "🇦🇺",
-    NZL: "🇳🇿",
-    FJI: "🇫🇯",
-    PNG: "🇵🇬",
-  };
-
-  return flagMap[countryCode] || "🌍";
-};
+// 국기 이모지: 공용 상수 사용
+const getCountryFlagByCode = (countryCode: string): string =>
+  COUNTRY_CODE_TO_FLAG[countryCode] || "🌍";
 
 export function RecordContent({
   initialData,
@@ -332,22 +118,17 @@ export function RecordContent({
 
   const continents = sortedContinents;
 
-  if (!initialData?.data) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="text-white text-lg">데이터를 불러오는 중...</div>
-      </div>
-    );
-  }
+  // SSR에서 데이터가 없을 때도 동일 레이아웃 유지 (빈 상태)
 
   return (
     <div className="space-y-8">
       {/* 상단 설명 */}
       <div>
-        <h1 className="text-text-primary text-2xl font-bold leading-loose">
-          여행 중 가장 기억에 남는 사진을{" "}
+        <div className="text-text-primary text-2xl font-bold">
+          여행 중 가장 기억에 남는 사진을
+          <br />
           <span className="text-State-Focused">최대 3장</span>으로 담아보세요.
-        </h1>
+        </div>
       </div>
 
       {/* 대륙 필터 */}
@@ -394,7 +175,7 @@ export function RecordContent({
         {filteredRegions.map((region, index) => (
           <div key={index} className="flex flex-col gap-3">
             <div className="text-white text-base font-medium">
-              {getCountryFlag(region.cities[0]?.countryCode || "")}{" "}
+              {getCountryFlagByCode(region.cities[0]?.countryCode || "")}{" "}
               {region.regionName}
             </div>
             <div className="flex flex-col gap-2">

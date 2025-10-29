@@ -259,6 +259,25 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       margin-right: -20px;
       transform: translateY(-50%);
     `,
+    thumbnailCard: `
+      position: absolute;
+      z-index: ${20 + index + 1};
+      top: ${offsetY + 15}px;
+      left: ${offsetX + 35}px;
+      width: 30px;
+      height: 40px;
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: -20px;
+      transform: translateY(-50%) rotate(8deg);
+      border: 1px solid #b3daff;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #112036;
+    `,
   };
 };
 

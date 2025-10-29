@@ -37,6 +37,8 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
         lat: city.lat,
         lng: city.lng,
         color: regionColor,
+        hasRecords: true, // API 응답에 있는 도시는 모두 기록이 있는 것으로 간주
+        thumbnailUrl: "https://picsum.photos/30/40", // TODO: API에서 thumbnailUrl 제공 시 추가
       });
     }
 

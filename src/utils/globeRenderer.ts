@@ -105,7 +105,42 @@ export const createCountryClusterHTML = (
   cityCount: number,
   flagEmoji: string,
   _isExpanded: boolean = false,
+  hasRecords: boolean = true,
+  thumbnailUrl?: string,
 ) => {
+  // 모든 도시 미기록 시: 기본형 마커 (+ 아이콘만)
+  if (!hasRecords) {
+    return `
+      <!-- 중심 dot -->
+      <div style="${styles.dot}"></div>
+      <!-- 단색 수평선 -->
+      <div style="${styles.horizontalLine}"></div>
+      <div style="${styles.label}">
+        <!-- 좌측 국기 이모지 -->
+        <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
+        <!-- 국가명 -->
+        <span>
+          ${countryName}
+        </span>
+        <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
+        ${
+          cityCount >= 1
+            ? `<div style="${styles.countBadge}">
+          <span>
+            ${cityCount}
+          </span>
+        </div>`
+            : ""
+        }
+      </div>
+      <!-- 우측 액션 버튼 (+ 아이콘) -->
+      <div style="${styles.actionButton}">
+        ${PLUS_BUTTON_SVG}
+      </div>
+    `;
+  }
+
+  // 해당 국가 내 1개 이상의 도시 기록 시: 카드형 마커 (썸네일 이미지 포함)
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
@@ -129,10 +164,14 @@ export const createCountryClusterHTML = (
           : ""
       }
     </div>
-    <!-- 우측 액션 버튼 -->
-    <div style="${styles.actionButton}">
-      ${PLUS_BUTTON_SVG}
-    </div>
+    <!-- 우측 썸네일 이미지 카드 -->
+    ${
+      thumbnailUrl
+        ? `<div style="${styles.thumbnailCard}">
+      <img src="${thumbnailUrl}" alt="${countryName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+    </div>`
+        : ""
+    }
   `;
 };
 

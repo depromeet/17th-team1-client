@@ -52,6 +52,35 @@ export const calculateClampedDistance = (
   return dynamicDistance;
 };
 
+// 텍스트 너비 계산 함수 (한글/영문 구분)
+const calculateTextWidth = (text: string, fontSize: number = 14): number => {
+  let totalWidth = 0;
+
+  const koreanCharRegex = /[\u3131-\u314e|\u314f-\u3163|\uac00-\ud7a3]/;
+  const koreanWidth = fontSize * 0.8; // 한글은 fontSize의 80%
+  const asciiWidth = fontSize * 0.55; // 영문/숫자는 fontSize의 55%
+
+  for (const char of text) {
+    if (koreanCharRegex.test(char)) {
+      totalWidth += koreanWidth;
+    } else {
+      totalWidth += asciiWidth;
+    }
+  }
+  return totalWidth;
+};
+
+// 라벨 전체 너비 계산 (국기 + 텍스트 + 배지 + 패딩)
+const calculateLabelWidth = (countryName: string, cityCount: number): number => {
+  const flagWidth = 14; // 국기 이모지 너비
+  const textWidth = calculateTextWidth(countryName, 14);
+  const badgeWidth = cityCount >= 1 ? 22 : 0; // 배지 최소 너비
+  const gaps = 5 * 2; // gap 5px * 2
+  const padding = 12; // 좌측 패딩만 (우측 패딩 제외)
+
+  return flagWidth + textWidth + badgeWidth + gaps + padding;
+};
+
 // 기획서에 맞는 개별 도시 HTML 생성
 export const createCityHTML = (
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
@@ -108,6 +137,9 @@ export const createCountryClusterHTML = (
   hasRecords: boolean = true,
   thumbnailUrl?: string,
 ) => {
+  // 라벨 너비 계산하여 썸네일 위치 동적 조정
+  const labelWidth = calculateLabelWidth(countryName, cityCount);
+
   // 모든 도시 미기록 시: 기본형 마커 (+ 아이콘만)
   if (!hasRecords) {
     return `
@@ -167,7 +199,7 @@ export const createCountryClusterHTML = (
     <!-- 우측 썸네일 이미지 카드 -->
     ${
       thumbnailUrl
-        ? `<div style="${styles.thumbnailCard}">
+        ? `<div style="${styles.thumbnailCard(labelWidth / 2)}">
       <img src="${thumbnailUrl}" alt="${countryName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
     </div>`
         : ""

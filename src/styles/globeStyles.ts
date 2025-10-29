@@ -259,11 +259,11 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       margin-right: -20px;
       transform: translateY(-50%);
     `,
-    thumbnailCard: `
+    thumbnailCard: (leftOffset: number) => `
       position: absolute;
       z-index: ${20 + index + 1};
       top: ${offsetY + 15}px;
-      left: ${offsetX + 35}px;
+      left: ${offsetX + leftOffset}px;
       width: 30px;
       height: 40px;
       pointer-events: auto;
@@ -271,7 +271,6 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: -20px;
       transform: translateY(-50%) rotate(8deg);
       border: 1px solid #b3daff;
       border-radius: 4px;
@@ -280,6 +279,3 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
     `,
   };
 };
-
-// 기존 호환성을 위한 함수 (기존 createClusterLabelStyles 대체)
-export const createClusterLabelStyles = createCountryClusterStyles;

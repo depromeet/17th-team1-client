@@ -14,9 +14,9 @@ interface RecordContentProps {
   onContinentChange: (continent: Continent) => void;
 }
 
-// 국가 코드를 대륙으로 매핑하는 함수 (공용 매핑 재사용)
+// 국가 코드 대륙으로 매핑
 const getContinentFromCountryCode = (countryCode: string): Continent => {
-  const korean = getKoreanContinent(countryCode); // "북아메리카" 등
+  const korean = getKoreanContinent(countryCode);
   if (korean === "북아메리카") return "북미";
   if (korean === "남아메리카") return "남미";
   if (
@@ -118,60 +118,73 @@ export function RecordContent({
 
   const continents = sortedContinents;
 
-  // SSR에서 데이터가 없을 때도 동일 레이아웃 유지 (빈 상태)
-
   return (
     <div className="space-y-8">
-      {/* 상단 설명 */}
       <div>
-        <div className="text-text-primary text-2xl font-bold">
-          여행 중 가장 기억에 남는 사진을
-          <br />
-          <span className="text-State-Focused">최대 3장</span>으로 담아보세요.
+        <div className="justify-start">
+          <span className="text-text-primary text-2xl font-bold font-['Pretendard'] leading-8">
+            여행 중 가장 기억에 남는 사진을
+          </span>
+          <br/>
+          <span className="text-state-focused text-2xl font-bold font-['Pretendard'] leading-8">
+            최대 3장
+          </span>
+          <span className="text-text-primary text-2xl font-bold font-['Pretendard'] leading-8">
+            으로 담아보세요.
+          </span>
         </div>
       </div>
 
       {/* 대륙 필터 */}
       <div>
         <div className="flex gap-2 overflow-x-auto -mx-4 px-4">
-          {continents.map((continent) => (
-            <button
-              key={continent}
-              onClick={() => onContinentChange(continent)}
-              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-[10px] border shrink-0 ${
-                selectedContinent === continent
-                  ? "bg-white border-transparent"
-                  : "border-white/10"
-              } ${continentStats[continent] === 0 ? "opacity-30" : ""}`}
-              disabled={continentStats[continent] === 0}
-            >
-              <span
-                className={`text-sm font-bold ${
-                  selectedContinent === continent
-                    ? "text-surface-secondary"
-                    : "text-white"
+          {continents.map((continent) => {
+            const count = continentStats[continent];
+            const isSelected = selectedContinent === continent;
+            const isDisabled = count === 0;
+            return (
+              <button
+                key={continent}
+                onClick={() => onContinentChange(continent)}
+                className={`shrink-0 inline-flex justify-center items-center gap-1 rounded-xl ${
+                  isSelected
+                    ? "px-3.5 py-2 bg-state-enabled"
+                    : isDisabled
+                      ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
+                      : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
                 }`}
+                disabled={isDisabled}
               >
-                {continent}
-              </span>
-              {continentStats[continent] > 0 && (
                 <span
-                  className={`text-sm font-bold ${
-                    selectedContinent === continent
-                      ? "text-surface-secondary"
-                      : "text-white"
+                  className={`${
+                    isSelected
+                      ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
+                      : isDisabled
+                        ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
+                        : "text-white text-sm font-medium font-['Pretendard'] leading-5"
                   }`}
                 >
-                  {continentStats[continent]}
+                  {continent}
                 </span>
-              )}
-            </button>
-          ))}
+                {!isDisabled && (
+                  <span
+                    className={`${
+                      isSelected
+                        ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
+                        : "text-white text-sm font-medium font-['Pretendard'] leading-5"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* 도시 목록 */}
-      <div className="flex flex-col gap-7 pb-8">
+      <div className="flex flex-col gap-[30px] pb-8">
         {filteredRegions.map((region, index) => (
           <div key={index} className="flex flex-col gap-3">
             <div className="text-white text-base font-medium">
@@ -182,19 +195,21 @@ export function RecordContent({
               {region.cities.map((city, cityIndex) => (
                 <div
                   key={cityIndex}
-                  className="w-full px-5 py-3 bg-Surface-Placeholder-4%/5 rounded-xl border border-Border-AbsoluteWhite-4%/5 flex justify-between items-center"
+                  className="self-stretch pl-5 pr-4 py-3 bg-surface-placeholder--4 rounded-2xl inline-flex justify-between items-center overflow-hidden"
                 >
-                  <div className="text-white text-sm font-medium">
+                  <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
                     {city.name}
                   </div>
-                  <div className="w-8 h-8 bg-0-4%/5 rounded-lg border flex justify-center items-center">
-                    <Image
-                      src="/modify.svg"
-                      alt="수정"
-                      width={12}
-                      height={12}
-                      className="outline outline-[1.50px] outline-offset-[-0.75px] outline-white/80"
-                    />
+                  <div className="w-8 h-8 rounded-lg flex justify-between items-center overflow-hidden">
+                    <div className="w-6 h-6 relative rounded-lg overflow-hidden">
+                      <Image
+                        src="/ic_edit.svg"
+                        alt="수정"
+                        fill
+                        className="object-contain"
+                        priority={false}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}

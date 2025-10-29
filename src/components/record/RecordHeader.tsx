@@ -17,22 +17,20 @@ export function RecordHeader() {
           onClick={handleBackClick}
           className="flex justify-start items-center"
         >
-          <div className="relative w-5 h-5">
+          <div className="w-6 h-6 relative">
             <Image
-              src="/back_btn.svg"
+              src="/ic_arrow_left.svg"
               alt="뒤로가기"
-              width={16}
-              height={16}
+              fill
               className="object-contain"
               priority
             />
           </div>
         </button>
-        <div className="text-center text-lg font-bold font-['Pretendard'] text-white">
-          기록
-        </div>
-        <div className="text-State-Focused text-base font-bold font-['Pretendard']">
-          도시 편집
+        <div data-property-1="disabled" className="px-2 py-1.5 rounded-[200px] inline-flex justify-end items-center">
+          <div className="text-right justify-start text-state-focused text-base font-bold font-['Pretendard'] leading-5">
+            도시 편집
+          </div>
         </div>
       </div>
     </div>

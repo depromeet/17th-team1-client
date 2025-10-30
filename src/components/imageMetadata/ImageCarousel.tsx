@@ -39,9 +39,9 @@ export const ImageCarousel = ({ images, onRemove, onLocationClick, onTagSelect }
           className="flex transition-transform duration-300"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          {images.map((img) => (
-            <div key={img.id} className="w-[251px] h-[445px] flex-shrink-0 bg-black relative">
-              <Image src={img.imagePreview} alt={img.fileName} fill className="object-cover object-center" />
+          {images.map(({ id, imagePreview, fileName }) => (
+            <div key={id} className="w-[251px] h-[445px] flex-shrink-0 bg-black relative">
+              <Image src={imagePreview} alt={fileName} fill className="object-cover object-center" />
             </div>
           ))}
         </div>

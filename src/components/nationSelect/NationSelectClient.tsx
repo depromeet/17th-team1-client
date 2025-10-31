@@ -11,9 +11,12 @@ import { PopularCitiesList } from "./PopularCitiesList";
 
 type NationSelectClientProps = {
   initialCities: City[];
+  mode?: "default" | "edit-add";
+  onComplete?: (cities: City[]) => void;
+  buttonLabel?: string;
 };
 
-export const NationSelectClient = ({ initialCities }: NationSelectClientProps) => {
+export const NationSelectClient = ({ initialCities, mode = "default", onComplete, buttonLabel }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
 
@@ -38,6 +41,11 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
 
   const handleCreateGlobe = async () => {
     if (selectedCityList.length === 0) return;
+
+    if (mode === "edit-add" && onComplete) {
+      onComplete(selectedCityList);
+      return;
+    }
 
     try {
       await createMemberTravels(selectedCityList);
@@ -94,6 +102,7 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
         selectedCities={selectedCityList}
         onRemoveCity={handleRemoveCity}
         onCreateGlobe={handleCreateGlobe}
+        buttonLabel={buttonLabel}
       />
     </div>
   );

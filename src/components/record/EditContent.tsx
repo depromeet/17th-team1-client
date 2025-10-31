@@ -4,16 +4,18 @@ import Image from "next/image";
 import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 
 interface EditContentProps {
-  cities: { id: string; name: string; countryCode: string }[];
+  cities: { id: string; name: string; countryCode: string; isNew?: boolean }[];
+  onAddClick?: () => void;
 }
 
-export function EditContent({ cities }: EditContentProps) {
+export function EditContent({ cities, onAddClick }: EditContentProps) {
   return (
     <div>
       <div className="mb-8">
         <button
           type="button"
           className="w-full px-5 py-3 bg-surface-inverseprimary rounded-xl inline-flex justify-center items-center overflow-hidden"
+          onClick={onAddClick}
         >
           <div className="flex justify-center items-center gap-1">
             <div className="w-4 h-4 relative">
@@ -37,7 +39,11 @@ export function EditContent({ cities }: EditContentProps) {
           return (
             <div
               key={c.id}
-              className="w-full px-5 py-3 bg-surface-placeholder--4 rounded-2xl inline-flex justify-between items-center overflow-hidden"
+              className={`w-full px-5 py-3 rounded-2xl inline-flex justify-between items-center overflow-hidden ${
+                c.isNew
+                  ? "bg-surface-placeholder--4 outline outline-[0.70px] outline-border-thirdly"
+                  : "bg-surface-placeholder--4"
+              }`}
             >
               <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
                 {flag} {c.name}, {countryName}

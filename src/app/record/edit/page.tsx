@@ -6,7 +6,7 @@ import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 export default async function EditRecordPage({
   searchParams,
 }: {
-  searchParams: { added?: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("kakao_access_token")?.value;
@@ -30,9 +30,10 @@ export default async function EditRecordPage({
   }
 
   // merge newly added from selection
-  if (searchParams?.added) {
+  const addedParam = searchParams?.added as string | undefined;
+  if (addedParam) {
     try {
-      const decoded = JSON.parse(decodeURIComponent(searchParams.added));
+      const decoded = JSON.parse(decodeURIComponent(addedParam));
       if (Array.isArray(decoded)) {
         const added = decoded.map((c: any) => ({ id: String(c.id), name: String(c.name), countryCode: String(c.countryCode), isNew: true }));
         // put new ones at the top, avoid duplicates by id

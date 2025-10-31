@@ -6,7 +6,7 @@ import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 export default async function EditRecordPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("kakao_access_token")?.value;
@@ -30,7 +30,8 @@ export default async function EditRecordPage({
   }
 
   // merge newly added from selection
-  const addedParam = searchParams?.added as string | undefined;
+  const resolved = await searchParams;
+  const addedParam = (Array.isArray(resolved?.added) ? resolved.added[0] : resolved?.added) as string | undefined;
   if (addedParam) {
     try {
       const decoded = JSON.parse(decodeURIComponent(addedParam));

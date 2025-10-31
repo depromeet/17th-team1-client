@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export function EditHeader() {
+interface EditHeaderProps {
+  canSave?: boolean;
+  onSave?: () => void;
+}
+
+export function EditHeader({ canSave = false, onSave }: EditHeaderProps) {
   const router = useRouter();
 
   return (
@@ -29,11 +34,18 @@ export function EditHeader() {
           도시 편집
         </div>
 
-        <div data-property-1="disabled" className="px-2 py-1.5 rounded-[200px] inline-flex justify-end items-center">
-          <div className="text-right justify-start text-text-thirdly text-base font-bold font-['Pretendard'] leading-5">
+        <button
+          type="button"
+          onClick={() => canSave && onSave?.()}
+          className="px-2 py-1.5 rounded-[200px] inline-flex justify-end items-center"
+          disabled={!canSave}
+        >
+          <div className={`text-right justify-start text-base font-bold font-['Pretendard'] leading-5 ${
+            canSave ? "text-theme-color cursor-pointer" : "text-text-thirdly"
+          }`}>
             저장
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );

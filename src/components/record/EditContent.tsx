@@ -6,9 +6,10 @@ import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping
 interface EditContentProps {
   cities: { id: string; name: string; countryCode: string; isNew?: boolean }[];
   onAddClick?: () => void;
+  onRemoveClick?: (cityId: string, isNew?: boolean) => void;
 }
 
-export function EditContent({ cities, onAddClick }: EditContentProps) {
+export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentProps) {
   return (
     <div>
       <div className="mb-8">
@@ -48,9 +49,9 @@ export function EditContent({ cities, onAddClick }: EditContentProps) {
               <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
                 {flag} {c.name}, {countryName}
               </div>
-              <div className="w-4 h-4 relative flex items-center justify-center">
+              <button type="button" onClick={() => onRemoveClick?.(c.id, c.isNew)} className="w-4 h-4 relative flex items-center justify-center">
                 <Image src="/ic_X.svg" alt="삭제" fill className="object-contain" />
-              </div>
+              </button>
             </div>
           );
         })}

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
+import { EditHeader } from "@/components/record/EditHeader";
 import type { City } from "@/types/city";
 
 interface EditSelectClientProps {
@@ -23,6 +24,7 @@ export function EditSelectClient({ initialCities }: EditSelectClientProps) {
       mode="edit-add"
       onComplete={handleComplete}
       buttonLabel="내 지구본에 추가하기"
+      customHeader={<EditHeader title="도시 추가" showSaveButton={false} />}
     />
   );
 }

@@ -8,15 +8,17 @@ import type { City } from "@/types/city";
 import { NationSelectFooter } from "./NationSelectFooter";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
+import { SearchInput } from "@/components/common/Input";
 
 type NationSelectClientProps = {
   initialCities: City[];
   mode?: "default" | "edit-add";
   onComplete?: (cities: City[]) => void;
   buttonLabel?: string;
+  customHeader?: React.ReactNode;
 };
 
-export const NationSelectClient = ({ initialCities, mode = "default", onComplete, buttonLabel }: NationSelectClientProps) => {
+export const NationSelectClient = ({ initialCities, mode = "default", onComplete, buttonLabel, customHeader }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
 
@@ -67,9 +69,19 @@ export const NationSelectClient = ({ initialCities, mode = "default", onComplete
     <div className="h-screen bg-surface-secondary flex flex-col">
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
 
-      <div className="flex-1 overflow-y-auto px-4 flex justify-center pb-32">
+      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
         <div className="w-full max-w-[512px] px-4">
-          <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />
+          {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
+          
+          {customHeader && (
+            <div className="mb-4">
+              <SearchInput
+                placeholder="도시/나라를 검색해주세요."
+                value={searchKeyword}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+          )}
 
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">

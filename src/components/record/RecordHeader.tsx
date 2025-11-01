@@ -34,7 +34,7 @@ export function RecordHeader() {
         <button
           onClick={handleEditClick}
           type="button"
-          className="px-2 py-1.5 rounded-[200px] inline-flex justify-end items-center"
+          className="px-2 inline-flex justify-end items-center"
         >
           <div className="text-right justify-start text-state-focused text-base font-bold font-['Pretendard'] leading-5">
             도시 편집

@@ -1,35 +1,82 @@
 "use client";
 
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Reaction = {
   emoji: string;
   count: number;
+  id: string;
 };
 
 type RecordReactionsProps = {
-  reactions?: Reaction[];
-  onAddReaction?: (emoji: string) => void;
+  recordId: string;
+  initialReactions?: Reaction[];
+  onReactionUpdate?: (reactions: Reaction[]) => void;
 };
 
-export const RecordReactions = ({ reactions = [], onAddReaction }: RecordReactionsProps) => {
+const MAX_EMPTY_SLOTS = 4;
+const AVAILABLE_EMOJIS = ["😀", "😍", "🥹", "😂", "😭", "😱", "🔥", "👍", "❤️", "🎉", "✨", "🌟"];
+
+export const RecordReactions = ({ recordId, initialReactions = [], onReactionUpdate }: RecordReactionsProps) => {
+  const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    if (isInitialLoad) {
+      const sortedReactions = [...initialReactions].sort((a, b) => b.count - a.count);
+      setReactions(sortedReactions);
+      setIsInitialLoad(false);
+    }
+  }, [initialReactions, isInitialLoad]);
+
+  const handleReactionClick = (reactionId: string) => {
+    setReactions((prev) => {
+      const updatedReactions = prev.map((r) => (r.id === reactionId ? { ...r, count: r.count + 1 } : r));
+      onReactionUpdate?.(updatedReactions);
+      return updatedReactions;
+    });
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setReactions((prev) => {
+      const existingReaction = prev.find((r) => r.emoji === emoji);
+
+      if (existingReaction) {
+        const updatedReactions = prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r));
+
+        const clickedReaction = updatedReactions.find((r) => r.emoji === emoji);
+        const otherReactions = updatedReactions.filter((r) => r.emoji !== emoji);
+        const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
+
+        onReactionUpdate?.(newOrder);
+        return newOrder;
+      }
+
+      const newReaction: Reaction = {
+        emoji,
+        count: 1,
+        id: `${recordId}-${emoji}-${Date.now()}`,
+      };
+
+      const newReactions = [newReaction, ...prev];
+      onReactionUpdate?.(newReactions);
+      return newReactions;
+    });
+
+    setShowEmojiPicker(false);
+  };
 
   const handleAddEmoji = () => {
     setShowEmojiPicker(true);
   };
 
-  const handleEmojiSelect = (emoji: string) => {
-    onAddReaction?.(emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const emptySlots = Math.max(0, 4 - reactions.length);
+  const emptySlots = Math.max(0, MAX_EMPTY_SLOTS - reactions.length);
+  const hasEmptySlots = reactions.length < MAX_EMPTY_SLOTS;
 
   return (
-    <div className="flex items-center gap-2">
-      {/* FAB 이모지 추가 버튼 */}
+    <div className="flex items-center gap-4">
       <button
         type="button"
         onClick={handleAddEmoji}
@@ -40,35 +87,36 @@ export const RecordReactions = ({ reactions = [], onAddReaction }: RecordReactio
         }}
         aria-label="이모지 추가"
       >
-       <AddEmojiIcon  />
+        <AddEmojiIcon />
       </button>
 
-      {/* 기존 이모지 반응 */}
-      {reactions.map((reaction) => (
-        <button
-          key={`${reaction.emoji}-${reaction.count}`}
-          type="button"
-          className="w-16 h-16 rounded-full bg-surface-thirdly flex flex-col items-center justify-center gap-0.5 flex-shrink-0"
-        >
-          <span className="text-2xl leading-none">{reaction.emoji}</span>
-          <span className="text-xs font-medium text-text-primary">{reaction.count}</span>
-        </button>
-      ))}
+      <div className="flex items-center gap-2">
+        {reactions.map((reaction) => (
+          <button
+            key={reaction.id}
+            type="button"
+            onClick={() => handleReactionClick(reaction.id)}
+            className="w-16 h-16 rounded-full bg-surface-thirdly flex flex-col items-center justify-center gap-0.5 flex-shrink-0"
+          >
+            <span className="text-2xl leading-none">{reaction.emoji}</span>
+            <span className="text-xs font-medium text-text-primary">{reaction.count}</span>
+          </button>
+        ))}
 
-      {/* 빈 슬롯 */}
-      {Array.from({ length: emptySlots }, (_, i) => `empty-slot-${Date.now()}-${i}`).map((slotId) => (
-        <button
-          key={slotId}
-          type="button"
-          onClick={handleAddEmoji}
-          className="w-16 h-16 rounded-full border border-dashed border-surface-thirdly flex items-center justify-center flex-shrink-0"
-          aria-label="이모지 추가"
-        >
-          <EmojiHintIcon  />
-        </button>
-      ))}
+        {hasEmptySlots &&
+          Array.from({ length: emptySlots }, (_, i) => i).map((index) => (
+            <button
+              key={`empty-slot-${index}`}
+              type="button"
+              onClick={handleAddEmoji}
+              className="w-16 h-16 rounded-full border border-dashed border-surface-thirdly flex items-center justify-center flex-shrink-0"
+              aria-label="이모지 추가"
+            >
+              <EmojiHintIcon />
+            </button>
+          ))}
+        </div>
 
-      {/* 이모지 피커 모달 */}
       {showEmojiPicker && (
         <>
           <button
@@ -93,7 +141,7 @@ export const RecordReactions = ({ reactions = [], onAddReaction }: RecordReactio
               </button>
             </div>
             <div className="grid grid-cols-8 gap-3">
-              {["😀", "😍", "🥹", "😂", "😭", "😱", "🔥", "👍", "❤️", "🎉", "✨", "🌟"].map((emoji) => (
+              {AVAILABLE_EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
                   type="button"

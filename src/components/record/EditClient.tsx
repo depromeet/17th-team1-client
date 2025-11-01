@@ -6,6 +6,7 @@ import { EditHeader } from "./EditHeader";
 import { useMemo, useState, useEffect } from "react";
 import { Popup } from "@/components/common/Popup";
 import Image from "next/image";
+import { getCountryName } from "@/constants/countryMapping";
 
 interface EditClientProps {
   cities: { id: string; name: string; countryCode: string; isNew?: boolean }[];
@@ -67,13 +68,29 @@ export function EditClient({ cities }: EditClientProps) {
     // TODO: API 연동 위치. 현재는 편집 페이지로 유지
     router.back();
   };
+
+  const handleAddClick = () => {
+    // 현재 추가된 도시들(isNew: true)을 쿼리로 전달
+    const newCities = current.filter((c) => c.isNew);
+    if (newCities.length > 0) {
+      const payload = newCities.map(({ id, name, countryCode }) => {
+        const countryName = getCountryName(countryCode);
+        return { id, name, country: countryName, countryCode };
+      });
+      const encoded = encodeURIComponent(JSON.stringify(payload));
+      router.push(`/record/edit/select?added=${encoded}`);
+    } else {
+      router.push("/record/edit/select");
+    }
+  };
+
   return (
     <div className="h-screen bg-surface-secondary flex flex-col">
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
       <div className="w-full max-w-[512px] px-4">
           <EditHeader canSave={isChanged} onSave={handleSave} onBack={handleBack} />
-          <EditContent cities={current} onAddClick={() => router.push("/record/edit/select")} onRemoveClick={handleRemove} />
+          <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
         </div>
       </div>
       {confirmId && (

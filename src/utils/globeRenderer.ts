@@ -81,13 +81,50 @@ const calculateLabelWidth = (countryName: string, cityCount: number): number => 
   return flagWidth + textWidth + badgeWidth + gaps + padding;
 };
 
+// 텍스트 너비 계산 함수 (도시 라벨용)
+const calculateCityLabelWidth = (cityName: string): number => {
+  const flagWidth = 14; // 국기 이모지 너비
+  const textWidth = calculateTextWidth(cityName, 14);
+  const gaps = 5; // gap 5px
+  const padding = 12;
+
+  return flagWidth + textWidth + gaps + padding;
+};
+
 // 기획서에 맞는 개별 도시 HTML 생성
 export const createCityHTML = (
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
   styles: any,
   displayFlag: string,
   cityName: string,
+  hasRecords: boolean = true,
+  thumbnailUrl?: string,
 ) => {
+  const labelWidth = calculateCityLabelWidth(cityName);
+
+  // 기록이 없는 경우: + 버튼만 표시
+  if (!hasRecords) {
+    return `
+      <!-- 중심 dot -->
+      <div style="${styles.dot}"></div>
+      <!-- 점선 -->
+      <div style="${styles.horizontalLine}"></div>
+      <div style="${styles.label}">
+        <!-- 좌측 국기 이모지 -->
+        <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
+        <!-- 도시명 -->
+        <span>
+          ${cityName}
+        </span>
+      </div>
+      <!-- 우측 액션 버튼 (+ 아이콘) -->
+      <div style="${styles.actionButton}">
+        ${PLUS_BUTTON_SVG}
+      </div>
+    `;
+  }
+
+  // 기록이 있는 경우: 썸네일 이미지 표시
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
@@ -101,6 +138,14 @@ export const createCityHTML = (
         ${cityName}
       </span>
     </div>
+    <!-- 우측 썸네일 이미지 카드 -->
+    ${
+      thumbnailUrl
+        ? `<div style="${styles.thumbnailCard(labelWidth / 2)}">
+      <img src="${thumbnailUrl}" alt="${cityName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+    </div>`
+        : ""
+    }
   `;
 };
 
@@ -221,8 +266,8 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
   };
 };
 
-// 도시 클릭 핸들러 (일시적으로 비활성화)
-export const createCityClickHandler = (_cityName: string) => {
+// 도시 클릭 핸들러
+export const createCityClickHandler = (cityName: string, hasRecords: boolean = true) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
@@ -230,8 +275,15 @@ export const createCityClickHandler = (_cityName: string) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // 도시 클릭 비활성화 - image-metadata 이동 막음
-    // const q = encodeURIComponent(cityName.split(",")[0]);
-    // window.location.href = `/image-metadata?city=${q}`;
+    const cityNameOnly = cityName.split(",")[0];
+    const q = encodeURIComponent(cityNameOnly);
+
+    if (hasRecords) {
+      // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
+      window.location.href = `/image-metadata?city=${q}`;
+    } else {
+      // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
+      window.location.href = `/image-metadata?city=${q}&mode=edit`;
+    }
   };
 };

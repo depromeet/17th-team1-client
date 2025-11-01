@@ -52,8 +52,8 @@ const RecordDetailPage = () => {
             country: "독일",
             images: [
               "https://picsum.photos/seed/heidelberg1/800/1200",
-              "https://picsum.photos/seed/heidelberg2/800/1200",
-              "https://picsum.photos/seed/heidelberg3/800/1200",
+              "https://picsum.photos/seed/hamburg1/800/1200",
+              "https://picsum.photos/seed/berlin1/800/1200",
             ],
             category: "풍경 🌳",
             date: "2024.10",

@@ -48,8 +48,6 @@ export const RecordCard = ({
           className="absolute top-0 left-0 right-0 h-[207px] pointer-events-none"
           style={{
             background: "linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(178, 178, 178, 0) 100%)",
-            borderTopLeftRadius: "24px",
-            borderTopRightRadius: "24px",
           }}
         />
 
@@ -64,7 +62,7 @@ export const RecordCard = ({
         </div>
 
         {/* 메타 정보 (태그, 날짜, 위치) */}
-        <div className="absolute top-[118px] left-4 z-10">
+        <div className="absolute top-[78px] left-4 z-10">
           <RecordMetaInfo category={category} date={date} location={location} />
         </div>
 
@@ -75,7 +73,10 @@ export const RecordCard = ({
       </div>
 
       {/* 하단 영역 - 이모지 반응 */}
+      {/* biome-ignore lint/a11y/useSemanticElements: div with stopPropagation for touch/mouse events, not a button */}
       <div
+        role="button"
+        tabIndex={0}
         className="px-4 pt-4 flex-shrink-0"
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}

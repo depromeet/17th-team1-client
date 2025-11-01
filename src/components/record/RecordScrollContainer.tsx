@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { isValidElement, type ReactNode, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 
 type RecordScrollContainerProps = {
@@ -157,6 +157,7 @@ export const RecordScrollContainer = ({
   }, [currentIndex, hasNext, hasPrevious, isTransitioning, onIndexChange]);
 
   // 인덱스 변경 시 애니메이션
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentIndex 변경 시 애니메이션 트리거 필요
   useEffect(() => {
     setIsTransitioning(true);
     const timer = setTimeout(() => {
@@ -167,7 +168,10 @@ export const RecordScrollContainer = ({
   }, [currentIndex]);
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: div with complex ref management for swipe gestures
     <div
+      role="region"
+      aria-label="Record scroll container"
       ref={(node) => {
         containerRef.current = node;
         if (swipeHandlers.ref) {
@@ -187,17 +191,20 @@ export const RecordScrollContainer = ({
           transform: `translateY(-${currentIndex * 100}%)`,
         }}
       >
-        {children.map((child, index) => (
-          <div
-            key={index}
-            className="w-full"
-            style={{
-              height: "100dvh",
-            }}
-          >
-            {child}
-          </div>
-        ))}
+        {children.map((child, index) => {
+          const key = isValidElement(child) && child.key ? child.key : `record-${index}`;
+          return (
+            <div
+              key={key}
+              className="w-full"
+              style={{
+                height: "100dvh",
+              }}
+            >
+              {child}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { apiGet } from "@/lib/apiClient";
-import type { City, CityApiParams, CityApiResponse, CitySearchResponse } from "@/types/city";
+import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
+import type { City, CityApiParams, CityApiResponse, CityApiData, CitySearchResponse, AddCityRequest, AddCityResponse, DeleteCityResponse } from "@/types/city";
 import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 
 export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {
@@ -20,6 +20,28 @@ export const searchCities = async (keyword: string): Promise<City[]> => {
     return data.cities.map(transformApiDataToCity);
   } catch (error) {
     console.error("Failed to search cities:", error);
+    throw error;
+  }
+};
+
+// 도시 추가 API
+export const addCity = async (request: AddCityRequest, token: string): Promise<AddCityResponse> => {
+  try {
+    const data = await apiPost<AddCityResponse>("/api/v1/cities", request, token);
+    return data;
+  } catch (error) {
+    console.error("Failed to add city:", error);
+    throw error;
+  }
+};
+
+// 도시 삭제 API
+export const deleteCity = async (cityId: number, token: string): Promise<DeleteCityResponse> => {
+  try {
+    const data = await apiDelete<DeleteCityResponse>(`/api/v1/cities/${cityId}`, token);
+    return data;
+  } catch (error) {
+    console.error("Failed to delete city:", error);
     throw error;
   }
 };

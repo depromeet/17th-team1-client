@@ -102,14 +102,26 @@ export const apiPost = async <T>(
 ): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
+    const requestBody = data ? JSON.stringify(data) : undefined;
+
+    console.log(`[API] POST ${endpoint}`);
+    console.log(`[API] URL:`, url);
+    console.log(`[API] Request Body:`, requestBody);
+    console.log(`[API] Headers:`, token ? getAuthHeaders(token) : getDefaultHeaders());
 
     const response = await fetch(url, {
       method: "POST",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
-      body: data ? JSON.stringify(data) : undefined,
+      body: requestBody,
     });
 
+    console.log(`[API] Response status:`, response.status);
+
     if (!response.ok) {
+      const responseText = await response
+        .text()
+        .catch(() => "Unable to read response");
+      console.log(`[API] Error response body:`, responseText);
       throw new ApiError(
         `HTTP error! status: ${response.status}`,
         response.status,
@@ -117,7 +129,9 @@ export const apiPost = async <T>(
       );
     }
 
-    return await parseJsonSafely<T>(response);
+    const result = await parseJsonSafely<T>(response);
+    console.log(`[API] Response data:`, result);
+    return result;
   } catch (error) {
     console.error(`API POST Error (${endpoint}):`, error);
     throw error;
@@ -160,12 +174,22 @@ export const apiDelete = async <T>(
   try {
     const url = `${API_BASE_URL}${endpoint}`;
 
+    console.log(`[API] DELETE ${endpoint}`);
+    console.log(`[API] URL:`, url);
+    console.log(`[API] Headers:`, token ? getAuthHeaders(token) : getDefaultHeaders());
+
     const response = await fetch(url, {
       method: "DELETE",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
     });
 
+    console.log(`[API] Response status:`, response.status);
+
     if (!response.ok) {
+      const responseText = await response
+        .text()
+        .catch(() => "Unable to read response");
+      console.log(`[API] Error response body:`, responseText);
       throw new ApiError(
         `HTTP error! status: ${response.status}`,
         response.status,
@@ -173,7 +197,9 @@ export const apiDelete = async <T>(
       );
     }
 
-    return await parseJsonSafely<T>(response);
+    const result = await parseJsonSafely<T>(response);
+    console.log(`[API] Response data:`, result);
+    return result;
   } catch (error) {
     console.error(`API DELETE Error (${endpoint}):`, error);
     throw error;

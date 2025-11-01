@@ -40,3 +40,24 @@ export interface CitySearchResponse {
 export interface CitySearchParams {
   keyword: string;
 }
+
+// 도시 추가 API 요청 타입
+export interface AddCityRequest {
+  cityName: string;
+  countryName: string;
+  lat: number;
+  lng: number;
+  countryCode: string;
+}
+
+// 도시 추가 API 응답 타입
+export interface AddCityResponse {
+  status: string;
+  data: CityApiData;
+}
+
+// 도시 삭제 API 응답 타입
+export interface DeleteCityResponse {
+  status: string;
+  data: CityApiData;
+}

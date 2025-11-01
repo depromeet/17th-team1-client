@@ -169,18 +169,22 @@ export const apiPut = async <T>(
 
 export const apiDelete = async <T>(
   endpoint: string,
+  data?: unknown,
   token?: string
 ): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
+    const requestBody = data ? JSON.stringify(data) : undefined;
 
     console.log(`[API] DELETE ${endpoint}`);
     console.log(`[API] URL:`, url);
+    console.log(`[API] Request Body:`, requestBody);
     console.log(`[API] Headers:`, token ? getAuthHeaders(token) : getDefaultHeaders());
 
     const response = await fetch(url, {
       method: "DELETE",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
+      body: requestBody,
     });
 
     console.log(`[API] Response status:`, response.status);

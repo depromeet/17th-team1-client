@@ -15,18 +15,31 @@ export function EditSelectClient({ initialCities }: EditSelectClientProps) {
   const searchParams = useSearchParams();
 
   const handleBack = () => {
-    // 뒤로가기 시 기존 쿼리 파라미터 유지 (이전에 추가한 도시들이 사라지지 않음)
+    // 뒤로가기 시 기존 쿼리 파라미터 유지 (이전에 추가한 도시들과 삭제된 도시 정보 유지)
     const existingAddedParam = searchParams.get("added");
+    const existingRemovedParam = searchParams.get("removed");
+    
+    let newUrl = "/record/edit";
+    const params = new URLSearchParams();
+    
     if (existingAddedParam) {
-      router.push(`/record/edit?added=${existingAddedParam}`);
-    } else {
-      router.push("/record/edit");
+      params.set("added", existingAddedParam);
     }
+    if (existingRemovedParam) {
+      params.set("removed", existingRemovedParam);
+    }
+    
+    if (params.toString()) {
+      newUrl += `?${params.toString()}`;
+    }
+    
+    router.push(newUrl);
   };
 
   const handleComplete = (cities: City[]) => {
     // 기존에 추가된 도시들 가져오기
     const existingAddedParam = searchParams.get("added");
+    const existingRemovedParam = searchParams.get("removed");
     const existingAdded: any[] = [];
     
     if (existingAddedParam) {
@@ -57,8 +70,17 @@ export function EditSelectClient({ initialCities }: EditSelectClientProps) {
     // 합쳐진 배열
     const merged = Array.from(cityMap.values());
     
-    const encoded = encodeURIComponent(JSON.stringify(merged));
-    router.push(`/record/edit?added=${encoded}`);
+    let newUrl = "/record/edit";
+    const params = new URLSearchParams();
+    params.set("added", encodeURIComponent(JSON.stringify(merged)));
+    
+    // 삭제된 도시 정보도 유지
+    if (existingRemovedParam) {
+      params.set("removed", existingRemovedParam);
+    }
+    
+    newUrl += `?${params.toString()}`;
+    router.push(newUrl);
   };
 
   return (

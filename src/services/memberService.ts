@@ -1,7 +1,9 @@
-import { apiGet, apiPost } from "@/lib/apiClient";
+import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
 import type { City } from "@/types/city";
 import type {
   CreateTravelRecordsResponse,
+  DeleteTravelRecord,
+  DeleteTravelRecordsResponse,
   GlobeResponse,
   MemberIdResponse,
   MemberTravelsResponse,
@@ -117,6 +119,37 @@ export const getTravelInsight = async (memberId: number): Promise<string> => {
   } catch (error) {
     console.error("Failed to fetch travel insight:", error);
     return "";
+  }
+};
+
+// 멤버 여행 기록 삭제 API
+export const deleteMemberTravel = async (
+  travelRecord: DeleteTravelRecord,
+  token?: string
+): Promise<DeleteTravelRecordsResponse> => {
+  try {
+    let authToken = token;
+
+    // 클라이언트 컴포넌트에서 호출 시 쿠키에서 토큰 가져오기
+    if (!authToken) {
+      const { token: clientToken } = getAuthInfo();
+      authToken = clientToken || undefined;
+    }
+
+    if (!authToken) {
+      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    }
+
+    const data = await apiDelete<DeleteTravelRecordsResponse>(
+      `/api/v1/member-travels`,
+      travelRecord,
+      authToken
+    );
+
+    return data;
+  } catch (error) {
+    console.error("Failed to delete member travel:", error);
+    throw error;
   }
 };
 

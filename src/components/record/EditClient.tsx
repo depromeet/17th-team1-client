@@ -1,27 +1,94 @@
 "use client";
 
 import { EditContent } from "./EditContent";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EditHeader } from "./EditHeader";
 import { useMemo, useState, useEffect } from "react";
 import { Popup } from "@/components/common/Popup";
 import Image from "next/image";
 import { getCountryName } from "@/constants/countryMapping";
-import { addCity, deleteCity } from "@/services/cityService";
+import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
 import { getAuthInfo } from "@/utils/cookies";
+import type { City } from "@/types/city";
 
 interface EditClientProps {
   cities: { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number; isNew?: boolean }[];
+  deletedCities?: { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number }[];
 }
 
-export function EditClient({ cities }: EditClientProps) {
+export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [current, setCurrent] = useState(cities);
   const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // 삭제된 도시 정보 저장 (삭제 시점의 도시 정보를 저장)
+  const [deletedCitiesInfo, setDeletedCitiesInfo] = useState<
+    Map<string, { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number }>
+  >(new Map());
+  
+  // 삭제된 도시 ID 목록 (쿼리 파라미터에서 읽기)
+  const removedIds = useMemo(() => {
+    const removedParam = searchParams.get("removed");
+    if (removedParam) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(removedParam));
+        if (Array.isArray(decoded)) {
+          return new Set(decoded.map(String));
+        }
+      } catch {}
+    }
+    return new Set<string>();
+  }, [searchParams]);
+  
+  // page.tsx에서 전달받은 삭제된 도시 정보를 deletedCitiesInfo에 저장
+  useEffect(() => {
+    if (deletedCities.length > 0) {
+      setDeletedCitiesInfo((prev) => {
+        const updated = new Map(prev);
+        deletedCities.forEach((city) => {
+          updated.set(city.id, city);
+        });
+        return updated;
+      });
+    }
+  }, [deletedCities]);
+  
+  // cities prop이 처음 로드될 때 삭제된 도시가 아닌 기존 도시들을 deletedCitiesInfo에 저장 (필요시)
+  useEffect(() => {
+    const existingCities = cities.filter((c) => !c.isNew && !removedIds.has(c.id));
+    setDeletedCitiesInfo((prev) => {
+      const updated = new Map(prev);
+      existingCities.forEach((city) => {
+        if (!updated.has(city.id)) {
+          updated.set(city.id, city);
+        }
+      });
+      return updated;
+    });
+  }, [cities, removedIds]);
+
+  // cities prop이 변경될 때 current state 업데이트 (하지만 삭제된 도시는 제외)
+  useEffect(() => {
+    // 삭제된 도시를 제외한 도시들만 current에 유지
+    const filteredCities = cities.filter((c) => !removedIds.has(c.id));
+    
+    // 기존 current에서 삭제된 도시 제거하고 새 도시 추가
+    setCurrent((prev) => {
+      const prevIds = new Set(prev.map((c) => c.id));
+      const newCities = filteredCities.filter((c) => !prevIds.has(c.id));
+      
+      // 삭제된 도시 제거
+      const updated = prev.filter((c) => !removedIds.has(c.id));
+      
+      // 새 도시 추가
+      return [...newCities, ...updated];
+    });
+  }, [cities, removedIds]);
 
   // 브라우저 뒤로가기 감지
   useEffect(() => {
@@ -43,14 +110,20 @@ export function EditClient({ cities }: EditClientProps) {
   const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
   const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
   const isChanged = useMemo(() => {
-    if (current.length !== base.length) return true;
+    // 삭제된 도시가 있으면 변경된 것
+    if (removedIds.size > 0) return true;
+    
+    // 추가된 도시가 있으면 변경된 것
     if (current.some((c) => c.isNew)) return true;
+    
+    // 개수나 ID가 다르면 변경된 것
+    if (current.length !== base.length) return true;
     if (baseIds.size !== currentIds.size) return true;
     for (const id of baseIds) {
       if (!currentIds.has(id)) return true;
     }
     return false;
-  }, [base.length, baseIds, current, currentIds]);
+  }, [base.length, baseIds, current, currentIds, removedIds.size]);
 
   const handleRemove = (cityId: string, isNew?: boolean) => {
     if (isNew) {
@@ -62,8 +135,39 @@ export function EditClient({ cities }: EditClientProps) {
 
   const handleConfirmDelete = () => {
     if (!confirmId) return;
+    
+    // 삭제하려는 도시 정보를 찾아서 저장
+    const cityToDelete = current.find((c) => c.id === confirmId);
+    if (cityToDelete && !cityToDelete.isNew) {
+      setDeletedCitiesInfo((prev) => {
+        const updated = new Map(prev);
+        updated.set(confirmId, cityToDelete);
+        return updated;
+      });
+    }
+    
     setCurrent((prev) => prev.filter((c) => c.id !== confirmId));
     setConfirmId(null);
+    
+    // 삭제된 도시 ID를 쿼리 파라미터에 추가
+    const currentRemoved = Array.from(removedIds);
+    if (!removedIds.has(confirmId)) {
+      currentRemoved.push(confirmId);
+    }
+    
+    // 현재 쿼리 파라미터 가져오기
+    const addedParam = searchParams.get("added");
+    const removedParam = encodeURIComponent(JSON.stringify(currentRemoved));
+    
+    let newUrl = "/record/edit";
+    const params = new URLSearchParams();
+    if (addedParam) {
+      params.set("added", addedParam);
+    }
+    params.set("removed", removedParam);
+    newUrl += `?${params.toString()}`;
+    
+    router.push(newUrl);
   };
 
   const handleCancelDelete = () => setConfirmId(null);
@@ -89,38 +193,52 @@ export function EditClient({ cities }: EditClientProps) {
         (c) => !baseIds.has(c.id) || c.isNew
       );
       
-      // 삭제된 도시들 (base에 있지만 current에 없는 것)
-      const deletedCities = base.filter((c) => !currentIds.has(c.id));
+      // 삭제된 도시들 (removedIds에 있는 ID들에 해당하는 삭제된 도시 정보 찾기)
+      const deletedCities = Array.from(removedIds)
+        .map((id) => deletedCitiesInfo.get(id))
+        .filter((city): city is NonNullable<typeof city> => city !== undefined);
 
       console.log(`[Save] 추가할 도시:`, addedCities);
       console.log(`[Save] 삭제할 도시:`, deletedCities);
 
-      // 모든 API 호출 생성
-      const addPromises = addedCities.map((city) => {
-        const countryName = getCountryName(city.countryCode);
-        const request = {
+      // 추가된 도시들을 City 타입으로 변환 (배열로 한번에 전송)
+      const citiesToAdd: City[] = addedCities.map((city) => ({
+        id: city.id,
+        name: city.name,
+        country: getCountryName(city.countryCode),
+        flag: "", // 필요 없음
+        lat: city.lat,
+        lng: city.lng,
+        countryCode: city.countryCode,
+      }));
+
+      // 삭제된 도시들을 DeleteTravelRecord 타입으로 변환
+      const deletePromises = deletedCities.map((city) => {
+        const deleteRecord = {
+          countryCode: city.countryCode,
           cityName: city.name,
-          countryName,
           lat: city.lat,
           lng: city.lng,
-          countryCode: city.countryCode,
         };
-        console.log(`[Save] 도시 추가 요청:`, request);
-        return addCity(request, token);
+        console.log(`[Save] 도시 삭제 요청:`, deleteRecord);
+        return deleteMemberTravel(deleteRecord, token);
       });
 
-      const deletePromises = deletedCities.map((city) => {
-        if (!city.cityId) {
-          throw new Error(`City ID not found for city: ${city.name}`);
-        }
-        console.log(`[Save] 도시 삭제 요청: cityId=${city.cityId}`);
-        return deleteCity(city.cityId, token);
-      });
+      // 추가 요청 (배열로 한번에 전송)
+      let addPromise: Promise<any> | null = null;
+      if (citiesToAdd.length > 0) {
+        console.log(`[Save] 도시 추가 요청:`, citiesToAdd);
+        addPromise = createMemberTravels(citiesToAdd);
+      }
 
-      console.log(`[Save] 총 ${addPromises.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
+      console.log(`[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
       
       // 모든 API 호출 실행
-      await Promise.all([...addPromises, ...deletePromises]);
+      const promises = [...deletePromises];
+      if (addPromise) {
+        promises.push(addPromise);
+      }
+      await Promise.all(promises);
       
       console.log(`[Save] 모든 요청 성공`);
 
@@ -135,18 +253,32 @@ export function EditClient({ cities }: EditClientProps) {
   };
 
   const handleAddClick = () => {
-    // 현재 추가된 도시들(isNew: true)을 쿼리로 전달
+    // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
     const newCities = current.filter((c) => c.isNew);
+    const removedParam = Array.from(removedIds).length > 0 
+      ? encodeURIComponent(JSON.stringify(Array.from(removedIds)))
+      : null;
+    
+    let newUrl = "/record/edit/select";
+    const params = new URLSearchParams();
+    
     if (newCities.length > 0) {
       const payload = newCities.map(({ id, name, countryCode, lat, lng }) => {
         const countryName = getCountryName(countryCode);
         return { id, name, country: countryName, countryCode, lat, lng };
       });
-      const encoded = encodeURIComponent(JSON.stringify(payload));
-      router.push(`/record/edit/select?added=${encoded}`);
-    } else {
-      router.push("/record/edit/select");
+      params.set("added", encodeURIComponent(JSON.stringify(payload)));
     }
+    
+    if (removedParam) {
+      params.set("removed", removedParam);
+    }
+    
+    if (params.toString()) {
+      newUrl += `?${params.toString()}`;
+    }
+    
+    router.push(newUrl);
   };
 
   return (

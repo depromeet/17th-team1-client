@@ -37,6 +37,29 @@ export default async function EditRecordPage({
 
   const resolved = await searchParams;
   const addedParam = (Array.isArray(resolved?.added) ? resolved.added[0] : resolved?.added) as string | undefined;
+  const removedParam = (Array.isArray(resolved?.removed) ? resolved.removed[0] : resolved?.removed) as string | undefined;
+  
+  // 원본 도시 목록 저장 (삭제된 도시 정보를 찾기 위해)
+  const originalCities = [...cities];
+  
+  // 삭제된 도시 ID 목록
+  const removedIds = new Set<string>();
+  if (removedParam) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(removedParam));
+      if (Array.isArray(decoded)) {
+        decoded.forEach((id: any) => removedIds.add(String(id)));
+      }
+    } catch {}
+  }
+  
+  // 삭제된 도시 정보 추출 (원본 데이터에서)
+  const deletedCities = originalCities.filter((c) => removedIds.has(c.id));
+  
+  // 삭제된 도시 제외
+  cities = cities.filter((c) => !removedIds.has(c.id));
+  
+  // 추가된 도시 추가
   if (addedParam) {
     try {
       const decoded = JSON.parse(decodeURIComponent(addedParam));
@@ -56,7 +79,7 @@ export default async function EditRecordPage({
     } catch {}
   }
 
-  return <EditClient cities={cities} />;
+  return <EditClient cities={cities} deletedCities={deletedCities} />;
 }
 
 

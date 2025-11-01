@@ -1,3 +1,4 @@
+export { default as AddEmojiIcon } from "./add-emoji.svg";
 export { default as BackIcon } from "./back.svg";
 export { default as CalendarIcon } from "./calendar.svg";
 export { default as ChevronDownIcon } from "./chevron-down.svg";
@@ -5,6 +6,7 @@ export { default as ChevronUpIcon } from "./chevron-up.svg";
 export { default as CloseIcon } from "./close.svg";
 export { default as DotIcon } from "./dot.svg";
 export { default as EditIcon } from "./edit.svg";
+export { default as EmojiHintIcon } from "./emoji-hint.svg";
 export { default as GalleryIcon } from "./gallery.svg";
 export { default as KakaoIcon } from "./kakao.svg";
 export { default as KakaoLogoIcon } from "./kakaoLogo.svg";

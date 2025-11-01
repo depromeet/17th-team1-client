@@ -1,37 +1,22 @@
-'use client';
+"use client";
 
-import type { GlobeInstance } from 'globe.gl';
-import dynamic from 'next/dynamic';
-import type React from 'react';
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
-import {
-  ANIMATION_DURATION,
-  COLORS,
-  EXTERNAL_URLS,
-  GLOBE_CONFIG,
-} from '@/constants/globe';
-import { VIEWPORT_DEFAULTS } from '@/constants/zoomLevels';
-import { type ClusterData, useClustering } from '@/hooks/useClustering';
-import { useGlobeState } from '@/hooks/useGlobeState';
+import type { GlobeInstance } from "globe.gl";
+import dynamic from "next/dynamic";
+import type React from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
+import { VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
+import { type ClusterData, useClustering } from "@/hooks/useClustering";
+import { useGlobeState } from "@/hooks/useGlobeState";
 import {
   createContinentClusterStyles,
   createCountryClusterStyles,
   createSingleLabelStyles,
-} from '@/styles/globeStyles';
-import type { GeoJSONFeature, PointOfView } from '@/types/geography';
-import type { TravelPattern } from '@/types/travelPatterns';
-import {
-  calculateAnimationDuration,
-  calculateAutoFitCamera,
-} from '@/utils/autoFitUtils';
-import { createGlobeImageUrl } from '@/utils/globeImageGenerator';
+} from "@/styles/globeStyles";
+import type { GeoJSONFeature, PointOfView } from "@/types/geography";
+import type { TravelPattern } from "@/types/travelPatterns";
+import { calculateAnimationDuration, calculateAutoFitCamera } from "@/utils/autoFitUtils";
+import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import {
   calculateClampedDistance,
   calculateLabelPosition,
@@ -40,14 +25,10 @@ import {
   createClusterClickHandler,
   createContinentClusterHTML,
   createCountryClusterHTML,
-} from '@/utils/globeRenderer';
-import {
-  createZoomPreventListeners,
-  getISOCode,
-  getPolygonColor,
-} from '@/utils/globeUtils';
+} from "@/utils/globeRenderer";
+import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/utils/globeUtils";
 
-const GlobeComponent = dynamic(() => import('react-globe.gl'), {
+const GlobeComponent = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
 
@@ -64,23 +45,14 @@ export interface GlobeRef {
 }
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
-  (
-    { travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange },
-    ref
-  ) => {
+  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
     const [countriesData, setCountriesData] = useState<GeoJSONFeature[]>([]);
     const [windowSize, setWindowSize] = useState({
-      width:
-        typeof window !== 'undefined'
-          ? window.innerWidth
-          : VIEWPORT_DEFAULTS.WIDTH,
-      height:
-        typeof window !== 'undefined'
-          ? window.innerHeight
-          : VIEWPORT_DEFAULTS.HEIGHT,
+      width: typeof window !== "undefined" ? window.innerWidth : VIEWPORT_DEFAULTS.WIDTH,
+      height: typeof window !== "undefined" ? window.innerHeight : VIEWPORT_DEFAULTS.HEIGHT,
     });
 
     // Globe state 관리
@@ -100,35 +72,34 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
     const handleSelectionStackChange = useCallback(
       (newStack: (typeof currentPattern.countries | null)[]) => {
         // 스택의 마지막 항목을 selectedClusterData로 설정
-        const newSelectedData =
-          newStack.length > 0 ? newStack[newStack.length - 1] : null;
+        const newSelectedData = newStack.length > 0 ? newStack[newStack.length - 1] : null;
 
         // 빈 클러스터를 만들어서 globalHandleClusterSelect에 전달
         if (newSelectedData) {
           globalHandleClusterSelect({
-            id: 'rotation_restore',
-            name: 'Rotation Restore',
-            flag: '',
+            id: "rotation_restore",
+            name: "Rotation Restore",
+            flag: "",
             lat: 0,
             lng: 0,
-            color: '',
+            color: "",
             items: newSelectedData,
             count: newSelectedData.length,
-            clusterType: 'country_cluster' as const,
+            clusterType: "country_cluster" as const,
           });
         } else {
           // 스택이 비어있으면 selectedClusterData를 null로 설정
           resetGlobe();
         }
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Selection stack changed:', {
+        if (process.env.NODE_ENV === "development") {
+          console.log("Selection stack changed:", {
             stackLength: newStack.length,
             newSelectedData: newSelectedData?.length || 0,
           });
         }
       },
-      [globalHandleClusterSelect, resetGlobe]
+      [globalHandleClusterSelect, resetGlobe],
     );
 
     // 클러스터링 시스템 사용
@@ -176,8 +147,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           setCountriesData(features);
           setGlobeLoading(false);
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
 
           setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
           setGlobeLoading(false);
@@ -192,29 +162,29 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
     const getHtmlElement = useCallback(
       (d: unknown) => {
         const clusterData = d as ClusterData;
-        if (typeof window === 'undefined' || !document) {
-          const el = document.createElement('div');
-          el.style.display = 'none';
+        if (typeof window === "undefined" || !document) {
+          const el = document.createElement("div");
+          el.style.display = "none";
           return el;
         }
 
-        const el = document.createElement('div');
+        const el = document.createElement("div");
         // HTML 컨테이너는 정확히 지구본의 좌표에 위치 (0,0 기준점)
-        el.style.position = 'absolute';
-        el.style.top = '0px';
-        el.style.left = '0px';
-        el.style.width = '0px';
-        el.style.height = '0px';
-        el.style.overflow = 'visible';
-        el.style.pointerEvents = 'none'; // 컨테이너는 이벤트 차단
-        el.style.zIndex = '999';
+        el.style.position = "absolute";
+        el.style.top = "0px";
+        el.style.left = "0px";
+        el.style.width = "0px";
+        el.style.height = "0px";
+        el.style.overflow = "visible";
+        el.style.pointerEvents = "none"; // 컨테이너는 이벤트 차단
+        el.style.zIndex = "999";
 
         const { angleOffset, dynamicDistance } = calculateLabelPosition(
           clusterData,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           visibleItems as ClusterData[],
           zoomLevel,
-          globeRef
+          globeRef,
         );
 
         const clampedDistance = calculateClampedDistance(
@@ -222,7 +192,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           angleOffset,
           { x: 0, y: 0 },
           clusterData.count === 1,
-          globeRef
+          globeRef,
         );
 
         // 기획에 맞는 스타일 선택
@@ -232,50 +202,33 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           label: string;
         };
 
-        if (clusterData.clusterType === 'continent_cluster') {
-          styles = createContinentClusterStyles(
-            0,
-            angleOffset,
-            clampedDistance
-          );
-        } else if (clusterData.clusterType === 'country_cluster') {
+        if (clusterData.clusterType === "continent_cluster") {
+          styles = createContinentClusterStyles(0, angleOffset, clampedDistance);
+        } else if (clusterData.clusterType === "country_cluster") {
           styles = createCountryClusterStyles(0, angleOffset, clampedDistance);
         } else {
           // 개별 도시는 기존 스타일 유지
           styles = createSingleLabelStyles(0, angleOffset, clampedDistance);
         }
 
-        if (clusterData.clusterType === 'individual_city') {
+        if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
-          const cityName = clusterData.name.split(',')[0];
+          const cityName = clusterData.name.split(",")[0];
           // 클러스터의 첫 번째 아이템에서 hasRecords와 thumbnailUrl 가져오기
           const firstItem = clusterData.items?.[0];
           const hasRecords = firstItem?.hasRecords ?? true; // 기본값: 기록 있음
           const thumbnailUrl = firstItem?.thumbnailUrl;
 
-          el.innerHTML = createCityHTML(
-            styles,
-            clusterData.flag,
-            cityName,
-            hasRecords,
-            thumbnailUrl
-          );
+          el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
-          const clickHandler = createCityClickHandler(
-            clusterData.name,
-            hasRecords
-          );
-          el.addEventListener('click', clickHandler);
-        } else if (clusterData.clusterType === 'continent_cluster') {
+          const recordId = clusterData.items?.[0]?.recordId;
+          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, recordId);
+          el.addEventListener("click", clickHandler);
+        } else if (clusterData.clusterType === "continent_cluster") {
           // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
-          el.innerHTML = createContinentClusterHTML(
-            styles,
-            clusterData.name,
-            clusterData.count,
-            clusterData.flag
-          );
+          el.innerHTML = createContinentClusterHTML(styles, clusterData.name, clusterData.count, clusterData.flag);
           // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
-        } else if (clusterData.clusterType === 'country_cluster') {
+        } else if (clusterData.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
           // 클러스터의 첫 번째 아이템에서 hasRecords와 thumbnailUrl 가져오기
           const firstItem = clusterData.items?.[0];
@@ -287,67 +240,60 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
             clusterData.name,
             clusterData.count,
             clusterData.flag,
-            mode === 'city' && selectedClusterData !== null, // 도시 모드에서 확장된 것으로 표시
+            mode === "city" && selectedClusterData !== null, // 도시 모드에서 확장된 것으로 표시
             hasRecords,
-            thumbnailUrl
+            thumbnailUrl,
           );
 
-          const clickHandler = createClusterClickHandler(
-            clusterData.id,
-            (clusterId: string) => {
-              const cluster = clusteredData.find(({ id }) => id === clusterId);
-              if (cluster && localHandleClusterSelect) {
-                const clusterItems = localHandleClusterSelect(cluster);
-                globalHandleClusterSelect({ ...cluster, items: clusterItems });
-                onClusterSelect?.(cluster);
+          const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {
+            const cluster = clusteredData.find(({ id }) => id === clusterId);
+            if (cluster && localHandleClusterSelect) {
+              const clusterItems = localHandleClusterSelect(cluster);
+              globalHandleClusterSelect({ ...cluster, items: clusterItems });
+              onClusterSelect?.(cluster);
 
-                // 자동 fit 기능: 클러스터의 도시들이 모두 보이도록 카메라 이동
-                if (
-                  clusterItems &&
-                  clusterItems.length > 0 &&
-                  globeRef.current
-                ) {
-                  const autoFitCamera = calculateAutoFitCamera(clusterItems);
-                  const currentPov = globeRef.current.pointOfView();
+              // 자동 fit 기능: 클러스터의 도시들이 모두 보이도록 카메라 이동
+              if (clusterItems && clusterItems.length > 0 && globeRef.current) {
+                const autoFitCamera = calculateAutoFitCamera(clusterItems);
+                const currentPov = globeRef.current.pointOfView();
 
-                  const animationDuration = calculateAnimationDuration(
-                    currentPov.lat || 0,
-                    currentPov.lng || 0,
-                    currentPov.altitude || 2.5,
-                    autoFitCamera.lat,
-                    autoFitCamera.lng,
-                    autoFitCamera.altitude
-                  );
+                const animationDuration = calculateAnimationDuration(
+                  currentPov.lat || 0,
+                  currentPov.lng || 0,
+                  currentPov.altitude || 2.5,
+                  autoFitCamera.lat,
+                  autoFitCamera.lng,
+                  autoFitCamera.altitude,
+                );
 
-                  // 개발 환경에서 디버깅 정보 출력
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('Auto-fit camera calculation:', {
-                      clusterName: clusterData.name,
-                      cityCount: clusterItems.length,
-                      boundingBox: autoFitCamera.boundingBox,
-                      targetPosition: {
-                        lat: autoFitCamera.lat,
-                        lng: autoFitCamera.lng,
-                        altitude: autoFitCamera.altitude,
-                      },
-                      animationDuration,
-                    });
-                  }
-
-                  // 부드러운 카메라 이동
-                  globeRef.current.pointOfView(
-                    {
+                // 개발 환경에서 디버깅 정보 출력
+                if (process.env.NODE_ENV === "development") {
+                  console.log("Auto-fit camera calculation:", {
+                    clusterName: clusterData.name,
+                    cityCount: clusterItems.length,
+                    boundingBox: autoFitCamera.boundingBox,
+                    targetPosition: {
                       lat: autoFitCamera.lat,
                       lng: autoFitCamera.lng,
                       altitude: autoFitCamera.altitude,
                     },
-                    animationDuration
-                  );
+                    animationDuration,
+                  });
                 }
+
+                // 부드러운 카메라 이동
+                globeRef.current.pointOfView(
+                  {
+                    lat: autoFitCamera.lat,
+                    lng: autoFitCamera.lng,
+                    altitude: autoFitCamera.altitude,
+                  },
+                  animationDuration,
+                );
               }
             }
-          );
-          el.addEventListener('click', clickHandler);
+          });
+          el.addEventListener("click", clickHandler);
         }
 
         return el;
@@ -361,36 +307,30 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         localHandleClusterSelect,
         globalHandleClusterSelect,
         onClusterSelect,
-      ]
+      ],
     );
 
     // 줌 변경 핸들러
     const handleZoomChangeInternal = useCallback(
       (pov: PointOfView) => {
-        if (pov && typeof pov.altitude === 'number') {
+        if (pov && typeof pov.altitude === "number") {
           let newZoom = pov.altitude;
 
           // 줌 범위 제한
           if (newZoom < GLOBE_CONFIG.MIN_ZOOM) {
             newZoom = GLOBE_CONFIG.MIN_ZOOM;
             if (globeRef.current) {
-              globeRef.current.pointOfView(
-                { altitude: GLOBE_CONFIG.MIN_ZOOM },
-                0
-              );
+              globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MIN_ZOOM }, 0);
             }
           } else if (newZoom > GLOBE_CONFIG.MAX_ZOOM) {
             newZoom = GLOBE_CONFIG.MAX_ZOOM;
             if (globeRef.current) {
-              globeRef.current.pointOfView(
-                { altitude: GLOBE_CONFIG.MAX_ZOOM },
-                0
-              );
+              globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MAX_ZOOM }, 0);
             }
           }
 
           // 외부에서 스냅 지시가 있으면 해당 값으로 고정
-          if (typeof snapZoomTo === 'number') {
+          if (typeof snapZoomTo === "number") {
             newZoom = snapZoomTo;
             if (globeRef.current) {
               globeRef.current.pointOfView({ altitude: newZoom }, 0);
@@ -403,16 +343,16 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         }
 
         // 지구본 회전 감지
-        if (pov && typeof pov.lat === 'number' && typeof pov.lng === 'number') {
+        if (pov && typeof pov.lat === "number" && typeof pov.lng === "number") {
           handleGlobeRotation(pov.lat, pov.lng);
         }
       },
-      [globalHandleZoomChange, snapZoomTo, onZoomChange, handleGlobeRotation]
+      [globalHandleZoomChange, snapZoomTo, onZoomChange, handleGlobeRotation],
     );
 
     // 윈도우 리사이즈 감지
     useEffect(() => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === "undefined") return;
 
       const handleResize = () => {
         setWindowSize({
@@ -421,13 +361,13 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         });
       };
 
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     // Globe 초기 설정
     useEffect(() => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === "undefined") return;
 
       // Timer 변수들을 배열로 관리
       const timers: NodeJS.Timeout[] = [];
@@ -439,10 +379,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       const trySetupControls = () => {
         if (globeRef.current && !globeLoading) {
           // 초기 시점 설정
-          globeRef.current.pointOfView(
-            { altitude: GLOBE_CONFIG.INITIAL_ALTITUDE },
-            ANIMATION_DURATION.INITIAL_SETUP
-          );
+          globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
 
           // 줌 제한 설정
           try {
@@ -455,7 +392,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
               return; // 성공, 더 이상 시도하지 않음
             }
           } catch (error) {
-            console.error('Error accessing controls:', error);
+            console.error("Error accessing controls:", error);
           }
         }
 
@@ -468,25 +405,21 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       };
 
       // 첫 번째 시도
-      const initialTimer = setTimeout(
-        trySetupControls,
-        ANIMATION_DURATION.SETUP_DELAY
-      );
+      const initialTimer = setTimeout(trySetupControls, ANIMATION_DURATION.SETUP_DELAY);
       timers.push(initialTimer);
 
-      const { preventZoom, preventKeyboardZoom, preventTouchZoom } =
-        createZoomPreventListeners();
+      const { preventZoom, preventKeyboardZoom, preventTouchZoom } = createZoomPreventListeners();
 
-      document.addEventListener('wheel', preventZoom, { passive: false });
-      document.addEventListener('keydown', preventKeyboardZoom);
-      document.addEventListener('touchstart', preventTouchZoom, {
+      document.addEventListener("wheel", preventZoom, { passive: false });
+      document.addEventListener("keydown", preventKeyboardZoom);
+      document.addEventListener("touchstart", preventTouchZoom, {
         passive: false,
       });
 
       return () => {
-        document.removeEventListener('wheel', preventZoom);
-        document.removeEventListener('keydown', preventKeyboardZoom);
-        document.removeEventListener('touchstart', preventTouchZoom);
+        document.removeEventListener("wheel", preventZoom);
+        document.removeEventListener("keydown", preventKeyboardZoom);
+        document.removeEventListener("touchstart", preventTouchZoom);
         // 모든 타이머 정리
         timers.forEach((timer) => {
           clearTimeout(timer);
@@ -495,9 +428,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
     }, [globeLoading]);
 
     if (globeLoading) {
-      return (
-        <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>
-      );
+      return <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>;
     }
 
     if (globeError) {
@@ -506,23 +437,20 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           style={{
             width: GLOBE_CONFIG.WIDTH,
             height: GLOBE_CONFIG.HEIGHT,
-            borderRadius: '50%',
-            background:
-              'radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '14px',
-            textAlign: 'center',
-            flexDirection: 'column',
-            gap: '10px',
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontSize: "14px",
+            textAlign: "center",
+            flexDirection: "column",
+            gap: "10px",
           }}
         >
           <div>⚠️ 지구본 로딩 실패</div>
-          <div style={{ fontSize: '12px', opacity: 0.8 }}>
-            인터넷 연결을 확인해주세요
-          </div>
+          <div style={{ fontSize: "12px", opacity: 0.8 }}>인터넷 연결을 확인해주세요</div>
         </div>
       );
     }
@@ -530,11 +458,11 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
     return (
       <div
         style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <GlobeComponent
@@ -548,11 +476,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
           polygonsData={countriesData}
           polygonCapColor={(feature: unknown) =>
-            getPolygonColor(
-              feature as GeoJSONFeature,
-              currentPattern?.countries || [],
-              getISOCode
-            )
+            getPolygonColor(feature as GeoJSONFeature, currentPattern?.countries || [], getISOCode)
           }
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
@@ -565,9 +489,9 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         />
       </div>
     );
-  }
+  },
 );
 
-Globe.displayName = 'Globe';
+Globe.displayName = "Globe";
 
 export default Globe;

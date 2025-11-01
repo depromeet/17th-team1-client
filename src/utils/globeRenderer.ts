@@ -267,7 +267,7 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 };
 
 // 도시 클릭 핸들러
-export const createCityClickHandler = (cityName: string, hasRecords: boolean = true) => {
+export const createCityClickHandler = (cityName: string, hasRecords: boolean = true, recordId?: string) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
@@ -278,8 +278,11 @@ export const createCityClickHandler = (cityName: string, hasRecords: boolean = t
     const cityNameOnly = cityName.split(",")[0];
     const q = encodeURIComponent(cityNameOnly);
 
-    if (hasRecords) {
+    if (hasRecords && recordId) {
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
+      window.location.href = `/record/${recordId}`;
+    } else if (hasRecords) {
+      // 기록 ID가 없는 경우 폴백: 기존 이미지 메타데이터 페이지로 이동
       window.location.href = `/image-metadata?city=${q}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동

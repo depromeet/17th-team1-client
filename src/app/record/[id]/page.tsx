@@ -8,6 +8,7 @@ import { RecordImageCarousel } from "@/components/record/RecordImageCarousel";
 import { RecordMetaInfo } from "@/components/record/RecordMetaInfo";
 import { RecordReactions } from "@/components/record/RecordReactions";
 import { RecordUserInfo } from "@/components/record/RecordUserInfo";
+import { ChevronDown } from "lucide-react";
 
 type RecordData = {
   id: string;
@@ -174,23 +175,7 @@ const RecordDetailPage = () => {
       <div className="flex flex-col items-center gap-1 mt-auto pb-6">
         <p className="text-text-thirdly text-sm">다음 기록을 살펴보세요!</p>
         <div className="w-6 h-6 flex items-center justify-center">
-          <svg
-            width="9"
-            height="16"
-            viewBox="0 0 9 16"
-            fill="none"
-            className="rotate-90 scale-y-[-1]"
-            aria-label="다음 기록으로 이동"
-          >
-            <title>다음 기록</title>
-            <path
-              d="M1 1L8 8L1 15"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronDown />
         </div>
       </div>
     </div>

@@ -6,19 +6,120 @@ import { useState } from "react";
 
 import { cn } from "@/utils/cn";
 
+type DropdownVariant = "dark" | "light";
+
 type DropdownProps = {
-  value: string;
-  onValueChange: (value: string) => void;
+  value?: string;
+  onValueChange?: (value: string) => void;
   options: Array<{
     label: string;
     value: string;
+    onClick?: () => void;
   }>;
   placeholder?: string;
   className?: string;
+  variant?: DropdownVariant;
+  showCheckIcon?: boolean;
+  trigger?: React.ReactNode;
+  asMenu?: boolean;
 };
 
-export const Dropdown = ({ value, onValueChange, options, placeholder = "선택해주세요", className }: DropdownProps) => {
+export const Dropdown = ({
+  value,
+  onValueChange,
+  options,
+  placeholder = "선택해주세요",
+  className,
+  variant = "dark",
+  showCheckIcon = true,
+  trigger,
+  asMenu = false,
+}: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleItemClick = (option: { value: string; onClick?: () => void }) => {
+    if (asMenu) {
+      option.onClick?.();
+      setIsOpen(false);
+    } else {
+      onValueChange?.(option.value);
+    }
+  };
+
+  const variantStyles = {
+    dark: {
+      content: "bg-[#1c2d45] border-[rgba(255,255,255,0.1)]",
+      item: {
+        base: "text-white",
+        checked: "text-[#00d9ff]",
+        hover: "hover:bg-[rgba(255,255,255,0.05)]",
+      },
+      separator: "bg-[rgba(255,255,255,0.1)]",
+    },
+    light: {
+      content: "bg-white border-border-primary",
+      item: {
+        base: "text-text-inverseprimary",
+        checked: "text-text-inverseprimary",
+        hover: "hover:bg-surface-secondary",
+      },
+      separator: "bg-border-primary",
+    },
+  };
+
+  const styles = variantStyles[variant];
+
+  if (asMenu) {
+    return (
+      <SelectPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+        <SelectPrimitive.Trigger asChild className={className}>
+          {trigger}
+        </SelectPrimitive.Trigger>
+
+        <SelectPrimitive.Portal>
+          <SelectPrimitive.Content
+            className={cn(
+              "relative z-50 min-w-[111px]",
+              styles.content,
+              "border border-solid",
+              "rounded-lg shadow-lg",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out",
+              "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+              "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+              "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
+              "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            )}
+            position="popper"
+            side="bottom"
+            align="end"
+            sideOffset={8}
+          >
+            <SelectPrimitive.Viewport className="p-0">
+              {options.map((option, index) => (
+                <div key={option.value}>
+                  <button
+                    type="button"
+                    onClick={() => handleItemClick(option)}
+                    className={cn(
+                      "relative flex w-full cursor-pointer select-none items-center gap-2",
+                      "px-5 py-3",
+                      "text-base font-medium leading-[1.3] tracking-[-0.32px]",
+                      "outline-none transition-colors",
+                      styles.item.base,
+                      styles.item.hover,
+                    )}
+                  >
+                    <span className="shrink-0">{option.label}</span>
+                  </button>
+                  {index < options.length - 1 && <div className={cn("h-px", styles.separator)} />}
+                </div>
+              ))}
+            </SelectPrimitive.Viewport>
+          </SelectPrimitive.Content>
+        </SelectPrimitive.Portal>
+      </SelectPrimitive.Root>
+    );
+  }
 
   return (
     <SelectPrimitive.Root value={value} onValueChange={onValueChange} open={isOpen} onOpenChange={setIsOpen}>
@@ -41,8 +142,8 @@ export const Dropdown = ({ value, onValueChange, options, placeholder = "선택�
         <SelectPrimitive.Content
           className={cn(
             "relative z-50 min-w-[102px]",
-            "bg-[#1c2d45]",
-            "border border-[rgba(255,255,255,0.1)]",
+            styles.content,
+            "border border-solid",
             "rounded-lg shadow-lg",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -61,24 +162,23 @@ export const Dropdown = ({ value, onValueChange, options, placeholder = "선택�
                 <SelectPrimitive.Item
                   value={option.value}
                   className={cn(
-                    "relative flex w-full cursor-pointer select-none items-center gap-1 py-2 px-3",
+                    "relative flex w-full cursor-pointer select-none items-center gap-2",
+                    "py-2 px-3",
                     "text-sm font-medium",
                     "outline-none transition-colors",
-                    "data-[state=checked]:text-[#00d9ff]",
-                    "data-[state=unchecked]:text-white",
-                    "hover:bg-[rgba(255,255,255,0.05)]",
+                    styles.item.base,
+                    styles.item.hover,
+                    value === option.value && styles.item.checked,
                   )}
                 >
-                  <Check
-                    className={cn(
-                      "w-4 h-4 flex-shrink-0",
-                      "data-[state=checked]:visible",
-                      value === option.value ? "visible" : "invisible",
-                    )}
-                  />
+                  {showCheckIcon && (
+                    <Check
+                      className={cn("w-4 h-4 flex-shrink-0", value === option.value ? "visible" : "invisible")}
+                    />
+                  )}
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>
-                {index < options.length - 1 && <div className="h-px bg-[rgba(255,255,255,0.1)]" />}
+                {index < options.length - 1 && <div className={cn("h-px", styles.separator)} />}
               </div>
             ))}
           </SelectPrimitive.Viewport>

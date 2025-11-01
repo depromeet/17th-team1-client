@@ -3,7 +3,7 @@
 import { EditContent } from "./EditContent";
 import { useRouter } from "next/navigation";
 import { EditHeader } from "./EditHeader";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Popup } from "@/components/common/Popup";
 import Image from "next/image";
 
@@ -13,9 +13,27 @@ interface EditClientProps {
 
 export function EditClient({ cities }: EditClientProps) {
   const router = useRouter();
+  
   const [current, setCurrent] = useState(cities);
   const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  // 브라우저 뒤로가기 감지
+  useEffect(() => {
+    const handlePopState = () => {
+      router.push("/record");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
+
+  const handleBack = () => {
+    router.push("/record");
+  };
 
   const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
   const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
@@ -54,7 +72,7 @@ export function EditClient({ cities }: EditClientProps) {
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
       <div className="w-full max-w-[512px] px-4">
-          <EditHeader canSave={isChanged} onSave={handleSave} />
+          <EditHeader canSave={isChanged} onSave={handleSave} onBack={handleBack} />
           <EditContent cities={current} onAddClick={() => router.push("/record/edit/select")} onRemoveClick={handleRemove} />
         </div>
       </div>

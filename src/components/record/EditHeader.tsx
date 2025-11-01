@@ -8,17 +8,26 @@ interface EditHeaderProps {
   canSave?: boolean;
   onSave?: () => void;
   showSaveButton?: boolean;
+  onBack?: () => void;
 }
 
-export function EditHeader({ title = "도시 편집", canSave = false, onSave, showSaveButton = true }: EditHeaderProps) {
+export function EditHeader({ title = "도시 편집", canSave = false, onSave, showSaveButton = true, onBack }: EditHeaderProps) {
   const router = useRouter();
+  
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <div className="mb-8">
       <div className="relative flex justify-between items-center">
         <div className="w-24 flex justify-start items-center">
           <button
-            onClick={() => router.back()}
+            onClick={handleBackClick}
             className="flex justify-start items-center"
             type="button"
           >

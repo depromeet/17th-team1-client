@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
-import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState, useRef } from "react";
 
 type Reaction = {
   emoji: string;
@@ -88,9 +88,12 @@ export const RecordReactions = ({
     }
 
     // 애니메이션이 끝난 후 다시 클릭 가능하도록 (800ms = 마지막 이모지 생성 시간)
-    setTimeout(() => {
-      isAnimatingRef.current = false;
-    }, emojiCount * 150 + 300);
+    setTimeout(
+      () => {
+        isAnimatingRef.current = false;
+      },
+      emojiCount * 150 + 300,
+    );
   };
 
   const handleReactionClick = (reactionId: string, event: React.MouseEvent<HTMLButtonElement>) => {
@@ -111,7 +114,7 @@ export const RecordReactions = ({
     // 애니메이션만 debounce 적용 - 버튼 위치를 미리 저장
     const buttonElement = event.currentTarget;
     const rect = buttonElement.getBoundingClientRect();
-    
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }

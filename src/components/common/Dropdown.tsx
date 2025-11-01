@@ -172,9 +172,7 @@ export const Dropdown = ({
                   )}
                 >
                   {showCheckIcon && (
-                    <Check
-                      className={cn("w-4 h-4 flex-shrink-0", value === option.value ? "visible" : "invisible")}
-                    />
+                    <Check className={cn("w-4 h-4 flex-shrink-0", value === option.value ? "visible" : "invisible")} />
                   )}
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>

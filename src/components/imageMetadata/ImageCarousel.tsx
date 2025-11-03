@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
+import { formatDate } from "@/utils/dateUtils";
 import { CircleCloseButton } from "./CircleCloseButton";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { MetadataChip } from "./MetadataChip";
@@ -20,15 +21,6 @@ export const ImageCarousel = ({ image, onRemove, onLocationClick, onTagSelect }:
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const shown = image;
-
-  const formatMonth = (ts?: string) =>
-    ts
-      ? (() => {
-        const d = new Date(ts);
-        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
-      })()
-      : "";
-
   const displayLocation = shown.location?.nearbyPlaces?.[1] || shown.location?.address || "";
 
 
@@ -61,7 +53,7 @@ export const ImageCarousel = ({ image, onRemove, onLocationClick, onTagSelect }:
         }}
       />
       <div className="absolute bottom-3 left-3 flex flex-col gap-1 items-start">
-        <MetadataChip iconType="calendar" text={formatMonth(shown.timestamp) || "정보 없음"} />
+        <MetadataChip iconType="calendar" text={formatDate(shown.timestamp) || "정보 없음"} />
         <button
           type="button"
           onClick={() => onLocationClick(shown)}

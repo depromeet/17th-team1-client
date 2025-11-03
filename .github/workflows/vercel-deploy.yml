@@ -2,8 +2,7 @@ name: Sync to Fork Repository for Vercel
 
 on:
   push:
-    branches: ['main', 'feat/GLB-177']
-  workflow_dispatch:
+    branches: ['main']
 
 jobs:
   sync-to-fork:
@@ -12,10 +11,6 @@ jobs:
     steps:
       - name: Checkout organization repository
         uses: actions/checkout@v4
-
-      - name: Get current branch name
-        id: branch
-        run: echo "name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
       - name: Push to fork repository
         uses: cpina/github-action-push-to-another-repository@main
@@ -27,4 +22,4 @@ jobs:
           destination-repository-name: 17th-team1-client
           user-email: ${{ secrets.VERCEL_DEPLOY_EMAIL }}
           commit-message: ${{ github.event.commits[0].message }}
-          target-branch: ${{ steps.branch.outputs.name }}
+          target-branch: main

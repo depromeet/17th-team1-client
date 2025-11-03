@@ -203,7 +203,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
         >
           {metadataList.map((metadata) => (
             <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel images={[metadata]} onRemove={handleRemove} onLocationClick={handleLocationClick} />
+              <ImageCarousel image={metadata} onRemove={handleRemove} onLocationClick={handleLocationClick} />
             </div>
           ))}
         </div>

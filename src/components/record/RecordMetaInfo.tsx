@@ -14,10 +14,10 @@ export const RecordMetaInfo = ({ category, date, location }: RecordMetaInfoProps
   }
 
   return (
-    <div className="flex items-start gap-1 flex-wrap">
+    <div className="flex items-start gap-1 flex-wrap h-8">
       {/* 카테고리 태그 */}
       {category && (
-        <div className="bg-surface-inverseprimary text-text-inversesecondary px-3 py-1.5 rounded-lg">
+        <div className="bg-surface-inverseprimary text-text-inversesecondary px-3 py-1.5 rounded-lg h-full flex items-center justify-center">
           <span className="text-sm font-medium">{category}</span>
         </div>
       )}

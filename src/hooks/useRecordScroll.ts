@@ -33,6 +33,11 @@ export const useRecordScroll = ({ countryRecords }: UseRecordScrollParams): UseR
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: countryRecords 변경 시 인덱스 리셋
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [countryRecords]);
+
   // 현재 기록
   const currentRecord = countryRecords[currentIndex] || null;
 

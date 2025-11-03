@@ -43,23 +43,18 @@ export const RecordScrollContainer = ({
     const container = containerRef.current;
     if (!container) return;
 
-    let wheelTimeout: NodeJS.Timeout;
-    let isWheeling = false;
+    let lastWheelTime = 0;
+    const THROTTLE_DELAY = 150;
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
 
-      if (isTransitioning || isWheeling) return;
+      if (isTransitioning) return;
 
-      clearTimeout(wheelTimeout);
+      const now = Date.now();
+      if (now - lastWheelTime < THROTTLE_DELAY) return;
 
-      wheelTimeout = setTimeout(() => {
-        isWheeling = false;
-      }, 150);
-
-      if (isWheeling) return;
-      isWheeling = true;
-
+      lastWheelTime = now;
       const deltaY = e.deltaY;
 
       if (deltaY > 0 && hasNext) {
@@ -75,7 +70,6 @@ export const RecordScrollContainer = ({
 
     return () => {
       container.removeEventListener("wheel", handleWheel);
-      clearTimeout(wheelTimeout);
     };
   }, [currentIndex, hasNext, hasPrevious, isTransitioning, onIndexChange]);
 
@@ -181,7 +175,6 @@ export const RecordScrollContainer = ({
       onMouseDown={swipeHandlers.onMouseDown}
       className="w-full h-full overflow-hidden relative"
       style={{
-        height: "100dvh",
         touchAction: "pan-y",
       }}
     >
@@ -194,13 +187,7 @@ export const RecordScrollContainer = ({
         {children.map((child, index) => {
           const key = isValidElement(child) && child.key ? child.key : `record-${index}`;
           return (
-            <div
-              key={key}
-              className="w-full"
-              style={{
-                height: "100dvh",
-              }}
-            >
+            <div key={key} className="w-full h-screen">
               {child}
             </div>
           );

@@ -23,7 +23,6 @@ export const ImageCarousel = ({ image, onRemove, onLocationClick, onTagSelect }:
   const shown = image;
   const displayLocation = shown.location?.nearbyPlaces?.[1] || shown.location?.address || "";
 
-
   return (
     <div className="relative select-none w-[250.784px] mx-auto" style={{ touchAction: "pan-y" }}>
       <div className="overflow-hidden rounded-xl border border-white/20">

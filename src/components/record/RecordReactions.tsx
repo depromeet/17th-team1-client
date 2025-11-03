@@ -39,6 +39,7 @@ export const RecordReactions = ({
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAnimatingRef = useRef(false);
+  const timersRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     if (isInitialLoad) {
@@ -48,16 +49,25 @@ export const RecordReactions = ({
     }
   }, [initialReactions, isInitialLoad]);
 
-  // Cleanup: 컴포넌트 언마운트 시 타이머 정리
+  // Cleanup: 컴포넌트 언마운트 시 모든 타이머 정리
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      timersRef.current.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      timersRef.current = [];
     };
   }, []);
 
   const createFloatingEmojiWithRect = (emoji: string, rect: DOMRect) => {
+    // SSR 환경에서 실행되지 않도록 확인
+    if (typeof window === "undefined") {
+      return;
+    }
+
     // 이미 애니메이션이 진행 중이면 무시
     if (isAnimatingRef.current) {
       return;
@@ -65,35 +75,55 @@ export const RecordReactions = ({
 
     isAnimatingRef.current = true;
 
+    // RecordCard 찾기 (relative 기준점)
+    const recordCard = document.querySelector("[data-record-card]");
+    if (!recordCard) {
+      isAnimatingRef.current = false;
+      return;
+    }
+
+    const cardRect = recordCard.getBoundingClientRect();
+
     // 여러 개의 이모지를 연속으로 생성 (3-5개)
     const emojiCount = Math.floor(Math.random() * 3) + 3;
+    const localTimers: NodeJS.Timeout[] = [];
 
     for (let i = 0; i < emojiCount; i++) {
-      setTimeout(() => {
+      const createTimer = setTimeout(() => {
         const randomX = (Math.random() - 0.5) * 60;
 
+        // RecordCard 기준 상대 좌표
         const floatingEmoji: FloatingEmoji = {
           id: `${Date.now()}-${Math.random()}`,
           emoji,
-          x: rect.left + rect.width / 2 + randomX,
-          y: rect.top + rect.height / 2,
+          x: rect.left - cardRect.left + rect.width / 2 + randomX,
+          y: rect.top - cardRect.top + rect.height / 2,
         };
 
         setFloatingEmojis((prev) => [...prev, floatingEmoji]);
 
-        setTimeout(() => {
+        const removeTimer = setTimeout(() => {
           setFloatingEmojis((prev) => prev.filter((e) => e.id !== floatingEmoji.id));
         }, 2000);
+
+        timersRef.current.push(removeTimer);
+        localTimers.push(removeTimer);
       }, i * 150);
+
+      timersRef.current.push(createTimer);
+      localTimers.push(createTimer);
     }
 
-    // 애니메이션이 끝난 후 다시 클릭 가능하도록 (800ms = 마지막 이모지 생성 시간)
-    setTimeout(
+    // 애니메이션이 끝난 후 다시 클릭 가능하도록
+    const animationEndTimer = setTimeout(
       () => {
         isAnimatingRef.current = false;
       },
       emojiCount * 150 + 300,
     );
+
+    timersRef.current.push(animationEndTimer);
+    localTimers.push(animationEndTimer);
   };
 
   const handleReactionClick = (reactionId: string, event: React.MouseEvent<HTMLButtonElement>) => {
@@ -201,9 +231,9 @@ export const RecordReactions = ({
         ))}
 
         {hasEmptySlots &&
-          Array.from({ length: emptySlots }, (_, i) => i).map((index) => (
+          Array.from({ length: emptySlots }, (_, i) => `empty-${reactions.length + i}`).map((uniqueKey) => (
             <button
-              key={`empty-slot-${index}`}
+              key={uniqueKey}
               type="button"
               onClick={handleAddEmoji}
               className="w-[66px] h-[66px] rounded-full flex items-center justify-center flex-shrink-0"
@@ -232,7 +262,6 @@ export const RecordReactions = ({
               opacity: 0,
               scale: 0.3,
               y: 0,
-              x: "-50%",
             }}
             animate={{
               opacity: [0, 1, 1, 0],

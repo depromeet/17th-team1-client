@@ -29,7 +29,7 @@ export const RecordCard = ({
   reactions,
 }: RecordCardProps) => {
   return (
-    <div className="w-full h-full bg-surface-secondary flex flex-col">
+    <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
       {/* 이미지 영역 */}
       <div
         className="relative h-[714px] w-full flex-shrink-0"
@@ -78,6 +78,11 @@ export const RecordCard = ({
         role="button"
         tabIndex={0}
         className="px-4 pt-4 flex-shrink-0"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.stopPropagation();
+          }
+        }}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { DotIcon } from "@/assets/icons";
 import { Dropdown } from "@/components/common/Dropdown";
 import { Header } from "@/components/common/Header";
@@ -19,20 +20,29 @@ export const RecordDetailHeader = ({
   onBack,
   onEdit,
   onDelete,
-  isOwner = true,
+  isOwner = false,
 }: RecordDetailHeaderProps) => {
-  const menuOptions = [
-    {
-      label: "기록 편집",
-      value: "edit",
-      onClick: onEdit,
-    },
-    {
-      label: "기록 삭제",
-      value: "delete",
-      onClick: onDelete,
-    },
-  ];
+  const menuOptions = useMemo(() => {
+    const options = [];
+
+    if (onEdit) {
+      options.push({
+        label: "기록 편집",
+        value: "edit",
+        onClick: onEdit,
+      });
+    }
+
+    if (onDelete) {
+      options.push({
+        label: "기록 삭제",
+        value: "delete",
+        onClick: onDelete,
+      });
+    }
+
+    return options;
+  }, [onEdit, onDelete]);
 
   const title = `${city}, ${country}`;
   const truncatedTitle = title.length > 20 ? `${title.slice(0, 20)}...` : title;
@@ -42,7 +52,7 @@ export const RecordDetailHeader = ({
       <Header
         variant="transparent"
         leftIcon="back"
-        onBack={onBack}
+        onLeftClick={onBack}
         title={truncatedTitle}
         rightIcon={
           isOwner ? (
@@ -51,7 +61,11 @@ export const RecordDetailHeader = ({
               variant="light"
               options={menuOptions}
               trigger={
-                <button type="button" aria-label="메뉴 열기">
+                <button
+                  type="button"
+                  className="flex items-center justify-center w-11 h-11 cursor-pointer hover:opacity-70 transition-opacity"
+                  aria-label="메뉴 열기"
+                >
                   <DotIcon />
                 </button>
               }

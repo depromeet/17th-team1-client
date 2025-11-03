@@ -142,7 +142,12 @@ export const createCityHTML = (
     ${
       thumbnailUrl
         ? `<div style="${styles.thumbnailCard(labelWidth / 2)}">
-      <img src="${thumbnailUrl}" alt="${cityName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+      <img 
+        src="${thumbnailUrl}" 
+        alt="${cityName} 여행 기록 썸네일" 
+        style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
+        onerror="this.style.display='none'" 
+      />
     </div>`
         : ""
     }

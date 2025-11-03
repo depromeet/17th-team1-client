@@ -29,8 +29,9 @@ const RecordDetailPage = () => {
   const router = useRouter();
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const recordId = params.id as string;
+  const recordId = typeof params.id === "string" ? params.id : "";
 
   // 스크롤 상태 관리
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
@@ -38,8 +39,12 @@ const RecordDetailPage = () => {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadRecordData = async () => {
       try {
+        setError(null);
+
         // TODO: Replace with actual API call
         // const response = await getCountryRecords(recordId);
         // 서버에서 이미 초기 레코드를 첫 번째로, 나머지는 랜덤 순서로 정렬하여 반환
@@ -106,14 +111,24 @@ const RecordDetailPage = () => {
           },
         ];
 
-        setCountryRecords(mockCountryRecords);
-        setIsLoading(false);
-      } catch (_error) {
-        setIsLoading(false);
+        if (isMounted) {
+          setCountryRecords(mockCountryRecords);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          const errorMessage = error instanceof Error ? error.message : "기록을 불러오는 중 오류가 발생했습니다";
+          setError(errorMessage);
+          setIsLoading(false);
+        }
       }
     };
 
     loadRecordData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [recordId]);
 
   const handleBack = () => {
@@ -145,6 +160,24 @@ const RecordDetailPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-surface-secondary px-4">
+        <div className="text-text-primary text-center">
+          <p className="text-lg font-semibold mb-2">오류가 발생했습니다</p>
+          <p className="text-text-secondary text-sm">{error}</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleBack}
+          className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-90 transition-opacity"
+        >
+          돌아가기
+        </button>
+      </div>
+    );
+  }
+
   if (!currentRecord) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-surface-secondary">
@@ -156,7 +189,7 @@ const RecordDetailPage = () => {
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
     return (
-      <div className="w-full h-full bg-surface-secondary relative" style={{ height: "100dvh" }}>
+      <div className="w-full max-w-[512px] h-screen bg-surface-secondary relative">
         {/* 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader
@@ -165,6 +198,7 @@ const RecordDetailPage = () => {
             onBack={handleBack}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            isOwner
           />
         </div>
 
@@ -186,18 +220,17 @@ const RecordDetailPage = () => {
 
   // 여러 기록이 있는 경우 (스크롤 가능)
   return (
-    <div className="w-full h-full bg-surface-secondary relative" style={{ height: "100dvh" }}>
+    <div className="w-full h-screen bg-surface-secondary relative max-w-[512px] mx-auto">
       {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
-      <div className="fixed top-0 left-0 right-0 z-30 pointer-events-none">
-        <div className="pointer-events-auto">
-          <RecordDetailHeader
-            city={currentRecord.city}
-            country={currentRecord.country}
-            onBack={handleBack}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <RecordDetailHeader
+          city={currentRecord.city}
+          country={currentRecord.country}
+          onBack={handleBack}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          isOwner
+        />
       </div>
 
       {/* 스크롤 힌트 */}
@@ -210,20 +243,22 @@ const RecordDetailPage = () => {
         hasNext={hasNext}
         hasPrevious={hasPrevious}
       >
-        {countryRecords.map((record) => (
-          <RecordCard
-            key={record.id}
-            id={record.id}
-            images={record.images}
-            category={record.category}
-            date={record.date}
-            location={record.location}
-            userName={record.userName}
-            userAvatar={record.userAvatar}
-            description={record.description}
-            reactions={record.reactions}
-          />
-        ))}
+        {countryRecords.map(
+          ({ id, images, category, date, location, userName, userAvatar, description, reactions }) => (
+            <RecordCard
+              key={id}
+              id={id}
+              images={images}
+              category={category}
+              date={date}
+              location={location}
+              userName={userName}
+              userAvatar={userAvatar}
+              description={description}
+              reactions={reactions}
+            />
+          ),
+        )}
       </RecordScrollContainer>
     </div>
   );

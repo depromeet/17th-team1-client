@@ -8,6 +8,27 @@ import { cn } from "@/utils/cn";
 
 type DropdownVariant = "dark" | "light";
 
+export const VARIANT_STYLES = {
+  dark: {
+    content: "bg-[#1c2d45] border-[rgba(255,255,255,0.1)]",
+    item: {
+      base: "text-white",
+      checked: "text-[#00d9ff]",
+      hover: "hover:bg-[rgba(255,255,255,0.05)]",
+    },
+    separator: "bg-[rgba(255,255,255,0.1)]",
+  },
+  light: {
+    content: "bg-white border-border-primary",
+    item: {
+      base: "text-text-inverseprimary",
+      checked: "text-text-inverseprimary",
+      hover: "hover:bg-[rgba(0,0,0,0.04)]",
+    },
+    separator: "bg-border-primary",
+  },
+} as const;
+
 type DropdownProps = {
   value?: string;
   onValueChange?: (value: string) => void;
@@ -46,32 +67,11 @@ export const Dropdown = ({
     }
   };
 
-  const variantStyles = {
-    dark: {
-      content: "bg-[#1c2d45] border-[rgba(255,255,255,0.1)]",
-      item: {
-        base: "text-white",
-        checked: "text-[#00d9ff]",
-        hover: "hover:bg-[rgba(255,255,255,0.05)]",
-      },
-      separator: "bg-[rgba(255,255,255,0.1)]",
-    },
-    light: {
-      content: "bg-white border-border-primary",
-      item: {
-        base: "text-text-inverseprimary",
-        checked: "text-text-inverseprimary",
-        hover: "hover:bg-surface-secondary",
-      },
-      separator: "bg-border-primary",
-    },
-  };
-
-  const styles = variantStyles[variant];
+  const styles = VARIANT_STYLES[variant];
 
   if (asMenu) {
     return (
-      <SelectPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+      <SelectPrimitive.Root value={value} open={isOpen} onOpenChange={setIsOpen}>
         <SelectPrimitive.Trigger asChild className={className}>
           {trigger}
         </SelectPrimitive.Trigger>
@@ -93,24 +93,35 @@ export const Dropdown = ({
             side="bottom"
             align="end"
             sideOffset={8}
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <SelectPrimitive.Viewport className="p-0">
               {options.map((option, index) => (
                 <div key={option.value}>
-                  <button
-                    type="button"
-                    onClick={() => handleItemClick(option)}
+                  <SelectPrimitive.Item
+                    value={option.value}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleItemClick(option);
+                    }}
                     className={cn(
                       "relative flex w-full cursor-pointer select-none items-center gap-2",
-                      "px-5 py-3",
-                      "text-base font-medium leading-[1.3] tracking-[-0.32px]",
+                      "px-[20px] py-[12px]",
+                      "text-[16px] font-medium leading-[1.3] tracking-[-0.32px]",
                       "outline-none transition-colors",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
+                      "focus-visible:ring-[var(--color-surface-inverseprimary)]",
                       styles.item.base,
                       styles.item.hover,
+                      value === option.value && styles.item.checked,
                     )}
+                    aria-label={option.label}
+                    aria-checked={value === option.value}
                   >
-                    <span className="shrink-0">{option.label}</span>
-                  </button>
+                    <SelectPrimitive.ItemText asChild>
+                      <span className="shrink-0">{option.label}</span>
+                    </SelectPrimitive.ItemText>
+                  </SelectPrimitive.Item>
                   {index < options.length - 1 && <div className={cn("h-px", styles.separator)} />}
                 </div>
               ))}

@@ -34,6 +34,7 @@ export const RecordScrollHint = ({ show }: RecordScrollHintProps) => {
 
   return (
     <div
+      aria-live="polite"
       className="fixed bottom-6 left-0 right-0 flex flex-col items-center gap-1 pointer-events-none z-50 transition-opacity duration-300"
       style={{
         opacity: isVisible ? 1 : 0,

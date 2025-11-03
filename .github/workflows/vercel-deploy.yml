@@ -1,0 +1,25 @@
+name: Sync to Fork Repository for Vercel
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  sync-to-fork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout organization repository
+        uses: actions/checkout@v4
+
+      - name: Push to fork repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.VERCEL_DEPLOY }}
+        with:
+          source-directory: '.'
+          destination-github-username: yuminnnnni
+          destination-repository-name: 17th-team1-client
+          user-email: ${{ secrets.VERCEL_DEPLOY_EMAIL }}
+          commit-message: ${{ github.event.commits[0].message }}
+          target-branch: main

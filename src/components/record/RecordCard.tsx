@@ -30,9 +30,8 @@ export const RecordCard = ({
 }: RecordCardProps) => {
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
-      {/* 이미지 영역 */}
       <div
-        className="relative h-[714px] w-full flex-shrink-0"
+        className="relative min-h-0 flex-1 w-full max-h-[652px]"
         onTouchStart={(e) => {
           // 이미지 캐러셀 내부에서는 수평 스와이프만 허용
           const target = e.target as HTMLElement;
@@ -73,16 +72,9 @@ export const RecordCard = ({
       </div>
 
       {/* 하단 영역 - 이모지 반응 */}
-      {/* biome-ignore lint/a11y/useSemanticElements: div with stopPropagation for touch/mouse events, not a button */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        role="button"
-        tabIndex={0}
         className="px-4 pt-4 flex-shrink-0"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.stopPropagation();
-          }
-        }}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}

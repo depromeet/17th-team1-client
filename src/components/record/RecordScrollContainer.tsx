@@ -82,17 +82,19 @@ export const RecordScrollContainer = ({
     let touchEnd = 0;
     let touchStartTime = 0;
     let isTouchMoved = false;
+    let isInteractiveTouch = false;
 
     const handleTouchStart = (e: TouchEvent) => {
       // 버튼이나 인터랙티브 요소를 터치한 경우 스크롤 방지
       const target = e.target as HTMLElement;
-      if (
+      const interactiveTarget =
         target.closest("button") ||
         target.closest("a") ||
         target.closest('[role="button"]') ||
         target.closest("input") ||
-        target.closest("textarea")
-      ) {
+        target.closest("textarea");
+      isInteractiveTouch = Boolean(interactiveTarget);
+      if (isInteractiveTouch) {
         return;
       }
 
@@ -102,24 +104,17 @@ export const RecordScrollContainer = ({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isInteractiveTouch) return;
       touchEnd = e.touches[0].clientY;
       isTouchMoved = true;
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (isTransitioning || !isTouchMoved) return;
-
-      // 버튼이나 인터랙티브 요소를 터치한 경우 스크롤 방지
-      const target = e.target as HTMLElement;
-      if (
-        target.closest("button") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest("input") ||
-        target.closest("textarea")
-      ) {
+    const handleTouchEnd = () => {
+      if (isInteractiveTouch) {
+        isInteractiveTouch = false;
         return;
       }
+      if (isTransitioning || !isTouchMoved) return;
 
       const diff = touchStart - touchEnd;
       const threshold = 50;
@@ -137,6 +132,8 @@ export const RecordScrollContainer = ({
           onIndexChange(currentIndex - 1);
         }
       }
+
+      isInteractiveTouch = false;
     };
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });

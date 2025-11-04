@@ -2,6 +2,7 @@
 
 import type { GlobeInstance } from "globe.gl";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
@@ -46,6 +47,7 @@ export interface GlobeRef {
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
   ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
+    const router = useRouter();
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
@@ -222,7 +224,9 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
           const recordId = clusterData.items?.[0]?.recordId;
-          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, recordId);
+          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, recordId, (path) =>
+            router.push(path),
+          );
           el.addEventListener("click", clickHandler);
         } else if (clusterData.clusterType === "continent_cluster") {
           // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
@@ -307,6 +311,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         localHandleClusterSelect,
         globalHandleClusterSelect,
         onClusterSelect,
+        router,
       ],
     );
 

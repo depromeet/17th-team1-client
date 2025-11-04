@@ -73,16 +73,9 @@ export const RecordCard = ({
       </div>
 
       {/* 하단 영역 - 이모지 반응 */}
-      {/* biome-ignore lint/a11y/useSemanticElements: div with stopPropagation for touch/mouse events, not a button */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        role="button"
-        tabIndex={0}
         className="px-4 pt-4 flex-shrink-0"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.stopPropagation();
-          }
-        }}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}

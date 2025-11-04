@@ -272,7 +272,12 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 };
 
 // 도시 클릭 핸들러
-export const createCityClickHandler = (cityName: string, hasRecords: boolean = true, recordId?: string) => {
+export const createCityClickHandler = (
+  cityName: string,
+  hasRecords: boolean = true,
+  recordId?: string,
+  onNavigate?: (path: string) => void,
+) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
@@ -283,15 +288,24 @@ export const createCityClickHandler = (cityName: string, hasRecords: boolean = t
     const cityNameOnly = cityName.split(",")[0];
     const q = encodeURIComponent(cityNameOnly);
 
+    let path: string;
     if (hasRecords && recordId) {
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
-      window.location.href = `/record/${recordId}`;
+      path = `/record/${recordId}`;
     } else if (hasRecords) {
       // 기록 ID가 없는 경우 폴백: 기존 이미지 메타데이터 페이지로 이동
-      window.location.href = `/image-metadata?city=${q}`;
+      path = `/image-metadata?city=${q}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
-      window.location.href = `/image-metadata?city=${q}&mode=edit`;
+      path = `/image-metadata?city=${q}&mode=edit`;
+    }
+
+    if (onNavigate) {
+      // onNavigate 콜백이 제공된 경우: Next.js router 사용
+      onNavigate(path);
+    } else {
+      // 폴백: window.location.href (레거시 지원)
+      window.location.href = path;
     }
   };
 };

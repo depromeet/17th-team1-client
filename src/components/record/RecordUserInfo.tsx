@@ -19,7 +19,7 @@ export const RecordUserInfo = ({ userName, userAvatar, description }: RecordUser
             <Image src={userAvatar} alt={userName} fill className="object-cover" />
           ) : (
             <div className="w-full h-full bg-surface-thirdly flex items-center justify-center text-text-secondary text-sm">
-              {userName.charAt(0)}
+              {userName.charAt(0) || "?"}
             </div>
           )}
         </div>

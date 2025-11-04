@@ -125,9 +125,9 @@ export const RecordImageCarousel = ({ images }: RecordImageCarouselProps) => {
       {/* 이미지 인디케이터 (여러 장일 경우만) */}
       {images.length > 1 && (
         <div className="absolute bottom-30 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-          {images.map((image, index) => (
+          {images.map((_, index) => (
             <div
-              key={image || `indicator-${index}`}
+              key={`indicator-${index}`}
               className={`w-1.5 h-1.5 rounded-full transition-all ${
                 index === currentIndex ? "bg-white" : "bg-white/30"
               }`}

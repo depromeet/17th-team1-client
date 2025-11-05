@@ -4,10 +4,32 @@ import { ClientLayout } from "@/components/common/ClientLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Globber",
-  description: "Depromeet 17th Team 1 Project",
+  title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
+  description: "지구본으로 완성하는 여행 기록 서비스",
   icons: {
     icon: "/assets/globe.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://www.globber.world",
+    title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
+    description: "지구본으로 완성하는 여행 기록 서비스",
+    siteName: "Globber",
+    images: [
+      {
+        url: "/assets/thumbnail.png",
+        width: 1200,
+        height: 630,
+        alt: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
+    description: "지구본으로 완성하는 여행 기록 서비스",
+    images: ["/assets/thumbnail.png"],
   },
 };
 

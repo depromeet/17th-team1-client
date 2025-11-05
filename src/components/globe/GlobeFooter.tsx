@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
@@ -26,6 +27,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
 
 export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,6 +113,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
             background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
           }}
           aria-label="새 항목 추가"
+          onClick={() => router.push("/record")}
         >
           <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
         </button>

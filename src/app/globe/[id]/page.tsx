@@ -39,6 +39,9 @@ const GlobePage = () => {
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
     useGlobeState(travelPatterns);
 
+  // Variables
+  const listViewPaddingTop = isMyGlobe ? 12 : 28; // 80 - 68 or 80 - 52
+
   // 실제 API 데이터 로드
   useEffect(() => {
     const loadData = async () => {
@@ -109,10 +112,12 @@ const GlobePage = () => {
       <Header
         title={isMyGlobe ? "" : `${nickname}님의 지구본`}
         variant="navy"
-        leftIcon="menu"
-        onLeftClick={() => router.push("/profile")}
-        rightIcon="people"
-        onRightClick={() => console.log("people")}
+        {...(isMyGlobe && {
+          leftIcon: "menu",
+          onLeftClick: () => router.push("/profile"),
+          rightIcon: "people",
+          onRightClick: () => console.log("people"),
+        })}
         style={{
           backgroundColor: "transparent",
           position: "relative",
@@ -124,7 +129,7 @@ const GlobePage = () => {
           {/* 글로브 뷰 */}
 
           {/* 상단 헤더 - position absolute */}
-          <div className="absolute top-0 left-0 right-0 z-10 px-4">
+          <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-20">
             <GlobeHeader
               isZoomed={isZoomed || selectedClusterData !== null}
               travelInsight={travelInsight}
@@ -146,7 +151,7 @@ const GlobePage = () => {
 
           {/* 하단 버튼들 - position absolute */}
           <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} isMyGlobe={isMyGlobe} />
           </div>
 
           {/* 돌아가기 버튼 */}
@@ -157,7 +162,7 @@ const GlobePage = () => {
           {/* 리스트 뷰 */}
 
           {/* 상단 헤더 */}
-          <div className="px-4">
+          <div className="px-4" style={{ paddingTop: `${listViewPaddingTop}px` }}>
             <GlobeHeader
               isZoomed={false}
               travelInsight={travelInsight}
@@ -180,7 +185,7 @@ const GlobePage = () => {
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}
           >
-            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} isMyGlobe={isMyGlobe} />
           </div>
         </>
       )}

@@ -16,7 +16,7 @@ const removeMarkdown = (text?: string) => {
 export const GlobeHeader = ({ isZoomed, travelInsight, cityCount = 0, countryCount = 0 }: GlobeHeaderProps) => {
   return (
     <div
-      className={`text-center pt-20 pb-4 transition-opacity duration-700 ease-out max-w-[512px] mx-auto ${
+      className={`text-center pb-4 transition-opacity duration-700 ease-out max-w-[512px] mx-auto ${
         isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >

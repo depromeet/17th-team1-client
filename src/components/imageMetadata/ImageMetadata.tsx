@@ -1,12 +1,13 @@
 "use client";
 
+import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useId, useMemo, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
 import { Header } from "../common/Header";
-import { GoogleMapsModal } from "./GoogleMapsModal";
+// import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageCarousel } from "./ImageCarousel";
 import { ImageMetadataHeader } from "./ImageMetadataHeader";
 import { LoadingOverlay } from "./LoadingOverlay";
@@ -22,70 +23,80 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
-  const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
-  const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
+  // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
+  // const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
+  // const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
   const city = initialCity || "";
   const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
 
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsProcessing(true);
-    try {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsProcessing(true);
+      try {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-      const tasks: Promise<ImageMetadata>[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+        const MAX_IMAGES = 3;
+        const remainingSlots = MAX_IMAGES - metadataList.length;
+        if (remainingSlots <= 0) return;
+
+        const tasks: Promise<ImageMetadata>[] = [];
+        const filesToProcess = Math.min(files.length, remainingSlots);
+        for (let i = 0; i < filesToProcess; i++) {
+          const f = files[i];
+          if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+        }
+
+        const settled = await Promise.allSettled(tasks);
+        const results = settled
+          .filter((r): r is PromiseFulfilledResult<ImageMetadata> => r.status === "fulfilled")
+          .map((r) => r.value);
+
+        if (results.length === 0) return;
+
+        setMetadataList((prev) => {
+          const next = prev.length > 0 ? [...prev, ...results] : results;
+          setSelectedImage(next[prev.length]);
+          return next;
+        });
+      } finally {
+        (e.target as HTMLInputElement).value = "";
+        setIsProcessing(false);
       }
-
-      const settled = await Promise.allSettled(tasks);
-      const results = settled
-        .filter((r): r is PromiseFulfilledResult<ImageMetadata> => r.status === "fulfilled")
-        .map((r) => r.value);
-
-      if (results.length === 0) return;
-
-      setMetadataList((prev) => {
-        const next = prev.length > 0 ? [...prev, ...results] : results;
-        setSelectedImage(next[prev.length]);
-        return next;
-      });
-    } finally {
-      (e.target as HTMLInputElement).value = "";
-      setIsProcessing(false);
-    }
-  }, []);
+    },
+    [metadataList.length],
+  );
 
   const handleImageSelect = (metadata: ImageMetadata) => setSelectedImage(metadata);
 
-  const handleLocationClick = (metadata: ImageMetadata) => {
-    setSelectedImageForMaps(metadata);
-    setIsMapsModalOpen(true);
-  };
+  // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
+  // const handleLocationClick = (metadata: ImageMetadata) => {
+  //   setSelectedImageForMaps(metadata);
+  //   setIsMapsModalOpen(true);
+  // };
 
-  const handleLocationUpdate = (lat: number, lng: number, address: string) => {
-    if (!selectedImageForMaps) return;
+  // const handleLocationUpdate = (lat: number, lng: number, address: string) => {
+  //   if (!selectedImageForMaps) return;
 
-    // 새로운 위치 정보로 업데이트
-    const updatedLocation = {
-      latitude: lat,
-      longitude: lng,
-      altitude: selectedImageForMaps.location?.altitude,
-      address: address,
-      nearbyPlaces: [address], // 기본적으로 선택된 주소만 포함
-    };
+  //   // 새로운 위치 정보로 업데이트
+  //   const updatedLocation = {
+  //     latitude: lat,
+  //     longitude: lng,
+  //     altitude: selectedImageForMaps.location?.altitude,
+  //     address: address,
+  //     nearbyPlaces: [address], // 기본적으로 선택된 주소만 포함
+  //   };
 
-    // 메타데이터 리스트 업데이트
-    setMetadataList((prev) =>
-      prev.map((item) => (item.id === selectedImageForMaps.id ? { ...item, location: updatedLocation } : item)),
-    );
+  //   // 메타데이터 리스트 업데이트
+  //   setMetadataList((prev) =>
+  //     prev.map((item) => (item.id === selectedImageForMaps.id ? { ...item, location: updatedLocation } : item)),
+  //   );
 
-    // 현재 선택된 이미지도 업데이트
-    if (selectedImage?.id === selectedImageForMaps.id) {
-      setSelectedImage((prev) => (prev ? { ...prev, location: updatedLocation } : null));
-    }
-  };
+  //   // 현재 선택된 이미지도 업데이트
+  //   if (selectedImage?.id === selectedImageForMaps.id) {
+  //     setSelectedImage((prev) => (prev ? { ...prev, location: updatedLocation } : null));
+  //   }
+  // };
 
   const handleRemove = (id: string) => {
     setMetadataList((prev) => {
@@ -180,7 +191,9 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   }
 
   if (selectedImage) {
-    const isSingleImage = metadataList.length === 1;
+    const MAX_IMAGES = 3;
+    const canAddMore = metadataList.length < MAX_IMAGES;
+    const isSingleImage = metadataList.length === 1 && !canAddMore;
 
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
@@ -203,19 +216,45 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
         >
           {metadataList.map((metadata) => (
             <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel image={metadata} onRemove={handleRemove} onLocationClick={handleLocationClick} />
+              <ImageCarousel image={metadata} onRemove={handleRemove} />
             </div>
           ))}
+          {canAddMore && (
+            <div className="flex-shrink-0">
+              <label
+                htmlFor={fileUploadId}
+                className="relative select-none w-[250.784px] mx-auto cursor-pointer block"
+                style={{ touchAction: "pan-y" }}
+              >
+                <div className="overflow-hidden rounded-xl border border-[#272727] bg-[#141414] hover:bg-black/40 transition-colors">
+                  <div className="w-[251px] h-[445px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <PlusIcon size={32} />
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          )}
         </div>
+        <input
+          type="file"
+          multiple
+          accept="image/*,image/heic"
+          onChange={handleFileUpload}
+          className="hidden"
+          id={fileUploadId}
+        />
         <div className="px-4">
           <MemoryTextarea />
         </div>
-        <GoogleMapsModal
+        {/* TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용 */}
+        {/* <GoogleMapsModal
           isOpen={isMapsModalOpen}
           onClose={() => setIsMapsModalOpen(false)}
           imageMetadata={selectedImageForMaps}
           onLocationUpdate={handleLocationUpdate}
-        />
+        /> */}
       </div>
     );
   }

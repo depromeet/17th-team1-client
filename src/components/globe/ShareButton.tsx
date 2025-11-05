@@ -70,8 +70,6 @@ ${shareUrl}`;
       setIsLoading(true);
 
       await navigator.share({
-        title,
-        text: text,
         url: shareUrl,
       });
 
@@ -88,7 +86,7 @@ ${shareUrl}`;
     } finally {
       setIsLoading(false);
     }
-  }, [isSupported, title, text, shareUrl, copyToClipboard]);
+  }, [isSupported, shareUrl, copyToClipboard]);
 
   // Custom Hooks / Lifecycle Hooks
   useEffect(() => {

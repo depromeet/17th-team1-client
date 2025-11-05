@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: "Globber",
     images: [
       {
-        url: "https://www.globber.world/assets/thumbnail.png",
+        url: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=1200&h=630&fit=crop",
         width: 1200,
         height: 630,
         alt: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
     description: "지구본으로 완성하는 여행 기록 서비스",
-    images: ["https://www.globber.world/assets/thumbnail.png"],
+    images: ["https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=1200&h=630&fit=crop"],
   },
 };
 

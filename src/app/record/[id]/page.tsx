@@ -33,6 +33,14 @@ const RecordDetailPage = () => {
 
   const recordId = typeof params.id === "string" ? params.id : "";
 
+  // 페이지 진입 시 recordId 유효성 검사
+  useEffect(() => {
+    if (!recordId || recordId.trim() === "") {
+      setError("유효하지 않은 기록 ID입니다");
+      setIsLoading(false);
+    }
+  }, [recordId]);
+
   // 스크롤 상태 관리
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
     countryRecords,
@@ -42,6 +50,8 @@ const RecordDetailPage = () => {
     let isMounted = true;
 
     const loadRecordData = async () => {
+      if (!recordId || recordId.trim() === "") return;
+
       try {
         setError(null);
 

@@ -37,6 +37,7 @@
     "react-error-boundary": "^6.0.0",
     "react-globe.gl": "^2.36.0",
     "react-hot-toast": "^2.6.0",
+    "react-swipeable": "^7.0.2",
     "tailwind-merge": "^3.3.1",
     "three": "^0.180.0",
     "world-countries": "^5.1.0",

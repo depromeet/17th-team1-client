@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  globber-fe:
+    container_name: globber-fe
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+    restart: always
+    ports:
+      - 3000:80
+    environment:
+      TZ: "Asia/Seoul"
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+    networks:
+      globber_fe_bridge:
+        ipv4_address: 172.28.0.2
+
+networks:
+  globber_fe_bridge:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

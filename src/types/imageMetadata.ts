@@ -6,7 +6,7 @@ export const TAG_LABELS: Record<ImageTag, string> = {
   FOOD: "음식",
   SCENERY: "풍경",
   PEOPLE: "인물",
-  NONE: "없음"
+  NONE: "없음",
 };
 
 export interface ImageMetadata {

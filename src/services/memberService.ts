@@ -68,11 +68,7 @@ export const createMemberTravels = async (
     }
 
     const travelRecords = convertCitiesToTravelRecords(cities);
-    const data = await apiPost<CreateTravelRecordsResponse>(
-      `/api/v1/member-travels`,
-      travelRecords,
-      token
-    );
+    const data = await apiPost<CreateTravelRecordsResponse>(`/api/v1/member-travels`, travelRecords, token);
 
     return data;
   } catch (error) {

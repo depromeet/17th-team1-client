@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useId, useMemo, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
@@ -16,48 +17,65 @@ type ImageMetadataProps = {
   initialCity?: string;
 };
 
-export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
+export default function ImageMetadataComponent({
+  initialCity,
+}: ImageMetadataProps) {
+  const router = useRouter();
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
+  const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(
+    null
+  );
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
   const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
-  const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
+  const [selectedImageForMaps, setSelectedImageForMaps] =
+    useState<ImageMetadata | null>(null);
   const city = initialCity || "";
   const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
 
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsProcessing(true);
-    try {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
+  const handleClose = useCallback(() => {
+    router.push("/record");
+  }, [router]);
 
-      const tasks: Promise<ImageMetadata>[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsProcessing(true);
+      try {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const tasks: Promise<ImageMetadata>[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+        }
+
+        const settled = await Promise.allSettled(tasks);
+        const results = settled
+          .filter(
+            (r): r is PromiseFulfilledResult<ImageMetadata> =>
+              r.status === "fulfilled"
+          )
+          .map((r) => r.value);
+
+        if (results.length === 0) return;
+
+        setMetadataList((prev) => {
+          const next = prev.length > 0 ? [...prev, ...results] : results;
+          setSelectedImage(next[prev.length]);
+          return next;
+        });
+      } finally {
+        (e.target as HTMLInputElement).value = "";
+        setIsProcessing(false);
       }
+    },
+    []
+  );
 
-      const settled = await Promise.allSettled(tasks);
-      const results = settled
-        .filter((r): r is PromiseFulfilledResult<ImageMetadata> => r.status === "fulfilled")
-        .map((r) => r.value);
-
-      if (results.length === 0) return;
-
-      setMetadataList((prev) => {
-        const next = prev.length > 0 ? [...prev, ...results] : results;
-        setSelectedImage(next[prev.length]);
-        return next;
-      });
-    } finally {
-      (e.target as HTMLInputElement).value = "";
-      setIsProcessing(false);
-    }
-  }, []);
-
-  const handleImageSelect = (metadata: ImageMetadata) => setSelectedImage(metadata);
+  const handleImageSelect = (metadata: ImageMetadata) =>
+    setSelectedImage(metadata);
 
   const handleLocationClick = (metadata: ImageMetadata) => {
     setSelectedImageForMaps(metadata);
@@ -78,12 +96,18 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
 
     // 메타데이터 리스트 업데이트
     setMetadataList((prev) =>
-      prev.map((item) => (item.id === selectedImageForMaps.id ? { ...item, location: updatedLocation } : item)),
+      prev.map((item) =>
+        item.id === selectedImageForMaps.id
+          ? { ...item, location: updatedLocation }
+          : item
+      )
     );
 
     // 현재 선택된 이미지도 업데이트
     if (selectedImage?.id === selectedImageForMaps.id) {
-      setSelectedImage((prev) => (prev ? { ...prev, location: updatedLocation } : null));
+      setSelectedImage((prev) =>
+        prev ? { ...prev, location: updatedLocation } : null
+      );
     }
   };
 
@@ -111,7 +135,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           title="최근 항목"
           variant="dark"
           leftIcon="close"
-          onLeftClick={() => console.log("close")}
+          onLeftClick={handleClose}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
           onRightClick={handleSave}
@@ -136,7 +160,10 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
               className="hidden"
               id={fileUploadId}
             />
-            <label htmlFor={fileUploadId} className="absolute inset-0 cursor-pointer">
+            <label
+              htmlFor={fileUploadId}
+              className="absolute inset-0 cursor-pointer"
+            >
               <span className="sr-only">이미지 파일 선택</span>
             </label>
           </div>
@@ -149,7 +176,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
         <LoadingOverlay show={isProcessing} />
-        <ImageMetadataHeader city={cityMain} />
+        <ImageMetadataHeader city={cityMain} onClose={handleClose} />
         <div className="px-6 mb-6">
           <div className="grid grid-cols-3 gap-3">
             {metadataList.map((metadata) => (
@@ -192,7 +219,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           onLeftClick={() => setSelectedImage(null)}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
-          onRightClick={() => console.log("dot")}
+          onRightClick={handleSave}
         />
         <div
           className={
@@ -202,8 +229,15 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           }
         >
           {metadataList.map((metadata) => (
-            <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel image={metadata} onRemove={handleRemove} onLocationClick={handleLocationClick} />
+            <div
+              key={metadata.id}
+              className={isSingleImage ? "" : "flex-shrink-0"}
+            >
+              <ImageCarousel
+                image={metadata}
+                onRemove={handleRemove}
+                onLocationClick={handleLocationClick}
+              />
             </div>
           ))}
         </div>

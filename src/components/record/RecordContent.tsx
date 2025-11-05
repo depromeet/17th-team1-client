@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { RecordResponse, Continent } from "@/types/record";
 import {
@@ -39,6 +40,8 @@ export function RecordContent({
   selectedContinent,
   onContinentChange,
 }: RecordContentProps) {
+  const router = useRouter();
+
   // 대륙별 필터링된 데이터 계산
   const { filteredRegions, continentStats } = useMemo(() => {
     if (!initialData?.data) {
@@ -125,7 +128,7 @@ export function RecordContent({
           <span className="text-text-primary text-2xl font-bold font-['Pretendard'] leading-8">
             여행 중 가장 기억에 남는 사진을
           </span>
-          <br/>
+          <br />
           <span className="text-state-focused text-2xl font-bold font-['Pretendard'] leading-8">
             최대 3장
           </span>
@@ -150,8 +153,8 @@ export function RecordContent({
                   isSelected
                     ? "px-3.5 py-2 bg-state-enabled"
                     : isDisabled
-                      ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
-                      : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
+                    ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
+                    : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
                 }`}
                 disabled={isDisabled}
               >
@@ -160,8 +163,8 @@ export function RecordContent({
                     isSelected
                       ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
                       : isDisabled
-                        ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
-                        : "text-white text-sm font-medium font-['Pretendard'] leading-5"
+                      ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
+                      : "text-white text-sm font-medium font-['Pretendard'] leading-5"
                   }`}
                 >
                   {continent}
@@ -200,7 +203,13 @@ export function RecordContent({
                   <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
                     {city.name}
                   </div>
-                  <div className="w-8 h-8 rounded-lg flex justify-between items-center overflow-hidden">
+                  <button
+                    onClick={() => {
+                      const cityParam = encodeURIComponent(city.name);
+                      router.push(`/image-metadata?city=${cityParam}`);
+                    }}
+                    className="w-8 h-8 rounded-lg flex justify-center items-center overflow-hidden hover:opacity-70 transition-opacity"
+                  >
                     <div className="w-6 h-6 relative rounded-lg overflow-hidden">
                       <Image
                         src="/ic_edit.svg"
@@ -210,7 +219,7 @@ export function RecordContent({
                         priority={false}
                       />
                     </div>
-                  </div>
+                  </button>
                 </div>
               ))}
             </div>

@@ -1,15 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import type { RecordResponse, Continent } from "@/types/record";
-import { RecordHeaderText } from "./RecordHeaderText";
-import { ContinentFilter } from "./ContinentFilter";
+import type { Continent, RecordResponse } from "@/types/record";
+import { calculateContinentStats, filterRegionsByContinent, sortContinentsByCount } from "@/utils/recordUtils";
 import { CityList } from "./CityList";
-import {
-  calculateContinentStats,
-  filterRegionsByContinent,
-  sortContinentsByCount,
-} from "@/utils/recordUtils";
+import { ContinentFilter } from "./ContinentFilter";
+import { RecordHeaderText } from "./RecordHeaderText";
 
 interface RecordContentProps {
   initialData: RecordResponse | null;
@@ -17,11 +13,7 @@ interface RecordContentProps {
   onContinentChange: (continent: Continent) => void;
 }
 
-export function RecordContent({
-  initialData,
-  selectedContinent,
-  onContinentChange,
-}: RecordContentProps) {
+export function RecordContent({ initialData, selectedContinent, onContinentChange }: RecordContentProps) {
   const { filteredRegions, continentStats } = useMemo(() => {
     if (!initialData?.data) {
       const emptyStats: Record<Continent, number> = {
@@ -43,10 +35,7 @@ export function RecordContent({
     return { filteredRegions: filtered, continentStats: stats };
   }, [initialData, selectedContinent]);
 
-  const sortedContinents = useMemo(
-    () => sortContinentsByCount(continentStats),
-    [continentStats]
-  );
+  const sortedContinents = useMemo(() => sortContinentsByCount(continentStats), [continentStats]);
 
   return (
     <div className="space-y-8">

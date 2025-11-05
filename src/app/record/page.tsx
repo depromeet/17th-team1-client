@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { RecordClient } from "@/components/record/RecordClient";
 import { getMemberTravels } from "@/services/memberService";
-import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 import type { RecordResponse } from "@/types/record";
+import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 
 export default async function RecordPage() {
   try {
@@ -19,8 +19,7 @@ export default async function RecordPage() {
       return <RecordClient initialData={null} />;
     }
 
-    const recordData: RecordResponse =
-      convertMemberTravelsToRecordResponse(memberTravels);
+    const recordData: RecordResponse = convertMemberTravelsToRecordResponse(memberTravels);
     return <RecordClient initialData={recordData} />;
   } catch (error) {
     console.error("Failed to fetch record data:", error);

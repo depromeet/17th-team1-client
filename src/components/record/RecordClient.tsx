@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { RecordHeader } from "./RecordHeader";
+import { useEffect, useState } from "react";
+import type { Continent, RecordResponse } from "@/types/record";
 import { RecordContent } from "./RecordContent";
-import type { RecordResponse, Continent } from "@/types/record";
+import { RecordHeader } from "./RecordHeader";
 
 interface RecordClientProps {
   initialData: RecordResponse | null;

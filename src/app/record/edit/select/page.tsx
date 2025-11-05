@@ -1,12 +1,21 @@
-import { cookies } from "next/headers";
+import { EditSelectClient } from "@/components/record/EditSelectClient";
 import { fetchCities } from "@/services/cityService";
 import { getMemberTravels } from "@/services/memberService";
-import { EditSelectClient } from "@/components/record/EditSelectClient";
+import type { PageProps } from "@/types/components";
+import { getServerAuthInfo } from "@/utils/serverCookies";
 
-export default async function EditSelectPage() {
+export const dynamic = "force-dynamic";
+
+type EditSelectPageProps = PageProps<
+  never,
+  { added?: string; removed?: string }
+>;
+
+export default async function EditSelectPage({
+  searchParams,
+}: EditSelectPageProps) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("kakao_access_token")?.value;
+    const { token } = await getServerAuthInfo();
 
     // 이미 등록된 도시 이름 목록 가져오기
     const registeredCityNames = new Set<string>();
@@ -20,14 +29,17 @@ export default async function EditSelectPage() {
             }
           }
         }
-      } catch (e) {}
+      } catch (_e) {}
     }
 
     const initialCities = await fetchCities({ limit: 20 });
+    const params = await searchParams;
     return (
       <EditSelectClient
         initialCities={initialCities}
         registeredCityNames={registeredCityNames}
+        addedParam={params?.added}
+        removedParam={params?.removed}
       />
     );
   } catch (error) {

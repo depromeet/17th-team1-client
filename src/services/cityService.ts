@@ -1,5 +1,13 @@
-import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
-import type { City, CityApiParams, CityApiResponse, CityApiData, CitySearchResponse, AddCityRequest, AddCityResponse, DeleteCityResponse } from "@/types/city";
+import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import type {
+  AddCityRequest,
+  AddCityResponse,
+  City,
+  CityApiParams,
+  CityApiResponse,
+  CitySearchResponse,
+  DeleteCityResponse,
+} from "@/types/city";
 import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 
 export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {

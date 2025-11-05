@@ -1,12 +1,9 @@
 import type { City } from "@/types/city";
-import type { TravelRecord } from "@/types/member";
-import type { MemberTravelsResponse } from "@/types/member";
+import type { MemberTravelsResponse, TravelRecord } from "@/types/member";
 import type { RecordResponse } from "@/types/record";
 
 // City 타입을 TravelRecord로 변환하는 함수
-export const convertCitiesToTravelRecords = (
-  cities: City[]
-): TravelRecord[] => {
+export const convertCitiesToTravelRecords = (cities: City[]): TravelRecord[] => {
   return cities.map((city) => ({
     countryName: city.country,
     cityName: city.name,
@@ -17,13 +14,9 @@ export const convertCitiesToTravelRecords = (
 };
 
 // MemberTravelsResponse를 RecordResponse로 변환하는 함수
-export const convertMemberTravelsToRecordResponse = (
-  memberTravels: MemberTravelsResponse
-): RecordResponse => {
+export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravelsResponse): RecordResponse => {
   // 모든 여행의 도시들을 평탄화
-  const allCities = memberTravels.data.travels.flatMap(
-    (travel) => travel.cities
-  );
+  const allCities = memberTravels.data.travels.flatMap((travel) => travel.cities);
 
   // 국가별로 그룹화 (countryName과 countryCode를 저장)
   const citiesByCountry = allCities.reduce(
@@ -54,12 +47,12 @@ export const convertMemberTravelsToRecordResponse = (
           countryCode: string;
         }>;
       }
-    >
+    >,
   );
 
   // regions 배열로 변환 (국가별로 정렬)
   const regions = Object.entries(citiesByCountry)
-    .map(([countryCode, { countryName, cities }]) => {
+    .map(([_countryCode, { countryName, cities }]) => {
       return {
         regionName: countryName,
         cityCount: cities.length,

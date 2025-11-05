@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
 import { NationSelectFooter } from "./NationSelectFooter";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
-import { SearchInput } from "@/components/common/Input";
 
 type NationSelectClientProps = {
   initialCities: City[];
@@ -30,15 +30,8 @@ export const NationSelectClient = ({
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
 
-  const {
-    searchResults,
-    isSearching,
-    searchError,
-    searchKeyword,
-    setSearchKeyword,
-    clearSearch,
-    hasSearched,
-  } = useCitySearch();
+  const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
+    useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
   const displayCities = isSearchingMode ? searchResults : initialCities;
@@ -86,12 +79,7 @@ export const NationSelectClient = ({
 
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
         <div className="w-full max-w-[512px] px-4">
-          {customHeader || (
-            <NationSelectHeader
-              searchValue={searchKeyword}
-              onSearchChange={handleSearchChange}
-            />
-          )}
+          {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
 
           {customHeader && (
             <div className="mb-4">
@@ -105,24 +93,14 @@ export const NationSelectClient = ({
 
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">
-              {isSearchingMode
-                ? `검색 결과 ${searchResults.length}건`
-                : "인기 여행지"}
+              {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
             </h2>
 
             {displayError && (
-              <div
-                className="text-red-500 text-center py-4"
-                role="alert"
-                aria-live="polite"
-              >
-                {isSearchingMode
-                  ? "검색 중 오류가 발생했습니다"
-                  : "도시를 불러오는 중 오류가 발생했습니다"}
+              <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
+                {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
                 <div className="mt-1 text-xs text-text-thirdly break-words">
-                  {typeof displayError === "string"
-                    ? displayError
-                    : String(displayError)}
+                  {typeof displayError === "string" ? displayError : String(displayError)}
                 </div>
               </div>
             )}

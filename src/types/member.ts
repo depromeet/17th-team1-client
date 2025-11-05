@@ -27,7 +27,7 @@ export interface DeleteTravelRecord {
 // 여행 기록 삭제 API 응답
 export interface DeleteTravelRecordsResponse {
   status: string;
-  data: {};
+  data: Record<string, never>;
 }
 
 // 여행 기록 생성 API 응답

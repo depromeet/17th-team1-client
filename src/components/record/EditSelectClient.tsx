@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
 import { EditHeader } from "@/components/record/EditHeader";
 import type { City } from "@/types/city";
@@ -9,19 +8,26 @@ import type { City } from "@/types/city";
 interface EditSelectClientProps {
   initialCities: City[];
   registeredCityNames?: Set<string>;
+  addedParam?: string | string[];
+  removedParam?: string | string[];
 }
 
 export function EditSelectClient({
   initialCities,
   registeredCityNames = new Set(),
+  addedParam,
+  removedParam,
 }: EditSelectClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleBack = () => {
     // 뒤로가기 시 기존 쿼리 파라미터 유지 (이전에 추가한 도시들과 삭제된 도시 정보 유지)
-    const existingAddedParam = searchParams.get("added");
-    const existingRemovedParam = searchParams.get("removed");
+    const existingAddedParam = Array.isArray(addedParam)
+      ? addedParam[0]
+      : addedParam;
+    const existingRemovedParam = Array.isArray(removedParam)
+      ? removedParam[0]
+      : removedParam;
 
     let newUrl = "/record/edit";
     const params = new URLSearchParams();
@@ -42,9 +48,20 @@ export function EditSelectClient({
 
   const handleComplete = (cities: City[]) => {
     // 기존에 추가된 도시들 가져오기
-    const existingAddedParam = searchParams.get("added");
-    const existingRemovedParam = searchParams.get("removed");
-    const existingAdded: any[] = [];
+    const existingAddedParam = Array.isArray(addedParam)
+      ? addedParam[0]
+      : addedParam;
+    const existingRemovedParam = Array.isArray(removedParam)
+      ? removedParam[0]
+      : removedParam;
+    const existingAdded: Array<{
+      id: string | number;
+      name: string;
+      country: string;
+      countryCode: string;
+      lat: number;
+      lng: number;
+    }> = [];
 
     if (existingAddedParam) {
       try {
@@ -68,7 +85,17 @@ export function EditSelectClient({
     );
 
     // 기존 도시 + 새 도시 합치기 (중복 제거 - 같은 id는 새 것으로 대체)
-    const cityMap = new Map<string, any>();
+    const cityMap = new Map<
+      string,
+      {
+        id: string | number;
+        name: string;
+        country: string;
+        countryCode: string;
+        lat: number;
+        lng: number;
+      }
+    >();
 
     // 기존 도시들 먼저 추가
     existingAdded.forEach((city) => {

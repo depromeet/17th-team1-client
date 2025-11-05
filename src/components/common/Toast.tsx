@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type ToastType = "success" | "error";
 
@@ -10,10 +10,12 @@ type ToastState = {
 } | null;
 
 let toastState: ToastState = null;
-let toastListeners: Set<(toast: ToastState) => void> = new Set();
+const toastListeners: Set<(toast: ToastState) => void> = new Set();
 
 const notifyListeners = () => {
-  toastListeners.forEach((listener) => listener(toastState));
+  toastListeners.forEach((listener) => {
+    listener(toastState);
+  });
 };
 
 export const toast = {

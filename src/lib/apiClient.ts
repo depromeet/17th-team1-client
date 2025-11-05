@@ -3,7 +3,11 @@ import { env } from "@/config/env";
 const API_BASE_URL = env.API_BASE_URL;
 
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public endpoint: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public endpoint: string,
+  ) {
     super(message);
     this.name = "ApiError";
   }
@@ -35,7 +39,7 @@ const parseJsonSafely = async <T>(response: Response): Promise<T> => {
 export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
-  token?: string
+  token?: string,
 ): Promise<T> => {
   try {
     const searchParams = new URLSearchParams();
@@ -48,9 +52,7 @@ export const apiGet = async <T>(
       });
     }
 
-    const url = `${API_BASE_URL}${endpoint}${
-      searchParams.toString() ? `?${searchParams.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}${endpoint}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
     console.log(`[API] GET ${endpoint}`);
     console.log(`[API] URL:`, url);
@@ -64,15 +66,9 @@ export const apiGet = async <T>(
     console.log(`[API] Response status:`, response.status);
 
     if (!response.ok) {
-      const responseText = await response
-        .text()
-        .catch(() => "Unable to read response");
+      const responseText = await response.text().catch(() => "Unable to read response");
       console.log(`[API] Error response body:`, responseText);
-      const apiError = new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      const apiError = new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
       // 404와 5xx 서버 에러를 제외하고만 로그 출력
       if (response.status !== 404 && response.status < 500) {
         console.error(`API GET Error (${endpoint}):`, apiError);
@@ -85,21 +81,14 @@ export const apiGet = async <T>(
     return data;
   } catch (error) {
     // ApiError가 아니거나 404와 5xx가 아닌 경우에만 로그 출력
-    if (
-      !(error instanceof ApiError) ||
-      (error.status !== 404 && error.status < 500)
-    ) {
+    if (!(error instanceof ApiError) || (error.status !== 404 && error.status < 500)) {
       console.error(`API GET Error (${endpoint}):`, error);
     }
     throw error;
   }
 };
 
-export const apiPost = async <T>(
-  endpoint: string,
-  data?: unknown,
-  token?: string
-): Promise<T> => {
+export const apiPost = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     const requestBody = data ? JSON.stringify(data) : undefined;
@@ -118,15 +107,9 @@ export const apiPost = async <T>(
     console.log(`[API] Response status:`, response.status);
 
     if (!response.ok) {
-      const responseText = await response
-        .text()
-        .catch(() => "Unable to read response");
+      const responseText = await response.text().catch(() => "Unable to read response");
       console.log(`[API] Error response body:`, responseText);
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -138,11 +121,7 @@ export const apiPost = async <T>(
   }
 };
 
-export const apiPut = async <T>(
-  endpoint: string,
-  data?: unknown,
-  token?: string
-): Promise<T> => {
+export const apiPut = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -153,11 +132,7 @@ export const apiPut = async <T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);
@@ -167,11 +142,40 @@ export const apiPut = async <T>(
   }
 };
 
-export const apiDelete = async <T>(
-  endpoint: string,
-  data?: unknown,
-  token?: string
-): Promise<T> => {
+export const apiPatch = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
+  try {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const requestBody = data ? JSON.stringify(data) : undefined;
+
+    console.log(`[API] PATCH ${endpoint}`);
+    console.log(`[API] URL:`, url);
+    console.log(`[API] Request Body:`, requestBody);
+    console.log(`[API] Headers:`, token ? getAuthHeaders(token) : getDefaultHeaders());
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
+      body: requestBody,
+    });
+
+    console.log(`[API] Response status:`, response.status);
+
+    if (!response.ok) {
+      const responseText = await response.text().catch(() => "Unable to read response");
+      console.log(`[API] Error response body:`, responseText);
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+    }
+
+    const result = await parseJsonSafely<T>(response);
+    console.log(`[API] Response data:`, result);
+    return result;
+  } catch (error) {
+    console.error(`API PATCH Error (${endpoint}):`, error);
+    throw error;
+  }
+};
+
+export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     const requestBody = data ? JSON.stringify(data) : undefined;
@@ -190,15 +194,9 @@ export const apiDelete = async <T>(
     console.log(`[API] Response status:`, response.status);
 
     if (!response.ok) {
-      const responseText = await response
-        .text()
-        .catch(() => "Unable to read response");
+      const responseText = await response.text().catch(() => "Unable to read response");
       console.log(`[API] Error response body:`, responseText);
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);

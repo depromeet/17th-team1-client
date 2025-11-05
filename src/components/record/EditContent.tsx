@@ -49,7 +49,11 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
               <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
                 {flag} {c.name}, {countryName}
               </div>
-              <button type="button" onClick={() => onRemoveClick?.(c.id, c.isNew)} className="w-4 h-4 relative flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => onRemoveClick?.(c.id, c.isNew)}
+                className="w-4 h-4 relative flex items-center justify-center"
+              >
                 <Image src="/ic_X.svg" alt="삭제" fill className="object-contain" />
               </button>
             </div>
@@ -59,5 +63,3 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
     </div>
   );
 }
-
-

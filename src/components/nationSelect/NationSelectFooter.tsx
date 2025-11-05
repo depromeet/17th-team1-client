@@ -9,7 +9,12 @@ type NationSelectFooterProps = {
   buttonLabel?: string;
 };
 
-export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe, buttonLabel }: NationSelectFooterProps) => {
+export const NationSelectFooter = ({
+  selectedCities,
+  onRemoveCity,
+  onCreateGlobe,
+  buttonLabel,
+}: NationSelectFooterProps) => {
   const isButtonEnabled = selectedCities.length > 0;
 
   return (

@@ -41,12 +41,7 @@ export const PopularCitiesList = ({
           <title>검색 중</title>
           <g clipPath={`url(#${clipPathId})`}>
             <g transform="matrix(0.004 0.0149282 -0.0149282 0.004 16 16)">
-              <foreignObject
-                x="-1426.44"
-                y="-1426.44"
-                width="2852.89"
-                height="2852.89"
-              >
+              <foreignObject x="-1426.44" y="-1426.44" width="2852.89" height="2852.89">
                 <div
                   style={{
                     background:

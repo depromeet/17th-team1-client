@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
 import { BackButton } from "@/components/common/Button";
+import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
@@ -21,6 +22,7 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 });
 
 const GlobePrototype = () => {
+  const router = useRouter();
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,6 +93,19 @@ const GlobePrototype = () => {
 
   return (
     <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
+      <Header
+        title="Header"
+        variant="navy"
+        leftIcon="menu"
+        onLeftClick={() => router.push("/profile")}
+        rightIcon="people"
+        onRightClick={() => console.log("people")}
+        style={{
+          backgroundColor: "transparent",
+          position: "relative",
+          zIndex: 20,
+        }}
+      />
       {viewMode === "globe" ? (
         <div className="absolute inset-0">
           {/* 글로브 뷰 */}

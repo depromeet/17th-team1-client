@@ -96,8 +96,8 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family:
-    "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Radix Toast fade animations */
@@ -159,4 +159,57 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Toast 모달 정중앙 배치 및 스타일 - 모든 가능한 선택자 */
+[data-react-hot-toast],
+.react-hot-toast,
+div[data-react-hot-toast] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  bottom: auto !important;
+  right: auto !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+}
+
+[data-react-hot-toast] > div,
+.react-hot-toast > div,
+div[data-react-hot-toast] > div {
+  width: 384px !important;
+  min-height: 48px !important;
+  padding: 14px 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(5.15px) !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  font-family: "Pretendard Variable", sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+
+[data-react-hot-toast] > div > svg,
+.react-hot-toast > div > svg,
+div[data-react-hot-toast] > div > svg {
+  display: none !important;
+}
+
+[data-react-hot-toast] > div > div,
+.react-hot-toast > div > div,
+div[data-react-hot-toast] > div > div {
+  margin: 0 !important;
+  padding: 0 !important;
 }

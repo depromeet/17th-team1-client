@@ -1,15 +1,14 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
-import Image from "next/image";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useId, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
 import { Header } from "../common/Header";
 // import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageCarousel } from "./ImageCarousel";
-import { ImageMetadataHeader } from "./ImageMetadataHeader";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { MemoryTextarea } from "./MemoryTextarea";
 
@@ -20,14 +19,18 @@ type ImageMetadataProps = {
 export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
   // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
   // const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
   // const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
-  const city = initialCity || "";
-  const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+  // const city = initialCity || "";
+  // const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back();
+  };
 
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,11 +57,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
 
         if (results.length === 0) return;
 
-        setMetadataList((prev) => {
-          const next = prev.length > 0 ? [...prev, ...results] : results;
-          setSelectedImage(next[prev.length]);
-          return next;
-        });
+        setMetadataList((prev) => (prev.length > 0 ? [...prev, ...results] : results));
       } finally {
         (e.target as HTMLInputElement).value = "";
         setIsProcessing(false);
@@ -66,8 +65,6 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     },
     [metadataList.length],
   );
-
-  const handleImageSelect = (metadata: ImageMetadata) => setSelectedImage(metadata);
 
   // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
   // const handleLocationClick = (metadata: ImageMetadata) => {
@@ -101,9 +98,6 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   const handleRemove = (id: string) => {
     setMetadataList((prev) => {
       const filtered = prev.filter((item) => item.id !== id);
-      if (filtered.length === 0) {
-        setSelectedImage(null);
-      }
       return filtered;
     });
   };
@@ -156,41 +150,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     );
   }
 
-  if (metadataList.length > 0 && !selectedImage) {
-    return (
-      <div className="max-w-md mx-auto min-h-screen bg-black text-white">
-        <LoadingOverlay show={isProcessing} />
-        <ImageMetadataHeader city={cityMain} />
-        <div className="px-6 mb-6">
-          <div className="grid grid-cols-3 gap-3">
-            {metadataList.map((metadata) => (
-              <button
-                type="button"
-                key={metadata.id}
-                onClick={() => handleImageSelect(metadata)}
-                className="aspect-square bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors relative border-0 p-0 w-full"
-              >
-                <Image
-                  src={metadata.imagePreview}
-                  alt={metadata.fileName}
-                  fill
-                  className="object-cover"
-                  // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  sizes="100vw"
-                />
-                {metadata.status === "completed" && (
-                  <div className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full"></div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="h-20"></div>
-      </div>
-    );
-  }
-
-  if (selectedImage) {
+  if (metadataList.length > 0) {
     const MAX_IMAGES = 3;
     const canAddMore = metadataList.length < MAX_IMAGES;
     const isSingleImage = metadataList.length === 1 && !canAddMore;
@@ -202,7 +162,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           title="나라, 도시 이름"
           variant="dark"
           leftIcon="back"
-          onLeftClick={() => setSelectedImage(null)}
+          onLeftClick={handleBack}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
           onRightClick={() => console.log("dot")}

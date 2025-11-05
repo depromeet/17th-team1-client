@@ -4,15 +4,19 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Popup } from "@/components/common/Popup";
-import { toast } from "@/components/common/Toast";
+import { toast } from "./EditToast";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
 import { getCountryName } from "@/constants/countryMapping";
-import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
+import {
+  createMemberTravels,
+  deleteMemberTravel,
+} from "@/services/memberService";
 import type { City } from "@/types/city";
 import type { CreateTravelRecordsResponse } from "@/types/member";
 import { getAuthInfo } from "@/utils/cookies";
 import { EditContent } from "./EditContent";
 import { EditHeader } from "./EditHeader";
+import { EditToastContainer } from "./EditToast";
 
 interface EditClientProps {
   cities: {
@@ -88,7 +92,9 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   // cities prop이 처음 로드될 때 삭제된 도시가 아닌 기존 도시들을 deletedCitiesInfo에 저장 (필요시)
   useEffect(() => {
-    const existingCities = cities.filter((c) => !c.isNew && !removedIds.has(c.id));
+    const existingCities = cities.filter(
+      (c) => !c.isNew && !removedIds.has(c.id)
+    );
     setDeletedCitiesInfo((prev) => {
       const updated = new Map(prev);
       existingCities.forEach((city) => {
@@ -136,7 +142,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   };
 
   const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
-  const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
+  const currentIds = useMemo(
+    () => new Set(current.map((c) => c.id)),
+    [current]
+  );
   const isChanged = useMemo(() => {
     // 삭제된 도시가 있으면 변경된 것
     if (removedIds.size > 0) return true;
@@ -172,7 +181,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       const params = new URLSearchParams();
 
       if (remainingNewCities.length > 0) {
-        params.set("added", encodeURIComponent(JSON.stringify(remainingNewCities)));
+        params.set(
+          "added",
+          encodeURIComponent(JSON.stringify(remainingNewCities))
+        );
       }
 
       if (removedParam) {
@@ -228,7 +240,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     const params = new URLSearchParams();
 
     if (remainingNewCities.length > 0) {
-      params.set("added", encodeURIComponent(JSON.stringify(remainingNewCities)));
+      params.set(
+        "added",
+        encodeURIComponent(JSON.stringify(remainingNewCities))
+      );
     }
 
     if (currentRemoved.length > 0) {
@@ -304,7 +319,9 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
         addPromise = createMemberTravels(citiesToAdd);
       }
 
-      console.log(`[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
+      console.log(
+        `[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`
+      );
 
       // 모든 API 호출 실행
       const promises: Promise<unknown>[] = [...deletePromises];
@@ -346,7 +363,9 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
     const newCities = current.filter((c) => c.isNew);
     const removedParam =
-      Array.from(removedIds).length > 0 ? encodeURIComponent(JSON.stringify(Array.from(removedIds))) : null;
+      Array.from(removedIds).length > 0
+        ? encodeURIComponent(JSON.stringify(Array.from(removedIds)))
+        : null;
 
     let newUrl = "/record/edit/select";
     const params = new URLSearchParams();
@@ -372,12 +391,21 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   return (
     <div className="h-screen bg-surface-secondary flex flex-col">
+      <EditToastContainer />
       <LoadingOverlay show={isSaving} />
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
         <div className="w-full max-w-[512px] px-4">
-          <EditHeader canSave={isChanged && !isSaving} onSave={handleSave} onBack={handleBack} />
-          <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
+          <EditHeader
+            canSave={isChanged && !isSaving}
+            onSave={handleSave}
+            onBack={handleBack}
+          />
+          <EditContent
+            cities={current}
+            onAddClick={handleAddClick}
+            onRemoveClick={handleRemove}
+          />
         </div>
       </div>
       {confirmId && (
@@ -385,7 +413,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <div className="w-10 h-10 relative overflow-hidden">
-                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+                <Image
+                  src="/icon-exclamation-circle-mono.svg"
+                  alt="경고"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div className="flex flex-col justify-start items-center gap-1">
                 <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
@@ -424,7 +457,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <div className="w-10 h-10 relative overflow-hidden">
-                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+                <Image
+                  src="/icon-exclamation-circle-mono.svg"
+                  alt="경고"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div className="flex flex-col justify-start items-center gap-1">
                 <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">

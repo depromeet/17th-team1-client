@@ -90,12 +90,7 @@ const GlobePrototype = () => {
   }
 
   return (
-    <div
-      className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col"
-      style={{
-        height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
-      }}
-    >
+    <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
       {viewMode === "globe" ? (
         <div className="absolute inset-0">
           {/* 글로브 뷰 */}

@@ -52,13 +52,79 @@ export const calculateClampedDistance = (
   return dynamicDistance;
 };
 
+// 텍스트 너비 계산 함수 (한글/영문 구분)
+const calculateTextWidth = (text: string, fontSize: number = 14): number => {
+  let totalWidth = 0;
+
+  const koreanCharRegex = /[\u3131-\u314e|\u314f-\u3163|\uac00-\ud7a3]/;
+  const koreanWidth = fontSize * 0.8; // 한글은 fontSize의 80%
+  const asciiWidth = fontSize * 0.55; // 영문/숫자는 fontSize의 55%
+
+  for (const char of text) {
+    if (koreanCharRegex.test(char)) {
+      totalWidth += koreanWidth;
+    } else {
+      totalWidth += asciiWidth;
+    }
+  }
+  return totalWidth;
+};
+
+// 라벨 전체 너비 계산 (국기 + 텍스트 + 배지 + 패딩)
+const calculateLabelWidth = (countryName: string, cityCount: number): number => {
+  const flagWidth = 14; // 국기 이모지 너비
+  const textWidth = calculateTextWidth(countryName, 14);
+  const badgeWidth = cityCount >= 1 ? 22 : 0; // 배지 최소 너비
+  const gaps = 5 * 2; // gap 5px * 2
+  const padding = 12; // 좌측 패딩만 (우측 패딩 제외)
+
+  return flagWidth + textWidth + badgeWidth + gaps + padding;
+};
+
+// 텍스트 너비 계산 함수 (도시 라벨용)
+const calculateCityLabelWidth = (cityName: string): number => {
+  const flagWidth = 14; // 국기 이모지 너비
+  const textWidth = calculateTextWidth(cityName, 14);
+  const gaps = 5; // gap 5px
+  const padding = 12;
+
+  return flagWidth + textWidth + gaps + padding;
+};
+
 // 기획서에 맞는 개별 도시 HTML 생성
 export const createCityHTML = (
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic styles object
   styles: any,
   displayFlag: string,
   cityName: string,
+  hasRecords: boolean = true,
+  thumbnailUrl?: string,
 ) => {
+  const labelWidth = calculateCityLabelWidth(cityName);
+
+  // 기록이 없는 경우: + 버튼만 표시
+  if (!hasRecords) {
+    return `
+      <!-- 중심 dot -->
+      <div style="${styles.dot}"></div>
+      <!-- 점선 -->
+      <div style="${styles.horizontalLine}"></div>
+      <div style="${styles.label}">
+        <!-- 좌측 국기 이모지 -->
+        <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
+        <!-- 도시명 -->
+        <span>
+          ${cityName}
+        </span>
+      </div>
+      <!-- 우측 액션 버튼 (+ 아이콘) -->
+      <div style="${styles.actionButton}">
+        ${PLUS_BUTTON_SVG}
+      </div>
+    `;
+  }
+
+  // 기록이 있는 경우: 썸네일 이미지 표시
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
@@ -72,6 +138,19 @@ export const createCityHTML = (
         ${cityName}
       </span>
     </div>
+    <!-- 우측 썸네일 이미지 카드 -->
+    ${
+      thumbnailUrl
+        ? `<div style="${styles.thumbnailCard(labelWidth / 2)}">
+      <img 
+        src="${thumbnailUrl}" 
+        alt="${cityName} 여행 기록 썸네일" 
+        style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
+        onerror="this.style.display='none'" 
+      />
+    </div>`
+        : ""
+    }
   `;
 };
 
@@ -105,7 +184,45 @@ export const createCountryClusterHTML = (
   cityCount: number,
   flagEmoji: string,
   _isExpanded: boolean = false,
+  hasRecords: boolean = true,
+  thumbnailUrl?: string,
 ) => {
+  // 라벨 너비 계산하여 썸네일 위치 동적 조정
+  const labelWidth = calculateLabelWidth(countryName, cityCount);
+
+  // 모든 도시 미기록 시: 기본형 마커 (+ 아이콘만)
+  if (!hasRecords) {
+    return `
+      <!-- 중심 dot -->
+      <div style="${styles.dot}"></div>
+      <!-- 단색 수평선 -->
+      <div style="${styles.horizontalLine}"></div>
+      <div style="${styles.label}">
+        <!-- 좌측 국기 이모지 -->
+        <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
+        <!-- 국가명 -->
+        <span>
+          ${countryName}
+        </span>
+        <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
+        ${
+          cityCount >= 1
+            ? `<div style="${styles.countBadge}">
+          <span>
+            ${cityCount}
+          </span>
+        </div>`
+            : ""
+        }
+      </div>
+      <!-- 우측 액션 버튼 (+ 아이콘) -->
+      <div style="${styles.actionButton}">
+        ${PLUS_BUTTON_SVG}
+      </div>
+    `;
+  }
+
+  // 해당 국가 내 1개 이상의 도시 기록 시: 카드형 마커 (썸네일 이미지 포함)
   return `
     <!-- 중심 dot -->
     <div style="${styles.dot}"></div>
@@ -129,10 +246,14 @@ export const createCountryClusterHTML = (
           : ""
       }
     </div>
-    <!-- 우측 액션 버튼 -->
-    <div style="${styles.actionButton}">
-      ${PLUS_BUTTON_SVG}
-    </div>
+    <!-- 우측 썸네일 이미지 카드 -->
+    ${
+      thumbnailUrl
+        ? `<div style="${styles.thumbnailCard(labelWidth / 2)}">
+      <img src="${thumbnailUrl}" alt="${countryName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+    </div>`
+        : ""
+    }
   `;
 };
 
@@ -150,8 +271,13 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
   };
 };
 
-// 도시 클릭 핸들러 (일시적으로 비활성화)
-export const createCityClickHandler = (_cityName: string) => {
+// 도시 클릭 핸들러
+export const createCityClickHandler = (
+  cityName: string,
+  hasRecords: boolean = true,
+  recordId?: string,
+  onNavigate?: (path: string) => void,
+) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
@@ -159,8 +285,27 @@ export const createCityClickHandler = (_cityName: string) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // 도시 클릭 비활성화 - image-metadata 이동 막음
-    // const q = encodeURIComponent(cityName.split(",")[0]);
-    // window.location.href = `/image-metadata?city=${q}`;
+    const cityNameOnly = cityName.split(",")[0];
+    const q = encodeURIComponent(cityNameOnly);
+
+    let path: string;
+    if (hasRecords && recordId) {
+      // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
+      path = `/record/${recordId}`;
+    } else if (hasRecords) {
+      // 기록 ID가 없는 경우 폴백: 기존 이미지 메타데이터 페이지로 이동
+      path = `/image-metadata?city=${q}`;
+    } else {
+      // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
+      path = `/image-metadata?city=${q}&mode=edit`;
+    }
+
+    if (onNavigate) {
+      // onNavigate 콜백이 제공된 경우: Next.js router 사용
+      onNavigate(path);
+    } else {
+      // 폴백: window.location.href (레거시 지원)
+      window.location.href = path;
+    }
   };
 };

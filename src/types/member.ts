@@ -1,8 +1,4 @@
-// 공통 Response 타입
-export interface ApiResponse<T> {
-  status: string;
-  data: T;
-}
+import type { ApiResponse } from "@/types/api";
 
 // 멤버 ID 조회 응답
 export interface MemberIdResponse extends ApiResponse<number> {}

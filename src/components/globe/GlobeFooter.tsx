@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
-import ShareIcon from "@/assets/icons/share.svg";
+import { ShareButton } from "./ShareButton";
 
 type GlobeFooterProps = {
   isZoomed: boolean;
@@ -58,17 +58,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
       {/* 버튼 래퍼 */}
       <div className="flex items-center justify-center gap-11">
         {/* 공유 버튼 */}
-        <button
-          type="button"
-          className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
-          style={{
-            background:
-              "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #ffffff2e 0%, #ffffff14 56.15%, #ffffff09 100%)",
-          }}
-          aria-label="공유하기"
-        >
-          <ShareIcon className="w-8 h-8" />
-        </button>
+        <ShareButton />
 
         {/* 리스트 뷰/글로브 뷰 토글 */}
         <div className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden">

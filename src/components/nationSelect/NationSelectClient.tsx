@@ -12,18 +12,33 @@ import { SearchInput } from "@/components/common/Input";
 
 type NationSelectClientProps = {
   initialCities: City[];
+  registeredCityNames?: Set<string>; // 이미 등록된 도시 이름 목록
   mode?: "default" | "edit-add";
   onComplete?: (cities: City[]) => void;
   buttonLabel?: string;
   customHeader?: React.ReactNode;
 };
 
-export const NationSelectClient = ({ initialCities, mode = "default", onComplete, buttonLabel, customHeader }: NationSelectClientProps) => {
+export const NationSelectClient = ({
+  initialCities,
+  registeredCityNames = new Set(),
+  mode = "default",
+  onComplete,
+  buttonLabel,
+  customHeader,
+}: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
 
-  const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
-    useCitySearch();
+  const {
+    searchResults,
+    isSearching,
+    searchError,
+    searchKeyword,
+    setSearchKeyword,
+    clearSearch,
+    hasSearched,
+  } = useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
   const displayCities = isSearchingMode ? searchResults : initialCities;
@@ -71,8 +86,13 @@ export const NationSelectClient = ({ initialCities, mode = "default", onComplete
 
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
         <div className="w-full max-w-[512px] px-4">
-          {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
-          
+          {customHeader || (
+            <NationSelectHeader
+              searchValue={searchKeyword}
+              onSearchChange={handleSearchChange}
+            />
+          )}
+
           {customHeader && (
             <div className="mb-4">
               <SearchInput
@@ -85,14 +105,24 @@ export const NationSelectClient = ({ initialCities, mode = "default", onComplete
 
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">
-              {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
+              {isSearchingMode
+                ? `검색 결과 ${searchResults.length}건`
+                : "인기 여행지"}
             </h2>
 
             {displayError && (
-              <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
-                {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
+              <div
+                className="text-red-500 text-center py-4"
+                role="alert"
+                aria-live="polite"
+              >
+                {isSearchingMode
+                  ? "검색 중 오류가 발생했습니다"
+                  : "도시를 불러오는 중 오류가 발생했습니다"}
                 <div className="mt-1 text-xs text-text-thirdly break-words">
-                  {typeof displayError === "string" ? displayError : String(displayError)}
+                  {typeof displayError === "string"
+                    ? displayError
+                    : String(displayError)}
                 </div>
               </div>
             )}
@@ -100,6 +130,7 @@ export const NationSelectClient = ({ initialCities, mode = "default", onComplete
             <PopularCitiesList
               cities={displayCities}
               selectedCityIds={selectedCityIds}
+              registeredCityNames={registeredCityNames}
               onAddCity={handleAddCity}
               onRemoveCity={handleRemoveCity}
               isLoading={displayLoading}

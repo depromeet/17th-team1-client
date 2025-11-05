@@ -7,7 +7,7 @@ export function RecordHeader() {
   const router = useRouter();
 
   const handleBackClick = () => {
-    router.back();
+    router.push("/globe");
   };
 
   const handleEditClick = () => {

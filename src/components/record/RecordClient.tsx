@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { RecordHeader } from "./RecordHeader";
 import { RecordContent } from "./RecordContent";
 import type { RecordResponse, Continent } from "@/types/record";
@@ -10,7 +11,21 @@ interface RecordClientProps {
 }
 
 export function RecordClient({ initialData }: RecordClientProps) {
+  const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<Continent>("전체");
+
+  // 브라우저 뒤로가기 감지
+  useEffect(() => {
+    const handlePopState = () => {
+      router.push("/globe");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
 
   return (
     <div className="h-screen bg-surface-secondary flex flex-col">

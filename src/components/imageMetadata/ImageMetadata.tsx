@@ -121,9 +121,17 @@ export default function ImageMetadataComponent({
     });
   };
 
-  const handleSave = () => {
-    // TODO: Implement actual save functionality
-    console.log("save");
+  const handleSave = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    // 1.3초 로딩 표시
+    setTimeout(() => {
+      setIsProcessing(false);
+      // TODO: Implement actual save functionality
+      console.log("save");
+    }, 1300);
   };
 
   if (metadataList.length === 0) {
@@ -218,7 +226,7 @@ export default function ImageMetadataComponent({
           leftIcon="back"
           onLeftClick={() => setSelectedImage(null)}
           rightButtonTitle="등록"
-          rightButtonDisabled={true}
+          rightButtonDisabled={isProcessing}
           onRightClick={handleSave}
         />
         <div

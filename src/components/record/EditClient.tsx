@@ -5,33 +5,63 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { EditHeader } from "./EditHeader";
 import { useMemo, useState, useEffect } from "react";
 import { Popup } from "@/components/common/Popup";
+import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
 import Image from "next/image";
+import { toast } from "@/components/common/Toast";
 import { getCountryName } from "@/constants/countryMapping";
-import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
+import {
+  createMemberTravels,
+  deleteMemberTravel,
+} from "@/services/memberService";
 import { getAuthInfo } from "@/utils/cookies";
 import type { City } from "@/types/city";
 
 interface EditClientProps {
-  cities: { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number; isNew?: boolean }[];
-  deletedCities?: { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number }[];
+  cities: {
+    id: string;
+    name: string;
+    countryCode: string;
+    lat: number;
+    lng: number;
+    cityId?: number;
+    isNew?: boolean;
+  }[];
+  deletedCities?: {
+    id: string;
+    name: string;
+    countryCode: string;
+    lat: number;
+    lng: number;
+    cityId?: number;
+  }[];
 }
 
 export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [current, setCurrent] = useState(cities);
   const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // 삭제된 도시 정보 저장 (삭제 시점의 도시 정보를 저장)
   const [deletedCitiesInfo, setDeletedCitiesInfo] = useState<
-    Map<string, { id: string; name: string; countryCode: string; lat: number; lng: number; cityId?: number }>
+    Map<
+      string,
+      {
+        id: string;
+        name: string;
+        countryCode: string;
+        lat: number;
+        lng: number;
+        cityId?: number;
+      }
+    >
   >(new Map());
-  
-  // 삭제된 도시 ID 목록 (쿼리 파라미터에서 읽기)
+
+  // 삭제된 도시 ID 목록
   const removedIds = useMemo(() => {
     const removedParam = searchParams.get("removed");
     if (removedParam) {
@@ -44,8 +74,8 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     }
     return new Set<string>();
   }, [searchParams]);
-  
-  // page.tsx에서 전달받은 삭제된 도시 정보를 deletedCitiesInfo에 저장
+
+  // 전달받은 삭제된 도시 정보를 deletedCitiesInfo에 저장
   useEffect(() => {
     if (deletedCities.length > 0) {
       setDeletedCitiesInfo((prev) => {
@@ -57,10 +87,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       });
     }
   }, [deletedCities]);
-  
+
   // cities prop이 처음 로드될 때 삭제된 도시가 아닌 기존 도시들을 deletedCitiesInfo에 저장 (필요시)
   useEffect(() => {
-    const existingCities = cities.filter((c) => !c.isNew && !removedIds.has(c.id));
+    const existingCities = cities.filter(
+      (c) => !c.isNew && !removedIds.has(c.id)
+    );
     setDeletedCitiesInfo((prev) => {
       const updated = new Map(prev);
       existingCities.forEach((city) => {
@@ -76,15 +108,15 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   useEffect(() => {
     // 삭제된 도시를 제외한 도시들만 current에 유지
     const filteredCities = cities.filter((c) => !removedIds.has(c.id));
-    
+
     // 기존 current에서 삭제된 도시 제거하고 새 도시 추가
     setCurrent((prev) => {
       const prevIds = new Set(prev.map((c) => c.id));
       const newCities = filteredCities.filter((c) => !prevIds.has(c.id));
-      
+
       // 삭제된 도시 제거
       const updated = prev.filter((c) => !removedIds.has(c.id));
-      
+
       // 새 도시 추가
       return [...newCities, ...updated];
     });
@@ -97,7 +129,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     };
 
     window.addEventListener("popstate", handlePopState);
-    
+
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
@@ -108,14 +140,17 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   };
 
   const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
-  const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
+  const currentIds = useMemo(
+    () => new Set(current.map((c) => c.id)),
+    [current]
+  );
   const isChanged = useMemo(() => {
     // 삭제된 도시가 있으면 변경된 것
     if (removedIds.size > 0) return true;
-    
+
     // 추가된 도시가 있으면 변경된 것
     if (current.some((c) => c.isNew)) return true;
-    
+
     // 개수나 ID가 다르면 변경된 것
     if (current.length !== base.length) return true;
     if (baseIds.size !== currentIds.size) return true;
@@ -127,7 +162,39 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   const handleRemove = (cityId: string, isNew?: boolean) => {
     if (isNew) {
-      setCurrent((prev) => prev.filter((c) => c.id !== cityId));
+      // 새로 추가한 도시 삭제 - current에서 제거하고 URL도 업데이트
+      const updatedCurrent = current.filter((c) => c.id !== cityId);
+      setCurrent(updatedCurrent);
+
+      // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
+      const remainingNewCities = updatedCurrent
+        .filter((c) => c.isNew)
+        .map(({ id, name, countryCode, lat, lng }) => {
+          const countryName = getCountryName(countryCode);
+          return { id, name, country: countryName, countryCode, lat, lng };
+        });
+
+      const removedParam = searchParams.get("removed");
+      let newUrl = "/record/edit";
+      const params = new URLSearchParams();
+
+      if (remainingNewCities.length > 0) {
+        params.set(
+          "added",
+          encodeURIComponent(JSON.stringify(remainingNewCities))
+        );
+      }
+
+      if (removedParam) {
+        params.set("removed", removedParam);
+      }
+
+      if (params.toString()) {
+        newUrl += `?${params.toString()}`;
+      }
+
+      router.push(newUrl);
+      toast.success("도시가 삭제되었습니다. 저장 시 변경사항이 반영됩니다");
     } else {
       setConfirmId(cityId);
     }
@@ -135,46 +202,66 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   const handleConfirmDelete = () => {
     if (!confirmId) return;
-    
-    // 삭제하려는 도시 정보를 찾아서 저장
+
     const cityToDelete = current.find((c) => c.id === confirmId);
-    if (cityToDelete && !cityToDelete.isNew) {
-      setDeletedCitiesInfo((prev) => {
-        const updated = new Map(prev);
-        updated.set(confirmId, cityToDelete);
-        return updated;
-      });
-    }
-    
-    setCurrent((prev) => prev.filter((c) => c.id !== confirmId));
+    if (!cityToDelete) return;
+
+    // 삭제된 도시 정보 저장 (저장 시 서버에 전송하기 위해)
+    setDeletedCitiesInfo((prev) => {
+      const updated = new Map(prev);
+      updated.set(confirmId, cityToDelete);
+      return updated;
+    });
+
+    // 현재 목록에서 제거
+    const updatedCurrent = current.filter((c) => c.id !== confirmId);
+    setCurrent(updatedCurrent);
     setConfirmId(null);
-    
+
     // 삭제된 도시 ID를 쿼리 파라미터에 추가
     const currentRemoved = Array.from(removedIds);
     if (!removedIds.has(confirmId)) {
       currentRemoved.push(confirmId);
     }
-    
-    // 현재 쿼리 파라미터 가져오기
-    const addedParam = searchParams.get("added");
+
+    // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
+    const remainingNewCities = updatedCurrent
+      .filter((c) => c.isNew)
+      .map(({ id, name, countryCode, lat, lng }) => {
+        const countryName = getCountryName(countryCode);
+        return { id, name, country: countryName, countryCode, lat, lng };
+      });
+
     const removedParam = encodeURIComponent(JSON.stringify(currentRemoved));
-    
+
     let newUrl = "/record/edit";
     const params = new URLSearchParams();
-    if (addedParam) {
-      params.set("added", addedParam);
+
+    if (remainingNewCities.length > 0) {
+      params.set(
+        "added",
+        encodeURIComponent(JSON.stringify(remainingNewCities))
+      );
     }
-    params.set("removed", removedParam);
-    newUrl += `?${params.toString()}`;
-    
+
+    if (currentRemoved.length > 0) {
+      params.set("removed", removedParam);
+    }
+
+    if (params.toString()) {
+      newUrl += `?${params.toString()}`;
+    }
+
     router.push(newUrl);
+
+    toast.success("도시가 삭제되었습니다. 저장 시 변경사항이 반영됩니다");
   };
 
   const handleCancelDelete = () => setConfirmId(null);
 
   const handleSave = async () => {
     if (isSaving) return;
-    
+
     const { token } = getAuthInfo();
     if (!token) {
       router.push("/login");
@@ -182,17 +269,17 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     }
 
     setIsSaving(true);
+    const startTime = Date.now();
+    const minLoadingDuration = 1300; // 최소 1.3초
 
     try {
       // 추가된 도시들과 삭제된 도시들 찾기
       const currentIds = new Set(current.map((c) => c.id));
       const baseIds = new Set(base.map((c) => c.id));
-      
+
       // 추가된 도시들 (current에 있지만 base에 없거나 isNew인 것)
-      const addedCities = current.filter(
-        (c) => !baseIds.has(c.id) || c.isNew
-      );
-      
+      const addedCities = current.filter((c) => !baseIds.has(c.id) || c.isNew);
+
       // 삭제된 도시들 (removedIds에 있는 ID들에 해당하는 삭제된 도시 정보 찾기)
       const deletedCities = Array.from(removedIds)
         .map((id) => deletedCitiesInfo.get(id))
@@ -231,37 +318,57 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
         addPromise = createMemberTravels(citiesToAdd);
       }
 
-      console.log(`[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
-      
+      console.log(
+        `[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`
+      );
+
       // 모든 API 호출 실행
       const promises = [...deletePromises];
       if (addPromise) {
         promises.push(addPromise);
       }
       await Promise.all(promises);
-      
+
       console.log(`[Save] 모든 요청 성공`);
 
+      // 최소 1.3초 동안 로딩 표시 보장
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      }
+
+      setIsSaving(false);
       // 성공 시 record 페이지로 이동
       router.push("/record");
     } catch (error) {
       console.error("Failed to save cities:", error);
-      setShowErrorModal(true);
-    } finally {
+
+      // 최소 1.3초 동안 로딩 표시 보장 (에러 발생 시에도)
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      }
+
       setIsSaving(false);
+      setShowErrorModal(true);
     }
   };
 
   const handleAddClick = () => {
     // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
     const newCities = current.filter((c) => c.isNew);
-    const removedParam = Array.from(removedIds).length > 0 
-      ? encodeURIComponent(JSON.stringify(Array.from(removedIds)))
-      : null;
-    
+    const removedParam =
+      Array.from(removedIds).length > 0
+        ? encodeURIComponent(JSON.stringify(Array.from(removedIds)))
+        : null;
+
     let newUrl = "/record/edit/select";
     const params = new URLSearchParams();
-    
+
     if (newCities.length > 0) {
       const payload = newCities.map(({ id, name, countryCode, lat, lng }) => {
         const countryName = getCountryName(countryCode);
@@ -269,25 +376,34 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       });
       params.set("added", encodeURIComponent(JSON.stringify(payload)));
     }
-    
+
     if (removedParam) {
       params.set("removed", removedParam);
     }
-    
+
     if (params.toString()) {
       newUrl += `?${params.toString()}`;
     }
-    
+
     router.push(newUrl);
   };
 
   return (
     <div className="h-screen bg-surface-secondary flex flex-col">
+      <LoadingOverlay show={isSaving} />
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-      <div className="w-full max-w-[512px] px-4">
-          <EditHeader canSave={isChanged && !isSaving} onSave={handleSave} onBack={handleBack} />
-          <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
+        <div className="w-full max-w-[512px] px-4">
+          <EditHeader
+            canSave={isChanged && !isSaving}
+            onSave={handleSave}
+            onBack={handleBack}
+          />
+          <EditContent
+            cities={current}
+            onAddClick={handleAddClick}
+            onRemoveClick={handleRemove}
+          />
         </div>
       </div>
       {confirmId && (
@@ -295,19 +411,40 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <div className="w-10 h-10 relative overflow-hidden">
-                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+                <Image
+                  src="/icon-exclamation-circle-mono.svg"
+                  alt="경고"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">정말 삭제하시겠어요?</div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">도시를 삭제하면, 기록도 함께 사라져요.</div>
+                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                  정말 삭제하시겠어요?
+                </div>
+                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                  도시를 삭제하면, 기록도 함께 사라져요.
+                </div>
               </div>
             </div>
             <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
-              <button onClick={handleCancelDelete} className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5" type="button">
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">취소</div>
+              <button
+                onClick={handleCancelDelete}
+                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  취소
+                </div>
               </button>
-              <button onClick={handleConfirmDelete} className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--4 flex justify-center items-center gap-2.5" type="button">
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">삭제</div>
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--4 flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  삭제
+                </div>
               </button>
             </div>
           </Popup>
@@ -318,16 +455,31 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <div className="w-10 h-10 relative overflow-hidden">
-                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+                <Image
+                  src="/icon-exclamation-circle-mono.svg"
+                  alt="경고"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">저장에 실패했습니다.</div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">다시 시도해주세요.</div>
+                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                  저장에 실패했습니다.
+                </div>
+                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                  다시 시도해주세요.
+                </div>
               </div>
             </div>
             <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
-              <button onClick={() => setShowErrorModal(false)} className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5" type="button">
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">닫기</div>
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  닫기
+                </div>
               </button>
             </div>
           </Popup>
@@ -336,5 +488,3 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     </div>
   );
 }
-
-

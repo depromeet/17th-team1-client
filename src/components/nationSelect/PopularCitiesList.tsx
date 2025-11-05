@@ -7,6 +7,7 @@ import { CityItem } from "./CityItem";
 type PopularCitiesListProps = {
   cities: City[];
   selectedCityIds: Set<string>;
+  registeredCityNames?: Set<string>; // 이미 등록된 도시 이름 목록
   onAddCity: (city: City) => void;
   onRemoveCity: (cityId: string) => void;
   isLoading?: boolean;
@@ -17,6 +18,7 @@ type PopularCitiesListProps = {
 export const PopularCitiesList = ({
   cities,
   selectedCityIds,
+  registeredCityNames = new Set(),
   onAddCity,
   onRemoveCity,
   isSearching = false,
@@ -39,7 +41,12 @@ export const PopularCitiesList = ({
           <title>검색 중</title>
           <g clipPath={`url(#${clipPathId})`}>
             <g transform="matrix(0.004 0.0149282 -0.0149282 0.004 16 16)">
-              <foreignObject x="-1426.44" y="-1426.44" width="2852.89" height="2852.89">
+              <foreignObject
+                x="-1426.44"
+                y="-1426.44"
+                width="2852.89"
+                height="2852.89"
+              >
                 <div
                   style={{
                     background:
@@ -78,6 +85,7 @@ export const PopularCitiesList = ({
           key={city.id}
           city={city}
           isSelected={selectedCityIds.has(city.id)}
+          isRegistered={registeredCityNames.has(city.name)}
           onAdd={onAddCity}
           onRemove={onRemoveCity}
           showDivider={index < cities.length - 1}

@@ -33,6 +33,7 @@ const GlobePage = () => {
   const [isMyGlobe, setIsMyGlobe] = useState<boolean>(true);
   const [isDataReady, setIsDataReady] = useState(false);
   const [isSplashDone, setIsSplashDone] = useState(false);
+  const [nickname, setNickname] = useState<string>("");
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -56,7 +57,7 @@ const GlobePage = () => {
         const globeResponse = await getGlobeData(urlUuid);
         let insightResponse: string | undefined;
         // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능)
-        if (myUuid && myUuid === urlUuid && memberId) {
+        if (memberId) {
           insightResponse = await getTravelInsight(parseInt(memberId, 10));
         }
 
@@ -67,6 +68,11 @@ const GlobePage = () => {
           // 도시와 국가 개수 설정
           setCityCount(globeResponse.data.cityCount);
           setCountryCount(globeResponse.data.countryCount);
+
+          // 닉네임 설정 (내 지구본이 아닌 경우 사용)
+          if (globeResponse.data.nickname) {
+            setNickname(globeResponse.data.nickname);
+          }
         }
         setTravelInsight(insightResponse || "");
       } catch {
@@ -101,7 +107,7 @@ const GlobePage = () => {
   return (
     <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
       <Header
-        title={isMyGlobe ? "" : "타인 님의 지구본"}
+        title={isMyGlobe ? "" : `${nickname}님의 지구본`}
         variant="navy"
         leftIcon="menu"
         onLeftClick={() => router.push("/profile")}

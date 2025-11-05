@@ -26,6 +26,7 @@ export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRec
 
 // 지구본 조회 API 응답
 export interface GlobeData {
+  nickname: string;
   cityCount: number;
   countryCount: number;
   regions: Region[];

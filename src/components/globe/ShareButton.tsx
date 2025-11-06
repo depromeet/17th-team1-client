@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import ShareIcon from "@/assets/icons/share.svg";
+import { getAuthInfo } from "@/utils/cookies";
 
 type ShareButtonProps = {
   /**
@@ -29,7 +30,18 @@ export const ShareButton = ({
   const [isSupported, setIsSupported] = useState(false);
 
   // Variables
-  const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
+  const generateShareUrl = useCallback(() => {
+    if (url) return url;
+    if (typeof window === "undefined") return "";
+
+    const { uuid } = getAuthInfo();
+    if (!uuid) return window.location.href;
+
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/globe?uuid=${uuid}`;
+  }, [url]);
+
+  const shareUrl = generateShareUrl();
 
   // Functions
   const copyToClipboard = useCallback(async () => {

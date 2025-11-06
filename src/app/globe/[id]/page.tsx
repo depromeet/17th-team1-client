@@ -116,7 +116,7 @@ const GlobePage = () => {
           leftIcon: "menu",
           onLeftClick: () => router.push("/profile"),
           rightIcon: "people",
-          onRightClick: () => console.log("people"),
+          onRightClick: () => router.push("/saved-globe"),
         })}
         style={{
           backgroundColor: "transparent",

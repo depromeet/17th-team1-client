@@ -6,24 +6,12 @@ import { getAuthInfo } from "@/utils/cookies";
 
 type ShareButtonProps = {
   /**
-   * 공유할 제목 (기본값: "Globber - 나의 여행 지도")
-   */
-  title?: string;
-  /**
-   * 공유할 텍스트 내용
-   */
-  text?: string;
-  /**
    * 공유할 URL (기본값: 현재 페이지 URL)
    */
   url?: string;
 };
 
-export const ShareButton = ({
-  title = "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
-  text = "지구본으로 완성하는 여행 기록 서비스",
-  url,
-}: ShareButtonProps) => {
+export const ShareButton = ({ url }: ShareButtonProps) => {
   // React Hooks
   const [isShared, setIsShared] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,22 +36,16 @@ export const ShareButton = ({
     try {
       setIsLoading(true);
 
-      // 텍스트와 URL 사이에 줄바꿈 추가
-      const shareText = `${title}
-
-${text}
-
-${shareUrl}`;
-
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(shareUrl);
 
       // 복사 성공 피드백
       setIsShared(true);
+      alert("링크가 복사되었습니다!");
       setTimeout(() => setIsShared(false), 2000);
     } finally {
       setIsLoading(false);
     }
-  }, [title, text, shareUrl]);
+  }, [shareUrl]);
 
   const handleShare = useCallback(async () => {
     // 모바일 기기 감지

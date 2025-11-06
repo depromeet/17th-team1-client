@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 import { BackButton } from "@/components/common/Button";
 import type { GlobeRef } from "@/components/globe/Globe";
@@ -20,7 +21,10 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
   loading: () => <div></div>,
 });
 
-const GlobePrototype = () => {
+const GlobeContent = () => {
+  const searchParams = useSearchParams();
+  const sharedUuid = searchParams.get("uuid");
+
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +32,7 @@ const GlobePrototype = () => {
   const [cityCount, setCityCount] = useState<number>(0);
   const [countryCount, setCountryCount] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"globe" | "list">("globe");
+  const [isSharedView, setIsSharedView] = useState(false);
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -37,15 +42,31 @@ const GlobePrototype = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { uuid, memberId } = getAuthInfo();
-        if (!uuid || !memberId) {
+        let targetUuid: string | null = null;
+        let targetMemberId: string | null = null;
+
+        // 공유 링크로 접근한 경우 (uuid 쿼리 파라미터가 있는 경우)
+        if (sharedUuid) {
+          targetUuid = sharedUuid;
+          setIsSharedView(true);
+        } else {
+          // 일반 로그인 사용자
+          const { uuid, memberId } = getAuthInfo();
+          targetUuid = uuid;
+          targetMemberId = memberId;
+        }
+
+        if (!targetUuid) {
           return;
         }
 
-        const [globeResponse, insightResponse] = await Promise.all([
-          getGlobeData(uuid),
-          getTravelInsight(parseInt(memberId, 10)),
-        ]);
+        // 공유 뷰에서는 insight를 가져오지 않음 (memberId가 없기 때문)
+        const globeResponse = await getGlobeData(targetUuid);
+
+        let insightResponse = "";
+        if (targetMemberId) {
+          insightResponse = await getTravelInsight(parseInt(targetMemberId, 10));
+        }
 
         if (globeResponse?.data) {
           const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
@@ -64,7 +85,7 @@ const GlobePrototype = () => {
 
     // API 데이터 로드
     loadData();
-  }, []);
+  }, [sharedUuid]);
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
 
@@ -118,7 +139,12 @@ const GlobePrototype = () => {
 
           {/* 하단 버튼들 - position absolute */}
           <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter
+              isZoomed={isZoomed}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              isSharedView={isSharedView}
+            />
           </div>
 
           {/* 돌아가기 버튼 */}
@@ -152,11 +178,24 @@ const GlobePrototype = () => {
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}
           >
-            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} />
+            <GlobeFooter
+              isZoomed={false}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              isSharedView={isSharedView}
+            />
           </div>
         </>
       )}
     </div>
+  );
+};
+
+const GlobePrototype = () => {
+  return (
+    <Suspense fallback={<GlobeLoading onComplete={() => {}} />}>
+      <GlobeContent />
+    </Suspense>
   );
 };
 

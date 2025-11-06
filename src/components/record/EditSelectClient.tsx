@@ -112,7 +112,7 @@ export function EditSelectClient({
 
     let newUrl = "/record/edit";
     const params = new URLSearchParams();
-    params.set("added", encodeURIComponent(JSON.stringify(merged)));
+    params.set("added", JSON.stringify(merged));
 
     // 삭제된 도시 정보도 유지
     if (existingRemovedParam) {

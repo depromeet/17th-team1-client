@@ -27,14 +27,8 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
   return nextIndex;
 };
 
-export const GlobeFooter = ({
-  isZoomed,
-  viewMode = "globe",
-  onViewModeChange,
-}: GlobeFooterProps) => {
-  const [descriptionIndex, setDescriptionIndex] = useState(() =>
-    Math.floor(Math.random() * DESCRIPTIONS.length)
-  );
+export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
+  const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
   const router = useRouter();
 
   useEffect(() => {
@@ -88,9 +82,7 @@ export const GlobeFooter = ({
           <div
             className="absolute w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-in-out"
             style={{
-              transform: `translateX(${
-                viewMode === "list" ? "0px" : "calc(44px + 8px)"
-              })`,
+              transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})`,
             }}
           />
 
@@ -103,10 +95,7 @@ export const GlobeFooter = ({
             <ListIcon
               className="w-8 h-8"
               style={{
-                color:
-                  viewMode === "list"
-                    ? "var(--color-surface-primary)"
-                    : "white",
+                color: viewMode === "list" ? "var(--color-surface-primary)" : "white",
               }}
             />
           </button>
@@ -120,10 +109,7 @@ export const GlobeFooter = ({
             <GlobeIcon
               className="w-8 h-8"
               style={{
-                color:
-                  viewMode === "globe"
-                    ? "var(--color-surface-primary)"
-                    : "white",
+                color: viewMode === "globe" ? "var(--color-surface-primary)" : "white",
               }}
             />
           </button>
@@ -134,16 +120,12 @@ export const GlobeFooter = ({
           type="button"
           className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
           style={{
-            background:
-              "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
+            background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
           }}
           aria-label="새 항목 추가"
           onClick={() => router.push("/record")}
         >
-          <PlusIcon
-            className="w-8 h-8"
-            style={{ color: "var(--color-surface-primary)" }}
-          />
+          <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
         </button>
       </div>
     </div>

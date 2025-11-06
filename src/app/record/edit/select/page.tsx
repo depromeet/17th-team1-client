@@ -6,14 +6,9 @@ import { getServerAuthInfo } from "@/utils/serverCookies";
 
 export const dynamic = "force-dynamic";
 
-type EditSelectPageProps = PageProps<
-  never,
-  { added?: string; removed?: string }
->;
+type EditSelectPageProps = PageProps<never, { added?: string; removed?: string }>;
 
-export default async function EditSelectPage({
-  searchParams,
-}: EditSelectPageProps) {
+export default async function EditSelectPage({ searchParams }: EditSelectPageProps) {
   try {
     const { token } = await getServerAuthInfo();
 

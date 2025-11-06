@@ -10,14 +10,9 @@ import type {
 } from "@/types/city";
 import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 
-export const fetchCities = async (
-  params: CityApiParams = {}
-): Promise<City[]> => {
+export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {
   try {
-    const data = await apiGet<CityApiResponse>(
-      "/api/v1/cities/favorites",
-      params
-    );
+    const data = await apiGet<CityApiResponse>("/api/v1/cities/favorites", params);
     return data.cityResponseList.map(transformApiDataToCity);
   } catch (error) {
     console.error("Failed to fetch cities:", error);
@@ -38,16 +33,9 @@ export const searchCities = async (keyword: string): Promise<City[]> => {
 };
 
 // 도시 추가 API
-export const addCity = async (
-  request: AddCityRequest,
-  token: string
-): Promise<AddCityResponse> => {
+export const addCity = async (request: AddCityRequest, token: string): Promise<AddCityResponse> => {
   try {
-    const data = await apiPost<AddCityResponse>(
-      "/api/v1/cities",
-      request,
-      token
-    );
+    const data = await apiPost<AddCityResponse>("/api/v1/cities", request, token);
     return data;
   } catch (error) {
     console.error("Failed to add city:", error);
@@ -56,16 +44,9 @@ export const addCity = async (
 };
 
 // 도시 삭제 API
-export const deleteCity = async (
-  cityId: number,
-  token: string
-): Promise<DeleteCityResponse> => {
+export const deleteCity = async (cityId: number, token: string): Promise<DeleteCityResponse> => {
   try {
-    const data = await apiDelete<DeleteCityResponse>(
-      `/api/v1/cities/${cityId}`,
-      undefined,
-      token
-    );
+    const data = await apiDelete<DeleteCityResponse>(`/api/v1/cities/${cityId}`, undefined, token);
     return data;
   } catch (error) {
     console.error("Failed to delete city:", error);

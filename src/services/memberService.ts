@@ -1,4 +1,5 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { ApiError, apiDelete, apiGet, apiPost } from "@/lib/apiClient";
 import type { City } from "@/types/city";
 import type {
   CreateTravelRecordsResponse,
@@ -39,9 +40,9 @@ export const getMemberTravels = async (token?: string): Promise<MemberTravelsRes
     if (!authToken) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
     const data = await apiGet<MemberTravelsResponse>(`/api/v1/member-travels`, {}, authToken);
     return data;
-  } catch (error: any) {
+  } catch (error) {
     // 502, 503 같은 서버 에러인 경우 조용히 처리
-    if (error?.status >= 500 && error?.status < 600) {
+    if (error instanceof ApiError && error.status >= 500 && error.status < 600) {
       return null;
     }
     console.error("Failed to fetch member travels:", error);
@@ -127,7 +128,7 @@ export const deleteMemberTravel = async (
 };
 
 // 여행 기록 조회 API
-export const getRecordData = async (serverCookies?: any): Promise<RecordResponse | null> => {
+export const getRecordData = async (serverCookies?: ReadonlyRequestCookies): Promise<RecordResponse | null> => {
   try {
     let token: string | undefined;
     let memberId: string | undefined;
@@ -149,9 +150,9 @@ export const getRecordData = async (serverCookies?: any): Promise<RecordResponse
 
     const data = await apiGet<RecordResponse>(`/api/v1/member-travels/${memberId}/records`, {}, token);
     return data;
-  } catch (error: any) {
+  } catch (error) {
     // 404 에러인 경우 조용히 처리 (레코드가 없는 경우일 수 있음)
-    if (error?.status === 404) {
+    if (error instanceof ApiError && error.status === 404) {
       console.log("No record data found for member");
       return null;
     }

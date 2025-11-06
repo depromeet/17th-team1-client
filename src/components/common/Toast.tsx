@@ -13,10 +13,7 @@ export type HeadlessToastProviderProps = {
  * Radix Toast Provider + Viewport 래퍼.
  * 스타일은 외부에서 주입하며, 내부 로직/접근성만 제공합니다.
  */
-export function HeadlessToastProvider({
-  children,
-  viewportClassName,
-}: HeadlessToastProviderProps) {
+export function HeadlessToastProvider({ children, viewportClassName }: HeadlessToastProviderProps) {
   return (
     <ToastPrimitive.Provider>
       {children}
@@ -25,9 +22,7 @@ export function HeadlessToastProvider({
   );
 }
 
-export type HeadlessToastProps = React.ComponentPropsWithoutRef<
-  typeof ToastPrimitive.Root
-> & {
+export type HeadlessToastProps = React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root> & {
   /** 이모지 혹은 아이콘 노드 (예: "😥") */
   leading?: React.ReactNode;
   /** 본문 텍스트 노드 (리치 텍스트 가능) */
@@ -52,21 +47,8 @@ export type HeadlessToastProps = React.ComponentPropsWithoutRef<
  * Headless Toast 컴포넌트
  * - 시맨틱/접근성은 유지, 시각 스타일은 전부 외부 className으로 주입
  */
-export const HeadlessToast = React.forwardRef<
-  HTMLLIElement,
-  HeadlessToastProps
->(
-  (
-    {
-      leading,
-      children,
-      className,
-      leadingClassName,
-      contentClassName,
-      ...rootProps
-    },
-    ref
-  ) => {
+export const HeadlessToast = React.forwardRef<HTMLLIElement, HeadlessToastProps>(
+  ({ leading, children, className, leadingClassName, contentClassName, ...rootProps }, ref) => {
     return (
       <ToastPrimitive.Root ref={ref} className={className} {...rootProps}>
         {leading ? <div className={leadingClassName}>{leading}</div> : null}
@@ -76,7 +58,7 @@ export const HeadlessToast = React.forwardRef<
         </ToastPrimitive.Close>
       </ToastPrimitive.Root>
     );
-  }
+  },
 );
 HeadlessToast.displayName = "HeadlessToast";
 

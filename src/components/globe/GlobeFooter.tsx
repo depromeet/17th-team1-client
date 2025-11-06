@@ -8,7 +8,6 @@ type GlobeFooterProps = {
   isZoomed: boolean;
   viewMode?: "globe" | "list";
   onViewModeChange?: (mode: "globe" | "list") => void;
-  isSharedView?: boolean;
 };
 
 const DESCRIPTIONS = [
@@ -25,12 +24,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
   return nextIndex;
 };
 
-export const GlobeFooter = ({
-  isZoomed,
-  viewMode = "globe",
-  onViewModeChange,
-  isSharedView = false,
-}: GlobeFooterProps) => {
+export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
 
   useEffect(() => {
@@ -63,8 +57,7 @@ export const GlobeFooter = ({
 
       {/* 버튼 래퍼 */}
       <div className="flex items-center justify-center gap-11">
-        {/* 공유 버튼 - 공유 뷰에서는 숨김 */}
-        {!isSharedView && <ShareButton />}
+        <ShareButton />
 
         {/* 리스트 뷰/글로브 뷰 토글 */}
         <div className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden">
@@ -99,19 +92,17 @@ export const GlobeFooter = ({
           </button>
         </div>
 
-        {/* 기록/도시 추가 버튼 - 공유 뷰에서는 숨김 */}
-        {!isSharedView && (
-          <button
-            type="button"
-            className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
-            style={{
-              background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
-            }}
-            aria-label="새 항목 추가"
-          >
-            <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
-          </button>
-        )}
+        {/* 기록/도시 추가 버튼 */}
+        <button
+          type="button"
+          className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
+          style={{
+            background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
+          }}
+          aria-label="새 항목 추가"
+        >
+          <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
+        </button>
       </div>
     </div>
   );

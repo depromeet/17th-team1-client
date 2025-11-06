@@ -128,6 +128,7 @@ const GlobePrototype = () => {
               currentGlobeIndex={0}
               onClusterSelect={handleClusterSelect}
               onZoomChange={handleZoomChange}
+              disableCityClick={true}
             />
           </div>
 

@@ -146,6 +146,7 @@ const GlobePage = () => {
               currentGlobeIndex={0}
               onClusterSelect={handleClusterSelect}
               onZoomChange={handleZoomChange}
+              cityClickMode={isMyGlobe ? "default" : "other"}
             />
           </div>
 

@@ -27,13 +27,14 @@ export default async function EditRecordPage({
         // 원본 데이터에서 cityId를 포함한 도시 정보 추출
         for (const travel of memberTravels.data.travels) {
           for (const city of travel.cities) {
+            const { cityId, cityName, countryCode, lat, lng } = city;
             cities.push({
-              id: String(city.cityId),
-              name: city.cityName,
-              countryCode: city.countryCode,
-              lat: city.lat,
-              lng: city.lng,
-              cityId: city.cityId,
+              id: String(cityId),
+              name: cityName,
+              countryCode,
+              lat,
+              lng,
+              cityId,
             });
           }
         }

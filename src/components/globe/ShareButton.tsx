@@ -38,7 +38,7 @@ export const ShareButton = ({
     if (!uuid) return window.location.href;
 
     const baseUrl = window.location.origin;
-    return `${baseUrl}/globe?uuid=${uuid}`;
+    return `${baseUrl}/globe/${uuid}`;
   }, [url]);
 
   const shareUrl = generateShareUrl();

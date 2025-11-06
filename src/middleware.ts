@@ -27,14 +27,14 @@ function allowRouting(pathname: string): boolean {
 }
 
 export function middleware(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
+  const { pathname } = request.nextUrl;
   const token = request.cookies.get("kakao_access_token")?.value;
   const memberId = request.cookies.get("member_id")?.value;
   const uuid = request.cookies.get("uuid")?.value;
 
-  // 공유 링크로 접근한 경우 (uuid 쿼리 파라미터가 있는 경우) - 인증 없이 허용
-  const sharedUuid = searchParams.get("uuid");
-  if (pathname === "/globe" && sharedUuid) {
+  // 공유 링크로 접근한 경우 (/globe/[uuid] 형태) - 인증 없이 허용
+  if (pathname.startsWith("/globe/") && pathname.length > 7) {
+    const sharedUuid = pathname.slice(7); // "/globe/" 이후의 uuid 추출
     console.log(`[Middleware] Allowing shared globe access with UUID: ${sharedUuid}`);
     return NextResponse.next();
   }

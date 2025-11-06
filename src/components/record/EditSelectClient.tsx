@@ -7,14 +7,14 @@ import type { City } from "@/types/city";
 
 interface EditSelectClientProps {
   initialCities: City[];
-  registeredCityNames?: Set<string>;
+  registeredCityNames?: string[];
   addedParam?: string | string[];
   removedParam?: string | string[];
 }
 
 export function EditSelectClient({
   initialCities,
-  registeredCityNames = new Set(),
+  registeredCityNames = [],
   addedParam,
   removedParam,
 }: EditSelectClientProps) {

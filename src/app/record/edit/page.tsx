@@ -38,7 +38,12 @@ export default async function EditRecordPage({
           }
         }
       }
-    } catch (_e) {}
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to fetch member travels:", error);
+      }
+      // 의도적으로 빈 배열로 fallback
+    }
   }
 
   const resolved = await searchParams;
@@ -62,7 +67,11 @@ export default async function EditRecordPage({
           removedIds.add(String(id));
         });
       }
-    } catch {}
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to parse removed param:", removedParam, error);
+      }
+    }
   }
 
   // 삭제된 도시 정보 추출 (원본 데이터에서)
@@ -99,7 +108,11 @@ export default async function EditRecordPage({
         ];
         cities = merged;
       }
-    } catch {}
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to parse added param:", addedParam, error);
+      }
+    }
   }
 
   return <EditClient cities={cities} deletedCities={deletedCities} />;

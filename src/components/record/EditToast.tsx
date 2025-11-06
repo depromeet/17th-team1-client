@@ -11,6 +11,7 @@ type ToastState = {
 
 let toastState: ToastState = null;
 const toastListeners: Set<(toast: ToastState) => void> = new Set();
+let toastTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const notifyListeners = () => {
   toastListeners.forEach((listener) => {
@@ -20,17 +21,23 @@ const notifyListeners = () => {
 
 export const toast = {
   success: (message: string) => {
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
     toastState = { message, type: "success" };
     notifyListeners();
-    setTimeout(() => {
+    toastTimeout = setTimeout(() => {
       toastState = null;
       notifyListeners();
     }, 1500);
   },
   error: (message: string) => {
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
     toastState = { message, type: "error" };
     notifyListeners();
-    setTimeout(() => {
+    toastTimeout = setTimeout(() => {
       toastState = null;
       notifyListeners();
     }, 1500);

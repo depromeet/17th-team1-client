@@ -52,12 +52,10 @@ export default async function EditRecordPage({
   }
 
   const resolved = await searchParams;
-  const addedParam = (
-    Array.isArray(resolved?.added) ? resolved.added[0] : resolved?.added
-  ) as string | undefined;
-  const removedParam = (
-    Array.isArray(resolved?.removed) ? resolved.removed[0] : resolved?.removed
-  ) as string | undefined;
+  const addedParam = (Array.isArray(resolved?.added) ? resolved.added[0] : resolved?.added) as string | undefined;
+  const removedParam = (Array.isArray(resolved?.removed) ? resolved.removed[0] : resolved?.removed) as
+    | string
+    | undefined;
 
   // 원본 도시 목록 저장 (삭제된 도시 정보를 찾기 위해)
   const originalCities = [...cities];
@@ -91,26 +89,17 @@ export default async function EditRecordPage({
       const decoded = JSON.parse(decodeURIComponent(addedParam));
       if (Array.isArray(decoded)) {
         const added = decoded.map(
-          (c: {
-            id: string | number;
-            name: string;
-            countryCode: string;
-            lat: number;
-            lng: number;
-          }) => ({
+          (c: { id: string | number; name: string; countryCode: string; lat: number; lng: number }) => ({
             id: String(c.id),
             name: String(c.name),
             countryCode: String(c.countryCode),
             lat: Number(c.lat),
             lng: Number(c.lng),
             isNew: true,
-          })
+          }),
         );
         const existingIds = new Set(cities.map((c) => c.id));
-        const merged = [
-          ...added.filter((c) => !existingIds.has(c.id)),
-          ...cities,
-        ];
+        const merged = [...added.filter((c) => !existingIds.has(c.id)), ...cities];
         cities = merged;
       }
     } catch (error) {

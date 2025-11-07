@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/common/Button";
 import Error401Icon from "@/assets/icons/401_error.png";
 import Error404Icon from "@/assets/icons/404_erorr.png";
 import Error500Icon from "@/assets/icons/500_error.png";
+import { Button } from "@/components/common/Button";
 
 type ErrorType = "401" | "404" | "500";
 
@@ -42,12 +42,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
             </>
           ),
           buttons: (
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleLogin}
-              className="w-full"
-            >
+            <Button variant="primary" size="lg" onClick={handleLogin} className="w-full">
               로그인 하러 가기
             </Button>
           ),
@@ -64,12 +59,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
             </>
           ),
           buttons: (
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleGoHome}
-              className="w-full"
-            >
+            <Button variant="primary" size="lg" onClick={handleGoHome} className="w-full">
               홈으로 가기
             </Button>
           ),
@@ -87,12 +77,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
           ),
           buttons: (
             <div className="w-full flex flex-col gap-2">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleRefresh}
-                className="w-full"
-              >
+              <Button variant="primary" size="lg" onClick={handleRefresh} className="w-full">
                 새로고침
               </Button>
               <button
@@ -114,12 +99,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="w-48 h-48 relative">
-          <Image
-            src={content.icon}
-            alt={`${errorType} 에러 아이콘`}
-            fill
-            className="object-contain"
-          />
+          <Image src={content.icon} alt={`${errorType} 에러 아이콘`} fill className="object-contain" />
         </div>
         <div className="w-full flex flex-col items-center gap-5">
           <h1 className="w-full text-center text-[var(--color-text-primary)] text-3xl font-bold font-['Pretendard'] leading-9">
@@ -129,9 +109,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
             {content.description}
           </p>
         </div>
-        <div className="w-full px-4 pt-4 pb-7 flex flex-col gap-2">
-          {content.buttons}
-        </div>
+        <div className="w-full px-4 pt-4 pb-7 flex flex-col gap-2">{content.buttons}</div>
       </div>
     </div>
   );

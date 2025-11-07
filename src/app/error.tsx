@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
-import { ApiError } from "@/lib/apiClient";
+import type { ApiError } from "@/lib/apiClient";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
   reset: () => void;
 };
 
-export default function Error({ error }: ErrorPageProps) {
+export default function ErrorBoundary({ error }: ErrorPageProps) {
   const router = useRouter();
 
   useEffect(() => {

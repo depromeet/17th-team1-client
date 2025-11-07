@@ -10,14 +10,7 @@ type CityItemProps = {
   showDivider?: boolean;
 };
 
-export const CityItem = ({
-  city,
-  isSelected,
-  isRegistered = false,
-  onAdd,
-  onRemove,
-  showDivider,
-}: CityItemProps) => {
+export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemove, showDivider }: CityItemProps) => {
   const handleClick = () => {
     if (isRegistered) return; // 이미 등록된 도시는 클릭 불가
     if (isSelected) {
@@ -37,11 +30,7 @@ export const CityItem = ({
           isRegistered ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
         }`}
       >
-        <span
-          className={`font-medium text-left ${
-            isSelected ? "text-[#66717D]" : "text-text-primary"
-          }`}
-        >
+        <span className={`font-medium text-left ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}>
           {city.flag} {city.name}, {city.country}
         </span>
         {!isRegistered && (
@@ -58,9 +47,7 @@ export const CityItem = ({
           </div>
         )}
       </button>
-      {showDivider && (
-        <div className="border-b border-surface-placeholder--8" />
-      )}
+      {showDivider && <div className="border-b border-surface-placeholder--8" />}
     </div>
   );
 };

@@ -16,13 +16,9 @@ export function CityList({ filteredRegions }: CityListProps) {
   return (
     <div className="flex flex-col gap-[30px] pb-8">
       {filteredRegions.map((region) => (
-        <div
-          key={`${region.regionName}-${region.cities[0]?.countryCode || ""}`}
-          className="flex flex-col gap-3"
-        >
+        <div key={`${region.regionName}-${region.cities[0]?.countryCode || ""}`} className="flex flex-col gap-3">
           <div className="text-white text-base font-medium">
-            {getCountryFlagByCode(region.cities[0]?.countryCode)}{" "}
-            {region.regionName}
+            {getCountryFlagByCode(region.cities[0]?.countryCode)} {region.regionName}
           </div>
           <div className="flex flex-col gap-2">
             {region.cities.map((city) => (
@@ -42,13 +38,7 @@ export function CityList({ filteredRegions }: CityListProps) {
                   className="w-8 h-8 rounded-lg flex justify-center items-center overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
                 >
                   <div className="w-6 h-6 relative rounded-lg overflow-hidden">
-                    <Image
-                      src="/ic_edit.svg"
-                      alt="수정"
-                      fill
-                      className="object-contain"
-                      priority={false}
-                    />
+                    <Image src="/ic_edit.svg" alt="수정" fill className="object-contain" priority={false} />
                   </div>
                 </button>
               </div>

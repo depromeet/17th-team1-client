@@ -89,7 +89,7 @@ export interface ProfileData {
   memberId: number;
   nickname: string;
   email: string;
-  profileImageUrl: string | null;
+  profileImageUrl: string | undefined;
   authProvider: string;
 }
 

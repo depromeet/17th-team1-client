@@ -8,6 +8,8 @@ import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
 import { RecordScrollContainer } from "@/components/record/RecordScrollContainer";
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
+import { getDiaryDetail } from "@/services/diaryService";
+import { getMyProfile } from "@/services/profileService";
 
 type RecordData = {
   id: string;
@@ -55,74 +57,27 @@ const RecordDetailPage = () => {
       try {
         setError(null);
 
-        // TODO: Replace with actual API call
-        // const response = await getCountryRecords(recordId);
-        // 서버에서 이미 초기 레코드를 첫 번째로, 나머지는 랜덤 순서로 정렬하여 반환
+        const [diaryDetail, profile] = await Promise.all([getDiaryDetail(recordId), getMyProfile()]);
 
-        // Mock data - 독일의 여러 도시 기록들 (서버에서 정렬된 상태로 반환됨)
-        const mockCountryRecords: RecordData[] = [
-          {
-            id: recordId,
-            city: "하이델베르크",
-            country: "독일",
-            images: [
-              "https://picsum.photos/seed/heidelberg1/800/1200",
-              "https://picsum.photos/seed/hamburg1/800/1200",
-              "https://picsum.photos/seed/berlin1/800/1200",
-            ],
-            category: "풍경 🌳",
-            date: "2024.10",
-            location: "하이델베르크, 독일",
-            userId: "1",
-            userName: "김지구",
-            userAvatar: "https://picsum.photos/seed/avatar/100/100",
-            description:
-              "너무 좋았던 하이델베르크에서의 사진! 처음 갔을 때 설레기도하고 이 사진 찍을 때의 감정을 아직도 못 잊어",
-            reactions: [
-              { emoji: "😍", count: 234 },
-              { emoji: "🥹", count: 234 },
-              { emoji: "😀", count: 233 },
-            ],
-          },
-          {
-            id: "2",
-            city: "함부르크",
-            country: "독일",
-            images: ["https://picsum.photos/seed/hamburg1/800/1200", "https://picsum.photos/seed/hamburg2/800/1200"],
-            category: "음식 🍕",
-            date: "2024.10",
-            location: "함부르크, 독일",
-            userId: "1",
-            userName: "김지구",
-            userAvatar: "https://picsum.photos/seed/avatar/100/100",
-            description: "함부르크 최고다 최고~~",
-            reactions: [
-              { emoji: "😍", count: 234 },
-              { emoji: "🥹", count: 234 },
-              { emoji: "😀", count: 233 },
-            ],
-          },
-          {
-            id: "3",
-            city: "베를린",
-            country: "독일",
-            images: ["https://picsum.photos/seed/berlin1/800/1200"],
-            category: "풍경 🌳",
-            date: "2024.10",
-            location: "베를린, 독일",
-            userId: "1",
-            userName: "김지구",
-            userAvatar: "https://picsum.photos/seed/avatar/100/100",
-            description: "베를린 장벽의 역사를 느끼며",
-            reactions: [
-              { emoji: "😍", count: 150 },
-              { emoji: "🥹", count: 120 },
-            ],
-          },
-        ];
+        const { id, city, country, images, date, location, description, reactions } = diaryDetail;
+        const { memberId, nickname, profileImageUrl } = profile;
+
+        const recordData: RecordData = {
+          id,
+          city,
+          country,
+          images,
+          date,
+          location,
+          userId: String(memberId),
+          userName: nickname,
+          userAvatar: profileImageUrl,
+          description,
+          reactions,
+        };
 
         if (isMounted) {
-          setCountryRecords(mockCountryRecords);
+          setCountryRecords([recordData]);
           setIsLoading(false);
         }
       } catch (error) {
@@ -199,7 +154,7 @@ const RecordDetailPage = () => {
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
     return (
-      <div className="w-full max-w-[512px] h-screen bg-surface-secondary relative">
+      <div className="w-full h-screen bg-surface-secondary relative max-w-[512px] mx-auto">
         {/* 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader

@@ -11,6 +11,7 @@ type SortOption = "latest" | "alphabetical";
 
 type SavedGlobeClientProps = {
   initialBookmarks: BookmarkUser[];
+  initialError?: string | null;
 };
 
 const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => {
@@ -167,12 +168,12 @@ const GlobeList = ({
   );
 };
 
-export const SavedGlobeClient = ({ initialBookmarks }: SavedGlobeClientProps) => {
+export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: SavedGlobeClientProps) => {
   const router = useRouter();
   const [bookmarks, setBookmarks] = useState<BookmarkUser[]>(initialBookmarks);
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
 
   const loadBookmarks = useCallback(async () => {
     try {
@@ -181,8 +182,9 @@ export const SavedGlobeClient = ({ initialBookmarks }: SavedGlobeClientProps) =>
 
       const data = await getBookmarks();
       setBookmarks(data);
-    } catch {
-      setError("저장된 지구본을 불러오는데 실패했습니다");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "북마크를 불러오는데 실패했습니다";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -205,8 +207,9 @@ export const SavedGlobeClient = ({ initialBookmarks }: SavedGlobeClientProps) =>
         }
 
         setBookmarks((prev) => prev.map((g) => (g.memberId === memberId ? { ...g, bookmarked: !g.bookmarked } : g)));
-      } catch {
-        setError("북마크 상태 변경에 실패했습니다");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "북마크 상태 변경에 실패했습니다";
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }

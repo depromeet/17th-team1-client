@@ -17,23 +17,25 @@ import { getAuthInfo } from "@/utils/cookies";
  * const bookmarks = await getBookmarks();
  */
 export const getBookmarks = async (token?: string): Promise<BookmarkUser[]> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
   try {
-    let authToken = token;
-
-    if (!authToken) {
-      const { token: clientToken } = getAuthInfo();
-      authToken = clientToken || undefined;
-    }
-
-    if (!authToken) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
-
     const data = await apiGet<BookmarkListResponse>(`/api/v1/bookmarks`, {}, authToken);
     return data.data;
   } catch (error) {
-    console.error("Failed to fetch bookmarks:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`북마크 목록을 불러오는데 실패했습니다: ${error.message}`);
+    }
+    throw new Error("북마크 목록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
 
@@ -48,17 +50,19 @@ export const getBookmarks = async (token?: string): Promise<BookmarkUser[]> => {
  * await addBookmark(123);
  */
 export const addBookmark = async (targetMemberId: number): Promise<void> => {
+  const { token } = getAuthInfo();
+
+  if (!token) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
   try {
-    const { token } = getAuthInfo();
-
-    if (!token) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
-
     await apiPost(`/api/v1/bookmarks`, { targetMemberId }, token);
   } catch (error) {
-    console.error(`Failed to add bookmark for member ${targetMemberId}:`, error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`북마크 추가에 실패했습니다: ${error.message}`);
+    }
+    throw new Error("북마크를 추가하는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
 
@@ -73,16 +77,18 @@ export const addBookmark = async (targetMemberId: number): Promise<void> => {
  * await removeBookmark(123);
  */
 export const removeBookmark = async (targetMemberId: number): Promise<void> => {
+  const { token } = getAuthInfo();
+
+  if (!token) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
   try {
-    const { token } = getAuthInfo();
-
-    if (!token) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
-    }
-
     await apiDelete(`/api/v1/bookmarks/${targetMemberId}`, token);
   } catch (error) {
-    console.error(`Failed to remove bookmark for member ${targetMemberId}:`, error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`북마크 제거에 실패했습니다: ${error.message}`);
+    }
+    throw new Error("북마크를 제거하는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

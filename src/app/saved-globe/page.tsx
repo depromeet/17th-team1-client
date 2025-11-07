@@ -11,8 +11,9 @@ export default async function SavedGlobePage() {
 
     return <SavedGlobeClient initialBookmarks={bookmarks} />;
   } catch (error) {
-    console.error("북마크 로드 실패:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "북마크를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.";
 
-    return <SavedGlobeClient initialBookmarks={[]} />;
+    return <SavedGlobeClient initialBookmarks={[]} initialError={errorMessage} />;
   }
 }

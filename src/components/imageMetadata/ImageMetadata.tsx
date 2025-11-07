@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useId, useMemo, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
@@ -17,6 +18,7 @@ type ImageMetadataProps = {
 };
 
 export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
+  const router = useRouter();
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
@@ -26,6 +28,10 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
   const city = initialCity || "";
   const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+
+  const handleClose = useCallback(() => {
+    router.push("/record");
+  }, [router]);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsProcessing(true);
@@ -97,9 +103,17 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     });
   };
 
-  const handleSave = () => {
-    // TODO: Implement actual save functionality
-    console.log("save");
+  const handleSave = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    // 1.3초 로딩 표시
+    setTimeout(() => {
+      setIsProcessing(false);
+      // TODO: Implement actual save functionality
+      console.log("save");
+    }, 1300);
   };
 
   if (metadataList.length === 0) {
@@ -111,7 +125,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           title="최근 항목"
           variant="dark"
           leftIcon="close"
-          onLeftClick={() => console.log("close")}
+          onLeftClick={handleClose}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
           onRightClick={handleSave}
@@ -149,7 +163,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
         <LoadingOverlay show={isProcessing} />
-        <ImageMetadataHeader city={cityMain} />
+        <ImageMetadataHeader city={cityMain} onClose={handleClose} />
         <div className="px-6 mb-6">
           <div className="grid grid-cols-3 gap-3">
             {metadataList.map((metadata) => (
@@ -191,8 +205,8 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           leftIcon="back"
           onLeftClick={() => setSelectedImage(null)}
           rightButtonTitle="등록"
-          rightButtonDisabled={true}
-          onRightClick={() => console.log("dot")}
+          rightButtonDisabled={isProcessing}
+          onRightClick={handleSave}
         />
         <div
           className={

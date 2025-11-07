@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
@@ -26,6 +29,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
 
 export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,7 +42,9 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
   return (
     <div
       aria-hidden={isZoomed}
-      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${
+        isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
     >
       {/* 설명 문구 - 지구본 뷰일 때만 표시 */}
       {viewMode === "globe" && (
@@ -65,7 +71,9 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
           {/* 슬라이더 배경 */}
           <div
             className="absolute w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-in-out"
-            style={{ transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})` }}
+            style={{
+              transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})`,
+            }}
           />
 
           <button
@@ -76,7 +84,9 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
           >
             <ListIcon
               className="w-8 h-8"
-              style={{ color: viewMode === "list" ? "var(--color-surface-primary)" : "white" }}
+              style={{
+                color: viewMode === "list" ? "var(--color-surface-primary)" : "white",
+              }}
             />
           </button>
 
@@ -88,7 +98,9 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
           >
             <GlobeIcon
               className="w-8 h-8"
-              style={{ color: viewMode === "globe" ? "var(--color-surface-primary)" : "white" }}
+              style={{
+                color: viewMode === "globe" ? "var(--color-surface-primary)" : "white",
+              }}
             />
           </button>
         </div>
@@ -101,6 +113,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
             background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
           }}
           aria-label="새 항목 추가"
+          onClick={() => router.push("/record")}
         >
           <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
         </button>

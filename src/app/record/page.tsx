@@ -24,7 +24,7 @@ export default async function RecordPage() {
       convertMemberTravelsToRecordResponse(memberTravels);
     return <RecordClient initialData={recordData} />;
   } catch (error) {
-    // 401/500 에러는 서버에서 직접 리다이렉트
+    // 401/500 에러는 서버에서 직접 리다이렉트 (500 에러 방지)
     handleServerError(error);
 
     console.error("Failed to fetch record data:", error);

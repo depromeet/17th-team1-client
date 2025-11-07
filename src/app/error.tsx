@@ -22,7 +22,8 @@ export default function Error({ error }: ErrorPageProps) {
     const status =
       (error as ApiError).status || (error as { status?: number }).status;
 
-    // 서버 사이드에서 발생한 401/500 에러는 자동으로 에러 페이지로 리다이렉트
+    // 클라이언트 사이드에서 발생한 401/500 에러는 자동으로 에러 페이지로 리다이렉트
+    // 서버 사이드는 서버 컴포넌트에서 이미 처리됨
     if (status === 401) {
       router.replace("/error?type=401");
     } else if (status && status >= 500) {

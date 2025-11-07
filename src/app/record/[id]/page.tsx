@@ -10,6 +10,7 @@ import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
 import { getDiaryDetail } from "@/services/diaryService";
 import { getMyProfile } from "@/services/profileService";
+import type { Emoji } from "@/types/emoji";
 
 type RecordData = {
   id: string;
@@ -23,7 +24,7 @@ type RecordData = {
   userName: string;
   userAvatar?: string;
   description?: string;
-  reactions?: Array<{ emoji: string; count: number }>;
+  reactions?: Emoji[];
 };
 
 const RecordDetailPage = () => {

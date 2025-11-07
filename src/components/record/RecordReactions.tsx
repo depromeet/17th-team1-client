@@ -7,14 +7,11 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { registerEmoji } from "@/services/emojiService";
+import type { Emoji } from "@/types/emoji";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
-type Reaction = {
-  emoji: string;
-  count: number;
-  id: string;
-};
+type Reaction = Emoji;
 
 type FloatingEmoji = {
   id: string;
@@ -122,17 +119,17 @@ export const RecordReactions = ({
     localTimers.push(animationEndTimer);
   };
 
-  const handleReactionClick = (reactionId: string, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleReactionClick = (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!isFriend) {
       return;
     }
 
-    const reaction = reactions.find((r) => r.id === reactionId);
+    const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
     // Debounce를 사용하여 카운트 업데이트는 즉시, 애니메이션은 제한
     setReactions((prev) => {
-      const updatedReactions = prev.map((r) => (r.id === reactionId ? { ...r, count: r.count + 1 } : r));
+      const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
       onReactionUpdate?.(updatedReactions);
       return updatedReactions;
     });
@@ -146,31 +143,30 @@ export const RecordReactions = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      createFloatingEmojiWithRect(reaction.emoji, rect);
+      createFloatingEmojiWithRect(reaction.glyph, rect);
     }, 100);
   };
 
   const handleEmojiSelect = async (emojiData: EmojiClickData) => {
-    const emoji = emojiData.emoji;
-    const unicodeCode = emojiData.unified;
+    const { emoji: glyph, unified: code } = emojiData;
 
     try {
       // API 호출
       await registerEmoji({
         diaryId: recordId,
-        code: unicodeCode,
-        glyph: emoji,
+        code,
+        glyph,
       });
 
       // 성공 시 로컬 상태 업데이트
       setReactions((prev) => {
-        const existingReaction = prev.find((r) => r.emoji === emoji);
+        const existingReaction = prev.find((r) => r.glyph === glyph);
 
         if (existingReaction) {
-          const updatedReactions = prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r));
+          const updatedReactions = prev.map((r) => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
 
-          const clickedReaction = updatedReactions.find((r) => r.emoji === emoji);
-          const otherReactions = updatedReactions.filter((r) => r.emoji !== emoji);
+          const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
+          const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
           const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
           onReactionUpdate?.(newOrder);
@@ -178,9 +174,9 @@ export const RecordReactions = ({
         }
 
         const newReaction: Reaction = {
-          emoji,
+          code,
+          glyph,
           count: 1,
-          id: `${recordId}-${emoji}-${Date.now()}`,
         };
 
         const newReactions = [newReaction, ...prev];
@@ -207,7 +203,7 @@ export const RecordReactions = ({
       <button
         type="button"
         onClick={handleAddEmoji}
-        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
+        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
         style={{
           background:
             "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
@@ -218,15 +214,15 @@ export const RecordReactions = ({
       </button>
 
       <div className="flex items-center gap-4">
-        {reactions.map((reaction) => (
+        {reactions.map(({ code, glyph, count }, index) => (
           <motion.button
-            key={reaction.id}
+            key={`${code}-${glyph}-${index}`}
             type="button"
-            onClick={(e) => handleReactionClick(reaction.id, e)}
+            onClick={(e) => handleReactionClick(code, e)}
             disabled={!isFriend}
             whileTap={isFriend ? { scale: 0.85 } : {}}
             whileHover={isFriend ? { scale: 1.05 } : {}}
-            className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 flex-shrink-0 ${
+            className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0 ${
               isFriend ? "" : "opacity-50 cursor-not-allowed"
             }`}
             style={{
@@ -235,10 +231,8 @@ export const RecordReactions = ({
             }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <span className="text-[20px] leading-none tracking-[-0.8px]">{reaction.emoji}</span>
-            <span className="text-[12px] font-semibold text-white leading-[1.5] tracking-[-0.48px]">
-              {reaction.count}
-            </span>
+            <span className="text-[20px] leading-none tracking-[-0.8px]">{glyph}</span>
+            <span className="text-[12px] font-semibold text-white leading-normal tracking-[-0.48px]">{count}</span>
           </motion.button>
         ))}
 
@@ -248,7 +242,7 @@ export const RecordReactions = ({
               key={uniqueKey}
               type="button"
               onClick={handleAddEmoji}
-              className="w-[66px] h-[66px] rounded-full flex items-center justify-center flex-shrink-0"
+              className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
@@ -305,7 +299,7 @@ export const RecordReactions = ({
             }}
             aria-label="이모지 피커 닫기"
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[512px] mx-auto">
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto">
             <EmojiPicker
               onEmojiClick={handleEmojiSelect}
               width="100%"

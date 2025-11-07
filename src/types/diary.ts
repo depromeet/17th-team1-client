@@ -2,6 +2,8 @@
  * Diary API 응답 타입 정의
  */
 
+import type { Emoji } from "./emoji";
+
 export type DiaryCity = {
   cityId: number;
   cityName: string;
@@ -16,11 +18,7 @@ export type DiaryPhoto = {
   url: string;
 };
 
-export type DiaryEmoji = {
-  emojiId: number;
-  emoji: string;
-  count: number;
-};
+export type DiaryEmoji = Emoji;
 
 export type DiaryData = {
   diaryId: number;
@@ -49,7 +47,7 @@ export type DiaryDetail = {
   lng: number;
   description: string;
   images: string[];
-  reactions: Array<{ emoji: string; count: number }>;
+  reactions: Emoji[];
   date: string;
   location: string;
 };

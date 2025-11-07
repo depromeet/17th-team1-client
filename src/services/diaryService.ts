@@ -22,8 +22,9 @@ const transformDiaryResponse = (response: DiaryDetailResponse): DiaryDetail => {
     lng,
     description: text,
     images: photos.map(({ url }) => url),
-    reactions: emojis.map(({ emoji, count }) => ({
-      emoji,
+    reactions: emojis.map(({ code, glyph, count }) => ({
+      code,
+      glyph,
       count,
     })),
     date: new Date(createdAt).toLocaleDateString("ko-KR", {

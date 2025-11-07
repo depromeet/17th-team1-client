@@ -3,6 +3,7 @@ import { RecordClient } from "@/components/record/RecordClient";
 import { getMemberTravels } from "@/services/memberService";
 import type { RecordResponse } from "@/types/record";
 import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
+import { handleServerError } from "@/utils/serverErrorHandler";
 
 export default async function RecordPage() {
   try {
@@ -19,10 +20,14 @@ export default async function RecordPage() {
       return <RecordClient initialData={null} />;
     }
 
-    const recordData: RecordResponse = convertMemberTravelsToRecordResponse(memberTravels);
+    const recordData: RecordResponse =
+      convertMemberTravelsToRecordResponse(memberTravels);
     return <RecordClient initialData={recordData} />;
   } catch (error) {
+    // 401/500 에러는 서버에서 직접 리다이렉트
+    handleServerError(error);
+
     console.error("Failed to fetch record data:", error);
-    return <RecordClient initialData={null} />;
+    throw error; // 그 외 에러는 error.tsx로 전파
   }
 }

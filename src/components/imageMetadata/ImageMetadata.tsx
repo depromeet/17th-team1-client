@@ -102,6 +102,12 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     });
   };
 
+  const handleImageUpdate = (id: string, croppedImage: string) => {
+    setMetadataList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, imagePreview: croppedImage } : item)),
+    );
+  };
+
   const handleSave = () => {
     // TODO: Implement actual save functionality
     console.log("save");
@@ -176,7 +182,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
         >
           {metadataList.map((metadata) => (
             <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel image={metadata} onRemove={handleRemove} />
+              <ImageCarousel image={metadata} onRemove={handleRemove} onImageUpdate={handleImageUpdate} />
             </div>
           ))}
           {canAddMore && (

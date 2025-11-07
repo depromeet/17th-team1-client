@@ -7,8 +7,8 @@ interface CityListProps {
   filteredRegions: RecordResponse["data"]["regions"];
 }
 
-const getCountryFlagByCode = (countryCode: string): string =>
-  COUNTRY_CODE_TO_FLAG[countryCode] || "🌍";
+const getCountryFlagByCode = (countryCode?: string): string =>
+  countryCode ? COUNTRY_CODE_TO_FLAG[countryCode] || "🌍" : "🌍";
 
 export function CityList({ filteredRegions }: CityListProps) {
   const router = useRouter();
@@ -21,7 +21,7 @@ export function CityList({ filteredRegions }: CityListProps) {
           className="flex flex-col gap-3"
         >
           <div className="text-white text-base font-medium">
-            {getCountryFlagByCode(region.cities[0]?.countryCode || "")}{" "}
+            {getCountryFlagByCode(region.cities[0]?.countryCode)}{" "}
             {region.regionName}
           </div>
           <div className="flex flex-col gap-2">

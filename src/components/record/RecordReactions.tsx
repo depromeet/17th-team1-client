@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
-import { registerEmoji } from "@/services/emojiService";
+import { pressEmoji, registerEmoji } from "@/services/emojiService";
 import type { Emoji } from "@/types/emoji";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -45,7 +45,12 @@ export const RecordReactions = ({
 
   useEffect(() => {
     if (isInitialLoad) {
-      const sortedReactions = [...initialReactions].sort((a, b) => b.count - a.count);
+      // 초기 로딩 시 서버 카운트 + 1로 설정
+      const reactionsWithIncreasedCount = initialReactions.map((reaction) => ({
+        ...reaction,
+        count: reaction.count + 1,
+      }));
+      const sortedReactions = [...reactionsWithIncreasedCount].sort((a, b) => b.count - a.count);
       setReactions(sortedReactions);
       setIsInitialLoad(false);
     }
@@ -119,7 +124,7 @@ export const RecordReactions = ({
     localTimers.push(animationEndTimer);
   };
 
-  const handleReactionClick = (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!isFriend) {
       return;
     }
@@ -127,14 +132,14 @@ export const RecordReactions = ({
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
-    // Debounce를 사용하여 카운트 업데이트는 즉시, 애니메이션은 제한
+    // 먼저 UI 업데이트 (낙관적 업데이트)
     setReactions((prev) => {
       const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
       onReactionUpdate?.(updatedReactions);
       return updatedReactions;
     });
 
-    // 애니메이션만 debounce 적용 - 버튼 위치를 미리 저장
+    // 애니메이션 실행 - 버튼 위치를 미리 저장
     const buttonElement = event.currentTarget;
     const rect = buttonElement.getBoundingClientRect();
 
@@ -145,6 +150,23 @@ export const RecordReactions = ({
     debounceTimerRef.current = setTimeout(() => {
       createFloatingEmojiWithRect(reaction.glyph, rect);
     }, 100);
+
+    try {
+      await pressEmoji({
+        diaryId: recordId,
+        code: reactionCode,
+      });
+    } catch (error) {
+      // API 실패 시 카운트 롤백
+      setReactions((prev) => {
+        const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+        onReactionUpdate?.(rolledBackReactions);
+        return rolledBackReactions;
+      });
+
+      const errorMessage = error instanceof Error ? error.message : "이모지 누르기에 실패했습니다";
+      alert(errorMessage);
+    }
   };
 
   const handleEmojiSelect = async (emojiData: EmojiClickData) => {

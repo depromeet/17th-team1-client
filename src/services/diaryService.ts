@@ -21,11 +21,11 @@ const transformDiaryResponse = (response: DiaryDetailResponse): DiaryDetail => {
     lat,
     lng,
     description: text,
-    images: photos.map((({ url }) => url)),
-    reactions: emojis.map((({ emoji, count }) => ({
+    images: photos.map(({ url }) => url),
+    reactions: emojis.map(({ emoji, count }) => ({
       emoji,
       count,
-    }))),
+    })),
     date: new Date(createdAt).toLocaleDateString("ko-KR", {
       year: "numeric",
       month: "2-digit",

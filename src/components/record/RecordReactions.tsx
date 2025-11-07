@@ -1,8 +1,13 @@
 "use client";
 
+import type { EmojiClickData } from "emoji-picker-react";
+import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 type Reaction = {
   emoji: string;
@@ -25,7 +30,6 @@ type RecordReactionsProps = {
 };
 
 const MAX_EMPTY_SLOTS = 4;
-const AVAILABLE_EMOJIS = ["😀", "😍", "🥹", "😂", "😭", "😱", "🔥", "👍", "❤️", "🎉", "✨", "🌟"];
 
 export const RecordReactions = ({
   recordId,
@@ -154,7 +158,9 @@ export const RecordReactions = ({
     }, 100);
   };
 
-  const handleEmojiSelect = (emoji: string) => {
+  const handleEmojiSelect = (emojiData: EmojiClickData) => {
+    const emoji = emojiData.emoji;
+
     setReactions((prev) => {
       const existingReaction = prev.find((r) => r.emoji === emoji);
 
@@ -293,30 +299,22 @@ export const RecordReactions = ({
             }}
             aria-label="이모지 피커 닫기"
           />
-          <div className="fixed bottom-0 left-0 right-0 bg-surface-secondary rounded-t-3xl p-6 z-50 max-w-[512px] mx-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-text-primary">이모지 선택</h3>
-              <button
-                type="button"
-                onClick={() => setShowEmojiPicker(false)}
-                className="text-text-secondary"
-                aria-label="닫기"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-8 gap-3">
-              {AVAILABLE_EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => handleEmojiSelect(emoji)}
-                  className="text-3xl hover:scale-110 transition-transform"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[512px] mx-auto">
+            <EmojiPicker
+              onEmojiClick={handleEmojiSelect}
+              width="100%"
+              height="400px"
+              theme={Theme.DARK}
+              searchPlaceHolder="이모지를 검색해 보세요"
+              previewConfig={{
+                showPreview: false,
+              }}
+              style={{
+                borderTopLeftRadius: "24px",
+                borderTopRightRadius: "24px",
+                backgroundColor: "#0E1724",
+              }}
+            />
           </div>
         </>
       )}

@@ -6,9 +6,15 @@ type NationSelectFooterProps = {
   selectedCities: City[];
   onRemoveCity: (cityId: string) => void;
   onCreateGlobe: () => void;
+  buttonLabel?: string;
 };
 
-export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe }: NationSelectFooterProps) => {
+export const NationSelectFooter = ({
+  selectedCities,
+  onRemoveCity,
+  onCreateGlobe,
+  buttonLabel,
+}: NationSelectFooterProps) => {
   const isButtonEnabled = selectedCities.length > 0;
 
   return (
@@ -23,7 +29,7 @@ export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe
           disabled={!isButtonEnabled}
           onClick={onCreateGlobe}
         >
-          내 지구본 생성하기
+          {buttonLabel || "내 지구본 생성하기"}
         </Button>
       </div>
     </div>

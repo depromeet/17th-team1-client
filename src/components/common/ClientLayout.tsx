@@ -7,7 +7,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 type ClientLayoutProps = {
   children: ReactNode;
 };
-
 export const ClientLayout = ({ children }: ClientLayoutProps) => {
   return (
     <ErrorBoundary>

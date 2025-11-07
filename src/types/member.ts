@@ -16,6 +16,20 @@ export interface TravelRecord {
   countryCode: string;
 }
 
+// 여행 기록 삭제 API 요청
+export interface DeleteTravelRecord {
+  countryCode: string;
+  cityName: string;
+  lat: number;
+  lng: number;
+}
+
+// 여행 기록 삭제 API 응답
+export interface DeleteTravelRecordsResponse {
+  status: string;
+  data: Record<string, never>;
+}
+
 // 여행 기록 생성 API 응답
 export interface CreateTravelRecordsData {
   recordsCreated: number;

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
@@ -11,11 +12,24 @@ import { PopularCitiesList } from "./PopularCitiesList";
 
 type NationSelectClientProps = {
   initialCities: City[];
+  registeredCityNames?: string[]; // 이미 등록된 도시 이름 목록
+  mode?: "default" | "edit-add";
+  onComplete?: (cities: City[]) => void;
+  buttonLabel?: string;
+  customHeader?: React.ReactNode;
 };
 
-export const NationSelectClient = ({ initialCities }: NationSelectClientProps) => {
+export const NationSelectClient = ({
+  initialCities,
+  registeredCityNames = [],
+  mode = "default",
+  onComplete,
+  buttonLabel,
+  customHeader,
+}: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
+  const registeredCityNamesSet = new Set(registeredCityNames);
 
   const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
     useCitySearch();
@@ -39,6 +53,11 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
   const handleCreateGlobe = async () => {
     if (selectedCityList.length === 0) return;
 
+    if (mode === "edit-add" && onComplete) {
+      onComplete(selectedCityList);
+      return;
+    }
+
     try {
       await createMemberTravels(selectedCityList);
       router.push("/globe");
@@ -59,9 +78,19 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
     <div className="h-screen bg-surface-secondary flex flex-col">
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
 
-      <div className="flex-1 overflow-y-auto px-4 flex justify-center pb-32">
+      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
         <div className="w-full max-w-[512px] px-4">
-          <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />
+          {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
+
+          {customHeader && (
+            <div className="mb-4">
+              <SearchInput
+                placeholder="도시/나라를 검색해주세요."
+                value={searchKeyword}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+          )}
 
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">
@@ -80,6 +109,7 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
             <PopularCitiesList
               cities={displayCities}
               selectedCityIds={selectedCityIds}
+              registeredCityNames={registeredCityNamesSet}
               onAddCity={handleAddCity}
               onRemoveCity={handleRemoveCity}
               isLoading={displayLoading}
@@ -94,6 +124,7 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
         selectedCities={selectedCityList}
         onRemoveCity={handleRemoveCity}
         onCreateGlobe={handleCreateGlobe}
+        buttonLabel={buttonLabel}
       />
     </div>
   );

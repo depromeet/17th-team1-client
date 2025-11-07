@@ -1,3 +1,4 @@
+export { default as AddIcon } from "./add.svg";
 export { default as AddEmojiIcon } from "./add-emoji.svg";
 export { default as BackIcon } from "./back.svg";
 export { default as CalendarIcon } from "./calendar.svg";

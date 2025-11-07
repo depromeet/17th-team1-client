@@ -19,8 +19,7 @@ export default function ErrorBoundary({ error }: ErrorPageProps) {
     }
 
     // ApiError의 status 코드 확인
-    const status =
-      (error as ApiError).status || (error as { status?: number }).status;
+    const status = (error as ApiError).status || (error as { status?: number }).status;
 
     // 클라이언트 사이드에서 발생한 401/500 에러는 자동으로 에러 페이지로 리다이렉트
     // 서버 사이드는 서버 컴포넌트에서 이미 처리됨
@@ -32,8 +31,7 @@ export default function ErrorBoundary({ error }: ErrorPageProps) {
   }, [error, router]);
 
   // ApiError의 status 코드 확인
-  const status =
-    (error as ApiError).status || (error as { status?: number }).status;
+  const status = (error as ApiError).status || (error as { status?: number }).status;
 
   // status에 따라 에러 타입 결정, 없으면 500
   let errorType: "401" | "404" | "500" = "500";

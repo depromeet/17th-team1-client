@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
@@ -14,9 +14,10 @@ import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
   initialCity?: string;
+  initialCountry?: string;
 };
 
-export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
+export default function ImageMetadataComponent({ initialCity, initialCountry }: ImageMetadataProps) {
   const router = useRouter();
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,8 +25,8 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   const [_keyword, _setKeyword] = useState("");
   // const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
   // const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
-  const city = initialCity || "";
-  const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+  // const city = initialCity || "";
+  // const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
 
   const handleClose = useCallback(() => {
     router.push("/record");
@@ -122,6 +123,9 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
     }, 1300);
   };
 
+  const locationTitle = [initialCity, initialCountry].filter(Boolean).join(", ");
+  const headerTitle = locationTitle || "나라, 도시 이름";
+
   if (metadataList.length === 0) {
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
@@ -174,7 +178,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
         <LoadingOverlay show={isProcessing} />
         <Header
-          title="나라, 도시 이름"
+          title={headerTitle}
           variant="dark"
           leftIcon="back"
           onLeftClick={handleBack}

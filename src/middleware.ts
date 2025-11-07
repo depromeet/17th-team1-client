@@ -6,6 +6,7 @@ const PUBLIC_PATHS: readonly string[] = [
   "/login/oauth/success",
   "/_next",
   "/api",
+  "/assets",
   "/favicon.png",
   "/robots.txt",
   "/sitemap.xml",

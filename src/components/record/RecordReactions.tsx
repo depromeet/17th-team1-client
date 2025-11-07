@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
+import { registerEmoji } from "@/services/emojiService";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
@@ -149,35 +150,49 @@ export const RecordReactions = ({
     }, 100);
   };
 
-  const handleEmojiSelect = (emojiData: EmojiClickData) => {
+  const handleEmojiSelect = async (emojiData: EmojiClickData) => {
     const emoji = emojiData.emoji;
+    const unicodeCode = emojiData.unified;
 
-    setReactions((prev) => {
-      const existingReaction = prev.find((r) => r.emoji === emoji);
+    try {
+      // API 호출
+      await registerEmoji({
+        diaryId: recordId,
+        code: unicodeCode,
+        glyph: emoji,
+      });
 
-      if (existingReaction) {
-        const updatedReactions = prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r));
+      // 성공 시 로컬 상태 업데이트
+      setReactions((prev) => {
+        const existingReaction = prev.find((r) => r.emoji === emoji);
 
-        const clickedReaction = updatedReactions.find((r) => r.emoji === emoji);
-        const otherReactions = updatedReactions.filter((r) => r.emoji !== emoji);
-        const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
+        if (existingReaction) {
+          const updatedReactions = prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r));
 
-        onReactionUpdate?.(newOrder);
-        return newOrder;
-      }
+          const clickedReaction = updatedReactions.find((r) => r.emoji === emoji);
+          const otherReactions = updatedReactions.filter((r) => r.emoji !== emoji);
+          const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
-      const newReaction: Reaction = {
-        emoji,
-        count: 1,
-        id: `${recordId}-${emoji}-${Date.now()}`,
-      };
+          onReactionUpdate?.(newOrder);
+          return newOrder;
+        }
 
-      const newReactions = [newReaction, ...prev];
-      onReactionUpdate?.(newReactions);
-      return newReactions;
-    });
+        const newReaction: Reaction = {
+          emoji,
+          count: 1,
+          id: `${recordId}-${emoji}-${Date.now()}`,
+        };
 
-    setShowEmojiPicker(false);
+        const newReactions = [newReaction, ...prev];
+        onReactionUpdate?.(newReactions);
+        return newReactions;
+      });
+
+      setShowEmojiPicker(false);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "이모지 등록에 실패했습니다";
+      alert(errorMessage);
+    }
   };
 
   const handleAddEmoji = () => {

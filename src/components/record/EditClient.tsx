@@ -1,0 +1,455 @@
+"use client";
+
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Popup } from "@/components/common/Popup";
+import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
+import { getCountryName } from "@/constants/countryMapping";
+import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
+import type { City } from "@/types/city";
+import type { CreateTravelRecordsResponse } from "@/types/member";
+import { getAuthInfo } from "@/utils/cookies";
+import { EditContent } from "./EditContent";
+import { EditHeader } from "./EditHeader";
+import { EditToastContainer, toast } from "./EditToast";
+
+interface EditClientProps {
+  cities: {
+    id: string;
+    name: string;
+    countryCode: string;
+    lat: number;
+    lng: number;
+    cityId?: number;
+    isNew?: boolean;
+  }[];
+  deletedCities?: {
+    id: string;
+    name: string;
+    countryCode: string;
+    lat: number;
+    lng: number;
+    cityId?: number;
+  }[];
+}
+
+export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [current, setCurrent] = useState(cities);
+  const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // 삭제된 도시 정보 저장 (삭제 시점의 도시 정보를 저장)
+  const [deletedCitiesInfo, setDeletedCitiesInfo] = useState<
+    Map<
+      string,
+      {
+        id: string;
+        name: string;
+        countryCode: string;
+        lat: number;
+        lng: number;
+        cityId?: number;
+      }
+    >
+  >(new Map());
+
+  // 삭제된 도시 ID 목록
+  const removedIds = useMemo(() => {
+    const removedParam = searchParams.get("removed");
+    if (removedParam) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(removedParam));
+        if (Array.isArray(decoded)) {
+          return new Set(decoded.map(String));
+        }
+      } catch {}
+    }
+    return new Set<string>();
+  }, [searchParams]);
+
+  // 전달받은 삭제된 도시 정보를 deletedCitiesInfo에 저장
+  useEffect(() => {
+    if (deletedCities.length > 0) {
+      setDeletedCitiesInfo((prev) => {
+        const updated = new Map(prev);
+        deletedCities.forEach((city) => {
+          updated.set(city.id, city);
+        });
+        return updated;
+      });
+    }
+  }, [deletedCities]);
+
+  // cities prop이 처음 로드될 때 삭제된 도시가 아닌 기존 도시들을 deletedCitiesInfo에 저장 (필요시)
+  useEffect(() => {
+    const existingCities = cities.filter((c) => !c.isNew && !removedIds.has(c.id));
+    setDeletedCitiesInfo((prev) => {
+      const updated = new Map(prev);
+      existingCities.forEach((city) => {
+        if (!updated.has(city.id)) {
+          updated.set(city.id, city);
+        }
+      });
+      return updated;
+    });
+  }, [cities, removedIds]);
+
+  // cities prop이 변경될 때 current state 업데이트 (하지만 삭제된 도시는 제외)
+  useEffect(() => {
+    // 삭제된 도시를 제외한 도시들만 current에 유지
+    const filteredCities = cities.filter((c) => !removedIds.has(c.id));
+
+    // 기존 current에서 삭제된 도시 제거하고 새 도시 추가
+    setCurrent((prev) => {
+      const prevIds = new Set(prev.map((c) => c.id));
+      const newCities = filteredCities.filter((c) => !prevIds.has(c.id));
+
+      // 삭제된 도시 제거
+      const updated = prev.filter((c) => !removedIds.has(c.id));
+
+      // 새 도시 추가
+      return [...newCities, ...updated];
+    });
+  }, [cities, removedIds]);
+
+  // 브라우저 뒤로가기 감지
+  useEffect(() => {
+    const handlePopState = () => {
+      router.push("/record");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
+
+  const handleBack = () => {
+    router.push("/record");
+  };
+
+  const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
+  const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
+  const isChanged = useMemo(() => {
+    // 삭제된 도시가 있으면 변경된 것
+    if (removedIds.size > 0) return true;
+
+    // 추가된 도시가 있으면 변경된 것
+    if (current.some((c) => c.isNew)) return true;
+
+    // 개수나 ID가 다르면 변경된 것
+    if (current.length !== base.length) return true;
+    if (baseIds.size !== currentIds.size) return true;
+    for (const id of baseIds) {
+      if (!currentIds.has(id)) return true;
+    }
+    return false;
+  }, [base.length, baseIds, current, currentIds, removedIds.size]);
+
+  const handleRemove = (cityId: string, isNew?: boolean) => {
+    if (isNew) {
+      // 새로 추가한 도시 삭제 - current에서 제거하고 URL도 업데이트
+      const updatedCurrent = current.filter((c) => c.id !== cityId);
+      setCurrent(updatedCurrent);
+
+      // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
+      const remainingNewCities = updatedCurrent
+        .filter((c) => c.isNew)
+        .map(({ id, name, countryCode, lat, lng }) => {
+          const countryName = getCountryName(countryCode);
+          return { id, name, country: countryName, countryCode, lat, lng };
+        });
+
+      const removedParam = searchParams.get("removed");
+      let newUrl = "/record/edit";
+      const params = new URLSearchParams();
+
+      if (remainingNewCities.length > 0) {
+        params.set("added", encodeURIComponent(JSON.stringify(remainingNewCities)));
+      }
+
+      if (removedParam) {
+        params.set("removed", removedParam);
+      }
+
+      if (params.toString()) {
+        newUrl += `?${params.toString()}`;
+      }
+
+      router.push(newUrl);
+      toast.success("도시가 삭제되었습니다. 저장 시 변경사항이 반영됩니다");
+    } else {
+      setConfirmId(cityId);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (!confirmId) return;
+
+    const cityToDelete = current.find((c) => c.id === confirmId);
+    if (!cityToDelete) return;
+
+    // 삭제된 도시 정보 저장 (저장 시 서버에 전송하기 위해)
+    setDeletedCitiesInfo((prev) => {
+      const updated = new Map(prev);
+      updated.set(confirmId, cityToDelete);
+      return updated;
+    });
+
+    // 현재 목록에서 제거
+    const updatedCurrent = current.filter((c) => c.id !== confirmId);
+    setCurrent(updatedCurrent);
+    setConfirmId(null);
+
+    // 삭제된 도시 ID를 쿼리 파라미터에 추가
+    const currentRemoved = Array.from(removedIds);
+    if (!removedIds.has(confirmId)) {
+      currentRemoved.push(confirmId);
+    }
+
+    // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
+    const remainingNewCities = updatedCurrent
+      .filter((c) => c.isNew)
+      .map(({ id, name, countryCode, lat, lng }) => {
+        const countryName = getCountryName(countryCode);
+        return { id, name, country: countryName, countryCode, lat, lng };
+      });
+
+    const removedParam = encodeURIComponent(JSON.stringify(currentRemoved));
+
+    let newUrl = "/record/edit";
+    const params = new URLSearchParams();
+
+    if (remainingNewCities.length > 0) {
+      params.set("added", encodeURIComponent(JSON.stringify(remainingNewCities)));
+    }
+
+    if (currentRemoved.length > 0) {
+      params.set("removed", removedParam);
+    }
+
+    if (params.toString()) {
+      newUrl += `?${params.toString()}`;
+    }
+
+    router.push(newUrl);
+
+    toast.success("도시가 삭제되었습니다. 저장 시 변경사항이 반영됩니다");
+  };
+
+  const handleCancelDelete = () => setConfirmId(null);
+
+  const handleSave = async () => {
+    if (isSaving) return;
+
+    const { token } = getAuthInfo();
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setIsSaving(true);
+    const startTime = Date.now();
+    const minLoadingDuration = 1300; // 최소 1.3초
+
+    try {
+      // 추가된 도시들과 삭제된 도시들 찾기
+      const baseIds = new Set(base.map((c) => c.id));
+
+      // 추가된 도시들 (current에 있지만 base에 없거나 isNew인 것)
+      const addedCities = current.filter((c) => !baseIds.has(c.id) || c.isNew);
+
+      // 삭제된 도시들 (removedIds에 있는 ID들에 해당하는 삭제된 도시 정보 찾기)
+      const deletedCities = Array.from(removedIds)
+        .map((id) => deletedCitiesInfo.get(id))
+        .filter((city): city is NonNullable<typeof city> => city !== undefined);
+
+      console.log(`[Save] 추가할 도시:`, addedCities);
+      console.log(`[Save] 삭제할 도시:`, deletedCities);
+
+      // 추가된 도시들을 City 타입으로 변환 (배열로 한번에 전송)
+      const citiesToAdd: City[] = addedCities.map((city) => ({
+        id: city.id,
+        name: city.name,
+        country: getCountryName(city.countryCode),
+        flag: "", // 필요 없음
+        lat: city.lat,
+        lng: city.lng,
+        countryCode: city.countryCode,
+      }));
+
+      // 삭제된 도시들을 DeleteTravelRecord 타입으로 변환
+      const deletePromises = deletedCities.map((city) => {
+        const deleteRecord = {
+          countryCode: city.countryCode,
+          cityName: city.name,
+          lat: city.lat,
+          lng: city.lng,
+        };
+        console.log(`[Save] 도시 삭제 요청:`, deleteRecord);
+        return deleteMemberTravel(deleteRecord, token);
+      });
+
+      // 추가 요청 (배열로 한번에 전송)
+      let addPromise: Promise<CreateTravelRecordsResponse> | null = null;
+      if (citiesToAdd.length > 0) {
+        console.log(`[Save] 도시 추가 요청:`, citiesToAdd);
+        addPromise = createMemberTravels(citiesToAdd);
+      }
+
+      console.log(`[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
+
+      // 모든 API 호출 실행
+      const promises: Promise<unknown>[] = [...deletePromises];
+      if (addPromise) {
+        promises.push(addPromise);
+      }
+      await Promise.all(promises);
+
+      console.log(`[Save] 모든 요청 성공`);
+
+      // 최소 1.3초 동안 로딩 표시 보장
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      }
+
+      setIsSaving(false);
+      // 성공 시 record 페이지로 이동
+      router.push("/record");
+    } catch (error) {
+      console.error("Failed to save cities:", error);
+
+      // 최소 1.3초 동안 로딩 표시 보장 (에러 발생 시에도)
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      }
+
+      setIsSaving(false);
+      setShowErrorModal(true);
+    }
+  };
+
+  const handleAddClick = () => {
+    // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
+    const newCities = current.filter((c) => c.isNew);
+    const removedParam =
+      Array.from(removedIds).length > 0 ? encodeURIComponent(JSON.stringify(Array.from(removedIds))) : null;
+
+    let newUrl = "/record/edit/select";
+    const params = new URLSearchParams();
+
+    if (newCities.length > 0) {
+      const payload = newCities.map(({ id, name, countryCode, lat, lng }) => {
+        const countryName = getCountryName(countryCode);
+        return { id, name, country: countryName, countryCode, lat, lng };
+      });
+      params.set("added", encodeURIComponent(JSON.stringify(payload)));
+    }
+
+    if (removedParam) {
+      params.set("removed", removedParam);
+    }
+
+    if (params.toString()) {
+      newUrl += `?${params.toString()}`;
+    }
+
+    router.push(newUrl);
+  };
+
+  return (
+    <div className="h-screen bg-surface-secondary flex flex-col">
+      <EditToastContainer />
+      <LoadingOverlay show={isSaving} />
+      <div className="flex justify-between items-center px-4 pt-4 pb-3" />
+      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
+        <div className="w-full max-w-[512px] px-4">
+          <EditHeader canSave={isChanged && !isSaving} onSave={handleSave} onBack={handleBack} />
+          <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
+        </div>
+      </div>
+      {confirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.50)]">
+          <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
+            <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
+              <div className="w-10 h-10 relative overflow-hidden">
+                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+              </div>
+              <div className="flex flex-col justify-start items-center gap-1">
+                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                  정말 삭제하시겠어요?
+                </div>
+                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                  도시를 삭제하면, 기록도 함께 사라져요.
+                </div>
+              </div>
+            </div>
+            <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
+              <button
+                onClick={handleCancelDelete}
+                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  취소
+                </div>
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--4 flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  삭제
+                </div>
+              </button>
+            </div>
+          </Popup>
+        </div>
+      )}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.50)]">
+          <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
+            <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
+              <div className="w-10 h-10 relative overflow-hidden">
+                <Image src="/icon-exclamation-circle-mono.svg" alt="경고" fill className="object-contain" />
+              </div>
+              <div className="flex flex-col justify-start items-center gap-1">
+                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                  저장에 실패했습니다.
+                </div>
+                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                  다시 시도해주세요.
+                </div>
+              </div>
+            </div>
+            <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
+                type="button"
+              >
+                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
+                  닫기
+                </div>
+              </button>
+            </div>
+          </Popup>
+        </div>
+      )}
+    </div>
+  );
+}

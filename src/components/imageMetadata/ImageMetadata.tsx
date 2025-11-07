@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
@@ -17,16 +17,19 @@ type ImageMetadataProps = {
 };
 
 export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
+  const router = useRouter();
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
-  // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
   // const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
   // const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
-  // const city = initialCity || "";
-  // const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
-  const router = useRouter();
+  const city = initialCity || "";
+  const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+
+  const handleClose = useCallback(() => {
+    router.push("/record");
+  }, [router]);
 
   const handleBack = () => {
     router.back();
@@ -103,14 +106,20 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
   };
 
   const handleImageUpdate = (id: string, croppedImage: string) => {
-    setMetadataList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, imagePreview: croppedImage } : item)),
-    );
+    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, imagePreview: croppedImage } : item)));
   };
 
-  const handleSave = () => {
-    // TODO: Implement actual save functionality
-    console.log("save");
+  const handleSave = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    // 1.3초 로딩 표시
+    setTimeout(() => {
+      setIsProcessing(false);
+      // TODO: Implement actual save functionality
+      console.log("save");
+    }, 1300);
   };
 
   if (metadataList.length === 0) {
@@ -122,7 +131,7 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           title="최근 항목"
           variant="dark"
           leftIcon="close"
-          onLeftClick={() => console.log("close")}
+          onLeftClick={handleClose}
           rightButtonTitle="등록"
           rightButtonDisabled={true}
           onRightClick={handleSave}
@@ -170,8 +179,8 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
           leftIcon="back"
           onLeftClick={handleBack}
           rightButtonTitle="등록"
-          rightButtonDisabled={true}
-          onRightClick={() => console.log("dot")}
+          rightButtonDisabled={isProcessing}
+          onRightClick={handleSave}
         />
         <div
           className={

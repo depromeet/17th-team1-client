@@ -79,15 +79,6 @@ export const RecordReactions = ({
 
     isAnimatingRef.current = true;
 
-    // RecordCard 찾기 (relative 기준점)
-    const recordCard = document.querySelector("[data-record-card]");
-    if (!recordCard) {
-      isAnimatingRef.current = false;
-      return;
-    }
-
-    const cardRect = recordCard.getBoundingClientRect();
-
     // 여러 개의 이모지를 연속으로 생성 (3-5개)
     const emojiCount = Math.floor(Math.random() * 3) + 3;
     const localTimers: NodeJS.Timeout[] = [];
@@ -96,12 +87,12 @@ export const RecordReactions = ({
       const createTimer = setTimeout(() => {
         const randomX = (Math.random() - 0.5) * 60;
 
-        // RecordCard 기준 상대 좌표
+        // viewport 기준 절대 좌표 (fixed position 사용)
         const floatingEmoji: FloatingEmoji = {
           id: `${Date.now()}-${Math.random()}`,
           emoji,
-          x: rect.left - cardRect.left + rect.width / 2 + randomX,
-          y: rect.top - cardRect.top + rect.height / 2,
+          x: rect.left + rect.width / 2 + randomX,
+          y: rect.top + rect.height / 2,
         };
 
         setFloatingEmojis((prev) => [...prev, floatingEmoji]);

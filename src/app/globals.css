@@ -163,9 +163,9 @@ body {
 
 /* Image Crop Modal - Crop Area Border Radius */
 .image-crop-modal .reactEasyCrop_CropArea {
-  border-radius: 12px !important;
+  border-radius: 12px;
 }
 
 .image-crop-modal .reactEasyCrop_CropAreaGrid {
-  border-radius: 12px !important;
+  border-radius: 12px;
 }

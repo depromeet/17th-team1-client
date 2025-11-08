@@ -2,12 +2,16 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { getAuthInfo } from "@/utils/cookies";
 
 export function RecordHeader() {
   const router = useRouter();
 
   const handleBackClick = () => {
-    router.push("/globe");
+    const { uuid } = getAuthInfo();
+    if (uuid) {
+      router.push(`/globe/${uuid}`);
+    }
   };
 
   const handleEditClick = () => {

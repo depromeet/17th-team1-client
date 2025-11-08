@@ -7,8 +7,9 @@ export default async function Home() {
   const cookieStore = await cookies();
   const token = cookieStore.get("kakao_access_token")?.value;
   const memberId = cookieStore.get("member_id")?.value;
+  const uuid = cookieStore.get("uuid")?.value;
 
-  if (token && memberId) {
+  if (token && memberId && uuid) {
     let travelData: MemberTravelsResponse | null = null;
 
     try {
@@ -21,7 +22,7 @@ export default async function Home() {
 
     // 여행 데이터 유무에 따른 라우팅
     if (travelData?.data?.travels && travelData.data.travels.length > 0) {
-      redirect("/globe");
+      redirect(`/globe/${uuid}`);
     } else {
       redirect("/nation-select");
     }

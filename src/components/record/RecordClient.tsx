@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Continent, RecordResponse } from "@/types/record";
+import { getAuthInfo } from "@/utils/cookies";
 import { RecordContent } from "./RecordContent";
 import { RecordHeader } from "./RecordHeader";
 
@@ -17,7 +18,10 @@ export function RecordClient({ initialData }: RecordClientProps) {
   // 브라우저 뒤로가기 감지
   useEffect(() => {
     const handlePopState = () => {
-      router.push("/globe");
+      const { uuid } = getAuthInfo();
+      if (uuid) {
+        router.push(`/globe/${uuid}`);
+      }
     };
 
     window.addEventListener("popstate", handlePopState);

@@ -48,7 +48,7 @@ export function middleware(request: NextRequest) {
       }, UUID: ${uuid || "none"})`,
     );
     const url = request.nextUrl.clone();
-    url.pathname = "/globe";
+    url.pathname = `/globe/${uuid}`;
     return NextResponse.redirect(url);
   }
 

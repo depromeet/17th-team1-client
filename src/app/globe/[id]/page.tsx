@@ -110,7 +110,7 @@ const GlobePage = () => {
   return (
     <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
       <Header
-        title={isMyGlobe ? "" : `${nickname}님의 지구본`}
+        title={`${nickname}님의 지구본`}
         variant="navy"
         {...(isMyGlobe && {
           leftIcon: "menu",

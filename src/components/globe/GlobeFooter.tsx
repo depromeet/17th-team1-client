@@ -6,6 +6,7 @@ import { BookmarkIcon } from "@/assets/icons";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
+import { getAuthInfo } from "@/utils/cookies";
 import { ShareButton } from "./ShareButton";
 
 type GlobeFooterProps = {
@@ -75,7 +76,12 @@ export const GlobeFooter = ({
               background: "rgb(13, 12, 20) 100%)",
             }}
             aria-label="홈으로 이동"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              const { uuid } = getAuthInfo();
+              if (uuid) {
+                router.push(`/globe/${uuid}`);
+              }
+            }}
           >
             <p className="font-bold text-base text-white leading-[1.3]">홈으로 이동</p>
           </button>

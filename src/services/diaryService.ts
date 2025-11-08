@@ -22,7 +22,7 @@ const transformDiaryResponse = (response: DiaryDetailResponse): DiaryDetail => {
     lat,
     lng,
     description: text,
-    images: photos.map(({ url }) => url),
+    images: photos.map(({ photoCode }) => photoCode),
     reactions: emojis.map(({ code, glyph, count }) => ({
       code,
       glyph,

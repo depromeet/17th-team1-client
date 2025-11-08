@@ -25,15 +25,14 @@ export type DiaryPhotoTakenMonth =
 
 export type DiaryPhoto = {
   photoId: number;
-  url: string;
   photoCode: string;
-  lat?: number;
-  lng?: number;
-  width?: number;
-  height?: number;
-  takenMonth?: DiaryPhotoTakenMonth;
-  placeName?: string;
-  tag?: ImageTag;
+  lat: number;
+  lng: number;
+  width: number;
+  height: number;
+  takenMonth: DiaryPhotoTakenMonth | null;
+  placeName: string | null;
+  tag: ImageTag | null;
 };
 
 export type DiaryEmoji = Emoji;

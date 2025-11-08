@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { RecordCard } from "@/components/record/RecordCard";
@@ -11,6 +11,7 @@ import { useRecordScroll } from "@/hooks/useRecordScroll";
 import { getDiaryDetail } from "@/services/diaryService";
 import { getMyProfile } from "@/services/profileService";
 import type { Emoji } from "@/types/emoji";
+import { getAuthInfo } from "@/utils/cookies";
 
 type RecordData = {
   id: string;
@@ -30,10 +31,16 @@ type RecordData = {
 const RecordDetailPage = () => {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const recordId = typeof params.id === "string" ? params.id : "";
+
+  // UUID 비교를 통한 소유자 확인
+  const queryUuid = searchParams.get("uuid");
+  const { uuid: cookieUuid } = getAuthInfo();
+  const isOwner = queryUuid !== null && cookieUuid !== null && queryUuid === cookieUuid;
 
   // 페이지 진입 시 recordId 유효성 검사
   useEffect(() => {
@@ -132,13 +139,7 @@ const RecordDetailPage = () => {
     );
   }
 
-  if (!currentRecord) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-surface-secondary">
-        <div className="text-text-primary">기록을 찾을 수 없습니다</div>
-      </div>
-    );
-  }
+  if (!currentRecord) return null;
 
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
@@ -152,7 +153,7 @@ const RecordDetailPage = () => {
             onBack={handleBack}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            isOwner
+            isOwner={isOwner}
           />
         </div>
 
@@ -167,6 +168,7 @@ const RecordDetailPage = () => {
           userAvatar={currentRecord.userAvatar}
           description={currentRecord.description}
           reactions={currentRecord.reactions}
+          isOwner={isOwner}
         />
       </div>
     );
@@ -183,7 +185,7 @@ const RecordDetailPage = () => {
           onBack={handleBack}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          isOwner
+          isOwner={isOwner}
         />
       </div>
 
@@ -210,6 +212,7 @@ const RecordDetailPage = () => {
               userAvatar={userAvatar}
               description={description}
               reactions={reactions}
+              isOwner={isOwner}
             />
           ),
         )}

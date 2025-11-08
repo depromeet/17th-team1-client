@@ -16,6 +16,7 @@ type RecordCardProps = {
   userAvatar?: string;
   description?: string;
   reactions?: Emoji[];
+  isOwner?: boolean;
 };
 
 export const RecordCard = ({
@@ -28,6 +29,7 @@ export const RecordCard = ({
   userAvatar,
   description,
   reactions,
+  isOwner = false,
 }: RecordCardProps) => {
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
@@ -81,7 +83,7 @@ export const RecordCard = ({
         onTouchEnd={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <RecordReactions recordId={id} initialReactions={reactions || []} />
+        <RecordReactions recordId={id} initialReactions={reactions || []} isOwner={isOwner} />
       </div>
     </div>
   );

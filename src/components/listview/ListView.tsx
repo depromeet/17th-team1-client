@@ -111,7 +111,7 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
   }, [travelPatterns]);
 
   return (
-    <div className="w-full h-full relative overflow-y-auto">
+    <div className="w-full h-full relative overflow-y-auto scrollbar-hide">
       <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto">
         {/* 탭 영역 */}
         <div className="flex gap-2 items-center px-4 py-5 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">

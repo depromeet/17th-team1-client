@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { ICEditIcon } from "@/assets/icons";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import type { RecordResponse } from "@/types/record";
 
@@ -37,9 +37,7 @@ export function CityList({ filteredRegions }: CityListProps) {
                   }}
                   className="w-8 h-8 rounded-lg flex justify-center items-center overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
                 >
-                  <div className="w-6 h-6 relative rounded-lg overflow-hidden">
-                    <Image src="/ic_edit.svg" alt="수정" fill className="object-contain" priority={false} />
-                  </div>
+                  <ICEditIcon className="w-6 h-6" />
                 </button>
               </div>
             ))}

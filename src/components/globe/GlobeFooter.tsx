@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookmarkFilledIcon, BookmarkIcon } from "@/assets/icons";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
 import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
 import { addBookmark, removeBookmark } from "@/services/bookmarkService";
+import { cn } from "@/utils/cn";
 import { getAuthInfo } from "@/utils/cookies";
 import { ShareButton } from "./ShareButton";
 
@@ -48,7 +49,59 @@ export const GlobeFooter = ({
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [visualViewMode, setVisualViewMode] = useState<"globe" | "list">(viewMode);
   const router = useRouter();
+  const toggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleToggleViewMode = useCallback(() => {
+    const nextMode = visualViewMode === "list" ? "globe" : "list";
+
+    setVisualViewMode(nextMode);
+
+    if (!onViewModeChange) return;
+
+    if (toggleTimeoutRef.current) {
+      clearTimeout(toggleTimeoutRef.current);
+    }
+
+    toggleTimeoutRef.current = setTimeout(() => {
+      onViewModeChange(nextMode);
+      toggleTimeoutRef.current = null;
+    }, 220);
+  }, [onViewModeChange, visualViewMode]);
+
+  const renderViewToggle = () => {
+    const isListMode = visualViewMode === "list";
+
+    return (
+      <button
+        type="button"
+        onClick={handleToggleViewMode}
+        className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        aria-label={`현재 ${isListMode ? "리스트" : "글로브"} 보기`}
+        aria-pressed={!isListMode}
+      >
+        <span
+          className={cn(
+            "absolute left-2 top-1/2 z-0 w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] -translate-y-1/2",
+            isListMode ? "translate-x-0" : "translate-x-[52px]",
+          )}
+        />
+        <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
+          <ListIcon
+            className="w-8 h-8 transition-colors duration-200 ease-in-out"
+            style={{ color: isListMode ? "var(--color-surface-primary)" : "white" }}
+          />
+        </span>
+        <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
+          <GlobeIcon
+            className="w-8 h-8 transition-colors duration-200 ease-in-out"
+            style={{ color: isListMode ? "white" : "var(--color-surface-primary)" }}
+          />
+        </span>
+      </button>
+    );
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -56,6 +109,18 @@ export const GlobeFooter = ({
     }, 5000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setVisualViewMode((current) => (current === viewMode ? current : viewMode));
+  }, [viewMode]);
+
+  useEffect(() => {
+    return () => {
+      if (toggleTimeoutRef.current) {
+        clearTimeout(toggleTimeoutRef.current);
+      }
+    };
   }, []);
 
   const handleBookmarkClick = async () => {
@@ -152,37 +217,7 @@ export const GlobeFooter = ({
                 <ShareButton />
 
                 {/* 리스트 뷰/글로브 뷰 토글 */}
-                <div className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden">
-                  {/* 슬라이더 배경 */}
-                  <div
-                    className="absolute w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})` }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => onViewModeChange?.("list")}
-                    className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
-                    aria-label="리스트 보기"
-                  >
-                    <ListIcon
-                      className="w-8 h-8"
-                      style={{ color: viewMode === "list" ? "var(--color-surface-primary)" : "white" }}
-                    />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onViewModeChange?.("globe")}
-                    className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
-                    aria-label="글로브 보기"
-                  >
-                    <GlobeIcon
-                      className="w-8 h-8"
-                      style={{ color: viewMode === "globe" ? "var(--color-surface-primary)" : "white" }}
-                    />
-                  </button>
-                </div>
+                {renderViewToggle()}
 
                 {/* 기록/도시 추가 버튼 */}
                 <button
@@ -216,37 +251,7 @@ export const GlobeFooter = ({
                 </button>
 
                 {/* 리스트 뷰/글로브 뷰 토글 */}
-                <div className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden">
-                  {/* 슬라이더 배경 */}
-                  <div
-                    className="absolute w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(${viewMode === "list" ? "0px" : "calc(44px + 8px)"})` }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => onViewModeChange?.("list")}
-                    className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
-                    aria-label="리스트 보기"
-                  >
-                    <ListIcon
-                      className="w-8 h-8"
-                      style={{ color: viewMode === "list" ? "var(--color-surface-primary)" : "white" }}
-                    />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onViewModeChange?.("globe")}
-                    className="relative flex items-center justify-center size-[44px] rounded-[50px] transition-colors cursor-pointer"
-                    aria-label="글로브 보기"
-                  >
-                    <GlobeIcon
-                      className="w-8 h-8"
-                      style={{ color: viewMode === "globe" ? "var(--color-surface-primary)" : "white" }}
-                    />
-                  </button>
-                </div>
+                {renderViewToggle()}
               </div>
             )}
           </>

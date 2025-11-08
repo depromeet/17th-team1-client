@@ -50,6 +50,7 @@ export interface Region {
 }
 
 export interface GlobeCity {
+  cityId: number;
   name: string;
   lat: number;
   lng: number;

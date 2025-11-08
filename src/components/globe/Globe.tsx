@@ -38,8 +38,6 @@ type GlobeProps = {
   currentGlobeIndex: number;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
-  disableCityClick?: boolean;
-  cityClickMode?: "default" | "other";
 };
 
 export interface GlobeRef {
@@ -48,7 +46,7 @@ export interface GlobeRef {
 }
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
-  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange, disableCityClick, cityClickMode }, ref) => {
+  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
     const router = useRouter();
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
@@ -218,20 +216,16 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
           const cityName = clusterData.name.split(",")[0];
-          // 클러스터의 첫 번째 아이템에서 hasRecords와 thumbnailUrl 가져오기
+          // 클러스터의 첫 번째 아이템에서 hasRecords, thumbnailUrl, cityId 가져오기
           const firstItem = clusterData.items?.[0];
           const hasRecords = firstItem?.hasRecords ?? true; // 기본값: 기록 있음
           const thumbnailUrl = firstItem?.thumbnailUrl;
+          const cityId = firstItem?.cityId;
 
           el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
-          const recordId = clusterData.items?.[0]?.recordId;
-          const clickHandler = createCityClickHandler(
-            clusterData.name,
-            recordId,
-            (path) => router.push(path),
-            disableCityClick,
-            cityClickMode,
+          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, cityId, (path) =>
+            router.push(path),
           );
           el.addEventListener("click", clickHandler);
         } else if (clusterData.clusterType === "continent_cluster") {
@@ -318,8 +312,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         globalHandleClusterSelect,
         onClusterSelect,
         router,
-        disableCityClick,
-        cityClickMode,
       ],
     );
 
@@ -439,10 +431,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         });
       };
     }, [globeLoading]);
-
-    if (globeLoading) {
-      return <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>;
-    }
 
     if (globeError) {
       return (

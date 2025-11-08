@@ -8,7 +8,7 @@ export interface CountryData {
   color: string;
   hasRecords?: boolean; // 해당 국가 내 1개 이상의 도시 기록 여부
   thumbnailUrl?: string; // 가장 최근에 기록된 사진 (대표 이미지)
-  recordId?: string; // 기록 상세 페이지 ID
+  cityId?: number; // 도시 ID
 }
 
 export interface ClusterData {

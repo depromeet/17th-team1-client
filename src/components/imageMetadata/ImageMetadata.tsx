@@ -23,10 +23,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
   const [isProcessing, setIsProcessing] = useState(false);
   const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
-  // const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
-  // const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
-  // const city = initialCity || "";
-  // const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
+  const metadataCount = metadataList.length;
 
   const handleClose = useCallback(() => {
     router.push("/record");
@@ -44,7 +41,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
         if (!files || files.length === 0) return;
 
         const MAX_IMAGES = 3;
-        const remainingSlots = MAX_IMAGES - metadataList.length;
+        const remainingSlots = MAX_IMAGES - metadataCount;
         if (remainingSlots <= 0) return;
 
         const tasks: Promise<ImageMetadata>[] = [];
@@ -67,7 +64,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
         setIsProcessing(false);
       }
     },
-    [metadataList.length],
+    [metadataCount],
   );
 
   // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
@@ -126,7 +123,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
   const locationTitle = [initialCity, initialCountry].filter(Boolean).join(", ");
   const headerTitle = locationTitle || "나라, 도시 이름";
 
-  if (metadataList.length === 0) {
+  if (metadataCount === 0) {
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
         <LoadingOverlay show={isProcessing} />
@@ -169,10 +166,10 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
     );
   }
 
-  if (metadataList.length > 0) {
+  if (metadataCount > 0) {
     const MAX_IMAGES = 3;
-    const canAddMore = metadataList.length < MAX_IMAGES;
-    const isSingleImage = metadataList.length === 1 && !canAddMore;
+    const canAddMore = metadataCount < MAX_IMAGES;
+    const isSingleImage = metadataCount === 1 && !canAddMore;
 
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">

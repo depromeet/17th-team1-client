@@ -97,6 +97,9 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string>
 
   ctx.drawImage(image, x, y, width, height, 0, 0, targetWidth, targetHeight);
 
+  const OUTPUT_MIME_TYPE = "image/jpeg";
+  const OUTPUT_QUALITY = 0.95;
+
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -107,8 +110,8 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string>
         const fileUrl = URL.createObjectURL(blob);
         resolve(fileUrl);
       },
-      "image/jpeg",
-      0.95,
+      OUTPUT_MIME_TYPE,
+      OUTPUT_QUALITY,
     );
   });
 };

@@ -189,6 +189,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
               ? "px-4"
               : "flex gap-4 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           }
+          style={{ touchAction: "pan-x" }}
         >
           {metadataList.map((metadata) => (
             <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
@@ -197,11 +198,7 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
           ))}
           {canAddMore && (
             <div className="flex-shrink-0">
-              <label
-                htmlFor={fileUploadId}
-                className="relative select-none w-[250.784px] mx-auto cursor-pointer block"
-                style={{ touchAction: "pan-y" }}
-              >
+              <label htmlFor={fileUploadId} className="relative select-none w-[250.784px] mx-auto cursor-pointer block">
                 <div className="overflow-hidden rounded-xl border border-[#272727] bg-[#141414] hover:bg-black/40 transition-colors">
                   <div className="w-[251px] h-[445px] flex items-center justify-center">
                     <div className="flex flex-col items-center gap-3">

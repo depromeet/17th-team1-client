@@ -1,4 +1,4 @@
-import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
+import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 import type { GlobeData } from "@/types/member";
 import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
@@ -30,9 +30,10 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
     const regionColor = REGION_COLORS[colorIndex % REGION_COLORS.length];
 
     for (const city of region.cities) {
+      const countryName = getCountryName(city.countryCode);
       allCities.push({
         id: city.countryCode,
-        name: city.name,
+        name: `${city.name}, ${countryName}`, // "도시명, 국가명" 형식으로 저장
         flag: COUNTRY_CODE_TO_FLAG[city.countryCode] || "🌍",
         lat: city.lat,
         lng: city.lng,

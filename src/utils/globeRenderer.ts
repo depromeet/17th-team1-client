@@ -291,8 +291,13 @@ export const createCityClickHandler = (
       return;
     }
 
-    const cityNameOnly = cityName.split(",")[0];
-    const q = encodeURIComponent(cityNameOnly);
+    // cityName 형식: "도시명, 국가명" 또는 "도시명"
+    const parts = cityName.split(",").map((s) => s.trim());
+    const cityNameOnly = parts[0];
+    const countryName = parts[1] || "";
+
+    const cityQuery = encodeURIComponent(cityNameOnly);
+    const countryQuery = encodeURIComponent(countryName);
 
     let path: string;
 
@@ -304,7 +309,7 @@ export const createCityClickHandler = (
       path = `/record/${recordId}`;
     } else {
       // 기록 ID가 없는 경우: 이미지 메타데이터 페이지로 이동 (페이지에서 판단)
-      path = `/image-metadata?city=${q}`;
+      path = `/image-metadata?city=${cityQuery}&country=${countryQuery}`;
     }
 
     if (onNavigate) {

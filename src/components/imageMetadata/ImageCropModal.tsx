@@ -88,13 +88,14 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string>
   }
 
   const ASPECT_RATIO = 9 / 16;
-  const targetWidth = Math.round(pixelCrop.width);
+  const { x, y, width, height } = pixelCrop;
+  const targetWidth = Math.round(width);
   const targetHeight = Math.round(targetWidth / ASPECT_RATIO);
 
   canvas.width = targetWidth;
   canvas.height = targetHeight;
 
-  ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, targetWidth, targetHeight);
+  ctx.drawImage(image, x, y, width, height, 0, 0, targetWidth, targetHeight);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(

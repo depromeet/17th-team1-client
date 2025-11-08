@@ -57,8 +57,7 @@ export const ImageCarousel = ({ image, onRemove, onTagSelect, onImageUpdate }: I
             alt={shown.fileName}
             width={251}
             height={446}
-            className="w-full h-full"
-            style={{ objectFit: "cover" }}
+            className="w-full h-full object-cover"
             unoptimized
           />
         </button>

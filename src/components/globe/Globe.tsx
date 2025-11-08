@@ -438,6 +438,10 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       };
     }, [globeLoading]);
 
+    if (globeLoading) {
+      return <div></div>;
+    }
+
     if (globeError) {
       return (
         <div

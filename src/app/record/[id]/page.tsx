@@ -31,7 +31,6 @@ const RecordDetailPage = () => {
   const params = useParams();
   const router = useRouter();
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const recordId = typeof params.id === "string" ? params.id : "";
@@ -40,7 +39,6 @@ const RecordDetailPage = () => {
   useEffect(() => {
     if (!recordId || recordId.trim() === "") {
       setError("유효하지 않은 기록 ID입니다");
-      setIsLoading(false);
     }
   }, [recordId]);
 
@@ -79,13 +77,11 @@ const RecordDetailPage = () => {
 
         if (isMounted) {
           setCountryRecords([recordData]);
-          setIsLoading(false);
         }
       } catch (error) {
         if (isMounted) {
           const errorMessage = error instanceof Error ? error.message : "기록을 불러오는 중 오류가 발생했습니다";
           setError(errorMessage);
-          setIsLoading(false);
         }
       }
     };
@@ -118,14 +114,6 @@ const RecordDetailPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-surface-secondary">
-        <div className="text-text-primary">로딩 중...</div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-surface-secondary px-4">
@@ -155,7 +143,7 @@ const RecordDetailPage = () => {
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
     return (
-      <div className="w-full h-screen bg-surface-secondary relative max-w-[512px] mx-auto">
+      <div className="w-full h-screen bg-surface-secondary relative max-w-lg mx-auto">
         {/* 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader
@@ -186,7 +174,7 @@ const RecordDetailPage = () => {
 
   // 여러 기록이 있는 경우 (스크롤 가능)
   return (
-    <div className="w-full h-screen bg-surface-secondary relative max-w-[512px] mx-auto">
+    <div className="w-full h-screen bg-surface-secondary relative max-w-lg mx-auto">
       {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
       <div className="absolute top-0 left-0 right-0 z-10">
         <RecordDetailHeader

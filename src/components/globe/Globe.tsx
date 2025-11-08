@@ -432,10 +432,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       };
     }, [globeLoading]);
 
-    if (globeLoading) {
-      return <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>;
-    }
-
     if (globeError) {
       return (
         <div

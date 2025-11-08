@@ -140,7 +140,7 @@ const GlobePrototype = () => {
 
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
           <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
-            <div className="max-w-[512px] w-full h-full mt-4">
+            <div className="max-w-lg w-full h-full mt-4">
               <ListView travelPatterns={travelPatterns} />
             </div>
           </div>

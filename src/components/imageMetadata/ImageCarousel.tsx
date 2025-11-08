@@ -44,20 +44,20 @@ export const ImageCarousel = ({ image, onRemove, onTagSelect, onImageUpdate }: I
   const hasLocation = customLocation !== null;
 
   return (
-    <div className="relative select-none w-[250.784px] mx-auto" style={{ touchAction: "pan-y" }}>
-      <div className="overflow-hidden rounded-xl border border-white/20">
+    <div className="relative select-none w-[251px] mx-auto" style={{ touchAction: "pan-y" }}>
+      <div className="overflow-hidden rounded-xl border border-white/20" style={{ aspectRatio: "9 / 16" }}>
         <button
           type="button"
-          className="w-[251px] h-[446px] bg-black relative cursor-pointer overflow-hidden"
+          className="w-full h-full bg-black relative cursor-pointer overflow-hidden"
           onClick={() => setIsCropModalOpen(true)}
           aria-label="이미지 편집"
         >
           <Image
             src={currentImage}
             alt={shown.fileName}
-            width={251}
-            height={446}
-            className="w-full h-full object-cover"
+            fill
+            sizes="251px"
+            className="object-cover"
             unoptimized
           />
         </button>

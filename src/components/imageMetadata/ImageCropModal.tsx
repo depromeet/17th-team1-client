@@ -89,13 +89,17 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string>
 
   const ASPECT_RATIO = 9 / 16;
   const { x, y, width, height } = pixelCrop;
-  const targetWidth = Math.round(width);
-  const targetHeight = Math.round(targetWidth / ASPECT_RATIO);
 
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
+  const canvasWidth = Math.round(width);
+  const canvasHeight = Math.round(canvasWidth / ASPECT_RATIO);
 
-  ctx.drawImage(image, x, y, width, height, 0, 0, targetWidth, targetHeight);
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+  ctx.drawImage(image, x, y, width, height, 0, 0, canvasWidth, canvasHeight);
 
   const OUTPUT_MIME_TYPE = "image/jpeg";
   const OUTPUT_QUALITY = 0.95;

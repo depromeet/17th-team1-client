@@ -1,5 +1,12 @@
-import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
-import type { CreateDiaryParams, CreateDiaryResponse, DiaryDetail, DiaryDetailResponse } from "@/types/diary";
+import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import type {
+  CreateDiaryParams,
+  CreateDiaryResponse,
+  DiariesByUuidResponse,
+  DiaryData,
+  DiaryDetail,
+  DiaryDetailResponse,
+} from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
 import { getS3UploadUrl } from "./profileService";
 
@@ -12,10 +19,44 @@ import { getS3UploadUrl } from "./profileService";
 const transformDiaryResponse = (response: DiaryDetailResponse): DiaryDetail => {
   const { data } = response;
   const { diaryId, city, text, createdAt, photos, emojis } = data;
-  const { cityName, countryName, countryCode, lat, lng } = city;
+  const { cityId, cityName, countryName, countryCode, lat, lng } = city;
 
   return {
     id: String(diaryId),
+    cityId,
+    city: cityName,
+    country: countryName,
+    countryCode,
+    lat,
+    lng,
+    description: text,
+    images: photos.map(({ photoCode }) => photoCode),
+    reactions: emojis.map(({ code, glyph, count }) => ({
+      code,
+      glyph,
+      count,
+    })),
+    date: new Date(createdAt).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+    }),
+    location: `${cityName}, ${countryName}`,
+  };
+};
+
+/**
+ * DiaryData를 DiaryDetail로 변환합니다.
+ *
+ * @param {DiaryData} data - 변환할 diary 데이터
+ * @returns {DiaryDetail} 변환된 diary 상세 정보
+ */
+const transformDiaryData = (data: DiaryData): DiaryDetail => {
+  const { diaryId, city, text, createdAt, photos, emojis } = data;
+  const { cityId, cityName, countryName, countryCode, lat, lng } = city;
+
+  return {
+    id: String(diaryId),
+    cityId,
     city: cityName,
     country: countryName,
     countryCode,
@@ -153,7 +194,34 @@ export const createDiary = async (params: CreateDiaryParams, token?: string): Pr
   const response = await apiPost<CreateDiaryResponse>("/api/v1/diaries", params, authToken);
 
   return response.data.diaryId;
-}
+};
+
+/**
+ * UUID로 특정 사용자의 모든 여행기록을 조회합니다.
+ *
+ * @param {string} uuid - 조회할 사용자의 UUID
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<DiaryDetail[]>} diary 목록
+ * @throws 데이터 조회 실패 시 에러 발생
+ *
+ * @example
+ * // 서버 컴포넌트에서 사용
+ * const diaries = await getDiariesByUuid(uuid, token);
+ *
+ * // 클라이언트 컴포넌트에서 사용
+ * const diaries = await getDiariesByUuid(uuid);
+ */
+export const getDiariesByUuid = async (uuid: string, token?: string): Promise<DiaryDetail[]> => {
+  try {
+    const response = await apiGet<DiariesByUuidResponse>(`/api/v1/diaries?uuid=${uuid}`, {}, token);
+    return response.data.diaryResponses.map((diaryData) => transformDiaryData(diaryData));
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록을 불러오는데 실패했습니다: ${error.message}`);
+    }
+    throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
 
 /**
  * 여행기록을 삭제합니다.

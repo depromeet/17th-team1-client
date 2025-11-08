@@ -8,13 +8,14 @@ import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
 import { RecordScrollContainer } from "@/components/record/RecordScrollContainer";
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
-import { deleteDiary, getDiaryDetail } from "@/services/diaryService";
+import { deleteDiary, getDiariesByUuid } from "@/services/diaryService";
 import { getMyProfile } from "@/services/profileService";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
 
 type RecordData = {
   id: string;
+  cityId: number;
   city: string;
   country: string;
   images: string[];
@@ -35,19 +36,19 @@ const RecordDetailPage = () => {
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const recordId = typeof params.id === "string" ? params.id : "";
+  const cityId = typeof params.id === "string" ? Number(params.id) : 0;
 
   // UUID 비교를 통한 소유자 확인
   const queryUuid = searchParams.get("uuid");
   const { uuid: cookieUuid } = getAuthInfo();
   const isOwner = queryUuid !== null && cookieUuid !== null && queryUuid === cookieUuid;
 
-  // 페이지 진입 시 recordId 유효성 검사
+  // 페이지 진입 시 cityId 유효성 검사
   useEffect(() => {
-    if (!recordId || recordId.trim() === "") {
-      setError("유효하지 않은 기록 ID입니다");
+    if (!cityId || Number.isNaN(cityId) || cityId <= 0) {
+      setError("유효하지 않은 도시 ID입니다");
     }
-  }, [recordId]);
+  }, [cityId]);
 
   // 스크롤 상태 관리
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
@@ -58,32 +59,60 @@ const RecordDetailPage = () => {
     let isMounted = true;
 
     const loadRecordData = async () => {
-      if (!recordId || recordId.trim() === "") return;
+      if (!cityId || Number.isNaN(cityId) || cityId <= 0) return;
+      if (!queryUuid) {
+        setError("UUID가 필요합니다");
+        return;
+      }
 
       try {
         setError(null);
 
-        const [diaryDetail, profile] = await Promise.all([getDiaryDetail(recordId), getMyProfile()]);
+        const [diaries, profile] = await Promise.all([getDiariesByUuid(queryUuid), getMyProfile()]);
 
-        const { id, city, country, images, date, location, description, reactions } = diaryDetail;
         const { memberId, nickname, profileImageUrl } = profile;
 
-        const recordData: RecordData = {
-          id,
-          city,
-          country,
-          images,
-          date,
-          location,
-          userId: String(memberId),
-          userName: nickname,
-          userAvatar: profileImageUrl,
-          description,
-          reactions,
-        };
+        if (diaries.length === 0) {
+          if (isMounted) {
+            setError("여행 기록이 없습니다");
+          }
+          return;
+        }
+
+        // cityId와 일치하는 다이어리들과 나머지 분리
+        const matchingDiaries = diaries.filter((diary) => diary.cityId === cityId);
+        const otherDiaries = diaries.filter((diary) => diary.cityId !== cityId);
+
+        // cityId와 일치하는 다이어리가 없으면 에러
+        if (matchingDiaries.length === 0) {
+          if (isMounted) {
+            setError("해당 도시의 여행 기록을 찾을 수 없습니다");
+          }
+          return;
+        }
+
+        // 정렬: 일치하는 다이어리들 먼저 → 나머지 다이어리들
+        const sortedDiaries = [...matchingDiaries, ...otherDiaries];
+
+        const recordsData: RecordData[] = sortedDiaries.map(
+          ({ id, cityId, city, country, images, date, location, description, reactions }) => ({
+            id,
+            cityId,
+            city,
+            country,
+            images: images.length > 0 ? images : [],
+            date,
+            location,
+            userId: String(memberId),
+            userName: nickname,
+            userAvatar: profileImageUrl,
+            description,
+            reactions,
+          }),
+        );
 
         if (isMounted) {
-          setCountryRecords([recordData]);
+          setCountryRecords(recordsData);
         }
       } catch (error) {
         if (isMounted) {
@@ -98,7 +127,7 @@ const RecordDetailPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [recordId]);
+  }, [cityId, queryUuid]);
 
   const handleBack = () => {
     router.back();

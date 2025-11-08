@@ -65,11 +65,19 @@ export type CreateDiaryResponse = {
   };
 };
 
+export type DiariesByUuidResponse = {
+  status: string;
+  data: {
+    diaryResponses: DiaryData[];
+  };
+};
+
 /**
  * 클라이언트에서 사용하는 변환된 타입
  */
 export type DiaryDetail = {
   id: string;
+  cityId: number;
   city: string;
   country: string;
   countryCode: string;

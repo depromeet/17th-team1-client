@@ -107,13 +107,7 @@ export const GlobeFooter = ({
         {isFirstGlobe ? (
           <div className="w-full max-w-[512px] flex flex-col gap-3">
             {/* 내 지구본 자랑하기 버튼 */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center px-12 py-[17px] rounded-[1000px] bg-[#00d9ff] transition-all hover:opacity-80 cursor-pointer"
-              aria-label="내 지구본 자랑하기"
-            >
-              <p className="font-bold text-base text-black leading-[1.3]">내 지구본 자랑하기</p>
-            </button>
+            <ShareButton isFirstGlobe={true} />
 
             {/* 홈으로 이동 버튼 */}
             <button

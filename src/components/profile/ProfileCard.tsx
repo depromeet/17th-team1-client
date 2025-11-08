@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { EditIcon, KakaoLogoIcon, ProfileIcon } from "@/assets/icons";
+import { EditIcon, KakaoLogoIcon } from "@/assets/icons";
 
 type ProfileCardProps = {
   name: string;
@@ -17,7 +17,7 @@ export const ProfileCard = ({ name, email, profileImage, onEditClick }: ProfileC
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex gap-3 items-center">
-        <div className="shrink-0 size-12 overflow-hidden rounded-full bg-surface-secondary border border-error-primary">
+        <div className="shrink-0 size-12 overflow-hidden rounded-full bg-surface-secondary">
           {profileImage && !imageError ? (
             <Image
               src={profileImage}
@@ -29,7 +29,14 @@ export const ProfileCard = ({ name, email, profileImage, onEditClick }: ProfileC
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <ProfileIcon className="w-12 h-12 shrink-0" />
+              <Image
+                src={"/default-profile.png"}
+                alt="프로필 이미지"
+                width={48}
+                height={48}
+                className="shrink-0"
+                onError={() => setImageError(true)}
+              />
             </div>
           )}
         </div>

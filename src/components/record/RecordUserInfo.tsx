@@ -14,7 +14,7 @@ export const RecordUserInfo = ({ userName, userAvatar, description }: RecordUser
       {/* 사용자 정보 */}
       <div className="flex items-center gap-2">
         {/* 아바타 */}
-        <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden flex-shrink-0">
+        <div className="relative w-[34px] h-[34px] rounded-full overflow-hidden shrink-0">
           {userAvatar ? (
             <Image src={userAvatar} alt={userName} fill className="object-cover" />
           ) : (

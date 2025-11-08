@@ -1,6 +1,7 @@
 export { default as AddEmojiIcon } from "./add-emoji.svg";
 export { default as BackIcon } from "./back.svg";
 export { default as BookmarkIcon } from "./bookmark.svg";
+export { default as BookmarkFilledIcon } from "./bookmark-filled.svg";
 export { default as CalendarIcon } from "./calendar.svg";
 export { default as ChevronDownIcon } from "./chevron-down.svg";
 export { default as ChevronUpIcon } from "./chevron-up.svg";

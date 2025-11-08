@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BookmarkIcon } from "@/assets/icons";
+import { BookmarkFilledIcon, BookmarkIcon } from "@/assets/icons";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
+import { addBookmark, removeBookmark } from "@/services/bookmarkService";
 import { getAuthInfo } from "@/utils/cookies";
 import { ShareButton } from "./ShareButton";
 
@@ -15,6 +16,8 @@ type GlobeFooterProps = {
   onViewModeChange?: (mode: "globe" | "list") => void;
   isMyGlobe?: boolean;
   isFirstGlobe?: boolean;
+  memberId?: number;
+  isBookmarked?: boolean;
 };
 
 const DESCRIPTIONS = [
@@ -37,8 +40,11 @@ export const GlobeFooter = ({
   onViewModeChange,
   isMyGlobe = true,
   isFirstGlobe = false,
+  memberId,
+  isBookmarked: initialIsBookmarked = false,
 }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
+  const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +54,24 @@ export const GlobeFooter = ({
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleBookmarkClick = async () => {
+    if (!memberId) return;
+
+    const previousState = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+
+    try {
+      if (isBookmarked) {
+        await removeBookmark(memberId);
+      } else {
+        await addBookmark(memberId);
+      }
+    } catch {
+      setIsBookmarked(previousState);
+      // 에러 토스트를 표시하려면 여기에 추가
+    }
+  };
 
   return (
     <div
@@ -169,8 +193,9 @@ export const GlobeFooter = ({
                     "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #ffffff2e 0%, #ffffff14 56.15%, #ffffff09 100%)",
                 }}
                 aria-label="저장하기"
+                onClick={handleBookmarkClick}
               >
-                <BookmarkIcon className="w-8 h-8" />
+                {isBookmarked ? <BookmarkFilledIcon className="w-8 h-8" /> : <BookmarkIcon className="w-8 h-8" />}
               </button>
 
               {/* 리스트 뷰/글로브 뷰 토글 */}

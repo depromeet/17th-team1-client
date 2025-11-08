@@ -11,6 +11,7 @@ import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
+import { getBookmarks } from "@/services/bookmarkService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
@@ -34,6 +35,8 @@ const GlobePage = () => {
   const [isDataReady, setIsDataReady] = useState(false);
   const [isSplashDone, setIsSplashDone] = useState(false);
   const [nickname, setNickname] = useState<string>("");
+  const [targetMemberId, setTargetMemberId] = useState<number | undefined>(undefined);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -52,9 +55,8 @@ const GlobePage = () => {
         }
 
         // 내 지구본 여부 설정
-        if (myUuid) {
-          setIsMyGlobe(myUuid === urlUuid);
-        }
+        const isMyGlobeCheck = myUuid === urlUuid;
+        setIsMyGlobe(isMyGlobeCheck);
 
         // URL의 uuid로 지구본 데이터 요청
         const globeResponse = await getGlobeData(urlUuid);
@@ -75,6 +77,22 @@ const GlobePage = () => {
           // 닉네임 설정 (내 지구본이 아닌 경우 사용)
           if (globeResponse.data.nickname) {
             setNickname(globeResponse.data.nickname);
+          }
+
+          // 타인의 지구본인 경우 memberId 저장
+          if (!isMyGlobeCheck && globeResponse.data.memberId) {
+            setTargetMemberId(globeResponse.data.memberId);
+
+            // 북마크 상태 확인
+            try {
+              const bookmarks = await getBookmarks();
+              const isAlreadyBookmarked = bookmarks.some(
+                (bookmark) => bookmark.memberId === globeResponse.data.memberId,
+              );
+              setIsBookmarked(isAlreadyBookmarked);
+            } catch {
+              // 북마크 목록 조회 실패 시 기본값 유지
+            }
           }
         }
         setTravelInsight(insightResponse || "");
@@ -152,7 +170,14 @@ const GlobePage = () => {
 
           {/* 하단 버튼들 - position absolute */}
           <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} isMyGlobe={isMyGlobe} />
+            <GlobeFooter
+              isZoomed={isZoomed}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              isMyGlobe={isMyGlobe}
+              memberId={targetMemberId}
+              isBookmarked={isBookmarked}
+            />
           </div>
 
           {/* 돌아가기 버튼 */}
@@ -186,7 +211,14 @@ const GlobePage = () => {
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}
           >
-            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} isMyGlobe={isMyGlobe} />
+            <GlobeFooter
+              isZoomed={false}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              isMyGlobe={isMyGlobe}
+              memberId={targetMemberId}
+              isBookmarked={isBookmarked}
+            />
           </div>
         </>
       )}

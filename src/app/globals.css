@@ -101,10 +101,10 @@ body {
 }
 
 /* Radix Toast fade animations */
-@keyframes toastFadeIn {
+@keyframes toastSlideUp {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -119,12 +119,12 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(10px);
   }
 }
 
 .toast-anim[data-state="open"] {
-  animation: toastFadeIn 200ms ease-out;
+  animation: toastSlideUp 300ms ease-out;
 }
 
 .toast-anim[data-state="closed"] {

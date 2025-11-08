@@ -8,7 +8,7 @@ import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
 import { RecordScrollContainer } from "@/components/record/RecordScrollContainer";
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
-import { getDiaryDetail } from "@/services/diaryService";
+import { deleteDiary, getDiaryDetail } from "@/services/diaryService";
 import { getMyProfile } from "@/services/profileService";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
@@ -109,15 +109,19 @@ const RecordDetailPage = () => {
     router.push(`/record/${currentRecord.id}/edit`);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!currentRecord) return;
 
     const confirmed = window.confirm("기록을 삭제하면 복구할 수 없습니다. 정말 삭제하시겠어요?");
 
     if (confirmed) {
-      // TODO: Call delete API
-      // await deleteRecord(currentRecord.id);
-      router.back();
+      try {
+        await deleteDiary(currentRecord.id);
+        router.push("/");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "기록 삭제 중 오류가 발생했습니다";
+        alert(errorMessage);
+      }
     }
   };
 

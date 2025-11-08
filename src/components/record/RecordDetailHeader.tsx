@@ -60,6 +60,7 @@ export const RecordDetailHeader = ({
               asMenu
               variant="light"
               options={menuOptions}
+              value=""
               trigger={
                 <button
                   type="button"

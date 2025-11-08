@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/apiClient";
+import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
 import type { CreateDiaryParams, CreateDiaryResponse, DiaryDetail, DiaryDetailResponse } from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
 import { getS3UploadUrl } from "./profileService";
@@ -153,4 +153,27 @@ export const createDiary = async (params: CreateDiaryParams, token?: string): Pr
   const response = await apiPost<CreateDiaryResponse>("/api/v1/diaries", params, authToken);
 
   return response.data.diaryId;
+}
+
+/**
+ * 여행기록을 삭제합니다.
+ *
+ * @param {string | number} diaryId - 삭제할 diary의 ID
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<void>}
+ * @throws 데이터 삭제 실패 시 에러 발생
+ *
+ * @example
+ * // 클라이언트 컴포넌트에서 사용
+ * await deleteDiary(1);
+ */
+export const deleteDiary = async (diaryId: string | number, token?: string): Promise<void> => {
+  try {
+    await apiDelete(`/api/v1/diaries/${diaryId}`, undefined, token);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록 삭제에 실패했습니다: ${error.message}`);
+    }
+    throw new Error("여행 기록 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
 };

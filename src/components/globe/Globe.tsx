@@ -39,6 +39,7 @@ type GlobeProps = {
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
   cityClickMode?: "default" | "other";
+  disableCityClick?: boolean;
 };
 
 export interface GlobeRef {

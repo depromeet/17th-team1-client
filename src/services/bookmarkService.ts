@@ -84,7 +84,7 @@ export const removeBookmark = async (targetMemberId: number): Promise<void> => {
   }
 
   try {
-    await apiDelete(`/api/v1/bookmarks/${targetMemberId}`, token);
+    await apiDelete(`/api/v1/bookmarks/${targetMemberId}`, undefined, token);
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`북마크 제거에 실패했습니다: ${error.message}`);

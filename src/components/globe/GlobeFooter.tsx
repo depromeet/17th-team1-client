@@ -63,7 +63,6 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange }: 
 
       {/* 버튼 래퍼 */}
       <div className="flex items-center justify-center gap-11">
-        {/* 공유 버튼 */}
         <ShareButton />
 
         {/* 리스트 뷰/글로브 뷰 토글 */}

@@ -70,15 +70,17 @@ export const createMemberTravels = async (cities: City[]): Promise<CreateTravelR
 };
 
 // 지구본 조회 API
-export const getGlobeData = async (uuid: string): Promise<GlobeResponse | null> => {
+export const getGlobeData = async (uuid: string, token?: string): Promise<GlobeResponse | null> => {
   try {
-    const { token } = getAuthInfo();
-
-    if (!token) {
-      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    // 토큰이 제공되지 않으면 쿠키에서 가져오기 시도 (선택적)
+    let authToken = token;
+    if (!authToken) {
+      const { token: clientToken } = getAuthInfo();
+      authToken = clientToken || undefined;
     }
 
-    const data = await apiGet<GlobeResponse>(`/api/v1/globes/${uuid}`, {}, token);
+    // 토큰 없이도 공유된 지구본 조회 가능
+    const data = await apiGet<GlobeResponse>(`/api/v1/globes/${uuid}`, {}, authToken);
     return data;
   } catch (error) {
     console.error("Failed to fetch globe data:", error);

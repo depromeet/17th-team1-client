@@ -38,7 +38,6 @@ type GlobeProps = {
   currentGlobeIndex: number;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
-  cityClickMode?: "default" | "other";
   disableCityClick?: boolean;
 };
 
@@ -48,7 +47,7 @@ export interface GlobeRef {
 }
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
-  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
+  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange, disableCityClick }, ref) => {
     const router = useRouter();
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
@@ -226,8 +225,12 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
 
           el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
-          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, cityId, (path) =>
-            router.push(path),
+          const clickHandler = createCityClickHandler(
+            clusterData.name,
+            cityId,
+            hasRecords,
+            (path) => router.push(path),
+            disableCityClick,
           );
           el.addEventListener("click", clickHandler);
         } else if (clusterData.clusterType === "continent_cluster") {
@@ -314,6 +317,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         globalHandleClusterSelect,
         onClusterSelect,
         router,
+        disableCityClick,
       ],
     );
 

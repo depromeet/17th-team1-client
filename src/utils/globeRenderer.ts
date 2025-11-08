@@ -274,9 +274,10 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 // 도시 클릭 핸들러
 export const createCityClickHandler = (
   cityName: string,
-  hasRecords: boolean = true,
   cityId?: number,
+  hasRecords: boolean = true,
   onNavigate?: (path: string) => void,
+  disableCityClick?: boolean,
 ) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
@@ -284,6 +285,11 @@ export const createCityClickHandler = (
   ) => {
     event.preventDefault();
     event.stopPropagation();
+
+    // 클릭 비활성화된 경우 아무 동작 안함
+    if (disableCityClick) {
+      return;
+    }
 
     // cityName 형식: "도시명, 국가명" 또는 "도시명"
     const parts = cityName.split(",").map((s) => s.trim());
@@ -294,7 +300,7 @@ export const createCityClickHandler = (
     const countryQuery = encodeURIComponent(countryName);
 
     let path: string;
-    if (!hasRecords && cityId) {
+    if (hasRecords && cityId) {
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
       path = `/record/${cityId}`;
     } else {

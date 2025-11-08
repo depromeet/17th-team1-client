@@ -92,7 +92,7 @@ export const GlobeFooter = ({
           open={toastOpen}
           onOpenChange={setToastOpen}
           duration={3000}
-          className="toast-anim absolute bottom-[72px] left-1/2 -translate-x-1/2 w-full max-w-[370px] pl-3 pr-8 py-3 rounded-[12px] bg-[#21272d] z-50 flex items-center gap-2"
+          className="toast-anim absolute bottom-[72px] left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[370px] pl-3 pr-8 py-3 rounded-[12px] bg-[#21272d] z-50 flex items-center gap-2"
           contentClassName="text-sm font-semibold text-white tracking-[-0.28px] leading-[1.3] text-center"
         >
           {toastMessage}

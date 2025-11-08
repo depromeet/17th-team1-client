@@ -32,33 +32,9 @@ export const ImageCarousel = ({ image, onRemove, onTagSelect, onImageUpdate }: I
     image.location?.nearbyPlaces?.[1] || image.location?.address || null,
   );
 
-  const handleOpenDateModal = () => {
-    setIsDateSelectModalOpen(true);
-  };
-
-  const handleOpenLocationModal = () => {
-    setIsLocationSelectModalOpen(true);
-  };
-
-  const handleRemoveDate = () => {
-    setCustomTimestamp(null);
-  };
-
-  const handleRemoveLocation = () => {
-    setCustomLocation(null);
-  };
-
-  const handleConfirmDate = (date: string) => {
-    setCustomTimestamp(date);
-  };
-
   const handleSaveCroppedImage = (croppedImage: string) => {
     setCurrentImage(croppedImage);
     onImageUpdate?.(image.id, croppedImage);
-  };
-
-  const handleImageClick = () => {
-    setIsCropModalOpen(true);
   };
 
   const shown = image;
@@ -73,7 +49,7 @@ export const ImageCarousel = ({ image, onRemove, onTagSelect, onImageUpdate }: I
         <button
           type="button"
           className="w-[251px] h-[446px] bg-black relative cursor-pointer overflow-hidden"
-          onClick={handleImageClick}
+          onClick={() => setIsCropModalOpen(true)}
           aria-label="이미지 편집"
         >
           <Image
@@ -112,22 +88,22 @@ export const ImageCarousel = ({ image, onRemove, onTagSelect, onImageUpdate }: I
         <MetadataChip
           iconType="calendar"
           text={hasDate && displayDate ? displayDate : "날짜 추가"}
-          onClick={handleOpenDateModal}
-          onRemove={hasDate ? handleRemoveDate : undefined}
+          onClick={() => setIsDateSelectModalOpen(true)}
+          onRemove={hasDate ? () => setCustomTimestamp(null) : undefined}
           isPlaceholder={!hasDate || !displayDate}
         />
         <MetadataChip
           iconType="location"
           text={displayLocation || "위치 추가"}
-          onClick={handleOpenLocationModal}
-          onRemove={hasLocation ? handleRemoveLocation : undefined}
+          onClick={() => setIsLocationSelectModalOpen(true)}
+          onRemove={hasLocation ? () => setCustomLocation(null) : undefined}
           isPlaceholder={!displayLocation}
         />
       </div>
       <DateSelectBottomSheet
         isOpen={isDateSelectModalOpen}
         onClose={() => setIsDateSelectModalOpen(false)}
-        onConfirm={handleConfirmDate}
+        onConfirm={(date) => setCustomTimestamp(date)}
       />
       <LocationSelectBottomSheet
         isOpen={isLocationSelectModalOpen}

@@ -94,7 +94,7 @@ export const EditProfileBottomSheet = ({
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
-      <BottomSheetContent className="min-h-[812px] max-w-[512px]">
+      <BottomSheetContent className="min-h-[812px] max-w-lg">
         <BottomSheetHeader className="w-full h-11 relative">
           <BottomSheetCloseButton
             onClick={() => onOpenChange(false)}
@@ -122,7 +122,7 @@ export const EditProfileBottomSheet = ({
           </Button>
         </BottomSheetHeader>
 
-        <BottomSheetBody className="items-center !px-0">
+        <BottomSheetBody className="items-center px-0!">
           {/* 프로필 이미지 섹션 */}
           <div className="flex flex-col items-center gap-2.5">
             <div className="relative w-[120px] h-[120px] rounded-full overflow-hidden bg-surface-placeholder--16">
@@ -172,8 +172,8 @@ export const EditProfileBottomSheet = ({
                 placeholder="닉네임을 입력하세요"
                 className={cn(
                   "w-full h-[50px] px-4 py-3.5",
-                  "rounded-[16px] border border-[rgba(255,255,255,0.04)]",
-                  "bg-gradient-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)], bg-surface-thirdly",
+                  "rounded-2xl border border-[rgba(255,255,255,0.04)]",
+                  "bg-linear-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)], bg-surface-thirdly",
                   "text-base font-medium text-white",
                   "placeholder:text-text-thirdly",
                   "outline-none focus:border-blue-theme transition-colors",

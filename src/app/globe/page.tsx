@@ -2,15 +2,12 @@
 
 import dynamic from "next/dynamic";
 
-import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { BackButton } from "@/components/common/Button";
-import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
-import ListView from "@/components/listview/ListView";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
@@ -24,14 +21,12 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 });
 
 const GlobeContent = () => {
-  const router = useRouter();
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [travelInsight, setTravelInsight] = useState<string>("");
   const [cityCount, setCityCount] = useState<number>(0);
   const [countryCount, setCountryCount] = useState<number>(0);
-  const [viewMode, setViewMode] = useState<"globe" | "list">("globe");
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -92,85 +87,37 @@ const GlobeContent = () => {
 
   return (
     <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
-      <Header
-        title="Header"
-        variant="navy"
-        leftIcon="menu"
-        onLeftClick={() => router.push("/profile")}
-        rightIcon="people"
-        onRightClick={() => router.push("/saved-globe")}
-        style={{
-          backgroundColor: "transparent",
-          position: "relative",
-          zIndex: 20,
-        }}
-      />
-      {viewMode === "globe" ? (
-        <div className="absolute inset-0">
-          {/* 글로브 뷰 */}
-
-          {/* 상단 헤더 - position absolute */}
-          <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-20">
-            <GlobeHeader
-              isZoomed={isZoomed || selectedClusterData !== null}
-              travelInsight={travelInsight}
-              cityCount={cityCount}
-              countryCount={countryCount}
-            />
-          </div>
-
-          {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
-          <div className="w-full h-full">
-            <Globe
-              ref={globeRef}
-              travelPatterns={travelPatterns}
-              currentGlobeIndex={0}
-              onClusterSelect={handleClusterSelect}
-              onZoomChange={handleZoomChange}
-              disableCityClick={true}
-            />
-          </div>
-
-          {/* 하단 버튼들 - position absolute */}
-          <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
-            <GlobeFooter isZoomed={isZoomed} viewMode={viewMode} onViewModeChange={setViewMode} />
-          </div>
-
-          {/* 돌아가기 버튼 */}
-          <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
+      <div className="absolute inset-0">
+        {/* 상단 헤더 - position absolute */}
+        <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-20">
+          <GlobeHeader
+            isZoomed={isZoomed || selectedClusterData !== null}
+            travelInsight={travelInsight}
+            cityCount={cityCount}
+            countryCount={countryCount}
+          />
         </div>
-      ) : (
-        <>
-          {/* 리스트 뷰 */}
 
-          {/* 상단 헤더 */}
-          <div className="px-4" style={{ paddingTop: `12px` }}>
-            <GlobeHeader
-              isZoomed={false}
-              travelInsight={travelInsight}
-              cityCount={cityCount}
-              countryCount={countryCount}
-            />
-          </div>
+        {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
+        <div className="w-full h-full">
+          <Globe
+            ref={globeRef}
+            travelPatterns={travelPatterns}
+            currentGlobeIndex={0}
+            onClusterSelect={handleClusterSelect}
+            onZoomChange={handleZoomChange}
+            disableCityClick={true}
+          />
+        </div>
 
-          {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
-          <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
-            <div className="max-w-[512px] w-full h-full mt-4">
-              <ListView travelPatterns={travelPatterns} />
-            </div>
-          </div>
+        {/* 하단 버튼들 - position absolute */}
+        <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
+          <GlobeFooter isZoomed={isZoomed} isFirstGlobe={true} />
+        </div>
 
-          {/* 하단 버튼들 - 푸터 영역 (absolute 제거) */}
-          <div
-            className="fixed bottom-0 left-0 right-0 z-10 h-[156px]"
-            style={{
-              background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
-            }}
-          >
-            <GlobeFooter isZoomed={false} viewMode={viewMode} onViewModeChange={setViewMode} />
-          </div>
-        </>
-      )}
+        {/* 돌아가기 버튼 */}
+        <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
+      </div>
     </div>
   );
 };

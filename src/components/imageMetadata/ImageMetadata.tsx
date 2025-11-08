@@ -15,9 +15,10 @@ import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
   initialCity?: string;
+  initialCountry?: string;
 };
 
-export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
+export default function ImageMetadataComponent({ initialCity, initialCountry }: ImageMetadataProps) {
   const router = useRouter();
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -195,12 +196,14 @@ export default function ImageMetadataComponent({ initialCity }: ImageMetadataPro
 
   if (selectedImage) {
     const isSingleImage = metadataList.length === 1;
+    const locationTitle = [initialCity, initialCountry].filter(Boolean).join(", ");
+    const headerTitle = locationTitle || "나라, 도시 이름";
 
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
         <LoadingOverlay show={isProcessing} />
         <Header
-          title="나라, 도시 이름"
+          title={headerTitle}
           variant="dark"
           leftIcon="back"
           onLeftClick={() => setSelectedImage(null)}

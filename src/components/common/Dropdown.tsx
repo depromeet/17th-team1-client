@@ -106,11 +106,13 @@ export const Dropdown = ({
                     }}
                     className={cn(
                       "relative flex w-full cursor-pointer select-none items-center gap-2",
-                      "px-[20px] py-[12px]",
+                      "px-5 py-3",
                       "text-[16px] font-medium leading-[1.3] tracking-[-0.32px]",
                       "outline-none transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
-                      "focus-visible:ring-[var(--color-surface-inverseprimary)]",
+                      "focus-visible:ring-(--color-surface-inverseprimary)",
+                      index === 0 && "rounded-t-lg",
+                      index === options.length - 1 && "rounded-b-lg",
                       styles.item.base,
                       styles.item.hover,
                       value === option.value && styles.item.checked,
@@ -138,7 +140,7 @@ export const Dropdown = ({
         className={cn(
           "flex items-center gap-1 text-white text-base font-medium hover:opacity-80 transition-opacity cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-          "focus-visible:ring-[var(--color-surface-inverseprimary)]",
+          "focus-visible:ring-(--color-surface-inverseprimary)",
           className,
         )}
         aria-label={`정렬 선택: 현재 ${value}`}
@@ -177,13 +179,15 @@ export const Dropdown = ({
                     "py-2 px-3",
                     "text-sm font-medium",
                     "outline-none transition-colors",
+                    index === 0 && "rounded-t-lg",
+                    index === options.length - 1 && "rounded-b-lg",
                     styles.item.base,
                     styles.item.hover,
                     value === option.value && styles.item.checked,
                   )}
                 >
                   {showCheckIcon && (
-                    <Check className={cn("w-4 h-4 flex-shrink-0", value === option.value ? "visible" : "invisible")} />
+                    <Check className={cn("w-4 h-4 shrink-0", value === option.value ? "visible" : "invisible")} />
                   )}
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>

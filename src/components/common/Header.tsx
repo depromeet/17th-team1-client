@@ -100,23 +100,29 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
     };
 
     const renderRightIcon = () => {
-      if (!rightIcon || !onRightClick) return null;
+      if (!rightIcon) return null;
+
+      // rightIcon이 React Node인 경우 직접 렌더링 (onRightClick 불필요)
+      if (typeof rightIcon !== "string") {
+        return rightIcon;
+      }
+
+      // string 타입인 경우 onRightClick 필요
+      if (!onRightClick) return null;
 
       const getRightIcon = () => {
-        if (typeof rightIcon === "string") {
-          switch (rightIcon) {
-            case "dot":
-              return <DotIcon width={24} height={24} />;
-            case "people":
-              return <PeopleIcon width={24} height={24} />;
-            case "close":
-              return <XIcon width={16} height={16} />;
-            default:
-              return null;
-          }
+        switch (rightIcon) {
+          case "dot":
+            return <DotIcon width={24} height={24} />;
+          case "people":
+            return <PeopleIcon width={24} height={24} />;
+          case "close":
+            return <XIcon width={16} height={16} />;
+          default:
+            return null;
         }
-        return rightIcon;
       };
+
       const getAriaLabel = () => {
         switch (rightIcon) {
           case "dot":

@@ -18,6 +18,8 @@ const AUTH_REQUIRED_BUT_ALLOW_ROUTING: readonly string[] = [
   "/", // 홈 페이지에서 여행 데이터 확인 후 라우팅
 ];
 
+const GLOBE_SHARED_PREFIX = "/globe/";
+
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -31,6 +33,13 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("kakao_access_token")?.value;
   const memberId = request.cookies.get("member_id")?.value;
   const uuid = request.cookies.get("uuid")?.value;
+
+  // 공유 링크로 접근한 경우 (/globe/[uuid] 형태) - 인증 없이 허용
+  if (pathname.startsWith(GLOBE_SHARED_PREFIX) && pathname.length > GLOBE_SHARED_PREFIX.length) {
+    const sharedUuid = pathname.slice(GLOBE_SHARED_PREFIX.length); // "/globe/" 이후의 uuid 추출
+    console.log(`[Middleware] Allowing shared globe access with UUID: ${sharedUuid}`);
+    return NextResponse.next();
+  }
 
   if (token && pathname === "/login") {
     console.log(

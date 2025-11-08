@@ -7,6 +7,7 @@ import { CityItem } from "./CityItem";
 type PopularCitiesListProps = {
   cities: City[];
   selectedCityIds: Set<string>;
+  registeredCityNames?: Set<string>; // 이미 등록된 도시 이름 목록
   onAddCity: (city: City) => void;
   onRemoveCity: (cityId: string) => void;
   isLoading?: boolean;
@@ -17,6 +18,7 @@ type PopularCitiesListProps = {
 export const PopularCitiesList = ({
   cities,
   selectedCityIds,
+  registeredCityNames = new Set(),
   onAddCity,
   onRemoveCity,
   isSearching = false,
@@ -78,6 +80,7 @@ export const PopularCitiesList = ({
           key={city.id}
           city={city}
           isSelected={selectedCityIds.has(city.id)}
+          isRegistered={registeredCityNames.has(city.name)}
           onAdd={onAddCity}
           onRemove={onRemoveCity}
           showDivider={index < cities.length - 1}

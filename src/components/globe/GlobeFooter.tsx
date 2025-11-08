@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BookmarkIcon } from "@/assets/icons";
 import GlobeIcon from "@/assets/icons/globe.svg";
@@ -28,6 +31,7 @@ const getRandomDescriptionIndex = (currentIndex: number): number => {
 
 export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange, isMyGlobe = true }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,7 +44,9 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange, is
   return (
     <div
       aria-hidden={isZoomed}
-      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 ${
+        isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
     >
       {/* 설명 문구 - 지구본 뷰일 때만 표시 (내 지구본일 때만) */}
       {viewMode === "globe" && isMyGlobe && (
@@ -105,6 +111,7 @@ export const GlobeFooter = ({ isZoomed, viewMode = "globe", onViewModeChange, is
               background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
             }}
             aria-label="새 항목 추가"
+            onClick={() => router.push("/record")}
           >
             <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
           </button>

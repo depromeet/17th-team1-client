@@ -254,14 +254,19 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
             isFirstGlobe,
           );
 
-          const clickHandler = createCityClickHandler(
-            clusterData.name,
-            cityId,
-            cityHasRecords,
-            (path) => router.push(path),
-            disableCityClick,
-          );
-          el.addEventListener("click", clickHandler);
+          // 타인의 지구본에서 기록이 없는 경우 클릭 비활성화
+          const shouldDisableClick = !isMyGlobe && !cityHasRecords;
+
+          if (!shouldDisableClick) {
+            const clickHandler = createCityClickHandler(
+              clusterData.name,
+              cityId,
+              cityHasRecords,
+              (path) => router.push(path),
+              disableCityClick,
+            );
+            el.addEventListener("click", clickHandler);
+          }
         } else if (clusterData.clusterType === "continent_cluster") {
           // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
           el.innerHTML = createContinentClusterHTML(styles, clusterData.name, clusterData.count, clusterData.flag);

@@ -108,12 +108,15 @@ export const createCityHTML = (
   if (!hasRecords) {
     // 타인의 지구본이거나 최초 지구본인 경우: + 버튼 표시하지 않음
     if (!isMyGlobe || isFirstGlobe) {
+      // 타인의 지구본이고 기록이 없는 경우 cursor를 default로 설정
+      const cursorStyle = !isMyGlobe && !hasRecords ? "cursor: default;" : "";
+
       return `
         <!-- 중심 dot -->
         <div style="${styles.dot}"></div>
         <!-- 점선 -->
         <div style="${styles.horizontalLine}"></div>
-        <div style="${styles.label}">
+        <div style="${styles.label} ${cursorStyle}">
           <!-- 좌측 국기 이모지 -->
           <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
           <!-- 도시명 -->

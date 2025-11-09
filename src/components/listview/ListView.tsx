@@ -120,6 +120,13 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
     return counts;
   }, [travelPatterns]);
 
+  // 여행 기록이 있는 대륙을 앞에, 없는 대륙을 뒤에 배치 (원래 순서 유지)
+  const sortedContinents = useMemo(() => {
+    const withRecords = CONTINENTS.filter((continent) => continentCounts[continent] > 0);
+    const withoutRecords = CONTINENTS.filter((continent) => continentCounts[continent] === 0);
+    return [...withRecords, ...withoutRecords];
+  }, [continentCounts]);
+
   return (
     <div className="w-full h-full relative overflow-y-auto scrollbar-hide">
       <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto">
@@ -139,7 +146,7 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
           </button>
 
           {/* 대륙 탭 */}
-          {CONTINENTS.map((continent) => {
+          {sortedContinents.map((continent) => {
             const isDisabled = continentCounts[continent] === 0;
             return (
               <button

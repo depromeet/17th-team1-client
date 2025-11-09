@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { getContinent, getCountryName } from "@/constants/countryMapping";
@@ -30,10 +31,14 @@ type GroupedByCountry = {
     name: string;
     lat: number;
     lng: number;
+    thumbnailUrl?: string;
+    hasRecords: boolean;
+    cityId?: number;
   }>;
 };
 
 const ListView = ({ travelPatterns }: ListViewProps) => {
+  const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
   // travelPatterns의 countries를 countryCode로 그룹화
@@ -58,6 +63,9 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
             name: country.name,
             lat: country.lat,
             lng: country.lng,
+            thumbnailUrl: country.thumbnailUrl,
+            hasRecords: country.hasRecords ?? false,
+            cityId: country.cityId,
           });
         }
       });
@@ -186,19 +194,53 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
                   {group.cities.map((city) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = city.name.split(",")[0].trim();
+                    const isClickable = city.hasRecords && city.cityId;
+
+                    const handleCityClick = () => {
+                      if (isClickable) {
+                        router.push(`/record/${city.cityId}`);
+                      }
+                    };
 
                     return (
-                      <div
+                      <button
                         key={`${group.countryCode}-${city.name}`}
+                        type="button"
                         className="border rounded-[12px]"
                         style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
+                        onClick={handleCityClick}
+                        disabled={!isClickable}
                       >
-                        <div className="flex gap-2 items-center px-[12px] py-[8px] rounded-[inherit] bg-[var(--color-surface-placeholder--8)]">
+                        <div
+                          className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
+                          style={{
+                            paddingLeft: "12px",
+                            paddingRight: city.hasRecords && city.thumbnailUrl ? "8px" : "12px",
+                            paddingTop: "7px",
+                            paddingBottom: "7px",
+                            height: "100%",
+                            cursor: isClickable ? "pointer" : "default",
+                          }}
+                        >
                           <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
                             {cityName}
                           </p>
+                          {/* 여행기록이 있는 경우 썸네일 표시 */}
+                          {city.hasRecords && city.thumbnailUrl && (
+                            <div
+                              className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                              style={{ width: "24px", height: "24px" }}
+                            >
+                              <img
+                                src={city.thumbnailUrl}
+                                alt={cityName}
+                                className="w-full h-full object-cover"
+                                style={{ borderRadius: "4px" }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

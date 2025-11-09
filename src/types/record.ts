@@ -1,4 +1,5 @@
 export interface RecordCity {
+  cityId: number;
   name: string;
   lat: number;
   lng: number;

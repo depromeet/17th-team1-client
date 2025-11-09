@@ -29,6 +29,7 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
         };
       }
       acc[countryCode].cities.push({
+        cityId: city.cityId,
         name: city.cityName,
         lat: city.lat,
         lng: city.lng,
@@ -41,6 +42,7 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
       {
         countryName: string;
         cities: Array<{
+          cityId: number;
           name: string;
           lat: number;
           lng: number;

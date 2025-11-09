@@ -1,9 +1,11 @@
 import ImageMetadata from "@/components/imageMetadata/ImageMetadata";
 import type { PageProps } from "@/types/components";
 
-type ImageMetadataPageProps = PageProps<never, { city?: string; country?: string }>;
+type ImageMetadataPageProps = PageProps<never, { cityId?: string; city?: string; country?: string }>;
 
 export default async function Page({ searchParams }: ImageMetadataPageProps) {
   const params = await searchParams;
-  return <ImageMetadata initialCity={params?.city} initialCountry={params?.country} />;
+  const cityId = params?.cityId ? Number(params.cityId) : undefined;
+
+  return <ImageMetadata cityId={cityId} initialCity={params?.city} initialCountry={params?.country} />;
 }

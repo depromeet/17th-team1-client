@@ -135,7 +135,11 @@ const RecordDetailPage = () => {
 
   const handleEdit = () => {
     if (!currentRecord) return;
-    router.push(`/record/${currentRecord.id}/edit`);
+    const params = new URLSearchParams();
+    params.set("cityId", String(currentRecord.cityId));
+    params.set("country", currentRecord.country);
+    params.set("city", currentRecord.city);
+    router.push(`/image-metadata?${params.toString()}`);
   };
 
   const handleDelete = async () => {

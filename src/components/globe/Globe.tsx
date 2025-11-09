@@ -42,6 +42,7 @@ type GlobeProps = {
   countryThumbnails?: Record<string, string>;
   isMyGlobe?: boolean;
   isFirstGlobe?: boolean;
+  uuid?: string;
 };
 
 export interface GlobeRef {
@@ -60,6 +61,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       countryThumbnails,
       isMyGlobe = true,
       isFirstGlobe = false,
+      uuid,
     },
     ref,
   ) => {
@@ -264,6 +266,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
               cityHasRecords,
               (path) => router.push(path),
               disableCityClick,
+              uuid,
             );
             el.addEventListener("click", clickHandler);
           }
@@ -355,6 +358,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         disableCityClick,
         isFirstGlobe,
         isMyGlobe,
+        uuid,
       ],
     );
 

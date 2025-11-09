@@ -333,6 +333,7 @@ export const createCityClickHandler = (
   hasRecords: boolean = true,
   onNavigate?: (path: string) => void,
   disableCityClick?: boolean,
+  uuid?: string,
 ) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
@@ -356,8 +357,9 @@ export const createCityClickHandler = (
 
     let path: string;
     if (hasRecords && cityId) {
+      console.log("uuid", uuid);
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
-      path = `/record/${cityId}`;
+      path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
       path = `/image-metadata?cityId=${cityId}&city=${cityQuery}&country=${countryQuery}`;

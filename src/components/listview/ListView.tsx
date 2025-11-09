@@ -20,6 +20,7 @@ const CONTINENT_DISPLAY_NAME: Record<KoreanContinent, string> = {
 
 type ListViewProps = {
   travelPatterns: TravelPattern[];
+  uuid?: string;
 };
 
 type GroupedByCountry = {
@@ -38,7 +39,7 @@ type GroupedByCountry = {
   }>;
 };
 
-const ListView = ({ travelPatterns }: ListViewProps) => {
+const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
   const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
@@ -207,7 +208,8 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
 
                     const handleCityClick = () => {
                       if (isClickable) {
-                        router.push(`/record/${city.cityId}`);
+                        const path = uuid ? `/record/${city.cityId}?uuid=${uuid}` : `/record/${city.cityId}`;
+                        router.push(path);
                       }
                     };
 

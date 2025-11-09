@@ -86,7 +86,7 @@ const GlobeList = ({
   sortOption: SortOption;
   onSortChange: (value: SortOption) => void;
   onGlobeClick: (uuid: string) => void;
-  onSaveToggle: (uuid: number) => void;
+  onSaveToggle: (memberId: number) => void;
   isLoading: boolean;
 }) => {
   return (

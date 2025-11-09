@@ -40,7 +40,7 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
               key={c.id}
               className={`w-full px-5 py-3 rounded-2xl inline-flex justify-between items-center overflow-hidden ${
                 c.isNew
-                  ? "bg-surface-placeholder--4 outline-[0.70px] outline-border-thirdly"
+                  ? "bg-surface-placeholder--4 outline outline-[0.70px] outline-border-thirdly"
                   : "bg-surface-placeholder--4"
               }`}
             >

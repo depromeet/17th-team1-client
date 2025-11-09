@@ -82,11 +82,11 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
       transform: translate(-50%, -50%);
       white-space: nowrap;
     `,
-    actionButton: `
+    actionButton: (leftOffset: number) => `
       position: absolute;
       z-index: ${20 + index + 1};
       top: ${offsetY + 15}px;
-      left: ${offsetX + 35}px;
+      left: ${offsetX + leftOffset}px;
       width: 37px;
       height: 44px;
       pointer-events: auto;
@@ -276,11 +276,11 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       line-height: 1.28;
       font-feature-settings: 'liga' off, 'clig' off;
     `,
-    actionButton: `
+    actionButton: (leftOffset: number) => `
       position: absolute;
       z-index: ${20 + index + 1};
       top: ${offsetY + 15}px;
-      left: ${offsetX + 35}px;
+      left: ${offsetX + leftOffset}px;
       width: 37px;
       height: 44px;
       pointer-events: auto;

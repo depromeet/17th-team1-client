@@ -118,7 +118,7 @@ export const createCityHTML = (
         </span>
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
-      <div style="${styles.actionButton}">
+      <div style="${styles.actionButton(labelWidth / 2)}">
         ${PLUS_BUTTON_SVG}
       </div>
     `;
@@ -216,7 +216,7 @@ export const createCountryClusterHTML = (
         }
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
-      <div style="${styles.actionButton}">
+      <div style="${styles.actionButton(labelWidth / 2)}">
         ${PLUS_BUTTON_SVG}
       </div>
     `;

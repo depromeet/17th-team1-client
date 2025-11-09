@@ -39,6 +39,7 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
   const [isProcessing, setIsProcessing] = useState(false);
   const fileUploadId = useId();
   const metadataCount = metadataList.length;
+  const isCityIdValid = typeof cityId === "number" && Number.isFinite(cityId) && cityId > 0;
 
   const handleBack = () => {
     router.back();
@@ -181,7 +182,7 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
 
   const handleSave = async () => {
     if (isProcessing) return;
-    if (cityId == null) {
+    if (!isCityIdValid) {
       alert("도시 정보가 없습니다. 기록을 생성할 수 없어요.");
       return;
     }
@@ -223,8 +224,9 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
         };
       });
 
+      const validCityId = cityId as number;
       const diaryId = await createDiary({
-        cityId,
+        cityId: validCityId,
         text: diaryText || undefined,
         photos,
       });
@@ -242,6 +244,33 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
   const MAX_IMAGES = 3;
   const placeholderCount = Math.max(0, MAX_IMAGES - metadataCount - (hasImages ? 0 : 1));
 
+  const handleNavigateToCitySelection = () => {
+    router.push("/record");
+  };
+
+  if (!isCityIdValid) {
+    return (
+      <div className="max-w-md mx-auto min-h-screen bg-black text-white">
+        <Header title="도시 선택 필요" variant="dark" leftIcon="back" onLeftClick={handleBack} />
+        <div className="flex flex-col items-center justify-center gap-6 px-6 py-16 text-center">
+          <div className="flex flex-col gap-2">
+            <p className="text-lg font-semibold text-white">도시 정보가 필요합니다.</p>
+            <p className="text-sm text-white/60">
+              여행 기록을 작성하려면 먼저 도시를 선택해주세요. 선택 화면으로 이동한 후 다시 시도해 주세요.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleNavigateToCitySelection}
+            className="rounded-full bg-primary px-6 py-3 text-base font-semibold text-black hover:opacity-90 transition-opacity"
+          >
+            도시 선택 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-md mx-auto min-h-screen bg-black text-white">
       <LoadingOverlay show={isProcessing} />
@@ -251,7 +280,7 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
         leftIcon="back"
         onLeftClick={handleBack}
         rightButtonTitle="저장"
-        rightButtonDisabled={!hasImages || isProcessing || cityId == null}
+        rightButtonDisabled={!hasImages || isProcessing || !isCityIdValid}
         onRightClick={handleSave}
       />
       <div

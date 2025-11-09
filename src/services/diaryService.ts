@@ -1,5 +1,5 @@
 import { apiGet } from "@/lib/apiClient";
-import type { DiaryDetail, DiaryDetailResponse } from "@/types/diary";
+import type { DiariesListResponse, DiaryDetail, DiaryDetailResponse } from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
 
 /**
@@ -70,5 +70,35 @@ export const getDiaryDetail = async (diaryId: string | number, token?: string): 
       throw new Error(`여행 기록을 불러오는데 실패했습니다: ${error.message}`);
     }
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
+/**
+ * 특정 UUID의 모든 여행 기록을 조회합니다.
+ * Authorization 토큰이 필요하지 않습니다.
+ *
+ * @param {string} uuid - 조회할 사용자의 UUID
+ * @returns {Promise<DiaryDetail[]>} 여행 기록 목록
+ * @throws 데이터 조회 실패 시 에러 발생
+ *
+ * @example
+ * const diaries = await getDiariesByUuid('uuid');
+ */
+export const getDiariesByUuid = async (uuid: string) => {
+  try {
+    const response = await apiGet<DiariesListResponse>("/api/v1/diaries", { uuid });
+
+    console.log("[getDiariesByUuid] 전체 응답:", response);
+
+    // response.data.diaryResponses가 없거나 배열이 아닌 경우 빈 배열 반환
+    if (!response.data?.diaryResponses || !Array.isArray(response.data.diaryResponses)) {
+      console.log("[getDiariesByUuid] diaryResponses가 없거나 배열이 아님, 빈 배열 반환");
+      return [];
+    }
+
+    return response.data.diaryResponses;
+  } catch (error) {
+    console.error("[getDiariesByUuid] 에러 발생, 빈 배열 반환:", error);
+    return [];
   }
 };

@@ -12,6 +12,7 @@ import ListView from "@/components/listview/ListView";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getBookmarks } from "@/services/bookmarkService";
+import { getDiariesByUuid } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
@@ -64,6 +65,14 @@ const GlobePage = () => {
         // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능)
         if (memberId) {
           insightResponse = await getTravelInsight(parseInt(memberId, 10));
+        }
+
+        // getDiariesByUuid 테스트 호출
+        try {
+          const diaries = await getDiariesByUuid(urlUuid);
+          console.log("[getDiariesByUuid] 응답:", diaries);
+        } catch (error) {
+          console.error("[getDiariesByUuid] 에러:", error);
         }
 
         if (globeResponse?.data) {

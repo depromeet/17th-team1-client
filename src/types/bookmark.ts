@@ -5,13 +5,13 @@ import type { ApiResponse } from "@/types/api";
  *
  * @property {number} memberId - 멤버 ID
  * @property {string} nickname - 사용자 닉네임
- * @property {string | null} profileImageUrl - 프로필 이미지 URL
+ * @property {string | undefined} profileImageUrl - 프로필 이미지 URL
  * @property {boolean} bookmarked - 북마크 여부
  */
 export interface BookmarkUser {
   memberId: number;
   nickname: string;
-  profileImageUrl: string | null;
+  profileImageUrl: string | undefined;
   bookmarked: boolean;
 }
 

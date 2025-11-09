@@ -4,6 +4,8 @@ import { getMemberTravels } from "@/services/memberService";
 import type { RecordResponse } from "@/types/record";
 import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 
+export const dynamic = "force-dynamic";
+
 export default async function RecordPage() {
   try {
     const cookieStore = await cookies();

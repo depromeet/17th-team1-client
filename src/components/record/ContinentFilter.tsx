@@ -28,8 +28,8 @@ export function ContinentFilter({
               isSelected
                 ? "px-3.5 py-2 bg-state-enabled"
                 : isDisabled
-                ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
-                : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
+                  ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
+                  : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
             }`}
             disabled={isDisabled}
           >
@@ -38,8 +38,8 @@ export function ContinentFilter({
                 isSelected
                   ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
                   : isDisabled
-                  ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
-                  : "text-white text-sm font-medium font-['Pretendard'] leading-5"
+                    ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
+                    : "text-white text-sm font-medium font-['Pretendard'] leading-5"
               }`}
             >
               {continent}

@@ -1,14 +1,17 @@
 "use client";
 
+import type { EmojiClickData } from "emoji-picker-react";
+import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
+import { pressEmoji, registerEmoji } from "@/services/emojiService";
+import type { Emoji } from "@/types/emoji";
 
-type Reaction = {
-  emoji: string;
-  count: number;
-  id: string;
-};
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
+
+type Reaction = Emoji;
 
 type FloatingEmoji = {
   id: string;
@@ -25,7 +28,6 @@ type RecordReactionsProps = {
 };
 
 const MAX_EMPTY_SLOTS = 4;
-const AVAILABLE_EMOJIS = ["😀", "😍", "🥹", "😂", "😭", "😱", "🔥", "👍", "❤️", "🎉", "✨", "🌟"];
 
 export const RecordReactions = ({
   recordId,
@@ -43,7 +45,12 @@ export const RecordReactions = ({
 
   useEffect(() => {
     if (isInitialLoad) {
-      const sortedReactions = [...initialReactions].sort((a, b) => b.count - a.count);
+      // 초기 로딩 시 서버 카운트 + 1로 설정
+      const reactionsWithIncreasedCount = initialReactions.map((reaction) => ({
+        ...reaction,
+        count: reaction.count + 1,
+      }));
+      const sortedReactions = [...reactionsWithIncreasedCount].sort((a, b) => b.count - a.count);
       setReactions(sortedReactions);
       setIsInitialLoad(false);
     }
@@ -75,15 +82,6 @@ export const RecordReactions = ({
 
     isAnimatingRef.current = true;
 
-    // RecordCard 찾기 (relative 기준점)
-    const recordCard = document.querySelector("[data-record-card]");
-    if (!recordCard) {
-      isAnimatingRef.current = false;
-      return;
-    }
-
-    const cardRect = recordCard.getBoundingClientRect();
-
     // 여러 개의 이모지를 연속으로 생성 (3-5개)
     const emojiCount = Math.floor(Math.random() * 3) + 3;
     const localTimers: NodeJS.Timeout[] = [];
@@ -92,12 +90,12 @@ export const RecordReactions = ({
       const createTimer = setTimeout(() => {
         const randomX = (Math.random() - 0.5) * 60;
 
-        // RecordCard 기준 상대 좌표
+        // viewport 기준 절대 좌표 (fixed position 사용)
         const floatingEmoji: FloatingEmoji = {
           id: `${Date.now()}-${Math.random()}`,
           emoji,
-          x: rect.left - cardRect.left + rect.width / 2 + randomX,
-          y: rect.top - cardRect.top + rect.height / 2,
+          x: rect.left + rect.width / 2 + randomX,
+          y: rect.top + rect.height / 2,
         };
 
         setFloatingEmojis((prev) => [...prev, floatingEmoji]);
@@ -126,22 +124,22 @@ export const RecordReactions = ({
     localTimers.push(animationEndTimer);
   };
 
-  const handleReactionClick = (reactionId: string, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!isFriend) {
       return;
     }
 
-    const reaction = reactions.find((r) => r.id === reactionId);
+    const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
-    // Debounce를 사용하여 카운트 업데이트는 즉시, 애니메이션은 제한
+    // 먼저 UI 업데이트 (낙관적 업데이트)
     setReactions((prev) => {
-      const updatedReactions = prev.map((r) => (r.id === reactionId ? { ...r, count: r.count + 1 } : r));
+      const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
       onReactionUpdate?.(updatedReactions);
       return updatedReactions;
     });
 
-    // 애니메이션만 debounce 적용 - 버튼 위치를 미리 저장
+    // 애니메이션 실행 - 버튼 위치를 미리 저장
     const buttonElement = event.currentTarget;
     const rect = buttonElement.getBoundingClientRect();
 
@@ -150,37 +148,69 @@ export const RecordReactions = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      createFloatingEmojiWithRect(reaction.emoji, rect);
+      createFloatingEmojiWithRect(reaction.glyph, rect);
     }, 100);
+
+    try {
+      await pressEmoji({
+        diaryId: recordId,
+        code: reactionCode,
+      });
+    } catch (error) {
+      // API 실패 시 카운트 롤백
+      setReactions((prev) => {
+        const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+        onReactionUpdate?.(rolledBackReactions);
+        return rolledBackReactions;
+      });
+
+      const errorMessage = error instanceof Error ? error.message : "이모지 누르기에 실패했습니다";
+      alert(errorMessage);
+    }
   };
 
-  const handleEmojiSelect = (emoji: string) => {
-    setReactions((prev) => {
-      const existingReaction = prev.find((r) => r.emoji === emoji);
+  const handleEmojiSelect = async (emojiData: EmojiClickData) => {
+    const { emoji: glyph, unified: code } = emojiData;
 
-      if (existingReaction) {
-        const updatedReactions = prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r));
+    try {
+      // API 호출
+      await registerEmoji({
+        diaryId: recordId,
+        code,
+        glyph,
+      });
 
-        const clickedReaction = updatedReactions.find((r) => r.emoji === emoji);
-        const otherReactions = updatedReactions.filter((r) => r.emoji !== emoji);
-        const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
+      // 성공 시 로컬 상태 업데이트
+      setReactions((prev) => {
+        const existingReaction = prev.find((r) => r.glyph === glyph);
 
-        onReactionUpdate?.(newOrder);
-        return newOrder;
-      }
+        if (existingReaction) {
+          const updatedReactions = prev.map((r) => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
 
-      const newReaction: Reaction = {
-        emoji,
-        count: 1,
-        id: `${recordId}-${emoji}-${Date.now()}`,
-      };
+          const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
+          const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
+          const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
-      const newReactions = [newReaction, ...prev];
-      onReactionUpdate?.(newReactions);
-      return newReactions;
-    });
+          onReactionUpdate?.(newOrder);
+          return newOrder;
+        }
 
-    setShowEmojiPicker(false);
+        const newReaction: Reaction = {
+          code,
+          glyph,
+          count: 1,
+        };
+
+        const newReactions = [newReaction, ...prev];
+        onReactionUpdate?.(newReactions);
+        return newReactions;
+      });
+
+      setShowEmojiPicker(false);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "이모지 등록에 실패했습니다";
+      alert(errorMessage);
+    }
   };
 
   const handleAddEmoji = () => {
@@ -195,7 +225,7 @@ export const RecordReactions = ({
       <button
         type="button"
         onClick={handleAddEmoji}
-        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
+        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
         style={{
           background:
             "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
@@ -205,16 +235,16 @@ export const RecordReactions = ({
         <AddEmojiIcon />
       </button>
 
-      <div className="flex items-center gap-4">
-        {reactions.map((reaction) => (
+      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1">
+        {reactions.map(({ code, glyph, count }, index) => (
           <motion.button
-            key={reaction.id}
+            key={`${code}-${glyph}-${index}`}
             type="button"
-            onClick={(e) => handleReactionClick(reaction.id, e)}
+            onClick={(e) => handleReactionClick(code, e)}
             disabled={!isFriend}
             whileTap={isFriend ? { scale: 0.85 } : {}}
             whileHover={isFriend ? { scale: 1.05 } : {}}
-            className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 flex-shrink-0 ${
+            className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0 ${
               isFriend ? "" : "opacity-50 cursor-not-allowed"
             }`}
             style={{
@@ -223,10 +253,8 @@ export const RecordReactions = ({
             }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <span className="text-[20px] leading-none tracking-[-0.8px]">{reaction.emoji}</span>
-            <span className="text-[12px] font-semibold text-white leading-[1.5] tracking-[-0.48px]">
-              {reaction.count}
-            </span>
+            <span className="text-[20px] leading-none tracking-[-0.8px]">{glyph}</span>
+            <span className="text-[12px] font-semibold text-white leading-normal tracking-[-0.48px]">{count}</span>
           </motion.button>
         ))}
 
@@ -236,7 +264,7 @@ export const RecordReactions = ({
               key={uniqueKey}
               type="button"
               onClick={handleAddEmoji}
-              className="w-[66px] h-[66px] rounded-full flex items-center justify-center flex-shrink-0"
+              className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
@@ -293,30 +321,22 @@ export const RecordReactions = ({
             }}
             aria-label="이모지 피커 닫기"
           />
-          <div className="fixed bottom-0 left-0 right-0 bg-surface-secondary rounded-t-3xl p-6 z-50 max-w-[512px] mx-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-text-primary">이모지 선택</h3>
-              <button
-                type="button"
-                onClick={() => setShowEmojiPicker(false)}
-                className="text-text-secondary"
-                aria-label="닫기"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-8 gap-3">
-              {AVAILABLE_EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => handleEmojiSelect(emoji)}
-                  className="text-3xl hover:scale-110 transition-transform"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto">
+            <EmojiPicker
+              onEmojiClick={handleEmojiSelect}
+              width="100%"
+              height="400px"
+              theme={Theme.DARK}
+              searchPlaceHolder="이모지를 검색해 보세요"
+              previewConfig={{
+                showPreview: false,
+              }}
+              style={{
+                borderTopLeftRadius: "24px",
+                borderTopRightRadius: "24px",
+                backgroundColor: "#0E1724",
+              }}
+            />
           </div>
         </>
       )}

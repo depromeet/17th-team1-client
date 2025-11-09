@@ -201,21 +201,19 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map((city) => {
+                  {group.cities.map(({ cityId, name, hasRecords, thumbnails }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
-                    const cityName = city.name.split(",")[0].trim();
-                    const isClickable = city.hasRecords && city.cityId;
+                    const cityName = name.split(",")[0].trim();
+                    const isClickable = hasRecords && cityId;
 
                     const handleCityClick = () => {
-                      if (isClickable) {
-                        const path = uuid ? `/record/${city.cityId}?uuid=${uuid}` : `/record/${city.cityId}`;
-                        router.push(path);
-                      }
+                      const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
+                      router.push(path);
                     };
 
                     return (
                       <button
-                        key={`${group.countryCode}-${city.name}`}
+                        key={`${group.countryCode}-${name}`}
                         type="button"
                         className="border rounded-[12px]"
                         style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
@@ -226,7 +224,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                           className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
                           style={{
                             paddingLeft: "12px",
-                            paddingRight: city.hasRecords && city.thumbnails ? "8px" : "12px",
+                            paddingRight: hasRecords && thumbnails ? "8px" : "12px",
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
@@ -237,19 +235,18 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                             {cityName}
                           </p>
                           {/* 여행기록이 있는 경우 썸네일 표시 */}
-                          {city.hasRecords && city.thumbnails && city.thumbnails.length > 0 && (
+                          {hasRecords && thumbnails && thumbnails.length > 0 && (
                             <div className="flex items-center" style={{ position: "relative" }}>
-                              {city.thumbnails.length === 1 ? (
+                              {thumbnails.length === 1 ? (
                                 // 썸네일이 1개인 경우
                                 <div
                                   className="border border-white rounded-[4px] shrink-0 overflow-hidden"
                                   style={{ width: "24px", height: "24px" }}
                                 >
                                   <img
-                                    src={city.thumbnails[0]}
+                                    src={thumbnails[0]}
                                     alt={cityName}
-                                    className="w-full h-full object-cover"
-                                    style={{ borderRadius: "4px" }}
+                                    className="w-full h-full object-cover rounded-[4px]"
                                   />
                                 </div>
                               ) : (
@@ -267,10 +264,9 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                     }}
                                   >
                                     <img
-                                      src={city.thumbnails[1]}
+                                      src={thumbnails[1]}
                                       alt={`${cityName} 이전`}
-                                      className="w-full h-full object-cover"
-                                      style={{ borderRadius: "4px" }}
+                                      className="w-full h-full object-cover rounded-[4px]"
                                     />
                                   </div>
                                   {/* 최신 썸네일 (우측, z-index 높음) */}
@@ -284,10 +280,9 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                     }}
                                   >
                                     <img
-                                      src={city.thumbnails[0]}
+                                      src={thumbnails[0]}
                                       alt={`${cityName} 최신`}
-                                      className="w-full h-full object-cover"
-                                      style={{ borderRadius: "4px" }}
+                                      className="w-full h-full object-cover rounded-[4px]"
                                     />
                                   </div>
                                 </>

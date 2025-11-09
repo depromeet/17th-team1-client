@@ -28,6 +28,8 @@ const DESCRIPTIONS = [
   "+ 버튼을 눌러 새로운 여행을 기록해보세요.",
 ];
 
+const VIEW_MODE_TOGGLE_DELAY_MS = 220;
+
 const getRandomDescriptionIndex = (currentIndex: number): number => {
   let nextIndex = Math.floor(Math.random() * DESCRIPTIONS.length);
   while (nextIndex === currentIndex) {
@@ -67,7 +69,7 @@ export const GlobeFooter = ({
     toggleTimeoutRef.current = setTimeout(() => {
       onViewModeChange(nextMode);
       toggleTimeoutRef.current = null;
-    }, 220);
+    }, VIEW_MODE_TOGGLE_DELAY_MS);
   }, [onViewModeChange, visualViewMode]);
 
   const renderViewToggle = () => {

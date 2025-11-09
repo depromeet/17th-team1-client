@@ -64,6 +64,7 @@ const GlobePage = () => {
       try {
         const { uuid: myUuid, memberId } = getAuthInfo();
         if (!urlUuid) {
+          router.push("/error?type=404");
           return;
         }
 
@@ -121,7 +122,7 @@ const GlobePage = () => {
         }
         setTravelInsight(insightResponse || "");
       } catch {
-        // 에러 처리
+        // TODO: 에러 처리 로직 추가
       } finally {
         setIsDataReady(true);
       }
@@ -129,7 +130,7 @@ const GlobePage = () => {
 
     // API 데이터 로드
     loadData();
-  }, [urlUuid]);
+  }, [urlUuid, router]);
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
 

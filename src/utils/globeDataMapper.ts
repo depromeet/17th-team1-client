@@ -33,22 +33,22 @@ export const mapGlobeDataToTravelPatterns = (
   for (const region of globeData.regions) {
     const regionColor = REGION_COLORS[colorIndex % REGION_COLORS.length];
 
-    for (const city of region.cities) {
-      const countryName = getCountryName(city.countryCode);
-      const thumbnailUrl = cityThumbnails?.[city.cityId];
-      const thumbnails = cityThumbnailsArray?.[city.cityId];
+    for (const { countryCode, cityId, name, lat, lng } of region.cities) {
+      const countryName = getCountryName(countryCode);
+      const thumbnailUrl = cityThumbnails?.[cityId];
+      const thumbnails = cityThumbnailsArray?.[cityId];
 
       allCities.push({
-        id: city.countryCode,
-        name: `${city.name}, ${countryName}`, // "도시명, 국가명" 형식으로 저장
-        flag: COUNTRY_CODE_TO_FLAG[city.countryCode] || "🌍",
-        lat: city.lat,
-        lng: city.lng,
+        id: countryCode,
+        name: `${name}, ${countryName}`, // "도시명, 국가명" 형식으로 저장
+        flag: COUNTRY_CODE_TO_FLAG[countryCode] || "🌍",
+        lat,
+        lng,
         color: regionColor,
         hasRecords: !!thumbnailUrl, // 썸네일이 있으면 기록이 있는 것으로 간주
         thumbnailUrl, // 도시별 최신 사진 썸네일 (없으면 undefined)
         thumbnails, // 도시별 썸네일 배열 (최대 2개, 최신순)
-        cityId: city.cityId, // API에서 제공하는 도시 ID
+        cityId, // API에서 제공하는 도시 ID
       });
     }
 

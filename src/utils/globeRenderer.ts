@@ -305,7 +305,7 @@ export const createCityClickHandler = (
       path = `/record/${cityId}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
-      path = `/image-metadata?city=${cityQuery}&country=${countryQuery}`;
+      path = `/image-metadata?cityId=${cityId}&city=${cityQuery}&country=${countryQuery}`;
     }
 
     if (onNavigate) {

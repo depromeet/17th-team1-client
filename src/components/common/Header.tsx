@@ -28,7 +28,7 @@ export type HeaderProps = React.ComponentProps<"header"> &
     title?: string;
     rightButtonTitle?: string;
     rightButtonVariant?: "default" | "white";
-    rightIcon?: "dot" | "people" | React.ReactNode;
+    rightIcon?: "dot" | "people" | "close" | React.ReactNode;
     onRightClick?: () => void;
     rightButtonDisabled?: boolean;
   };

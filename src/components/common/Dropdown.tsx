@@ -107,7 +107,7 @@ export const Dropdown = ({
                     "text-[16px] font-medium leading-[1.3] tracking-[-0.32px]",
                     "outline-none transition-colors",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
-                    "focus-visible:ring-(--color-surface-inverseprimary)",
+                    "focus-visible:ring-[--color-surface-inverseprimary]",
                     index === 0 && "rounded-t-lg",
                     index === options.length - 1 && "rounded-b-lg",
                     styles.item.base,

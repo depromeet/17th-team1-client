@@ -99,11 +99,32 @@ export const createCityHTML = (
   cityName: string,
   hasRecords: boolean = true,
   thumbnailUrl?: string,
+  isMyGlobe: boolean = true,
+  isFirstGlobe: boolean = false,
 ) => {
   const labelWidth = calculateCityLabelWidth(cityName);
 
-  // 기록이 없는 경우: + 버튼만 표시
+  // 기록이 없는 경우
   if (!hasRecords) {
+    // 타인의 지구본이거나 최초 지구본인 경우: + 버튼 표시하지 않음
+    if (!isMyGlobe || isFirstGlobe) {
+      return `
+        <!-- 중심 dot -->
+        <div style="${styles.dot}"></div>
+        <!-- 점선 -->
+        <div style="${styles.horizontalLine}"></div>
+        <div style="${styles.label}">
+          <!-- 좌측 국기 이모지 -->
+          <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
+          <!-- 도시명 -->
+          <span>
+            ${cityName}
+          </span>
+        </div>
+      `;
+    }
+
+    // 나의 지구본인 경우: + 버튼 표시
     return `
       <!-- 중심 dot -->
       <div style="${styles.dot}"></div>
@@ -186,12 +207,43 @@ export const createCountryClusterHTML = (
   _isExpanded: boolean = false,
   hasRecords: boolean = true,
   thumbnailUrl?: string,
+  isMyGlobe: boolean = true,
+  isFirstGlobe: boolean = false,
 ) => {
   // 라벨 너비 계산하여 썸네일 위치 동적 조정
   const labelWidth = calculateLabelWidth(countryName, cityCount);
 
-  // 모든 도시 미기록 시: 기본형 마커 (+ 아이콘만)
+  // 모든 도시 미기록 시
   if (!hasRecords) {
+    // 타인의 지구본이거나 최초 지구본인 경우: + 버튼 표시하지 않음
+    if (!isMyGlobe || isFirstGlobe) {
+      return `
+        <!-- 중심 dot -->
+        <div style="${styles.dot}"></div>
+        <!-- 단색 수평선 -->
+        <div style="${styles.horizontalLine}"></div>
+        <div style="${styles.label}">
+          <!-- 좌측 국기 이모지 -->
+          <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
+          <!-- 국가명 -->
+          <span>
+            ${countryName}
+          </span>
+          <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
+          ${
+            cityCount >= 1
+              ? `<div style="${styles.countBadge}">
+            <span>
+              ${cityCount}
+            </span>
+          </div>`
+              : ""
+          }
+        </div>
+      `;
+    }
+
+    // 나의 지구본인 경우: + 버튼 표시
     return `
       <!-- 중심 dot -->
       <div style="${styles.dot}"></div>

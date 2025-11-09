@@ -40,6 +40,8 @@ type GlobeProps = {
   onZoomChange?: (zoom: number) => void;
   disableCityClick?: boolean;
   countryThumbnails?: Record<string, string>;
+  isMyGlobe?: boolean;
+  isFirstGlobe?: boolean;
 };
 
 export interface GlobeRef {
@@ -49,7 +51,16 @@ export interface GlobeRef {
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
   (
-    { travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange, disableCityClick, countryThumbnails },
+    {
+      travelPatterns,
+      currentGlobeIndex: _,
+      onClusterSelect,
+      onZoomChange,
+      disableCityClick,
+      countryThumbnails,
+      isMyGlobe = true,
+      isFirstGlobe = false,
+    },
     ref,
   ) => {
     const router = useRouter();
@@ -210,29 +221,43 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           label: string;
         };
 
+        // ClusterData의 hasRecords 확인
+        const hasRecords = clusterData.hasRecords ?? false;
+        // 타인의 지구본이거나 최초 지구본이고 기록이 없는 경우 우측 패딩 12px, 그 외는 30px
+        const shouldHidePlusButton = (!isMyGlobe || isFirstGlobe) && !hasRecords;
+        const rightPadding = shouldHidePlusButton ? 12 : 30;
+
         if (clusterData.clusterType === "continent_cluster") {
           styles = createContinentClusterStyles(0, angleOffset, clampedDistance);
         } else if (clusterData.clusterType === "country_cluster") {
-          styles = createCountryClusterStyles(0, angleOffset, clampedDistance);
+          styles = createCountryClusterStyles(0, angleOffset, clampedDistance, rightPadding);
         } else {
           // 개별 도시는 기존 스타일 유지
-          styles = createSingleLabelStyles(0, angleOffset, clampedDistance);
+          styles = createSingleLabelStyles(0, angleOffset, clampedDistance, rightPadding);
         }
 
         if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
           const cityName = clusterData.name.split(",")[0];
           // ClusterData 자체의 값 사용
-          const hasRecords = clusterData.hasRecords ?? false;
+          const cityHasRecords = clusterData.hasRecords ?? false;
           const thumbnailUrl = clusterData.thumbnailUrl;
           const cityId = clusterData.items?.[0]?.cityId;
 
-          el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
+          el.innerHTML = createCityHTML(
+            styles,
+            clusterData.flag,
+            cityName,
+            cityHasRecords,
+            thumbnailUrl,
+            isMyGlobe,
+            isFirstGlobe,
+          );
 
           const clickHandler = createCityClickHandler(
             clusterData.name,
             cityId,
-            hasRecords,
+            cityHasRecords,
             (path) => router.push(path),
             disableCityClick,
           );
@@ -244,7 +269,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         } else if (clusterData.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
           // ClusterData 자체의 hasRecords와 thumbnailUrl 사용
-          const hasRecords = clusterData.hasRecords ?? false;
+          const countryHasRecords = clusterData.hasRecords ?? false;
           const thumbnailUrl = clusterData.thumbnailUrl;
 
           el.innerHTML = createCountryClusterHTML(
@@ -253,8 +278,10 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
             clusterData.count,
             clusterData.flag,
             mode === "city" && selectedClusterData !== null, // 도시 모드에서 확장된 것으로 표시
-            hasRecords,
+            countryHasRecords,
             thumbnailUrl,
+            isMyGlobe,
+            isFirstGlobe,
           );
 
           const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {

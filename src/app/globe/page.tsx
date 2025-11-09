@@ -107,6 +107,7 @@ const GlobeContent = () => {
             onClusterSelect={handleClusterSelect}
             onZoomChange={handleZoomChange}
             disableCityClick={true}
+            isFirstGlobe={true}
           />
         </div>
 

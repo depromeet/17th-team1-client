@@ -175,6 +175,7 @@ const GlobePage = () => {
               onClusterSelect={handleClusterSelect}
               onZoomChange={handleZoomChange}
               countryThumbnails={countryThumbnails}
+              isMyGlobe={isMyGlobe}
             />
           </div>
 

@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { formatYearMonth, toYearMonth } from "@/utils/dateUtils";
 import { CircleCloseButton } from "./CircleCloseButton";
 import { DateSelectBottomSheet } from "./DateSelectBottomSheet";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { ImageCropModal } from "./ImageCropModal";
-import { LocationSelectBottomSheet } from "./LocationSelectBottomSheet";
+import { LocationSelectBottomSheet, type LocationSelection } from "./LocationSelectBottomSheet";
 import { MetadataChip } from "./MetadataChip";
 import { TagSelector } from "./TagSelector";
 
@@ -23,9 +23,17 @@ type ImageCarouselProps = {
   onTagChange?: (tag: ImageTag | null) => void;
   onDateChange?: (yearMonth: string | null) => void;
   onImageUpdate?: (id: string, croppedImage: string) => void;
+  onLocationChange?: (location: LocationSelection | null) => void;
 };
 
-export const ImageCarousel = ({ image, onRemove, onTagChange, onDateChange, onImageUpdate }: ImageCarouselProps) => {
+export const ImageCarousel = ({
+  image,
+  onRemove,
+  onTagChange,
+  onDateChange,
+  onImageUpdate,
+  onLocationChange,
+}: ImageCarouselProps) => {
   const [selectedTag, setSelectedTag] = useState<ImageTag | null>(
     image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null),
   );
@@ -53,6 +61,10 @@ export const ImageCarousel = ({ image, onRemove, onTagChange, onDateChange, onIm
     setCustomDate(image.customDate ?? toYearMonth(image.timestamp));
   }, [image.customDate, image.timestamp]);
 
+  useEffect(() => {
+    setCustomLocation(image.location?.nearbyPlaces?.[1] || image.location?.address || null);
+  }, [image.location?.address, image.location?.nearbyPlaces]);
+
   const handleTagSelect = (tag: ImageTag) => {
     setSelectedTag(tag);
     onTagChange?.(tag);
@@ -79,9 +91,51 @@ export const ImageCarousel = ({ image, onRemove, onTagChange, onDateChange, onIm
     onImageUpdate?.(image.id, croppedImage);
   };
 
+  const handleConfirmLocation = (location: LocationSelection) => {
+    const displayName = location.name || location.address;
+    setCustomLocation(displayName);
+    onLocationChange?.(location);
+  };
+
+  const handleLocationClear = () => {
+    setCustomLocation(null);
+    onLocationChange?.(null);
+  };
+
   const shown = image;
   const displayLocation = customLocation || "";
   const hasLocation = customLocation !== null;
+
+  const initialLocationSelection = useMemo<LocationSelection | null>(() => {
+    const location = image.location;
+    if (!location) return null;
+
+    const hasLatitude = typeof location.latitude === "number";
+    const hasLongitude = typeof location.longitude === "number";
+    if (!hasLatitude || !hasLongitude) return null;
+
+    const formattedAddress =
+      (Array.isArray(location.nearbyPlaces) && location.nearbyPlaces.length > 0
+        ? location.nearbyPlaces[0]
+        : undefined) ||
+      location.address ||
+      "";
+    const mainName =
+      (Array.isArray(location.nearbyPlaces) && location.nearbyPlaces.length > 1
+        ? location.nearbyPlaces[1]
+        : undefined) ||
+      location.address ||
+      "";
+
+    if (!formattedAddress && !mainName) return null;
+
+    return {
+      name: mainName || formattedAddress,
+      address: formattedAddress || mainName,
+      latitude: location.latitude as number,
+      longitude: location.longitude as number,
+    };
+  }, [image.location]);
 
   return (
     <div className="relative select-none w-[251px] mx-auto">
@@ -121,7 +175,7 @@ export const ImageCarousel = ({ image, onRemove, onTagChange, onDateChange, onIm
           iconType="location"
           text={displayLocation || "위치 추가"}
           onClick={() => setIsLocationSelectModalOpen(true)}
-          onRemove={hasLocation ? () => setCustomLocation(null) : undefined}
+          onRemove={hasLocation ? handleLocationClear : undefined}
           isPlaceholder={!displayLocation}
         />
       </div>
@@ -133,7 +187,8 @@ export const ImageCarousel = ({ image, onRemove, onTagChange, onDateChange, onIm
       <LocationSelectBottomSheet
         isOpen={isLocationSelectModalOpen}
         onClose={() => setIsLocationSelectModalOpen(false)}
-        // onConfirm={handleConfirmLocation}
+        onConfirm={handleConfirmLocation}
+        initialLocation={initialLocationSelection}
       />
       {isCropModalOpen && (
         <ImageCropModal

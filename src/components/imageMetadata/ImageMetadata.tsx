@@ -11,6 +11,7 @@ import { Header } from "../common/Header";
 // import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageCarousel } from "./ImageCarousel";
 import { LoadingOverlay } from "./LoadingOverlay";
+import type { LocationSelection } from "./LocationSelectBottomSheet";
 import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
@@ -155,6 +156,34 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
     setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, customDate: yearMonth } : item)));
   };
 
+  const handleLocationChange = (id: string, location: LocationSelection | null) => {
+    setMetadataList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        if (!location) {
+          return { ...item, location: undefined };
+        }
+
+        const displayName = location.name || location.address || "";
+        const formattedAddress = location.address || location.name || "";
+        const uniquePlaces = [formattedAddress, displayName].filter(
+          (value, index, array): value is string => Boolean(value) && array.indexOf(value) === index,
+        );
+
+        return {
+          ...item,
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            altitude: item.location?.altitude,
+            address: displayName || formattedAddress,
+            nearbyPlaces: uniquePlaces.length > 0 ? uniquePlaces : undefined,
+          },
+        };
+      }),
+    );
+  };
+
   const handleSave = async () => {
     if (isProcessing) return;
     if (cityId == null) {
@@ -172,23 +201,14 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
       const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
 
       const photos = metadataList.map((metadata) => {
-        if (!metadata.dimensions) {
-          throw new Error("이미지에 크기 정보가 없습니다.");
-        }
-
         const uploaded = uploadedPhotos.find((item) => item.metadata.id === metadata.id);
         if (!uploaded) {
           throw new Error("업로드된 이미지 정보를 찾을 수 없습니다.");
         }
 
-        const {
-          location,
-          dimensions: { width, height },
-          customDate,
-          timestamp,
-          selectedTag,
-          tag,
-        } = metadata;
+        const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+        const width = dimensions?.width ?? 0;
+        const height = dimensions?.height ?? 0;
         const { photoCode } = uploaded;
         const takenMonth = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
         const normalizedTag = selectedTag ?? tag ?? "NONE";
@@ -267,6 +287,7 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
               onImageUpdate={handleImageUpdate}
               onTagChange={(tag) => handleTagChange(metadata.id, tag)}
               onDateChange={(yearMonth) => handleDateChange(metadata.id, yearMonth)}
+              onLocationChange={(location) => handleLocationChange(metadata.id, location)}
             />
           </div>
         ))}

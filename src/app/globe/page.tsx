@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 import { BackButton } from "@/components/common/Button";
 import type { GlobeRef } from "@/components/globe/Globe";
@@ -20,7 +20,7 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
   loading: () => <div></div>,
 });
 
-const GlobePrototype = () => {
+const GlobeContent = () => {
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,25 +33,23 @@ const GlobePrototype = () => {
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
     useGlobeState(travelPatterns);
 
-  // 실제 API 데이터 로드
+  // 로그인한 사용자의 데이터 로드
   useEffect(() => {
     const loadData = async () => {
       try {
         const { uuid, memberId } = getAuthInfo();
+
         if (!uuid || !memberId) {
           return;
         }
 
-        const [globeResponse, insightResponse] = await Promise.all([
-          getGlobeData(uuid),
-          getTravelInsight(parseInt(memberId, 10)),
-        ]);
+        const globeResponse = await getGlobeData(uuid);
+        const insightResponse = await getTravelInsight(parseInt(memberId, 10));
 
         if (globeResponse?.data) {
           const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
           setTravelPatterns(mappedPatterns);
 
-          // 도시와 국가 개수 설정
           setCityCount(globeResponse.data.cityCount);
           setCountryCount(globeResponse.data.countryCount);
         }
@@ -62,7 +60,6 @@ const GlobePrototype = () => {
       }
     };
 
-    // API 데이터 로드
     loadData();
   }, []);
 
@@ -157,6 +154,14 @@ const GlobePrototype = () => {
         </>
       )}
     </div>
+  );
+};
+
+const GlobePrototype = () => {
+  return (
+    <Suspense fallback={<GlobeLoading onComplete={() => {}} />}>
+      <GlobeContent />
+    </Suspense>
   );
 };
 

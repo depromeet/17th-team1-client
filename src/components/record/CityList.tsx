@@ -33,7 +33,8 @@ export function CityList({ filteredRegions }: CityListProps) {
                   type="button"
                   onClick={() => {
                     const cityParam = encodeURIComponent(city.name);
-                    router.push(`/image-metadata?city=${cityParam}`);
+                    const countryParam = encodeURIComponent(region.regionName);
+                    router.push(`/image-metadata?country=${countryParam}&city=${cityParam}`);
                   }}
                   className="w-8 h-8 rounded-lg flex justify-center items-center overflow-hidden hover:opacity-70 transition-opacity cursor-pointer"
                 >

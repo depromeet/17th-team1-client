@@ -16,6 +16,7 @@ import { getDiariesByUuid } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
+import { getDiaryThumbnails } from "@/utils/diaryThumbnailMapper";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
@@ -38,6 +39,7 @@ const GlobePage = () => {
   const [nickname, setNickname] = useState<string>("");
   const [targetMemberId, setTargetMemberId] = useState<number | undefined>(undefined);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const [countryThumbnails, setCountryThumbnails] = useState<Record<string, string>>({});
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -67,16 +69,15 @@ const GlobePage = () => {
           insightResponse = await getTravelInsight(parseInt(memberId, 10));
         }
 
-        // getDiariesByUuid 테스트 호출
-        try {
-          const diaries = await getDiariesByUuid(urlUuid);
-          console.log("[getDiariesByUuid] 응답:", diaries);
-        } catch (error) {
-          console.error("[getDiariesByUuid] 에러:", error);
-        }
+        // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
+        const diaryData = await getDiariesByUuid(urlUuid);
+        const { cityThumbnails, countryThumbnails: countryThumbMap } = getDiaryThumbnails(diaryData);
+
+        // 국가 썸네일 state 설정
+        setCountryThumbnails(countryThumbMap);
 
         if (globeResponse?.data) {
-          const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
+          const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data, cityThumbnails);
           setTravelPatterns(mappedPatterns);
 
           // 도시와 국가 개수 설정
@@ -173,6 +174,7 @@ const GlobePage = () => {
               currentGlobeIndex={0}
               onClusterSelect={handleClusterSelect}
               onZoomChange={handleZoomChange}
+              countryThumbnails={countryThumbnails}
             />
           </div>
 

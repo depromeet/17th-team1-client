@@ -39,6 +39,7 @@ type GlobeProps = {
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
   disableCityClick?: boolean;
+  countryThumbnails?: Record<string, string>;
 };
 
 export interface GlobeRef {
@@ -47,7 +48,10 @@ export interface GlobeRef {
 }
 
 const Globe = forwardRef<GlobeRef, GlobeProps>(
-  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange, disableCityClick }, ref) => {
+  (
+    { travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange, disableCityClick, countryThumbnails },
+    ref,
+  ) => {
     const router = useRouter();
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
@@ -119,6 +123,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       selectedClusterData: selectedClusterData || undefined,
       globeRef,
       onSelectionStackChange: handleSelectionStackChange,
+      countryThumbnails,
     });
 
     // 부모 컴포넌트에 globeRef와 리셋 함수들 노출
@@ -217,11 +222,10 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
           const cityName = clusterData.name.split(",")[0];
-          // 클러스터의 첫 번째 아이템에서 hasRecords, thumbnailUrl, cityId 가져오기
-          const firstItem = clusterData.items?.[0];
-          const hasRecords = firstItem?.hasRecords ?? true; // 기본값: 기록 있음
-          const thumbnailUrl = firstItem?.thumbnailUrl;
-          const cityId = firstItem?.cityId;
+          // ClusterData 자체의 값 사용
+          const hasRecords = clusterData.hasRecords ?? false;
+          const thumbnailUrl = clusterData.thumbnailUrl;
+          const cityId = clusterData.items?.[0]?.cityId;
 
           el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
@@ -239,10 +243,9 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
         } else if (clusterData.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
-          // 클러스터의 첫 번째 아이템에서 hasRecords와 thumbnailUrl 가져오기
-          const firstItem = clusterData.items?.[0];
-          const hasRecords = firstItem?.hasRecords ?? true; // 기본값: 기록 있음
-          const thumbnailUrl = firstItem?.thumbnailUrl;
+          // ClusterData 자체의 hasRecords와 thumbnailUrl 사용
+          const hasRecords = clusterData.hasRecords ?? false;
+          const thumbnailUrl = clusterData.thumbnailUrl;
 
           el.innerHTML = createCountryClusterHTML(
             styles,

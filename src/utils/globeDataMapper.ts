@@ -17,7 +17,10 @@ const REGION_COLORS = [
 ];
 
 // GlobeData를 하나의 TravelPattern으로 변환 (모든 국가를 한번에 표시)
-export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPattern[] => {
+export const mapGlobeDataToTravelPatterns = (
+  globeData: GlobeData,
+  cityThumbnails?: Record<number, string>,
+): TravelPattern[] => {
   if (!globeData.regions || globeData.regions.length === 0) {
     return [];
   }
@@ -31,6 +34,8 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
 
     for (const city of region.cities) {
       const countryName = getCountryName(city.countryCode);
+      const thumbnailUrl = cityThumbnails?.[city.cityId];
+
       allCities.push({
         id: city.countryCode,
         name: `${city.name}, ${countryName}`, // "도시명, 국가명" 형식으로 저장
@@ -38,8 +43,8 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
         lat: city.lat,
         lng: city.lng,
         color: regionColor,
-        hasRecords: true, // API 응답에 있는 도시는 모두 기록이 있는 것으로 간주
-        thumbnailUrl: "https://picsum.photos/30/40", // TODO: API에서 thumbnailUrl 제공 시 추가
+        hasRecords: !!thumbnailUrl, // 썸네일이 있으면 기록이 있는 것으로 간주
+        thumbnailUrl, // 도시별 최신 사진 썸네일 (없으면 undefined)
         cityId: city.cityId, // API에서 제공하는 도시 ID
       });
     }

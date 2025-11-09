@@ -96,7 +96,7 @@ const estimateBubbleWidth = (cluster: ClusterData): number => {
 /**
  * 국가별 클러스터링 - "몽골 5", "터키에 5" 형태
  */
-const createCountryClusters = (locations: CountryData[]): ClusterData[] => {
+const createCountryClusters = (locations: CountryData[], countryThumbnails?: Record<string, string>): ClusterData[] => {
   const countryGroups = new Map<string, CountryData[]>();
 
   locations.forEach((location) => {
@@ -112,6 +112,10 @@ const createCountryClusters = (locations: CountryData[]): ClusterData[] => {
     const centerLng = items.reduce((sum, item) => sum + item.lng, 0) / items.length;
     const countryName = getCountryName(countryId);
 
+    // 국가별 최신 썸네일 조회
+    const thumbnailUrl = countryThumbnails?.[countryId];
+    const hasRecords = !!thumbnailUrl;
+
     return {
       id: `country_${countryId}`,
       name: countryName,
@@ -122,6 +126,8 @@ const createCountryClusters = (locations: CountryData[]): ClusterData[] => {
       items,
       count: items.length,
       clusterType: "country_cluster" as const,
+      hasRecords,
+      thumbnailUrl,
     };
   });
 };
@@ -140,6 +146,8 @@ const createIndividualCityClusters = (locations: CountryData[]): ClusterData[] =
     items: [location],
     count: 1,
     clusterType: "individual_city" as const,
+    hasRecords: location.hasRecords,
+    thumbnailUrl: location.thumbnailUrl,
   }));
 };
 
@@ -154,6 +162,7 @@ const clusterLocations = (
   globeRef: React.RefObject<GlobeInstance | null>,
   mode: "country" | "city" | "continent" = "country",
   expandedCountry: string | null = null,
+  countryThumbnails?: Record<string, string>,
 ): ClusterData[] => {
   if (!locations || locations.length === 0) {
     return [];
@@ -167,20 +176,20 @@ const clusterLocations = (
 
   // Globe 준비 확인
   if (!globeRef.current || typeof globeRef.current.getScreenCoords !== "function") {
-    return createCountryClusters(locations);
+    return createCountryClusters(locations, countryThumbnails);
   }
 
   try {
     const testPos = globeRef.current.getScreenCoords(0, 0);
     if (!testPos || typeof testPos.x !== "number" || typeof testPos.y !== "number") {
-      return createCountryClusters(locations);
+      return createCountryClusters(locations, countryThumbnails);
     }
   } catch {
-    return createCountryClusters(locations);
+    return createCountryClusters(locations, countryThumbnails);
   }
 
   const globe = globeRef.current;
-  const countryClusters = createCountryClusters(locations);
+  const countryClusters = createCountryClusters(locations, countryThumbnails);
 
   const clustersWithPos = countryClusters.map((cluster) => {
     const screenPos = globe.getScreenCoords(cluster.lat, cluster.lng);
@@ -456,6 +465,7 @@ export const useClustering = ({
   selectedClusterData,
   globeRef,
   onSelectionStackChange,
+  countryThumbnails,
 }: UseClusteringProps) => {
   const [state, setState] = useState<ClusteringState>({
     mode: "country",
@@ -488,7 +498,15 @@ export const useClustering = ({
       if (!dataToCluster || dataToCluster.length === 0) return [];
 
       const clusterDistance = getClusterDistance(zoomLevel);
-      return clusterLocations(dataToCluster, clusterDistance, zoomLevel, globeRef, state.mode, state.expandedCountry);
+      return clusterLocations(
+        dataToCluster,
+        clusterDistance,
+        zoomLevel,
+        globeRef,
+        state.mode,
+        state.expandedCountry,
+        countryThumbnails,
+      );
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Clustering calculation failed:", error);
@@ -496,7 +514,7 @@ export const useClustering = ({
 
       return [];
     }
-  }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry, globeRef]);
+  }, [countries, zoomLevel, selectedClusterData, state.mode, state.expandedCountry, globeRef, countryThumbnails]);
 
   // 상태 업데이트
   useEffect(() => {

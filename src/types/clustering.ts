@@ -22,6 +22,8 @@ export interface ClusterData {
   count: number;
   clusterType?: "individual_city" | "country_cluster" | "continent_cluster";
   isExpanded?: boolean;
+  hasRecords?: boolean; // 해당 클러스터에 여행 기록이 있는지 여부
+  thumbnailUrl?: string; // 클러스터의 대표 썸네일
 }
 
 export interface ClusteringState {
@@ -45,4 +47,5 @@ export interface UseClusteringProps {
   selectedClusterData?: CountryData[];
   globeRef: React.RefObject<GlobeInstance | null>;
   onSelectionStackChange?: (newStack: (CountryData[] | null)[]) => void;
+  countryThumbnails?: Record<string, string>;
 }

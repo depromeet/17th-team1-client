@@ -63,7 +63,11 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
     lat,
     lng,
     description: text,
+<<<<<<< HEAD
     images: photos.map(({ photoCode }) => photoCode),
+=======
+    images: filterValidImageUrls(photos.map(({ photoCode }) => process.env.NEXT_PUBLIC_S3_BASE_URL + photoCode)),
+>>>>>>> d1e2a25 (fix: 여행기록 조회 변경된 엔드포인트 적용)
     reactions: emojis.map(({ code, glyph, count }) => ({
       code,
       glyph,
@@ -213,8 +217,16 @@ export const createDiary = async (params: CreateDiaryParams, token?: string): Pr
  */
 export const getDiariesByUuid = async (uuid: string, token?: string): Promise<DiaryDetail[]> => {
   try {
+<<<<<<< HEAD
     const response = await apiGet<DiariesByUuidResponse>(`/api/v1/diaries?uuid=${uuid}`, {}, token);
     return response.data.diaryResponses.map((diaryData) => transformDiaryData(diaryData));
+=======
+    const response = await apiGet<DiariesByUuidResponse>(`/api/v1/diaries?uuid=${uuid}`, {}, authToken);
+    // 각 DiaryResponse의 diaries 배열을 순회하며 변환
+    return response.data.diaryResponses.flatMap((diaryResponse) =>
+      diaryResponse.diaries.map((diaryData) => transformDiaryData(diaryData)),
+    );
+>>>>>>> d1e2a25 (fix: 여행기록 조회 변경된 엔드포인트 적용)
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`여행 기록을 불러오는데 실패했습니다: ${error.message}`);

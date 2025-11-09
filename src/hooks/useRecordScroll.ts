@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Emoji } from "@/types/emoji";
 
 type RecordScrollItem = {
   id: string;
@@ -12,7 +13,7 @@ type RecordScrollItem = {
   userName: string;
   userAvatar?: string;
   description?: string;
-  reactions?: Array<{ emoji: string; count: number }>;
+  reactions?: Emoji[];
 };
 
 type UseRecordScrollParams = {

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Emoji } from "@/types/emoji";
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";
@@ -14,7 +15,7 @@ type RecordCardProps = {
   userName: string;
   userAvatar?: string;
   description?: string;
-  reactions?: Array<{ emoji: string; count: number }>;
+  reactions?: Emoji[];
 };
 
 export const RecordCard = ({
@@ -74,21 +75,13 @@ export const RecordCard = ({
       {/* 하단 영역 - 이모지 반응 */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        className="px-4 pt-4 flex-shrink-0"
+        className="px-4 pt-4 shrink-0"
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <RecordReactions
-          recordId={id}
-          initialReactions={
-            reactions?.map((r, idx) => ({
-              ...r,
-              id: `${id}-${r.emoji}-${idx}`,
-            })) || []
-          }
-        />
+        <RecordReactions recordId={id} initialReactions={reactions || []} />
       </div>
     </div>
   );

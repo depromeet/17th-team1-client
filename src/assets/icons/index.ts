@@ -21,3 +21,5 @@ export { default as SearchIcon } from "./search.svg";
 export { default as WarningIcon } from "./warning.svg";
 export { default as XIcon } from "./x.svg";
 export { default as LoadingIcon } from "./loading.svg";
+export { default as GlobberHeaderIcon } from "./globber-header.svg";
+export { default as GlobberLoginIcon } from "./globber-login.svg";

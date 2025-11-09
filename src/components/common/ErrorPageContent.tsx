@@ -27,7 +27,12 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
   };
 
   const handleRefresh = () => {
-    window.location.reload();
+    // 이전 페이지로 이동 (history가 있으면 back, 없으면 홈으로)
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
   };
 
   const getErrorContent = () => {

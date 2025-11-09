@@ -4,6 +4,7 @@ import { Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SearchIcon } from "@/assets/icons";
 import { useGoogleMapsScript } from "@/hooks/useGoogleMapsScript";
+import { cn } from "@/utils/cn";
 import { BaseInputBottomSheet } from "./BaseInputBottomSheet";
 
 export type LocationSelection = {
@@ -33,6 +34,7 @@ export const LocationSelectBottomSheet = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationSelection | null>(null);
+  const [activePlaceId, setActivePlaceId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasTyped, setHasTyped] = useState(false);
 
@@ -57,6 +59,7 @@ export const LocationSelectBottomSheet = ({
     setSearchQuery("");
     setPredictions([]);
     setSelectedLocation(null);
+    setActivePlaceId(null);
     setErrorMessage(null);
     setHasTyped(false);
   }, []);
@@ -89,6 +92,7 @@ export const LocationSelectBottomSheet = ({
     if (isOpen && !wasOpenRef.current) {
       if (initialLocation) {
         setSelectedLocation(initialLocation);
+        setActivePlaceId(initialLocation.placeId ?? null);
         setSearchQuery(initialLocation.name || initialLocation.address || "");
       } else {
         resetState();
@@ -162,6 +166,7 @@ export const LocationSelectBottomSheet = ({
   const handlePredictionSelect = (prediction: google.maps.places.AutocompletePrediction) => {
     if (!prediction.place_id || !placesServiceRef.current) return;
 
+    setActivePlaceId(prediction.place_id);
     setIsFetchingDetails(true);
     setErrorMessage(null);
 
@@ -194,15 +199,18 @@ export const LocationSelectBottomSheet = ({
         };
 
         setSelectedLocation(location);
-        setSearchQuery(name);
-        setPredictions([]);
+        setActivePlaceId(location.placeId ?? null);
       } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        setActivePlaceId(null);
         setErrorMessage("선택한 장소의 상세 정보를 찾을 수 없습니다.");
       } else if (status === window.google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
+        setActivePlaceId(null);
         setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
       } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
+        setActivePlaceId(null);
         setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
       } else {
+        setActivePlaceId(null);
         setErrorMessage("장소 정보를 불러오지 못했습니다.");
       }
     });
@@ -211,6 +219,7 @@ export const LocationSelectBottomSheet = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
     setSelectedLocation(null);
+    setActivePlaceId(null);
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -236,6 +245,7 @@ export const LocationSelectBottomSheet = ({
     setSelectedLocation(null);
     setPredictions([]);
     setErrorMessage(null);
+    setActivePlaceId(null);
   };
 
   const renderStatusMessage = () => {
@@ -278,7 +288,7 @@ export const LocationSelectBottomSheet = ({
           onKeyDown={handleInputKeyDown}
           placeholder="장소를 검색해주세요."
           disabled={isInputDisabled}
-          className={`w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl pl-12 pr-12 py-[14px] text-base transition-colors ${
+          className={`w-full bg-transparent outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl pl-12 pr-12 py-[14px] text-base transition-colors ${
             isInputDisabled ? "opacity-60 cursor-not-allowed" : ""
           }`}
         />
@@ -313,7 +323,7 @@ export const LocationSelectBottomSheet = ({
           {!isSearching && predictions.length > 0 && (
             <ul className="mt-6 flex flex-col gap-3">
               {predictions.map((prediction) => {
-                const isSelected = prediction.place_id === selectedLocation?.placeId;
+                const isSelected = prediction.place_id === (activePlaceId ?? selectedLocation?.placeId ?? null);
                 const mainText = prediction.structured_formatting?.main_text || prediction.description || "";
                 const secondaryText =
                   prediction.structured_formatting?.secondary_text || prediction.description || "상세 정보 없음";
@@ -322,9 +332,12 @@ export const LocationSelectBottomSheet = ({
                     <button
                       type="button"
                       onClick={() => handlePredictionSelect(prediction)}
-                      className={`w-full rounded-2xl border border-[#243246] bg-[#172233] px-4 py-4 text-left transition-colors ${
-                        isSelected ? "border-[#4DA3FF] bg-[#1B3A67]" : "hover:border-[#36506C] hover:bg-[#1C2B43]"
-                      }`}
+                      className={cn(
+                        "w-full rounded-2xl border px-4 py-4 text-left transition-colors cursor-pointer",
+                        isSelected
+                          ? "border-[#00D9FF] bg-transparent hover:border-[#00D9FF]"
+                          : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]",
+                      )}
                     >
                       <div className="font-bold text-white">{mainText}</div>
                       <div className="mt-1 text-sm text-text-secondary font-medium">{secondaryText}</div>
@@ -342,13 +355,6 @@ export const LocationSelectBottomSheet = ({
           {errorMessage && (
             <div className="mt-6 text-sm text-red-400" role="alert">
               {errorMessage}
-            </div>
-          )}
-
-          {selectedLocation && !isFetchingDetails && (
-            <div className="mt-6 rounded-2xl border border-[#00D9FF] bg-[#162235] px-4 py-4">
-              <div className="text-white font-bold">{selectedLocation.name}</div>
-              <div className="text-sm text-text-secondary font-medium mt-1">{selectedLocation.address}</div>
             </div>
           )}
 

@@ -183,19 +183,24 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map((city) => (
-                    <div
-                      key={`${group.countryCode}-${city.name}`}
-                      className="border rounded-[12px]"
-                      style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
-                    >
-                      <div className="flex gap-2 items-center px-[12px] py-[8px] rounded-[inherit] bg-[var(--color-surface-placeholder--8)]">
-                        <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
-                          {city.name}
-                        </p>
+                  {group.cities.map((city) => {
+                    // "도시명, 국가명" 형식에서 도시명만 추출
+                    const cityName = city.name.split(",")[0].trim();
+
+                    return (
+                      <div
+                        key={`${group.countryCode}-${city.name}`}
+                        className="border rounded-[12px]"
+                        style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
+                      >
+                        <div className="flex gap-2 items-center px-[12px] py-[8px] rounded-[inherit] bg-[var(--color-surface-placeholder--8)]">
+                          <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
+                            {cityName}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

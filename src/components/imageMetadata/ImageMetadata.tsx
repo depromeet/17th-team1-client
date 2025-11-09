@@ -135,13 +135,8 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
   // };
 
   const handleRemove = (id: string) => {
-    setMetadataList((prev) => {
-      const index = prev.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        setUploadedPhotos((photos) => photos.filter((_, i) => i !== index));
-      }
-      return prev.filter((item) => item.id !== id);
-    });
+    setMetadataList((prev) => prev.filter((item) => item.id !== id));
+    setUploadedPhotos((prev) => prev.filter((item) => item.metadata.id !== id));
   };
 
   const handleImageUpdate = (id: string, croppedImage: string) => {

@@ -348,6 +348,8 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         onClusterSelect,
         router,
         disableCityClick,
+        isFirstGlobe,
+        isMyGlobe,
       ],
     );
 

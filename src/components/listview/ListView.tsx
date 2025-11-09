@@ -32,6 +32,7 @@ type GroupedByCountry = {
     lat: number;
     lng: number;
     thumbnailUrl?: string;
+    thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
     hasRecords: boolean;
     cityId?: number;
   }>;
@@ -64,6 +65,7 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
             lat: country.lat,
             lng: country.lng,
             thumbnailUrl: country.thumbnailUrl,
+            thumbnails: country.thumbnails,
             hasRecords: country.hasRecords ?? false,
             cityId: country.cityId,
           });
@@ -215,7 +217,7 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
                           className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
                           style={{
                             paddingLeft: "12px",
-                            paddingRight: city.hasRecords && city.thumbnailUrl ? "8px" : "12px",
+                            paddingRight: city.hasRecords && city.thumbnails ? "8px" : "12px",
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
@@ -226,17 +228,61 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
                             {cityName}
                           </p>
                           {/* 여행기록이 있는 경우 썸네일 표시 */}
-                          {city.hasRecords && city.thumbnailUrl && (
-                            <div
-                              className="border border-white rounded-[4px] shrink-0 overflow-hidden"
-                              style={{ width: "24px", height: "24px" }}
-                            >
-                              <img
-                                src={city.thumbnailUrl}
-                                alt={cityName}
-                                className="w-full h-full object-cover"
-                                style={{ borderRadius: "4px" }}
-                              />
+                          {city.hasRecords && city.thumbnails && city.thumbnails.length > 0 && (
+                            <div className="flex items-center" style={{ position: "relative" }}>
+                              {city.thumbnails.length === 1 ? (
+                                // 썸네일이 1개인 경우
+                                <div
+                                  className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                  style={{ width: "24px", height: "24px" }}
+                                >
+                                  <img
+                                    src={city.thumbnails[0]}
+                                    alt={cityName}
+                                    className="w-full h-full object-cover"
+                                    style={{ borderRadius: "4px" }}
+                                  />
+                                </div>
+                              ) : (
+                                // 썸네일이 2개 이상인 경우 겹침 표시 (최대 2개)
+                                <>
+                                  {/* 이전 썸네일 (왼쪽, z-index 낮음) */}
+                                  <div
+                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      position: "relative",
+                                      zIndex: 1,
+                                      marginRight: "-8px",
+                                    }}
+                                  >
+                                    <img
+                                      src={city.thumbnails[1]}
+                                      alt={`${cityName} 이전`}
+                                      className="w-full h-full object-cover"
+                                      style={{ borderRadius: "4px" }}
+                                    />
+                                  </div>
+                                  {/* 최신 썸네일 (우측, z-index 높음) */}
+                                  <div
+                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      position: "relative",
+                                      zIndex: 2,
+                                    }}
+                                  >
+                                    <img
+                                      src={city.thumbnails[0]}
+                                      alt={`${cityName} 최신`}
+                                      className="w-full h-full object-cover"
+                                      style={{ borderRadius: "4px" }}
+                                    />
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>

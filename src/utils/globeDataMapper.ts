@@ -20,6 +20,7 @@ const REGION_COLORS = [
 export const mapGlobeDataToTravelPatterns = (
   globeData: GlobeData,
   cityThumbnails?: Record<number, string>,
+  cityThumbnailsArray?: Record<number, string[]>,
 ): TravelPattern[] => {
   if (!globeData.regions || globeData.regions.length === 0) {
     return [];
@@ -35,6 +36,7 @@ export const mapGlobeDataToTravelPatterns = (
     for (const city of region.cities) {
       const countryName = getCountryName(city.countryCode);
       const thumbnailUrl = cityThumbnails?.[city.cityId];
+      const thumbnails = cityThumbnailsArray?.[city.cityId];
 
       allCities.push({
         id: city.countryCode,
@@ -45,6 +47,7 @@ export const mapGlobeDataToTravelPatterns = (
         color: regionColor,
         hasRecords: !!thumbnailUrl, // 썸네일이 있으면 기록이 있는 것으로 간주
         thumbnailUrl, // 도시별 최신 사진 썸네일 (없으면 undefined)
+        thumbnails, // 도시별 썸네일 배열 (최대 2개, 최신순)
         cityId: city.cityId, // API에서 제공하는 도시 ID
       });
     }

@@ -8,6 +8,7 @@ export interface CountryData {
   cityId?: number; // API에서 제공하는 도시 ID
   hasRecords?: boolean; // 해당 국가 내 1개 이상의 도시 기록 여부
   thumbnailUrl?: string; // 가장 최근에 기록된 사진 (대표 이미지)
+  thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
 }
 
 export interface TravelPattern {

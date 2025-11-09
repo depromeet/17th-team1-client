@@ -5,6 +5,7 @@ const S3_BASE_URL = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.
 type DiaryThumbnails = {
   cityThumbnails: Record<number, string>;
   countryThumbnails: Record<string, string>;
+  cityThumbnailsArray: Record<number, string[]>; // 도시별 최대 2개의 썸네일 배열
 };
 
 /**
@@ -25,10 +26,12 @@ export const getDiaryThumbnails = (
     return {
       cityThumbnails: {},
       countryThumbnails: {},
+      cityThumbnailsArray: {},
     };
   }
 
   const cityThumbnailMap: Record<number, string> = {};
+  const cityThumbnailsArrayMap: Record<number, string[]> = {}; // 도시별 썸네일 배열
   const countryDiariesMap: Record<string, Array<{ thumbnailUrl: string; timestamp: number }>> = {};
 
   // 각 diaryResponse를 순회 (이미 city별로 그룹화되어 있음)
@@ -52,14 +55,29 @@ export const getDiaryThumbnails = (
     // 사진이 있는 가장 최신 diary 찾기
     let thumbnailUrl: string | null = null;
     let latestTimestamp = 0;
+    const thumbnailsArray: string[] = []; // 최대 2개의 썸네일 수집
 
     for (const diary of sortedDiaries) {
       if (diary.photos && Array.isArray(diary.photos) && diary.photos.length > 0) {
         const firstPhoto = diary.photos[0];
         if (firstPhoto.photoCode) {
-          thumbnailUrl = `${S3_BASE_URL}${firstPhoto.photoCode}`;
-          latestTimestamp = new Date(diary.updatedAt || diary.createdAt).getTime();
-          break;
+          const url = `${S3_BASE_URL}${firstPhoto.photoCode}`;
+
+          // 첫 번째 썸네일 (가장 최신)
+          if (!thumbnailUrl) {
+            thumbnailUrl = url;
+            latestTimestamp = new Date(diary.updatedAt || diary.createdAt).getTime();
+          }
+
+          // 최대 2개까지만 수집
+          if (thumbnailsArray.length < 2) {
+            thumbnailsArray.push(url);
+          }
+
+          // 2개 수집하면 종료
+          if (thumbnailsArray.length === 2) {
+            break;
+          }
         }
       }
     }
@@ -67,6 +85,7 @@ export const getDiaryThumbnails = (
     // 도시별 썸네일 저장
     if (thumbnailUrl) {
       cityThumbnailMap[cityId] = thumbnailUrl;
+      cityThumbnailsArrayMap[cityId] = thumbnailsArray;
 
       // 국가별 diaries 수집
       if (!countryDiariesMap[countryCode]) {
@@ -92,5 +111,6 @@ export const getDiaryThumbnails = (
   return {
     cityThumbnails: cityThumbnailMap,
     countryThumbnails: countryThumbnailMap,
+    cityThumbnailsArray: cityThumbnailsArrayMap,
   };
 };

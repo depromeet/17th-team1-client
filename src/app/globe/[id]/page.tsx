@@ -71,13 +71,18 @@ const GlobePage = () => {
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
         const diaryData = await getDiariesByUuid(urlUuid);
-        const { cityThumbnails, countryThumbnails: countryThumbMap } = getDiaryThumbnails(diaryData);
+        const { cityThumbnails, countryThumbnails: countryThumbMap, cityThumbnailsArray } =
+          getDiaryThumbnails(diaryData);
 
         // 국가 썸네일 state 설정
         setCountryThumbnails(countryThumbMap);
 
         if (globeResponse?.data) {
-          const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data, cityThumbnails);
+          const mappedPatterns = mapGlobeDataToTravelPatterns(
+            globeResponse.data,
+            cityThumbnails,
+            cityThumbnailsArray,
+          );
           setTravelPatterns(mappedPatterns);
 
           // 도시와 국가 개수 설정

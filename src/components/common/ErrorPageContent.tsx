@@ -6,6 +6,7 @@ import Error401Icon from "@/assets/icons/401_error.png";
 import Error404Icon from "@/assets/icons/404_erorr.png";
 import Error500Icon from "@/assets/icons/500_error.png";
 import { Button } from "@/components/common/Button";
+import { clearAllCookies } from "@/utils/cookies";
 
 type ErrorType = "401" | "404" | "500";
 
@@ -17,6 +18,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
   const router = useRouter();
 
   const handleLogin = () => {
+    clearAllCookies();
     router.push("/login");
   };
 

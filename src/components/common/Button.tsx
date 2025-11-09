@@ -136,7 +136,7 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
             alt="업로드된 이미지"
             width={90}
             height={90}
-            className="flex aspect-square w-full! shrink-0 items-center gap-10 self-stretch rounded-md object-cover"
+            className="flex aspect-square !w-full shrink-0 items-center gap-10 self-stretch rounded-md object-cover"
           />
         ) : (
           <>

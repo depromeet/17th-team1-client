@@ -173,7 +173,7 @@ export const EditProfileBottomSheet = ({
                 className={cn(
                   "w-full h-[50px] px-4 py-3.5",
                   "rounded-2xl border border-[rgba(255,255,255,0.04)]",
-                  "bg-linear-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)], bg-surface-thirdly",
+                  "bg-gradient-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)], bg-surface-thirdly",
                   "text-base font-medium text-white",
                   "placeholder:text-text-thirdly",
                   "outline-none focus:border-blue-theme transition-colors",

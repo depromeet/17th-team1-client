@@ -35,6 +35,11 @@ export type DiaryPhoto = {
   tag: ImageTag | null;
 };
 
+export type DiaryPhotoResponse = {
+  status: string;
+  data: DiaryPhoto;
+};
+
 export type DiaryEmoji = Emoji;
 
 export type DiaryData = {
@@ -137,6 +142,12 @@ export type CreateDiaryPhotoParams = {
 };
 
 export type CreateDiaryParams = {
+  cityId: number;
+  text?: string;
+  photos: CreateDiaryPhotoParams[];
+};
+
+export type UpdateDiaryParams = {
   cityId: number;
   text?: string;
   photos: CreateDiaryPhotoParams[];

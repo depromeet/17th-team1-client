@@ -2,14 +2,20 @@
 
 import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { processSingleFile } from "@/lib/processFile";
-import { createDiary, uploadTravelPhoto } from "@/services/diaryService";
+import {
+  addDiaryPhoto,
+  createDiary,
+  deleteDiaryPhoto,
+  getDiaryDetail,
+  updateDiary,
+  uploadTravelPhoto,
+} from "@/services/diaryService";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
 import { Header } from "../common/Header";
-// import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageCarousel } from "./ImageCarousel";
 import { LoadingOverlay } from "./LoadingOverlay";
 import type { LocationSelection } from "./LocationSelectBottomSheet";
@@ -17,6 +23,7 @@ import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
   cityId?: number;
+  diaryId?: number;
   initialCity?: string;
   initialCountry?: string;
 };
@@ -24,27 +31,117 @@ type ImageMetadataProps = {
 type UploadMetadata = ImageMetadata & {
   selectedTag?: ImageTag | null;
   customDate?: string | null;
+  photoId?: number;
+  photoCode?: string;
+  isExisting?: boolean;
 };
 
-type UploadedPhoto = {
-  photoCode: string;
-  metadata: ImageMetadata;
-  file: File;
+const normalizeTakenMonth = (value: string | { year: number; monthValue: number } | null | undefined) => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const digitsOnly = value.replace(/\D/g, "");
+    return digitsOnly.length >= 6 ? digitsOnly.slice(0, 6) : null;
+  }
+  const { year, monthValue } = value;
+  if (!year || !monthValue) return null;
+  return `${year}${String(monthValue).padStart(2, "0")}`;
 };
 
-export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: ImageMetadataProps) => {
+export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCountry }: ImageMetadataProps) => {
   const router = useRouter();
   const [metadataList, setMetadataList] = useState<UploadMetadata[]>([]);
-  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
   const [diaryText, setDiaryText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
   const fileUploadId = useId();
   const metadataCount = metadataList.length;
   const isCityIdValid = typeof cityId === "number" && Number.isFinite(cityId) && cityId > 0;
+  const isEditMode = typeof diaryId === "number" && Number.isFinite(diaryId);
 
   const handleBack = () => {
     router.back();
   };
+
+  useEffect(() => {
+    if (!isEditMode || typeof diaryId !== "number") return;
+    let isCancelled = false;
+
+    const fetchDiaryDetail = async () => {
+      setIsInitialLoading(true);
+      try {
+        const diary = await getDiaryDetail(diaryId);
+        if (isCancelled) return;
+
+        setDiaryText(diary.text ?? "");
+
+        const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "";
+        const mappedMetadata = diary.photos.map((photo, index) => {
+          const takenMonth = normalizeTakenMonth(
+            typeof photo.takenMonth === "string"
+              ? photo.takenMonth
+              : photo.takenMonth
+                ? { year: photo.takenMonth.year, monthValue: photo.takenMonth.monthValue }
+                : null,
+          );
+
+          const hasLat = typeof photo.lat === "number" && Number.isFinite(photo.lat);
+          const hasLng = typeof photo.lng === "number" && Number.isFinite(photo.lng);
+          const location =
+            (hasLat || hasLng || photo.placeName) && (photo.placeName || (hasLat && hasLng))
+              ? {
+                  latitude: hasLat ? photo.lat : undefined,
+                  longitude: hasLng ? photo.lng : undefined,
+                  altitude: undefined,
+                  address: photo.placeName ?? undefined,
+                  nearbyPlaces: photo.placeName ? [photo.placeName, photo.placeName] : undefined,
+                }
+              : undefined;
+
+          return {
+            id: `existing-${photo.photoId}-${index}`,
+            fileName: photo.photoCode.split("/").pop() ?? `photo-${photo.photoId}`,
+            fileSize: 0,
+            fileType: "image/jpeg",
+            imagePreview: `${baseUrl}${photo.photoCode}`,
+            dimensions:
+              photo.width && photo.height
+                ? {
+                    width: photo.width,
+                    height: photo.height,
+                  }
+                : undefined,
+            location,
+            timestamp: undefined,
+            tag: photo.tag ?? "NONE",
+            status: "completed" as const,
+            selectedTag: photo.tag && photo.tag !== "NONE" ? photo.tag : null,
+            customDate: takenMonth,
+            photoId: photo.photoId,
+            photoCode: photo.photoCode,
+            isExisting: true,
+          };
+        });
+
+        setMetadataList(mappedMetadata);
+      } catch (error) {
+        if (!isCancelled) {
+          alert(error instanceof Error ? error.message : "여행 기록 정보를 불러오지 못했습니다.");
+          router.back();
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsInitialLoading(false);
+        }
+      }
+    };
+
+    fetchDiaryDetail();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [diaryId, isEditMode, router]);
 
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,20 +180,58 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
           uploadTravelPhoto(file).then((photoCode) => ({
             photoCode,
             metadata,
-            file,
           })),
         );
 
         const uploadedResults = await Promise.all(uploadPromises);
+        const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
 
-        const mappedMetadata = uploadedResults.map((r) => ({
-          ...r.metadata,
-          selectedTag: r.metadata.tag && r.metadata.tag !== "NONE" ? r.metadata.tag : null,
-          customDate: toYearMonth(r.metadata.timestamp),
-        }));
+        const mappedMetadata = await Promise.all(
+          uploadedResults.map(async ({ metadata, photoCode }) => {
+            const selectedTag = metadata.tag && metadata.tag !== "NONE" ? metadata.tag : null;
+            const baseTakenMonth = toYearMonth(metadata.timestamp);
+            const takenMonthForRequest = baseTakenMonth ?? fallbackMonth;
+            const width = metadata.dimensions?.width ?? 1;
+            const height = metadata.dimensions?.height ?? 1;
+            const latitude = metadata.location?.latitude;
+            const longitude = metadata.location?.longitude;
+            const placeName = metadata.location?.address;
+
+            let photoId: number | undefined;
+
+            if (isEditMode && typeof diaryId === "number") {
+              const normalizedTag = selectedTag ?? metadata.tag ?? "NONE";
+              const photoPayload = {
+                photoCode,
+                lat: latitude,
+                lng: longitude,
+                width,
+                height,
+                takenMonth: takenMonthForRequest,
+                tag: normalizedTag,
+                placeName,
+              };
+
+              try {
+                const createdPhoto = await addDiaryPhoto(diaryId, photoPayload);
+                photoId = createdPhoto.photoId;
+              } catch (error) {
+                throw error;
+              }
+            }
+
+            return {
+              ...metadata,
+              selectedTag,
+              customDate: baseTakenMonth ?? null,
+              photoCode,
+              photoId,
+              isExisting: Boolean(photoId),
+            };
+          }),
+        );
 
         setMetadataList((prev) => (prev.length > 0 ? [...prev, ...mappedMetadata] : mappedMetadata));
-        setUploadedPhotos((prev) => [...prev, ...uploadedResults]);
       } catch (error) {
         alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
       } finally {
@@ -104,41 +239,28 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
         setIsProcessing(false);
       }
     },
-    [metadataCount],
+    [metadataCount, isEditMode, diaryId],
   );
 
-  // TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용
-  // const handleLocationClick = (metadata: ImageMetadata) => {
-  //   setSelectedImageForMaps(metadata);
-  //   setIsMapsModalOpen(true);
-  // };
+  const handleRemove = async (id: string) => {
+    const target = metadataList.find((item) => item.id === id);
+    if (!target) return;
 
-  // const handleLocationUpdate = (lat: number, lng: number, address: string) => {
-  //   if (!selectedImageForMaps) return;
+    if (target.photoId && isEditMode && typeof diaryId === "number") {
+      try {
+        setDeletingPhotoId(id);
+        await deleteDiaryPhoto(diaryId, target.photoId);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "사진 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        alert(errorMessage);
+        throw error;
+      } finally {
+        setDeletingPhotoId(null);
+      }
+    }
 
-  //   // 새로운 위치 정보로 업데이트
-  //   const updatedLocation = {
-  //     latitude: lat,
-  //     longitude: lng,
-  //     altitude: selectedImageForMaps.location?.altitude,
-  //     address: address,
-  //     nearbyPlaces: [address], // 기본적으로 선택된 주소만 포함
-  //   };
-
-  //   // 메타데이터 리스트 업데이트
-  //   setMetadataList((prev) =>
-  //     prev.map((item) => (item.id === selectedImageForMaps.id ? { ...item, location: updatedLocation } : item)),
-  //   );
-
-  //   // 현재 선택된 이미지도 업데이트
-  //   if (selectedImage?.id === selectedImageForMaps.id) {
-  //     setSelectedImage((prev) => (prev ? { ...prev, location: updatedLocation } : null));
-  //   }
-  // };
-
-  const handleRemove = (id: string) => {
     setMetadataList((prev) => prev.filter((item) => item.id !== id));
-    setUploadedPhotos((prev) => prev.filter((item) => item.metadata.id !== id));
   };
 
   const handleImageUpdate = (id: string, croppedImage: string) => {
@@ -197,16 +319,65 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
     try {
       const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
 
-      const photos = metadataList.map((metadata) => {
-        const uploaded = uploadedPhotos.find((item) => item.metadata.id === metadata.id);
-        if (!uploaded) {
-          throw new Error("업로드된 이미지 정보를 찾을 수 없습니다.");
+      let currentMetadataList = metadataList;
+
+      if (isEditMode && typeof diaryId === "number") {
+        const withoutPhotoId = metadataList.filter((item) => item.photoId == null);
+
+        if (withoutPhotoId.length > 0) {
+          const createdPhotos = await Promise.all(
+            withoutPhotoId.map(async (metadata) => {
+              if (!metadata.photoCode) {
+                throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
+              }
+
+              const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+              const width = dimensions?.width ?? 1;
+              const height = dimensions?.height ?? 1;
+              const takenMonthValue = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
+              const normalizedTag = selectedTag ?? tag ?? "NONE";
+              const latitude = location?.latitude;
+              const longitude = location?.longitude;
+              const placeName = location?.address;
+
+              const payload = {
+                photoCode: metadata.photoCode,
+                lat: latitude,
+                lng: longitude,
+                width,
+                height,
+                takenMonth: takenMonthValue,
+                tag: normalizedTag,
+                placeName,
+              };
+
+              const createdPhoto = await addDiaryPhoto(diaryId, payload);
+              return { targetId: metadata.id, photoId: createdPhoto.photoId };
+            }),
+          );
+
+          currentMetadataList = metadataList.map((item) => {
+            const created = createdPhotos.find((c) => c.targetId === item.id);
+            if (!created) return item;
+            return {
+              ...item,
+              photoId: created.photoId,
+              isExisting: true,
+            };
+          });
+
+          setMetadataList(currentMetadataList);
+        }
+      }
+
+      const photos = currentMetadataList.map((metadata) => {
+        if (!metadata.photoCode) {
+          throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
         }
 
-        const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+        const { location, dimensions, customDate, timestamp, selectedTag, tag, photoId } = metadata;
         const width = dimensions?.width ?? 0;
         const height = dimensions?.height ?? 0;
-        const { photoCode } = uploaded;
         const takenMonth = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
         const normalizedTag = selectedTag ?? tag ?? "NONE";
         const latitude = location?.latitude;
@@ -214,7 +385,8 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
         const placeName = location?.address;
 
         return {
-          photoCode,
+          photoId,
+          photoCode: metadata.photoCode,
           lat: latitude,
           lng: longitude,
           width,
@@ -226,11 +398,17 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
       });
 
       const validCityId = cityId as number;
-      await createDiary({
+      const payload = {
         cityId: validCityId,
         text: diaryText || undefined,
         photos,
-      });
+      };
+
+      if (isEditMode && typeof diaryId === "number") {
+        await updateDiary(diaryId, payload);
+      } else {
+        await createDiary(payload);
+      }
 
       const { uuid } = getAuthInfo();
       const nextPath = uuid ? `/record/${validCityId}?uuid=${uuid}` : `/record/${validCityId}`;
@@ -277,14 +455,14 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-black text-white">
-      <LoadingOverlay show={isProcessing} />
+      <LoadingOverlay show={isProcessing || isInitialLoading || Boolean(deletingPhotoId)} />
       <Header
         title={headerTitle}
         variant="dark"
         leftIcon="back"
         onLeftClick={handleBack}
         rightButtonTitle="저장"
-        rightButtonDisabled={!hasImages || isProcessing || !isCityIdValid}
+        rightButtonDisabled={!hasImages || isProcessing || isInitialLoading || !isCityIdValid}
         onRightClick={handleSave}
       />
       <div
@@ -312,6 +490,7 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
             <ImageCarousel
               image={metadata}
               onRemove={handleRemove}
+              isProcessing={deletingPhotoId === metadata.id}
               onImageUpdate={handleImageUpdate}
               onTagChange={(tag) => handleTagChange(metadata.id, tag)}
               onDateChange={(yearMonth) => handleDateChange(metadata.id, yearMonth)}
@@ -342,13 +521,6 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
       <div className="px-4">
         <MemoryTextarea value={diaryText} onChange={setDiaryText} />
       </div>
-      {/* TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용 */}
-      {/* <GoogleMapsModal
-        isOpen={isMapsModalOpen}
-        onClose={() => setIsMapsModalOpen(false)}
-        imageMetadata={selectedImageForMaps}
-        onLocationUpdate={handleLocationUpdate}
-      /> */}
     </div>
   );
 };

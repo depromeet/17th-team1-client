@@ -18,7 +18,7 @@ export interface ImageMetadata {
   dimensions?: { width: number; height: number };
   camera?: { make: string; model: string; software: string };
   settings?: { iso: number; aperture: number; shutterSpeed: string; focalLength: number; flash: boolean };
-  location?: { latitude: number; longitude: number; altitude?: number; address?: string; nearbyPlaces?: string[] };
+  location?: { latitude?: number; longitude?: number; altitude?: number; address?: string; nearbyPlaces?: string[] };
   timestamp?: string;
   orientation?: number;
   tag?: ImageTag;

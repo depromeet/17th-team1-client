@@ -1,11 +1,16 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import type {
   CreateDiaryParams,
+  CreateDiaryPhotoParams,
   CreateDiaryResponse,
   DiariesByUuidResponse,
   DiariesListResponse,
   DiaryData,
   DiaryDetail,
+  DiaryDetailResponse,
+  DiaryPhoto,
+  DiaryPhotoResponse,
+  UpdateDiaryParams,
 } from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
 import { getS3UploadUrl } from "./profileService";
@@ -125,6 +130,40 @@ export const createDiary = async (params: CreateDiaryParams, token?: string): Pr
 };
 
 /**
+ * 여행기록 상세 정보를 조회합니다.
+ *
+ * @param {string | number} diaryId - 조회할 diary의 ID
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<DiaryData>} 여행 기록 상세 정보
+ * @throws 데이터 조회 실패 시 에러 발생
+ *
+ * @example
+ * const diary = await getDiaryDetail(1);
+ */
+export const getDiaryDetail = async (diaryId: string | number, token?: string): Promise<DiaryData> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  try {
+    const response = await apiGet<DiaryDetailResponse>(`/api/v1/diaries/${diaryId}`, undefined, authToken);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록을 불러오는데 실패했습니다: $error.message`);
+    }
+    throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
+/**
  * UUID로 특정 사용자의 모든 여행기록을 조회합니다.
  *
  * @param {string} uuid - 조회할 사용자의 UUID
@@ -178,6 +217,79 @@ export const deleteDiary = async (diaryId: string | number, token?: string): Pro
 };
 
 /**
+ * 여행기록에서 특정 사진을 삭제합니다.
+ *
+ * @param {string | number} diaryId - 사진이 속한 diary의 ID
+ * @param {number} photoId - 삭제할 사진 ID
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<void>}
+ * @throws 데이터 삭제 실패 시 에러 발생
+ *
+ * @example
+ * await deleteDiaryPhoto(1, 10);
+ */
+export const deleteDiaryPhoto = async (diaryId: string | number, photoId: number, token?: string): Promise<void> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  try {
+    await apiDelete(`/api/v1/diaries/photo/${diaryId}/${photoId}`, undefined, authToken);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록 사진 삭제에 실패했습니다: $error.message`);
+    }
+    throw new Error("여행 기록 사진 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
+/**
+ * 기존 여행기록에 사진을 추가합니다.
+ *
+ * @param {string | number} diaryId - 사진을 추가할 diary의 ID
+ * @param {CreateDiaryPhotoParams} photo - 추가할 사진 정보
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<DiaryPhoto>} 추가된 사진 정보
+ * @throws API 요청 실패 시 에러 발생
+ *
+ * @example
+ * const photo = await addDiaryPhoto(1, { photoCode, width: 100, height: 100, takenMonth: "202501" });
+ */
+export const addDiaryPhoto = async (
+  diaryId: string | number,
+  photo: CreateDiaryPhotoParams,
+  token?: string,
+): Promise<DiaryPhoto> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  try {
+    const response = await apiPost<DiaryPhotoResponse>(`/api/v1/diaries/photo/${diaryId}`, photo, authToken);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록 사진 추가에 실패했습니다: $error.message`);
+    }
+    throw new Error("여행 기록 사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
+/**
  * 특정 UUID의 모든 여행 기록을 조회합니다.
  * Authorization 토큰이 필요하지 않습니다.
  *
@@ -201,5 +313,47 @@ export const getDiariesList = async (uuid: string) => {
   } catch (error) {
     console.error("여행기록 조회에 실패했습니다.", error);
     return [];
+  }
+};
+
+/**
+ * 여행기록을 수정합니다.
+ *
+ * @param {string | number} diaryId - 수정할 diary의 ID
+ * @param {UpdateDiaryParams} params - 수정할 내용
+ * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @returns {Promise<void>}
+ * @throws 데이터 수정 실패 시 에러 발생
+ *
+ * @example
+ * await updateDiary(1, {
+ *   cityId: 123,
+ *   text: "여행 기록 수정",
+ *   photos: [...]
+ * });
+ */
+export const updateDiary = async (
+  diaryId: string | number,
+  params: UpdateDiaryParams,
+  token?: string,
+): Promise<void> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  try {
+    await apiPut(`/api/v1/diaries/${diaryId}`, params, authToken);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`여행 기록 수정에 실패했습니다: $error.message`);
+    }
+    throw new Error("여행 기록 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

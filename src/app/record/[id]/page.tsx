@@ -136,6 +136,7 @@ const RecordDetailPage = () => {
   const handleEdit = () => {
     if (!currentRecord) return;
     const params = new URLSearchParams();
+    params.set("diaryId", currentRecord.id);
     params.set("cityId", String(currentRecord.cityId));
     params.set("country", currentRecord.country);
     params.set("city", currentRecord.city);

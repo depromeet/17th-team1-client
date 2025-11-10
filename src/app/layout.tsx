@@ -26,13 +26,6 @@ export default function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <meta property="og:title" content="Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!" />
-        <meta property="og:description" content="지구본으로 완성하는 여행 기록 서비스" />
-        <meta property="og:image" content="https://www.globber.world/assets/thumbnail.png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.globber.world" />
       </head>
       <body
         className="antialiased min-h-screen"

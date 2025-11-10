@@ -11,6 +11,7 @@ import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
+import { useMetadataUpdate } from "@/hooks/useMetadataUpdate";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
@@ -45,6 +46,9 @@ const GlobePage = () => {
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
     useGlobeState(travelPatterns);
+
+  // OG 메타데이터 업데이트
+  useMetadataUpdate(nickname || null, urlUuid || null);
 
   // 이전 경로 확인 (sessionStorage 사용)
   useEffect(() => {

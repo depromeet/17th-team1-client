@@ -1,7 +1,14 @@
 import { ImageMetadataComponent } from "@/components/imageMetadata/ImageMetadata";
 import type { PageProps } from "@/types/components";
 
-type ImageMetadataPageProps = PageProps<never, { cityId?: string; city?: string; country?: string }>;
+type ImageMetadataQuery = {
+  cityId?: string;
+  city?: string;
+  country?: string;
+  diaryId?: string;
+};
+
+type ImageMetadataPageProps = PageProps<never, ImageMetadataQuery>;
 
 export default async function Page({ searchParams }: ImageMetadataPageProps) {
   const params = await searchParams;
@@ -10,5 +17,17 @@ export default async function Page({ searchParams }: ImageMetadataPageProps) {
     rawCityId && rawCityId !== "undefined" && rawCityId !== "null" ? Number.parseInt(rawCityId, 10) : undefined;
   const cityId = typeof parsedCityId === "number" && Number.isFinite(parsedCityId) ? parsedCityId : undefined;
 
-  return <ImageMetadataComponent cityId={cityId} initialCity={params?.city} initialCountry={params?.country} />;
+  const rawDiaryId = params?.diaryId?.trim();
+  const parsedDiaryId =
+    rawDiaryId && rawDiaryId !== "undefined" && rawDiaryId !== "null" ? Number.parseInt(rawDiaryId, 10) : undefined;
+  const diaryId = typeof parsedDiaryId === "number" && Number.isFinite(parsedDiaryId) ? parsedDiaryId : undefined;
+
+  return (
+    <ImageMetadataComponent
+      cityId={cityId}
+      diaryId={diaryId}
+      initialCity={params?.city}
+      initialCountry={params?.country}
+    />
+  );
 }

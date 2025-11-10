@@ -12,7 +12,14 @@ interface MetadataChipProps {
   isPlaceholder?: boolean;
 }
 
-export const MetadataChip = ({ iconType = "custom", icon, text, onRemove, onClick, isPlaceholder = false }: MetadataChipProps) => {
+export const MetadataChip = ({
+  iconType = "custom",
+  icon,
+  text,
+  onRemove,
+  onClick,
+  isPlaceholder = false,
+}: MetadataChipProps) => {
   const renderIcon = () => {
     if (iconType === "calendar") {
       return <CalendarIcon width={16} height={16} />;

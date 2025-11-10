@@ -159,7 +159,16 @@ export const apiPut = async <T>(endpoint: string, data?: unknown, token?: string
     });
 
     if (!response.ok) {
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const responseText = await response.text();
+        if (responseText) {
+          errorMessage += ` - ${responseText}`;
+        }
+      } catch {
+        // ignore parsing errors
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);

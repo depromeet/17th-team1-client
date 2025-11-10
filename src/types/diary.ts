@@ -52,7 +52,6 @@ export type DiaryDetailResponse = {
   data: DiaryData;
 };
 
-<<<<<<< HEAD
 export type CreateDiaryResponse = {
   status: string;
   data: {
@@ -64,11 +63,11 @@ export type CreateDiaryResponse = {
     photos: DiaryPhoto[];
     emojis: DiaryEmoji[];
   };
-=======
+};
+
 export type DiaryResponse = {
   city: DiaryCity;
   diaries: DiaryData[];
->>>>>>> d1e2a25 (fix: 여행기록 조회 변경된 엔드포인트 적용)
 };
 
 export type DiariesByUuidResponse = {

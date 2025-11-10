@@ -12,7 +12,7 @@ import ListView from "@/components/listview/ListView";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getBookmarks } from "@/services/bookmarkService";
-import { getDiariesByUuid } from "@/services/diaryService";
+import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
@@ -81,7 +81,7 @@ const GlobePage = () => {
         }
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
-        const diaryData = await getDiariesByUuid(urlUuid);
+        const diaryData = await getDiariesList(urlUuid);
         const {
           cityThumbnails,
           countryThumbnails: countryThumbMap,

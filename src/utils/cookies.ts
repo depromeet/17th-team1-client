@@ -10,13 +10,27 @@ export const getCookie = (name: string): string | null => {
   return value || null;
 };
 
+// 쿠키에 값을 저장하는 유틸 함수 (클라이언트 전용)
+export const setCookie = (name: string, value: string, options?: { maxAge?: number }): void => {
+  if (typeof document === "undefined") return;
+
+  let cookieString = `${name}=${encodeURIComponent(value)}`;
+  if (options?.maxAge) {
+    cookieString += `; Max-Age=${options.maxAge}`;
+  }
+  cookieString += "; path=/";
+
+  document.cookie = cookieString;
+};
+
 // 쿠키에서 토큰과 멤버 ID를 가져오는 함수 (클라이언트 전용)
 export const getAuthInfo = () => {
   const token = getCookie("kakao_access_token");
   const memberId = getCookie("member_id");
   const uuid = getCookie("uuid");
+  const nickname = getCookie("nickname");
 
-  return { token, memberId, uuid };
+  return { token, memberId, uuid, nickname };
 };
 
 /**

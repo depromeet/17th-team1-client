@@ -216,7 +216,9 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
                 const createdPhoto = await addDiaryPhoto(diaryId, photoPayload);
                 photoId = createdPhoto.photoId;
               } catch (error) {
-                throw error;
+                // throw error;
+                console.error(error);
+                throw new Error("사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
               }
             }
 

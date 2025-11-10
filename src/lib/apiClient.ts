@@ -42,6 +42,21 @@ const parseJsonSafely = async <T>(response: Response): Promise<T> => {
   return JSON.parse(bodyText) as T;
 };
 
+/**
+ * 클라이언트 사이드에서 401/500 에러를 자동으로 에러 페이지로 리다이렉트합니다.
+ * 서버 사이드에서는 에러를 그대로 throw하여 서버 컴포넌트의 error.tsx에서 처리합니다.
+ */
+const handleGlobalError = (status: number): void => {
+  // 클라이언트 사이드에서만 자동 리다이렉트
+  if (typeof window === "undefined") return;
+
+  if (status === 401) {
+    window.location.href = "/error?type=401";
+  } else if (status >= 500) {
+    window.location.href = "/error?type=500";
+  }
+};
+
 export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
@@ -75,6 +90,11 @@ export const apiGet = async <T>(
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
       const apiError = new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+
+      // 401/500 에러는 전역으로 처리 (클라이언트 사이드에서만 자동 리다이렉트)
+      // 서버 사이드에서는 에러를 그대로 throw하여 서버 컴포넌트의 error.tsx에서 처리
+      handleGlobalError(response.status);
+
       // 404와 5xx 서버 에러를 제외하고만 로그 출력
       if (response.status !== 404 && response.status < 500) {
         logger.error(`API GET Error (${endpoint}):`, apiError);
@@ -115,6 +135,7 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
     if (!response.ok) {
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
+
       throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
@@ -169,6 +190,7 @@ export const apiPatch = async <T>(endpoint: string, data?: unknown, token?: stri
     if (!response.ok) {
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
+
       throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
@@ -202,6 +224,7 @@ export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: str
     if (!response.ok) {
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
+
       throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 

@@ -42,3 +42,42 @@ export const getValidatedAuthToken = (token?: string): string => {
 
   return authToken;
 };
+
+/**
+ * 모든 쿠키를 삭제합니다.
+ * 클라이언트 전용 함수입니다.
+ */
+export const clearAllCookies = (): void => {
+  if (typeof document === "undefined") return;
+
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === "localhost" || /^[0-9.]+$/.test(hostname);
+
+  // domain 후보: (1) 지정 안 함, (2) 현재 호스트, (3) 부모 도메인들(.example.com 등)
+  const parentDomains = isLocalhost
+    ? []
+    : (() => {
+        const parts = hostname.split(".");
+        const acc: string[] = [];
+        for (let i = 1; i < parts.length - 0; i++) {
+          const d = `.${parts.slice(i).join(".")}`;
+          acc.push(d);
+        }
+        return Array.from(new Set([hostname, ...acc]));
+      })();
+
+  const domainCandidates: (string | undefined)[] = [undefined, ...parentDomains];
+
+  // 모든 쿠키 가져오기
+  const allCookies = document.cookie.split("; ");
+
+  // 각 쿠키를 모든 도메인 후보에 대해 삭제
+  for (const cookie of allCookies) {
+    const cookieName = cookie.split("=")[0];
+    for (const d of domainCandidates) {
+      const domainAttr = d ? `; domain=${d}` : "";
+      // biome-ignore lint/suspicious/noDocumentCookie: 쿠키 삭제를 위해 document.cookie에 직접 할당해야 합니다.
+      document.cookie = `${cookieName}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainAttr}`;
+    }
+  }
+};

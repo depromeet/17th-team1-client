@@ -1,4 +1,4 @@
-import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
+import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 import type { GlobeData } from "@/types/member";
 import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
@@ -17,7 +17,11 @@ const REGION_COLORS = [
 ];
 
 // GlobeData를 하나의 TravelPattern으로 변환 (모든 국가를 한번에 표시)
-export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPattern[] => {
+export const mapGlobeDataToTravelPatterns = (
+  globeData: GlobeData,
+  cityThumbnails?: Record<number, string>,
+  cityThumbnailsArray?: Record<number, string[]>,
+): TravelPattern[] => {
   if (!globeData.regions || globeData.regions.length === 0) {
     return [];
   }
@@ -29,17 +33,22 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
   for (const region of globeData.regions) {
     const regionColor = REGION_COLORS[colorIndex % REGION_COLORS.length];
 
-    for (const { countryCode, name, lat, lng, cityId } of region.cities) {
+    for (const { countryCode, cityId, name, lat, lng } of region.cities) {
+      const countryName = getCountryName(countryCode);
+      const thumbnailUrl = cityThumbnails?.[cityId];
+      const thumbnails = cityThumbnailsArray?.[cityId];
+
       allCities.push({
         id: countryCode,
-        name,
+        name: `${name}, ${countryName}`, // "도시명, 국가명" 형식으로 저장
         flag: COUNTRY_CODE_TO_FLAG[countryCode] || "🌍",
         lat,
-        lng: lng,
+        lng,
         color: regionColor,
+        hasRecords: !!thumbnailUrl, // 썸네일이 있으면 기록이 있는 것으로 간주
+        thumbnailUrl, // 도시별 최신 사진 썸네일 (없으면 undefined)
+        thumbnails, // 도시별 썸네일 배열 (최대 2개, 최신순)
         cityId, // API에서 제공하는 도시 ID
-        hasRecords: true, // API 응답에 있는 도시는 모두 기록이 있는 것으로 간주
-        thumbnailUrl: "https://picsum.photos/30/40", // TODO: API에서 thumbnailUrl 제공 시 추가
       });
     }
 

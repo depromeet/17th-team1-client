@@ -6,6 +6,7 @@ import { useCallback, useId, useState } from "react";
 import { processSingleFile } from "@/lib/processFile";
 import { createDiary, uploadTravelPhoto } from "@/services/diaryService";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
+import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
 import { Header } from "../common/Header";
 // import { GoogleMapsModal } from "./GoogleMapsModal";
@@ -225,13 +226,16 @@ export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: 
       });
 
       const validCityId = cityId as number;
-      const diaryId = await createDiary({
+      await createDiary({
         cityId: validCityId,
         text: diaryText || undefined,
         photos,
       });
 
-      router.push(`/record/${diaryId}`);
+      const { uuid } = getAuthInfo();
+      const nextPath = uuid ? `/record/${validCityId}?uuid=${uuid}` : `/record/${validCityId}`;
+
+      router.push(nextPath);
     } catch (error) {
       alert(error instanceof Error ? error.message : "여행기록 저장에 실패했습니다.");
       setIsProcessing(false);

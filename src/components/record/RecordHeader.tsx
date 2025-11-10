@@ -2,12 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { ICArrowLeftIcon } from "@/assets/icons";
+import { getAuthInfo } from "@/utils/cookies";
 
 export function RecordHeader() {
   const router = useRouter();
 
   const handleBackClick = () => {
-    router.push("/globe");
+    const { uuid } = getAuthInfo();
+    if (uuid) {
+      router.push(`/globe/${uuid}`);
+    }
   };
 
   const handleEditClick = () => {

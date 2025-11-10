@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { getContinent, getCountryName } from "@/constants/countryMapping";
@@ -19,6 +20,7 @@ const CONTINENT_DISPLAY_NAME: Record<KoreanContinent, string> = {
 
 type ListViewProps = {
   travelPatterns: TravelPattern[];
+  uuid?: string;
 };
 
 type GroupedByCountry = {
@@ -30,10 +32,15 @@ type GroupedByCountry = {
     name: string;
     lat: number;
     lng: number;
+    thumbnailUrl?: string;
+    thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
+    hasRecords: boolean;
+    cityId?: number;
   }>;
 };
 
-const ListView = ({ travelPatterns }: ListViewProps) => {
+const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
+  const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
   // travelPatterns의 countries를 countryCode로 그룹화
@@ -58,6 +65,10 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
             name: country.name,
             lat: country.lat,
             lng: country.lng,
+            thumbnailUrl: country.thumbnailUrl,
+            thumbnails: country.thumbnails,
+            hasRecords: country.hasRecords ?? false,
+            cityId: country.cityId,
           });
         }
       });
@@ -110,8 +121,15 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
     return counts;
   }, [travelPatterns]);
 
+  // 여행 기록이 있는 대륙을 앞에, 없는 대륙을 뒤에 배치 (원래 순서 유지)
+  const sortedContinents = useMemo(() => {
+    const withRecords = CONTINENTS.filter((continent) => continentCounts[continent] > 0);
+    const withoutRecords = CONTINENTS.filter((continent) => continentCounts[continent] === 0);
+    return [...withRecords, ...withoutRecords];
+  }, [continentCounts]);
+
   return (
-    <div className="w-full h-full relative overflow-y-auto">
+    <div className="w-full h-full relative overflow-y-auto scrollbar-hide">
       <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto">
         {/* 탭 영역 */}
         <div className="flex gap-2 items-center px-4 py-5 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -129,7 +147,7 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
           </button>
 
           {/* 대륙 탭 */}
-          {CONTINENTS.map((continent) => {
+          {sortedContinents.map((continent) => {
             const isDisabled = continentCounts[continent] === 0;
             return (
               <button
@@ -183,19 +201,98 @@ const ListView = ({ travelPatterns }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map((city) => (
-                    <div
-                      key={`${group.countryCode}-${city.name}`}
-                      className="border rounded-[12px]"
-                      style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
-                    >
-                      <div className="flex gap-2 items-center px-[12px] py-[8px] rounded-[inherit] bg-[var(--color-surface-placeholder--8)]">
-                        <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
-                          {city.name}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                  {group.cities.map(({ cityId, name, hasRecords, thumbnails }) => {
+                    // "도시명, 국가명" 형식에서 도시명만 추출
+                    const cityName = name.split(",")[0].trim();
+                    const isClickable = hasRecords && cityId;
+
+                    const handleCityClick = () => {
+                      const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
+                      router.push(path);
+                    };
+
+                    return (
+                      <button
+                        key={`${group.countryCode}-${name}`}
+                        type="button"
+                        className="border rounded-[12px]"
+                        style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
+                        onClick={handleCityClick}
+                        disabled={!isClickable}
+                      >
+                        <div
+                          className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
+                          style={{
+                            paddingLeft: "12px",
+                            paddingRight: hasRecords && thumbnails ? "8px" : "12px",
+                            paddingTop: "7px",
+                            paddingBottom: "7px",
+                            height: "100%",
+                            cursor: isClickable ? "pointer" : "default",
+                          }}
+                        >
+                          <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
+                            {cityName}
+                          </p>
+                          {/* 여행기록이 있는 경우 썸네일 표시 */}
+                          {hasRecords && thumbnails && thumbnails.length > 0 && (
+                            <div className="flex items-center" style={{ position: "relative" }}>
+                              {thumbnails.length === 1 ? (
+                                // 썸네일이 1개인 경우
+                                <div
+                                  className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                  style={{ width: "24px", height: "24px" }}
+                                >
+                                  <img
+                                    src={thumbnails[0]}
+                                    alt={cityName}
+                                    className="w-full h-full object-cover rounded-[4px]"
+                                  />
+                                </div>
+                              ) : (
+                                // 썸네일이 2개 이상인 경우 겹침 표시 (최대 2개)
+                                <>
+                                  {/* 이전 썸네일 (왼쪽, z-index 낮음) */}
+                                  <div
+                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      position: "relative",
+                                      zIndex: 1,
+                                      marginRight: "-8px",
+                                    }}
+                                  >
+                                    <img
+                                      src={thumbnails[1]}
+                                      alt={`${cityName} 이전`}
+                                      className="w-full h-full object-cover rounded-[4px]"
+                                    />
+                                  </div>
+                                  {/* 최신 썸네일 (우측, z-index 높음) */}
+                                  <div
+                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      position: "relative",
+                                      zIndex: 2,
+                                    }}
+                                  >
+                                    <img
+                                      src={thumbnails[0]}
+                                      alt={`${cityName} 최신`}
+                                      className="w-full h-full object-cover rounded-[4px]"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

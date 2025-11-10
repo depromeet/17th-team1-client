@@ -52,6 +52,35 @@ export type DiaryDetailResponse = {
   data: DiaryData;
 };
 
+export type DiariesListResponse = {
+  status: string;
+  data: {
+    diaryResponses: {
+      city: DiaryCity;
+      /* 충돌 우려하여 별도로 타입 작성. 추후 공통 타입으로 변경 */
+      diaries: {
+        diaryId: number;
+        city: DiaryCity;
+        text: string;
+        createdAt: string;
+        updatedAt: string;
+        photos: {
+          photoId: number;
+          photoCode: string;
+          lat: number;
+          lng: number;
+          width: number;
+          height: number;
+          takenMonth: string;
+          placeName: string;
+          tag: string;
+        }[];
+        emojis: DiaryEmoji[];
+      }[];
+    }[];
+  };
+};
+
 export type CreateDiaryResponse = {
   status: string;
   data: {

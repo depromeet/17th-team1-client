@@ -9,9 +9,13 @@ type ShareButtonProps = {
    * 공유할 URL (기본값: 현재 페이지 URL)
    */
   url?: string;
+  /**
+   * 첫 지구본 여부 (true일 경우 큰 버튼 스타일)
+   */
+  isFirstGlobe?: boolean;
 };
 
-export const ShareButton = ({ url }: ShareButtonProps) => {
+export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => {
   // React Hooks
   const [isShared, setIsShared] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,6 +91,22 @@ export const ShareButton = ({ url }: ShareButtonProps) => {
     setIsSupported(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
+  // 첫 지구본일 때는 큰 버튼 스타일
+  if (isFirstGlobe) {
+    return (
+      <button
+        type="button"
+        onClick={handleShare}
+        disabled={isLoading}
+        className="w-full flex items-center justify-center px-12 py-[17px] rounded-[1000px] bg-[#00d9ff] transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label={isShared ? "공유 완료" : isLoading ? "공유 중..." : "내 지구본 자랑하기"}
+      >
+        <p className="font-bold text-base text-black leading-[1.3]">{isShared ? "공유 완료!" : "내 지구본 자랑하기"}</p>
+      </button>
+    );
+  }
+
+  // 기본 아이콘 버튼 스타일
   return (
     <button
       type="button"

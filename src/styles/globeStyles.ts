@@ -5,7 +5,12 @@
  */
 
 // 기획서에 맞는 도시 개별 라벨 스타일
-export const createSingleLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 50) => {
+export const createSingleLabelStyles = (
+  index: number = 0,
+  angleOffset: number = 0,
+  distance: number = 50,
+  rightPadding: number = 30,
+) => {
   // 왼쪽/오른쪽 두 방향으로만 배치
   const finalAngle = angleOffset;
 
@@ -57,7 +62,7 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
     `,
     label: `
       display: inline-flex;
-      padding: 6px 30px 6px 12px;
+      padding: 6px ${rightPadding}px 6px 12px;
       align-items: center;
       gap: 5px;
       border-radius: 50px;
@@ -82,11 +87,11 @@ export const createSingleLabelStyles = (index: number = 0, angleOffset: number =
       transform: translate(-50%, -50%);
       white-space: nowrap;
     `,
-    actionButton: `
+    actionButton: (leftOffset: number) => `
       position: absolute;
       z-index: ${20 + index + 1};
       top: ${offsetY + 15}px;
-      left: ${offsetX + 35}px;
+      left: ${offsetX + leftOffset}px;
       width: 37px;
       height: 44px;
       pointer-events: auto;
@@ -188,7 +193,12 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
 };
 
 // 기획서에 맞는 국가 클러스터 스타일
-export const createCountryClusterStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
+export const createCountryClusterStyles = (
+  index: number = 0,
+  angleOffset: number = 0,
+  distance: number = 100,
+  rightPadding: number = 30,
+) => {
   const lineLength = distance * 0.7;
   // 45도 대각선의 실제 끝점 계산: cos(45°) = sin(45°) = √2/2 ≈ 0.707
   const diagonalEndX = lineLength * Math.cos(Math.PI / 4); // cos(45°)
@@ -229,7 +239,7 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
     `,
     label: `
       display: inline-flex;
-      padding: 6px 30px 6px 12px;
+      padding: 6px ${rightPadding}px 6px 12px;
       align-items: center;
       gap: 5px;
       border-radius: 50px;
@@ -276,11 +286,11 @@ export const createCountryClusterStyles = (index: number = 0, angleOffset: numbe
       line-height: 1.28;
       font-feature-settings: 'liga' off, 'clig' off;
     `,
-    actionButton: `
+    actionButton: (leftOffset: number) => `
       position: absolute;
       z-index: ${20 + index + 1};
       top: ${offsetY + 15}px;
-      left: ${offsetX + 35}px;
+      left: ${offsetX + leftOffset}px;
       width: 37px;
       height: 44px;
       pointer-events: auto;

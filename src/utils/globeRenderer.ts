@@ -99,11 +99,35 @@ export const createCityHTML = (
   cityName: string,
   hasRecords: boolean = true,
   thumbnailUrl?: string,
+  isMyGlobe: boolean = true,
+  isFirstGlobe: boolean = false,
 ) => {
   const labelWidth = calculateCityLabelWidth(cityName);
 
-  // 기록이 없는 경우: + 버튼만 표시
+  // 기록이 없는 경우
   if (!hasRecords) {
+    // 타인의 지구본이거나 최초 지구본인 경우: + 버튼 표시하지 않음
+    if (!isMyGlobe || isFirstGlobe) {
+      // 타인의 지구본이고 기록이 없는 경우 cursor를 default로 설정
+      const cursorStyle = !isMyGlobe && !hasRecords ? "cursor: default;" : "";
+
+      return `
+        <!-- 중심 dot -->
+        <div style="${styles.dot}"></div>
+        <!-- 점선 -->
+        <div style="${styles.horizontalLine}"></div>
+        <div style="${styles.label} ${cursorStyle}">
+          <!-- 좌측 국기 이모지 -->
+          <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
+          <!-- 도시명 -->
+          <span>
+            ${cityName}
+          </span>
+        </div>
+      `;
+    }
+
+    // 나의 지구본인 경우: + 버튼 표시
     return `
       <!-- 중심 dot -->
       <div style="${styles.dot}"></div>
@@ -118,7 +142,7 @@ export const createCityHTML = (
         </span>
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
-      <div style="${styles.actionButton}">
+      <div style="${styles.actionButton(labelWidth / 2)}">
         ${PLUS_BUTTON_SVG}
       </div>
     `;
@@ -186,12 +210,43 @@ export const createCountryClusterHTML = (
   _isExpanded: boolean = false,
   hasRecords: boolean = true,
   thumbnailUrl?: string,
+  isMyGlobe: boolean = true,
+  isFirstGlobe: boolean = false,
 ) => {
   // 라벨 너비 계산하여 썸네일 위치 동적 조정
   const labelWidth = calculateLabelWidth(countryName, cityCount);
 
-  // 모든 도시 미기록 시: 기본형 마커 (+ 아이콘만)
+  // 모든 도시 미기록 시
   if (!hasRecords) {
+    // 타인의 지구본이거나 최초 지구본인 경우: + 버튼 표시하지 않음
+    if (!isMyGlobe || isFirstGlobe) {
+      return `
+        <!-- 중심 dot -->
+        <div style="${styles.dot}"></div>
+        <!-- 단색 수평선 -->
+        <div style="${styles.horizontalLine}"></div>
+        <div style="${styles.label}">
+          <!-- 좌측 국기 이모지 -->
+          <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
+          <!-- 국가명 -->
+          <span>
+            ${countryName}
+          </span>
+          <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
+          ${
+            cityCount >= 1
+              ? `<div style="${styles.countBadge}">
+            <span>
+              ${cityCount}
+            </span>
+          </div>`
+              : ""
+          }
+        </div>
+      `;
+    }
+
+    // 나의 지구본인 경우: + 버튼 표시
     return `
       <!-- 중심 dot -->
       <div style="${styles.dot}"></div>
@@ -216,7 +271,7 @@ export const createCountryClusterHTML = (
         }
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
-      <div style="${styles.actionButton}">
+      <div style="${styles.actionButton(labelWidth / 2)}">
         ${PLUS_BUTTON_SVG}
       </div>
     `;
@@ -274,9 +329,11 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 // 도시 클릭 핸들러
 export const createCityClickHandler = (
   cityName: string,
-  hasRecords: boolean = true,
   cityId?: number,
+  hasRecords: boolean = true,
   onNavigate?: (path: string) => void,
+  disableCityClick?: boolean,
+  uuid?: string,
 ) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
@@ -285,16 +342,27 @@ export const createCityClickHandler = (
     event.preventDefault();
     event.stopPropagation();
 
-    const cityNameOnly = cityName.split(",")[0];
-    const q = encodeURIComponent(cityNameOnly);
+    // 클릭 비활성화된 경우 아무 동작 안함
+    if (disableCityClick) {
+      return;
+    }
+
+    // cityName 형식: "도시명, 국가명" 또는 "도시명"
+    const parts = cityName.split(",").map((s) => s.trim());
+    const cityNameOnly = parts[0];
+    const countryName = parts[1] || "";
+
+    const cityQuery = encodeURIComponent(cityNameOnly);
+    const countryQuery = encodeURIComponent(countryName);
 
     let path: string;
     if (hasRecords && cityId) {
+      console.log("uuid", uuid);
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
-      path = `/record/${cityId}`;
+      path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
-      path = `/image-metadata?city=${q}&mode=edit`;
+      path = `/image-metadata?cityId=${cityId}&city=${cityQuery}&country=${countryQuery}`;
     }
 
     if (onNavigate) {

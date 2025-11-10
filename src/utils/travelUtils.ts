@@ -20,19 +20,19 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
 
   // 국가별로 그룹화 (countryName과 countryCode를 저장)
   const citiesByCountry = allCities.reduce(
-    (acc, city) => {
-      const countryCode = city.countryCode;
+    (acc, { countryCode, countryName, cityId, cityName, lat, lng }) => {
       if (!acc[countryCode]) {
         acc[countryCode] = {
-          countryName: city.countryName,
+          countryName,
           cities: [],
         };
       }
       acc[countryCode].cities.push({
-        name: city.cityName,
-        lat: city.lat,
-        lng: city.lng,
-        countryCode: city.countryCode,
+        cityId,
+        name: cityName,
+        lat,
+        lng,
+        countryCode,
       });
       return acc;
     },
@@ -41,6 +41,7 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
       {
         countryName: string;
         cities: Array<{
+          cityId: number;
           name: string;
           lat: number;
           lng: number;

@@ -1,6 +1,7 @@
-import { apiGet } from "@/lib/apiClient";
-import type { DiaryDetail, DiaryDetailResponse } from "@/types/diary";
+import { apiGet, apiPost } from "@/lib/apiClient";
+import type { CreateDiaryParams, CreateDiaryResponse, DiaryDetail, DiaryDetailResponse } from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
+import { getS3UploadUrl } from "./profileService";
 
 /**
  * API 응답을 클라이언트 타입으로 변환합니다.
@@ -71,4 +72,85 @@ export const getDiaryDetail = async (diaryId: string | number, token?: string): 
     }
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
+};
+
+/**
+ * 단일 이미지를 S3에 업로드합니다.
+ *
+ * @param file - 업로드할 이미지 파일
+ * @param metadata - 이미지 메타데이터
+ * @param token - 인증 토큰 (선택)
+ * @returns S3 키(photoCode)
+ * @throws S3 업로드 실패 시
+ *
+ * @example
+ * const photoCode = await uploadPhotoToS3(file, metadata);
+ */
+export const uploadTravelPhoto = async (file: File, token?: string): Promise<string> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  const { presignedUrl, s3Key } = await getS3UploadUrl(
+    {
+      uploadType: "TRAVEL",
+      resourceId: 0,
+      fileName: file.name,
+      contentType: file.type,
+    },
+    authToken,
+  );
+
+  const uploadResponse = await fetch(presignedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`S3 upload failed with status ${uploadResponse.status}`);
+  }
+
+  return s3Key;
+};
+
+/**
+ * 여행기록을 생성합니다.
+ *
+ * @param params - 여행기록 생성 파라미터 (cityId, text, photos)
+ * @param token - 인증 토큰 (선택)
+ * @returns 생성된 여행기록 ID
+ * @throws API 요청 실패 시
+ *
+ * @example
+ * const diaryId = await createDiary({
+ *   cityId: 123,
+ *   text: "즐거운 여행이었습니다!",
+ *   photos: [...]
+ * });
+ */
+export const createDiary = async (params: CreateDiaryParams, token?: string): Promise<number> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
+  const response = await apiPost<CreateDiaryResponse>("/api/v1/diaries", params, authToken);
+
+  return response.data.diaryId;
 };

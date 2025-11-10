@@ -19,11 +19,12 @@ type ExtendedImageMetadata = ImageMetadata & {
 
 type ImageCarouselProps = {
   image: ExtendedImageMetadata;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => void | Promise<void>;
   onTagChange?: (tag: ImageTag | null) => void;
   onDateChange?: (yearMonth: string | null) => void;
   onImageUpdate?: (id: string, croppedImage: string) => void;
   onLocationChange?: (location: LocationSelection | null) => void;
+  isProcessing?: boolean;
 };
 
 export const ImageCarousel = ({
@@ -33,6 +34,7 @@ export const ImageCarousel = ({
   onDateChange,
   onImageUpdate,
   onLocationChange,
+  isProcessing = false,
 }: ImageCarouselProps) => {
   const [selectedTag, setSelectedTag] = useState<ImageTag | null>(
     image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null),
@@ -153,15 +155,21 @@ export const ImageCarousel = ({
         <TagSelector selectedTag={selectedTag} onSelect={handleTagSelect} onRemove={handleTagRemove} />
       </div>
       <div className="absolute top-3 right-3">
-        <CircleCloseButton onClick={() => setIsDeleteModalOpen(true)} />
+        <CircleCloseButton onClick={() => setIsDeleteModalOpen(true)} disabled={isProcessing} />
       </div>
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={() => {
-          onRemove(shown.id);
-          setIsDeleteModalOpen(false);
+        onConfirm={async () => {
+          if (isProcessing) return;
+          try {
+            await onRemove(shown.id);
+            setIsDeleteModalOpen(false);
+          } catch {
+            // 삭제 실패 시 모달 유지 (상위에서 에러 처리)
+          }
         }}
+        isProcessing={isProcessing}
       />
       <div className="absolute bottom-3 left-3 flex flex-col gap-1 items-start">
         <MetadataChip

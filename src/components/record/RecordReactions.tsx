@@ -24,7 +24,7 @@ type RecordReactionsProps = {
   recordId: string;
   initialReactions?: Reaction[];
   onReactionUpdate?: (reactions: Reaction[]) => void;
-  isFriend?: boolean;
+  isOwner?: boolean;
 };
 
 const MAX_EMPTY_SLOTS = 4;
@@ -33,7 +33,7 @@ export const RecordReactions = ({
   recordId,
   initialReactions = [],
   onReactionUpdate,
-  isFriend = true,
+  isOwner = false,
 }: RecordReactionsProps) => {
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -125,9 +125,8 @@ export const RecordReactions = ({
   };
 
   const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isFriend) {
-      return;
-    }
+    // owner면 리액션 불가
+    if (isOwner) return;
 
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
@@ -214,18 +213,26 @@ export const RecordReactions = ({
   };
 
   const handleAddEmoji = () => {
+    // owner이면 이모지 추가 불가
+    if (isOwner) {
+      return;
+    }
     setShowEmojiPicker(true);
   };
 
   const emptySlots = Math.max(0, MAX_EMPTY_SLOTS - reactions.length);
   const hasEmptySlots = reactions.length < MAX_EMPTY_SLOTS;
+  const canInteract = !isOwner;
 
   return (
     <div className="flex items-center gap-4 relative">
       <button
         type="button"
         onClick={handleAddEmoji}
-        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
+        disabled={isOwner}
+        className={`w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)] ${
+          isOwner ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         style={{
           background:
             "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
@@ -241,11 +248,11 @@ export const RecordReactions = ({
             key={`${code}-${glyph}-${index}`}
             type="button"
             onClick={(e) => handleReactionClick(code, e)}
-            disabled={!isFriend}
-            whileTap={isFriend ? { scale: 0.85 } : {}}
-            whileHover={isFriend ? { scale: 1.05 } : {}}
+            disabled={isOwner}
+            whileTap={canInteract ? { scale: 0.85 } : {}}
+            whileHover={canInteract ? { scale: 1.05 } : {}}
             className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0 ${
-              isFriend ? "" : "opacity-50 cursor-not-allowed"
+              isOwner ? "opacity-50 cursor-not-allowed" : ""
             }`}
             style={{
               backgroundImage:
@@ -264,7 +271,10 @@ export const RecordReactions = ({
               key={uniqueKey}
               type="button"
               onClick={handleAddEmoji}
-              className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
+              disabled={isOwner}
+              className={`w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0 ${
+                isOwner ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",

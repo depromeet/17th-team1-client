@@ -24,6 +24,29 @@ async function getAddress(lat: number, lng: number): Promise<string> {
   return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
+// 이미지 실제 크기 측정
+async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("이미지 크기를 측정할 수 없습니다."));
+    };
+
+    img.src = url;
+  });
+}
+
 export async function processSingleFile(file: File): Promise<ImageMetadata> {
   const id = Math.random().toString(36).substr(2, 9);
   const extracted: ImageMetadata = {
@@ -68,11 +91,24 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
 
   try {
     const exifData: Record<string, unknown> = await exifr.parse(file);
-    if (exifData.ImageWidth && exifData.ImageHeight)
+
+    // EXIF에서 크기 정보 가져오기 (우선순위 1)
+    if (exifData.ImageWidth && exifData.ImageHeight) {
       extracted.dimensions = {
         width: exifData.ImageWidth as number,
         height: exifData.ImageHeight as number,
       };
+    }
+
+    // EXIF에 크기 정보가 없으면 실제 이미지 로드해서 측정 (우선순위 2)
+    if (!extracted.dimensions) {
+      try {
+        extracted.dimensions = await getImageDimensions(file);
+      } catch {
+        // 크기 측정 실패 시 기본값 설정하지 않음
+      }
+    }
+
     if (exifData.Make || exifData.Model || exifData.Software)
       extracted.camera = {
         make: (exifData.Make as string) || "",

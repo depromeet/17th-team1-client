@@ -85,7 +85,7 @@ const GlobeList = ({
   sortedGlobes: BookmarkUser[];
   sortOption: SortOption;
   onSortChange: (value: SortOption) => void;
-  onGlobeClick: (memberId: number) => void;
+  onGlobeClick: (uuid: string) => void;
   onSaveToggle: (memberId: number) => void;
   isLoading: boolean;
 }) => {
@@ -105,36 +105,36 @@ const GlobeList = ({
 
       {/* Globe List */}
       <div className="px-4 flex flex-col gap-2 pb-4">
-        {sortedGlobes.map((globe) => (
+        {sortedGlobes.map(({ memberId, uuid, nickname, profileImageUrl, bookmarked }) => (
           // biome-ignore lint: Container with multiple buttons for different actions
           <div
-            key={globe.memberId}
+            key={memberId}
             role="button"
             tabIndex={0}
             className="w-full px-5 py-3 flex items-center justify-between rounded-2xl bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onGlobeClick(globe.memberId)}
+            onClick={() => onGlobeClick(uuid)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
                 e.preventDefault();
-                onGlobeClick(globe.memberId);
+                onGlobeClick(uuid);
               }
             }}
-            aria-label={`Open ${globe.nickname} 지구본`}
+            aria-label={`Open ${nickname} 지구본`}
           >
             {/* Left Content */}
             <div className="flex items-center gap-2.5">
               {/* Profile Image */}
               <div className="w-11 h-11 rounded-full bg-[rgba(255,255,255,0.1)] shrink-0 overflow-hidden">
-                {globe.profileImageUrl ? (
+                {profileImageUrl ? (
                   // biome-ignore lint/performance/noImgElement: Profile image placeholder, optimization not needed
-                  <img src={globe.profileImageUrl} alt={globe.nickname} className="w-full h-full object-cover" />
+                  <img src={profileImageUrl} alt={nickname} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-linear-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
                 )}
               </div>
 
               {/* Name */}
-              <p className="text-sm font-semibold text-white">{globe.nickname}</p>
+              <p className="text-sm font-semibold text-white">{nickname}</p>
             </div>
 
             {/* Bookmark Button */}
@@ -142,22 +142,22 @@ const GlobeList = ({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onSaveToggle(globe.memberId);
+                onSaveToggle(memberId);
               }}
               disabled={isLoading}
               className="shrink-0 w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={globe.bookmarked ? "저장 해제" : "저장"}
+              aria-label={bookmarked ? "저장 해제" : "저장"}
             >
               <svg
                 className="w-5 h-5"
                 viewBox="0 0 20 24"
-                fill={globe.bookmarked ? "currentColor" : "none"}
+                fill={bookmarked ? "currentColor" : "none"}
                 stroke="currentColor"
                 strokeWidth="1.5"
                 color="white"
                 role="img"
               >
-                <title>{globe.bookmarked ? "저장됨" : "저장 안 됨"}</title>
+                <title>{bookmarked ? "저장됨" : "저장 안 됨"}</title>
                 <path d="M2 2v20l8-5 8 5V2H2z" />
               </svg>
             </button>
@@ -217,9 +217,9 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
     [bookmarks],
   );
 
-  const handleGlobeCardClick = (memberId: number) => {
+  const handleGlobeCardClick = (uuid: string) => {
     sessionStorage.setItem("fromSavedGlobe", "true");
-    router.push(`/globe/${memberId}`);
+    router.push(`/globe/${uuid}`);
   };
 
   const sortedBookmarks = useMemo(() => {

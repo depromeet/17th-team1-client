@@ -31,9 +31,9 @@ export const buttonVariants = cva("inline-flex justify-center items-center round
     },
     size: {
       xs: "p-1 h-6 text-xs",
-      sm: "px-8 py-6 h-30 text-xs",
-      md: "px-10 py-8 h-36 text-sm",
-      lg: "px-12 py-[18px] h-14 text-lg font-bold rounded-3xl",
+      sm: "px-[8px] py-[6px] h-[30px] text-xs",
+      md: "px-[10px] py-[8px] h-[36px] text-sm",
+      lg: "px-[12px] py-[18px] h-[56px] text-lg font-bold rounded-3xl",
     },
   },
   defaultVariants: {

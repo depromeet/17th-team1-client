@@ -1,4 +1,4 @@
-import { CloseIcon, PlusIcon } from "@/assets/icons";
+import { AddIcon, CloseIcon } from "@/assets/icons";
 import type { City } from "@/types/city";
 
 type CityItemProps = {
@@ -33,22 +33,19 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
         <span className={`font-medium text-left ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}>
           {city.flag} {city.name}, {city.country}
         </span>
-        <div
-          className={`inline-flex justify-center items-center rounded-md p-1 h-6 text-xs w-6 ${
-            isRegistered ? "bg-transparent" : isSelected ? "bg-transparent" : "bg-[#293949]"
-          }`}
-        >
-          {isRegistered ? (
-            <div className="w-6 h-6 relative bg-Surface-Placeholder-16%/20 rounded-lg overflow-hidden">
-              <div className="w-2 h-0 left-[8px] top-[12px] absolute outline outline-[1.50px] outline-offset-[-0.75px] outline-Surface-InversePrimary" />
-              <div className="w-2 h-0 left-[12px] top-[8px] absolute origin-top-left rotate-90 outline outline-[1.50px] outline-offset-[-0.75px] outline-Surface-InversePrimary" />
-            </div>
-          ) : isSelected ? (
-            <CloseIcon width={10} height={10} className="text-white" />
-          ) : (
-            <PlusIcon width={10} height={10} className="text-white" />
-          )}
-        </div>
+        {!isRegistered && (
+          <div
+            className={`inline-flex justify-center items-center rounded-md p-1 h-6 text-xs w-6 ${
+              isSelected ? "bg-transparent" : "bg-[#293949]"
+            }`}
+          >
+            {isSelected ? (
+              <CloseIcon width={10} height={10} className="text-white" />
+            ) : (
+              <AddIcon width={10} height={10} className="text-white" />
+            )}
+          </div>
+        )}
       </button>
       {showDivider && <div className="border-b border-surface-placeholder--8" />}
     </div>

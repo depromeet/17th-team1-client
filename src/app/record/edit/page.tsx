@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { EditClient } from "@/components/record/EditClient";
 import { getMemberTravels } from "@/services/memberService";
+import { handleServerError } from "@/utils/serverErrorHandler";
 
 export default async function EditRecordPage({
   searchParams,
@@ -40,6 +41,9 @@ export default async function EditRecordPage({
         }
       }
     } catch (error) {
+      // 401/500 에러는 서버에서 직접 리다이렉트 (500 에러 방지)
+      handleServerError(error);
+
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to fetch member travels:", error);
       }

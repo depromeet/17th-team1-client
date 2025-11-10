@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ICPlusIcon, ICXIcon } from "@/assets/icons";
 import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 
 interface EditContentProps {
@@ -19,9 +19,7 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
           onClick={onAddClick}
         >
           <div className="flex justify-center items-center gap-1">
-            <div className="w-4 h-4 relative">
-              <Image src="/ic_plus.svg" alt="도시 추가" fill className="object-contain" />
-            </div>
+            <ICPlusIcon className="w-4 h-4" />
             <div className="justify-start text-text-inversesecondary text-sm font-bold font-['Pretendard'] leading-5">
               도시 추가
             </div>
@@ -52,9 +50,9 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
               <button
                 type="button"
                 onClick={() => onRemoveClick?.(c.id, c.isNew)}
-                className="w-4 h-4 relative flex items-center justify-center"
+                className="w-4 h-4 flex items-center justify-center"
               >
-                <Image src="/ic_X.svg" alt="삭제" fill className="object-contain" />
+                <ICXIcon className="w-4 h-4" />
               </button>
             </div>
           );

@@ -41,7 +41,14 @@ export const getMemberTravels = async (token?: string): Promise<MemberTravelsRes
     const data = await apiGet<MemberTravelsResponse>(`/api/v1/member-travels`, {}, authToken);
     return data;
   } catch (error) {
-    // 502, 503 같은 서버 에러인 경우 조용히 처리
+    // 서버 사이드에서 401/500 에러는 다시 throw (error.tsx에서 처리)
+    if (typeof window === "undefined" && error instanceof ApiError) {
+      if (error.status === 401 || error.status >= 500) {
+        throw error;
+      }
+    }
+
+    // 클라이언트 사이드 또는 502, 503 같은 서버 에러인 경우 조용히 처리
     if (error instanceof ApiError && error.status >= 500 && error.status < 600) {
       return null;
     }
@@ -83,6 +90,12 @@ export const getGlobeData = async (uuid: string, token?: string): Promise<GlobeR
     const data = await apiGet<GlobeResponse>(`/api/v1/globes/${uuid}`, {}, authToken);
     return data;
   } catch (error) {
+    // 서버 사이드에서 401/500 에러는 다시 throw (error.tsx에서 처리)
+    if (typeof window === "undefined" && error instanceof ApiError) {
+      if (error.status === 401 || error.status >= 500) {
+        throw error;
+      }
+    }
     console.error("Failed to fetch globe data:", error);
     return null;
   }
@@ -97,6 +110,12 @@ export const getTravelInsight = async (memberId: number): Promise<string> => {
     const data = await apiGet<TravelInsightResponse>(`/api/v1/travel-insights/${memberId}`, {}, token);
     return data.data.title;
   } catch (error) {
+    // 서버 사이드에서 401/500 에러는 다시 throw (error.tsx에서 처리)
+    if (typeof window === "undefined" && error instanceof ApiError) {
+      if (error.status === 401 || error.status >= 500) {
+        throw error;
+      }
+    }
     console.error("Failed to fetch travel insight:", error);
     return "";
   }
@@ -153,6 +172,13 @@ export const getRecordData = async (serverCookies?: ReadonlyRequestCookies): Pro
     const data = await apiGet<RecordResponse>(`/api/v1/member-travels/${memberId}/records`, {}, token);
     return data;
   } catch (error) {
+    // 서버 사이드에서 401/500 에러는 다시 throw (error.tsx에서 처리)
+    if (typeof window === "undefined" && error instanceof ApiError) {
+      if (error.status === 401 || error.status >= 500) {
+        throw error;
+      }
+    }
+
     // 404 에러인 경우 조용히 처리 (레코드가 없는 경우일 수 있음)
     if (error instanceof ApiError && error.status === 404) {
       console.log("No record data found for member");

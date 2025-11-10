@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { ICArrowLeftIcon } from "@/assets/icons";
 
 interface EditHeaderProps {
   title?: string;
@@ -33,9 +33,7 @@ export function EditHeader({
       <div className="relative flex justify-between items-center">
         <div className="w-24 flex justify-start items-center">
           <button onClick={handleBackClick} className="flex justify-start items-center" type="button">
-            <div className="w-6 h-6 relative">
-              <Image src="/ic_arrow_left.svg" alt="뒤로가기" fill className="object-contain" priority />
-            </div>
+            <ICArrowLeftIcon className="w-6 h-6" />
           </button>
         </div>
 

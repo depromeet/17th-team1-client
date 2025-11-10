@@ -3,31 +3,43 @@
 import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useId, useState } from "react";
-import { GalleryIcon } from "@/assets/icons";
 import { processSingleFile } from "@/lib/processFile";
-import type { ImageMetadata } from "@/types/imageMetadata";
+import { createDiary, uploadTravelPhoto } from "@/services/diaryService";
+import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
+import { toYearMonth } from "@/utils/dateUtils";
 import { Header } from "../common/Header";
 // import { GoogleMapsModal } from "./GoogleMapsModal";
 import { ImageCarousel } from "./ImageCarousel";
 import { LoadingOverlay } from "./LoadingOverlay";
+import type { LocationSelection } from "./LocationSelectBottomSheet";
 import { MemoryTextarea } from "./MemoryTextarea";
 
 type ImageMetadataProps = {
+  cityId?: number;
   initialCity?: string;
   initialCountry?: string;
 };
 
-export default function ImageMetadataComponent({ initialCity, initialCountry }: ImageMetadataProps) {
+type UploadMetadata = ImageMetadata & {
+  selectedTag?: ImageTag | null;
+  customDate?: string | null;
+};
+
+type UploadedPhoto = {
+  photoCode: string;
+  metadata: ImageMetadata;
+  file: File;
+};
+
+export const ImageMetadataComponent = ({ cityId, initialCity, initialCountry }: ImageMetadataProps) => {
   const router = useRouter();
-  const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
+  const [metadataList, setMetadataList] = useState<UploadMetadata[]>([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
+  const [diaryText, setDiaryText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const fileUploadId = useId();
-  const [_keyword, _setKeyword] = useState("");
   const metadataCount = metadataList.length;
-
-  const handleClose = useCallback(() => {
-    router.push("/record");
-  }, [router]);
+  const isCityIdValid = typeof cityId === "number" && Number.isFinite(cityId) && cityId > 0;
 
   const handleBack = () => {
     router.back();
@@ -44,21 +56,48 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
         const remainingSlots = MAX_IMAGES - metadataCount;
         if (remainingSlots <= 0) return;
 
-        const tasks: Promise<ImageMetadata>[] = [];
+        const tasks: Promise<{ metadata: ImageMetadata; file: File }>[] = [];
         const filesToProcess = Math.min(files.length, remainingSlots);
+
         for (let i = 0; i < filesToProcess; i++) {
           const f = files[i];
-          if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+          if (f.type.startsWith("image/")) {
+            tasks.push(
+              processSingleFile(f).then((metadata) => ({
+                metadata,
+                file: f,
+              })),
+            );
+          }
         }
 
         const settled = await Promise.allSettled(tasks);
         const results = settled
-          .filter((r): r is PromiseFulfilledResult<ImageMetadata> => r.status === "fulfilled")
+          .filter((r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; file: File }> => r.status === "fulfilled")
           .map((r) => r.value);
 
         if (results.length === 0) return;
 
-        setMetadataList((prev) => (prev.length > 0 ? [...prev, ...results] : results));
+        const uploadPromises = results.map(({ metadata, file }) =>
+          uploadTravelPhoto(file).then((photoCode) => ({
+            photoCode,
+            metadata,
+            file,
+          })),
+        );
+
+        const uploadedResults = await Promise.all(uploadPromises);
+
+        const mappedMetadata = uploadedResults.map((r) => ({
+          ...r.metadata,
+          selectedTag: r.metadata.tag && r.metadata.tag !== "NONE" ? r.metadata.tag : null,
+          customDate: toYearMonth(r.metadata.timestamp),
+        }));
+
+        setMetadataList((prev) => (prev.length > 0 ? [...prev, ...mappedMetadata] : mappedMetadata));
+        setUploadedPhotos((prev) => [...prev, ...uploadedResults]);
+      } catch (error) {
+        alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
       } finally {
         (e.target as HTMLInputElement).value = "";
         setIsProcessing(false);
@@ -97,140 +136,215 @@ export default function ImageMetadataComponent({ initialCity, initialCountry }: 
   // };
 
   const handleRemove = (id: string) => {
-    setMetadataList((prev) => {
-      const filtered = prev.filter((item) => item.id !== id);
-      return filtered;
-    });
+    setMetadataList((prev) => prev.filter((item) => item.id !== id));
+    setUploadedPhotos((prev) => prev.filter((item) => item.metadata.id !== id));
   };
 
   const handleImageUpdate = (id: string, croppedImage: string) => {
     setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, imagePreview: croppedImage } : item)));
   };
 
+  const handleTagChange = (id: string, tag: ImageTag | null) => {
+    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, selectedTag: tag } : item)));
+  };
+
+  const handleDateChange = (id: string, yearMonth: string | null) => {
+    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, customDate: yearMonth } : item)));
+  };
+
+  const handleLocationChange = (id: string, location: LocationSelection | null) => {
+    setMetadataList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        if (!location) {
+          return { ...item, location: undefined };
+        }
+
+        const displayName = location.name || location.address || "";
+        const formattedAddress = location.address || location.name || "";
+        const uniquePlaces = [formattedAddress, displayName].filter(
+          (value, index, array): value is string => Boolean(value) && array.indexOf(value) === index,
+        );
+
+        return {
+          ...item,
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            altitude: item.location?.altitude,
+            address: displayName || formattedAddress,
+            nearbyPlaces: uniquePlaces.length > 0 ? uniquePlaces : undefined,
+          },
+        };
+      }),
+    );
+  };
+
   const handleSave = async () => {
     if (isProcessing) return;
+    if (!isCityIdValid) {
+      alert("도시 정보가 없습니다. 기록을 생성할 수 없어요.");
+      return;
+    }
+    if (metadataList.length === 0) {
+      alert("업로드된 이미지가 없습니다.");
+      return;
+    }
 
     setIsProcessing(true);
 
-    // 1.3초 로딩 표시
-    setTimeout(() => {
+    try {
+      const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
+
+      const photos = metadataList.map((metadata) => {
+        const uploaded = uploadedPhotos.find((item) => item.metadata.id === metadata.id);
+        if (!uploaded) {
+          throw new Error("업로드된 이미지 정보를 찾을 수 없습니다.");
+        }
+
+        const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+        const width = dimensions?.width ?? 0;
+        const height = dimensions?.height ?? 0;
+        const { photoCode } = uploaded;
+        const takenMonth = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
+        const normalizedTag = selectedTag ?? tag ?? "NONE";
+        const latitude = location?.latitude;
+        const longitude = location?.longitude;
+        const placeName = location?.address;
+
+        return {
+          photoCode,
+          lat: latitude,
+          lng: longitude,
+          width,
+          height,
+          takenMonth,
+          tag: normalizedTag,
+          placeName,
+        };
+      });
+
+      const validCityId = cityId as number;
+      const diaryId = await createDiary({
+        cityId: validCityId,
+        text: diaryText || undefined,
+        photos,
+      });
+
+      router.push(`/record/${diaryId}`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "여행기록 저장에 실패했습니다.");
       setIsProcessing(false);
-      // TODO: Implement actual save functionality
-      console.log("save");
-    }, 1300);
+    }
   };
 
   const locationTitle = [initialCity, initialCountry].filter(Boolean).join(", ");
   const headerTitle = locationTitle || "나라, 도시 이름";
+  const hasImages = metadataCount > 0;
+  const MAX_IMAGES = 3;
+  const placeholderCount = Math.max(0, MAX_IMAGES - metadataCount - (hasImages ? 0 : 1));
 
-  if (metadataCount === 0) {
+  const handleNavigateToCitySelection = () => {
+    router.push("/record");
+  };
+
+  if (!isCityIdValid) {
     return (
       <div className="max-w-md mx-auto min-h-screen bg-black text-white">
-        <LoadingOverlay show={isProcessing} />
-        {/* <ImageMetadataHeader city={cityMain} /> */}
-        <Header
-          title="최근 항목"
-          variant="dark"
-          leftIcon="close"
-          onLeftClick={handleClose}
-          rightButtonTitle="등록"
-          rightButtonDisabled={true}
-          onRightClick={handleSave}
-        />
-        <div className="px-6 mb-6 h-[calc(100vh-160px)] flex items-center justify-center">
-          <div className="text-center flex flex-col justify-center relative overflow-hidden">
-            <div className="mb-6 pointer-events-none">
-              <div className="mx-auto mb-4 flex items-center justify-center">
-                <GalleryIcon width={80} height={80} />
+        <Header title="도시 선택 필요" variant="dark" leftIcon="back" onLeftClick={handleBack} />
+        <div className="flex flex-col items-center justify-center gap-6 px-6 py-16 text-center">
+          <div className="flex flex-col gap-2">
+            <p className="text-lg font-semibold text-white">도시 정보가 필요합니다.</p>
+            <p className="text-sm text-white/60">
+              여행 기록을 작성하려면 먼저 도시를 선택해주세요. 선택 화면으로 이동한 후 다시 시도해 주세요.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleNavigateToCitySelection}
+            className="rounded-full bg-primary px-6 py-3 text-base font-semibold text-black hover:opacity-90 transition-opacity"
+          >
+            도시 선택 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-black text-white">
+      <LoadingOverlay show={isProcessing} />
+      <Header
+        title={headerTitle}
+        variant="dark"
+        leftIcon="back"
+        onLeftClick={handleBack}
+        rightButtonTitle="저장"
+        rightButtonDisabled={!hasImages || isProcessing || !isCityIdValid}
+        onRightClick={handleSave}
+      />
+      <div
+        className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
+      >
+        {!hasImages && (
+          <div className="flex-shrink-0">
+            <label htmlFor={fileUploadId} className="relative select-none w-[250.784px] mx-auto cursor-pointer block">
+              <div className="overflow-hidden rounded-xl border border-[#272727] bg-[#141414] hover:bg-black/40 transition-colors">
+                <div className="w-[251px] h-[445px] flex flex-col items-center justify-center gap-3 px-6 text-center">
+                  <PlusIcon size={32} />
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    사진은 최대 3장까지
+                    <br />
+                    업로드할 수 있어요.
+                  </p>
+                </div>
               </div>
-              <div className="text-text-secondary text-lg font-medium mx-auto w-max">
-                사진을 업로드하려면
-                <br />
-                접근 권한이 필요합니다
-              </div>
-            </div>
-            <input
-              type="file"
-              multiple
-              accept="image/*,image/heic"
-              onChange={handleFileUpload}
-              className="hidden"
-              id={fileUploadId}
-            />
-            <label htmlFor={fileUploadId} className="absolute inset-0 cursor-pointer">
-              <span className="sr-only">이미지 파일 선택</span>
             </label>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (metadataCount > 0) {
-    const MAX_IMAGES = 3;
-    const canAddMore = metadataCount < MAX_IMAGES;
-    const isSingleImage = metadataCount === 1 && !canAddMore;
-
-    return (
-      <div className="max-w-md mx-auto min-h-screen bg-black text-white">
-        <LoadingOverlay show={isProcessing} />
-        <Header
-          title={headerTitle}
-          variant="dark"
-          leftIcon="back"
-          onLeftClick={handleBack}
-          rightButtonTitle="등록"
-          rightButtonDisabled={isProcessing}
-          onRightClick={handleSave}
-        />
-        <div
-          className={
-            isSingleImage
-              ? "px-4"
-              : "flex gap-4 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          }
-          style={{ touchAction: "pan-x" }}
-        >
-          {metadataList.map((metadata) => (
-            <div key={metadata.id} className={isSingleImage ? "" : "flex-shrink-0"}>
-              <ImageCarousel image={metadata} onRemove={handleRemove} onImageUpdate={handleImageUpdate} />
-            </div>
-          ))}
-          {canAddMore && (
-            <div className="flex-shrink-0">
-              <label htmlFor={fileUploadId} className="relative select-none w-[250.784px] mx-auto cursor-pointer block">
-                <div className="overflow-hidden rounded-xl border border-[#272727] bg-[#141414] hover:bg-black/40 transition-colors">
-                  <div className="w-[251px] h-[445px] flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <PlusIcon size={32} />
-                    </div>
-                  </div>
+        )}
+        {metadataList.map((metadata) => (
+          <div key={metadata.id} className="flex-shrink-0">
+            <ImageCarousel
+              image={metadata}
+              onRemove={handleRemove}
+              onImageUpdate={handleImageUpdate}
+              onTagChange={(tag) => handleTagChange(metadata.id, tag)}
+              onDateChange={(yearMonth) => handleDateChange(metadata.id, yearMonth)}
+              onLocationChange={(location) => handleLocationChange(metadata.id, location)}
+            />
+          </div>
+        ))}
+        {Array.from({ length: placeholderCount }).map((_, index) => (
+          <div key={`empty-${index}`} className="flex-shrink-0">
+            <label htmlFor={fileUploadId} className="relative select-none w-[250.784px] mx-auto cursor-pointer block">
+              <div className="overflow-hidden rounded-xl border border-[#272727] bg-[#141414] hover:bg-black/40 transition-colors">
+                <div className="w-[251px] h-[445px] flex flex-col items-center justify-center gap-3">
+                  <PlusIcon size={32} />
                 </div>
-              </label>
-            </div>
-          )}
-        </div>
-        <input
-          type="file"
-          multiple
-          accept="image/*,image/heic"
-          onChange={handleFileUpload}
-          className="hidden"
-          id={fileUploadId}
-        />
-        <div className="px-4">
-          <MemoryTextarea />
-        </div>
-        {/* TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용 */}
-        {/* <GoogleMapsModal
-          isOpen={isMapsModalOpen}
-          onClose={() => setIsMapsModalOpen(false)}
-          imageMetadata={selectedImageForMaps}
-          onLocationUpdate={handleLocationUpdate}
-        /> */}
+              </div>
+            </label>
+          </div>
+        ))}
       </div>
-    );
-  }
-
-  return null;
-}
+      <input
+        type="file"
+        multiple
+        accept="image/*,image/heic"
+        onChange={handleFileUpload}
+        className="hidden"
+        id={fileUploadId}
+      />
+      <div className="px-4">
+        <MemoryTextarea value={diaryText} onChange={setDiaryText} />
+      </div>
+      {/* TODO: LocationSelectBottomSheet에서 GoogleMapsModal 연동 시 사용 */}
+      {/* <GoogleMapsModal
+        isOpen={isMapsModalOpen}
+        onClose={() => setIsMapsModalOpen(false)}
+        imageMetadata={selectedImageForMaps}
+        onLocationUpdate={handleLocationUpdate}
+      /> */}
+    </div>
+  );
+};

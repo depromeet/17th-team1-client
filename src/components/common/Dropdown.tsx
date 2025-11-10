@@ -1,5 +1,6 @@
 "use client";
 
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -71,13 +72,13 @@ export const Dropdown = ({
 
   if (asMenu) {
     return (
-      <SelectPrimitive.Root value={value} open={isOpen} onOpenChange={setIsOpen}>
-        <SelectPrimitive.Trigger asChild className={className}>
+      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuPrimitive.Trigger asChild className={className}>
           {trigger}
-        </SelectPrimitive.Trigger>
+        </DropdownMenuPrimitive.Trigger>
 
-        <SelectPrimitive.Portal>
-          <SelectPrimitive.Content
+        <DropdownMenuPrimitive.Portal>
+          <DropdownMenuPrimitive.Content
             className={cn(
               "relative z-50 min-w-[111px]",
               styles.content,
@@ -89,46 +90,38 @@ export const Dropdown = ({
               "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
               "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
             )}
-            position="popper"
             side="bottom"
             align="end"
             sideOffset={8}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
-            <SelectPrimitive.Viewport className="p-0">
-              {options.map((option, index) => (
-                <div key={option.value}>
-                  <SelectPrimitive.Item
-                    value={option.value}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleItemClick(option);
-                    }}
-                    className={cn(
-                      "relative flex w-full cursor-pointer select-none items-center gap-2",
-                      "px-[20px] py-[12px]",
-                      "text-[16px] font-medium leading-[1.3] tracking-[-0.32px]",
-                      "outline-none transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
-                      "focus-visible:ring-[var(--color-surface-inverseprimary)]",
-                      styles.item.base,
-                      styles.item.hover,
-                      value === option.value && styles.item.checked,
-                    )}
-                    aria-label={option.label}
-                    aria-checked={value === option.value}
-                  >
-                    <SelectPrimitive.ItemText asChild>
-                      <span className="shrink-0">{option.label}</span>
-                    </SelectPrimitive.ItemText>
-                  </SelectPrimitive.Item>
-                  {index < options.length - 1 && <div className={cn("h-px", styles.separator)} />}
-                </div>
-              ))}
-            </SelectPrimitive.Viewport>
-          </SelectPrimitive.Content>
-        </SelectPrimitive.Portal>
-      </SelectPrimitive.Root>
+            {options.map((option, index) => (
+              <div key={option.value}>
+                <DropdownMenuPrimitive.Item
+                  onSelect={() => {
+                    handleItemClick(option);
+                  }}
+                  className={cn(
+                    "relative flex w-full cursor-pointer select-none items-center gap-2",
+                    "px-5 py-3",
+                    "text-[16px] font-medium leading-[1.3] tracking-[-0.32px]",
+                    "outline-none transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
+                    "focus-visible:ring-[--color-surface-inverseprimary]",
+                    index === 0 && "rounded-t-lg",
+                    index === options.length - 1 && "rounded-b-lg",
+                    styles.item.base,
+                    styles.item.hover,
+                  )}
+                >
+                  <span className="shrink-0">{option.label}</span>
+                </DropdownMenuPrimitive.Item>
+                {index < options.length - 1 && <div className={cn("h-px", styles.separator)} />}
+              </div>
+            ))}
+          </DropdownMenuPrimitive.Content>
+        </DropdownMenuPrimitive.Portal>
+      </DropdownMenuPrimitive.Root>
     );
   }
 
@@ -138,7 +131,7 @@ export const Dropdown = ({
         className={cn(
           "flex items-center gap-1 text-white text-base font-medium hover:opacity-80 transition-opacity cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-          "focus-visible:ring-[var(--color-surface-inverseprimary)]",
+          "focus-visible:ring-(--color-surface-inverseprimary)",
           className,
         )}
         aria-label={`정렬 선택: 현재 ${value}`}
@@ -177,13 +170,15 @@ export const Dropdown = ({
                     "py-2 px-3",
                     "text-sm font-medium",
                     "outline-none transition-colors",
+                    index === 0 && "rounded-t-lg",
+                    index === options.length - 1 && "rounded-b-lg",
                     styles.item.base,
                     styles.item.hover,
                     value === option.value && styles.item.checked,
                   )}
                 >
                   {showCheckIcon && (
-                    <Check className={cn("w-4 h-4 flex-shrink-0", value === option.value ? "visible" : "invisible")} />
+                    <Check className={cn("w-4 h-4 shrink-0", value === option.value ? "visible" : "invisible")} />
                   )}
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>

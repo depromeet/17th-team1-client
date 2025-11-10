@@ -1,6 +1,7 @@
 "use client";
 
 import type { Emoji } from "@/types/emoji";
+import { filterValidImageUrls } from "@/utils/imageValidation";
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";
@@ -16,6 +17,7 @@ type RecordCardProps = {
   userAvatar?: string;
   description?: string;
   reactions?: Emoji[];
+  isOwner?: boolean;
 };
 
 export const RecordCard = ({
@@ -28,7 +30,11 @@ export const RecordCard = ({
   userAvatar,
   description,
   reactions,
+  isOwner = false,
 }: RecordCardProps) => {
+  // 이미지 URL 검증 (추가 방어 로직)
+  const validImages = filterValidImageUrls(images);
+
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
       <div
@@ -41,7 +47,7 @@ export const RecordCard = ({
           }
         }}
       >
-        <RecordImageCarousel images={images} />
+        <RecordImageCarousel images={validImages} />
 
         {/* 상단 그라데이션 오버레이 */}
         <div
@@ -81,7 +87,7 @@ export const RecordCard = ({
         onTouchEnd={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <RecordReactions recordId={id} initialReactions={reactions || []} />
+        <RecordReactions recordId={id} initialReactions={reactions || []} isOwner={isOwner} />
       </div>
     </div>
   );

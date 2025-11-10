@@ -216,15 +216,15 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
           const cityName = clusterData.name.split(",")[0];
-          // 클러스터의 첫 번째 아이템에서 hasRecords와 thumbnailUrl 가져오기
+          // 클러스터의 첫 번째 아이템에서 hasRecords, thumbnailUrl, cityId 가져오기
           const firstItem = clusterData.items?.[0];
           const hasRecords = firstItem?.hasRecords ?? true; // 기본값: 기록 있음
           const thumbnailUrl = firstItem?.thumbnailUrl;
+          const cityId = firstItem?.cityId;
 
           el.innerHTML = createCityHTML(styles, clusterData.flag, cityName, hasRecords, thumbnailUrl);
 
-          const recordId = clusterData.items?.[0]?.recordId;
-          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, recordId, (path) =>
+          const clickHandler = createCityClickHandler(clusterData.name, hasRecords, cityId, (path) =>
             router.push(path),
           );
           el.addEventListener("click", clickHandler);

@@ -28,8 +28,8 @@ export function ContinentFilter({
               isSelected
                 ? "px-3.5 py-2 bg-state-enabled"
                 : isDisabled
-                  ? "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--8"
-                  : "px-3.5 py-2 outline outline-1 outline-offset-[-1px] outline-border-absolutewhite--16"
+                  ? "px-3.5 py-2 outline-1 -outline-offset-1 outline-border-absolutewhite--8"
+                  : "px-3.5 py-2 outline-1 -outline-offset-1 outline-border-absolutewhite--16"
             }`}
             disabled={isDisabled}
           >

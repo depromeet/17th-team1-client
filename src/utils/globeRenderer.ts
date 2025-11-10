@@ -275,7 +275,7 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 export const createCityClickHandler = (
   cityName: string,
   hasRecords: boolean = true,
-  recordId?: string,
+  cityId?: number,
   onNavigate?: (path: string) => void,
 ) => {
   return (
@@ -289,12 +289,9 @@ export const createCityClickHandler = (
     const q = encodeURIComponent(cityNameOnly);
 
     let path: string;
-    if (hasRecords && recordId) {
+    if (hasRecords && cityId) {
       // 기록이 있는 경우: 상세 기록 뷰(엔드)로 이동
-      path = `/record/${recordId}`;
-    } else if (hasRecords) {
-      // 기록 ID가 없는 경우 폴백: 기존 이미지 메타데이터 페이지로 이동
-      path = `/image-metadata?city=${q}`;
+      path = `/record/${cityId}`;
     } else {
       // 기록이 없는 경우: 기록하기(에디터) 페이지로 이동
       path = `/image-metadata?city=${q}&mode=edit`;

@@ -25,15 +25,14 @@ export type DiaryPhotoTakenMonth =
 
 export type DiaryPhoto = {
   photoId: number;
-  url: string;
   photoCode: string;
-  lat?: number;
-  lng?: number;
-  width?: number;
-  height?: number;
-  takenMonth?: DiaryPhotoTakenMonth;
-  placeName?: string;
-  tag?: ImageTag;
+  lat: number;
+  lng: number;
+  width: number;
+  height: number;
+  takenMonth: DiaryPhotoTakenMonth | null;
+  placeName: string | null;
+  tag: ImageTag | null;
 };
 
 export type DiaryEmoji = Emoji;
@@ -66,11 +65,24 @@ export type CreateDiaryResponse = {
   };
 };
 
+export type DiaryResponse = {
+  city: DiaryCity;
+  diaries: DiaryData[];
+};
+
+export type DiariesByUuidResponse = {
+  status: string;
+  data: {
+    diaryResponses: DiaryResponse[];
+  };
+};
+
 /**
  * 클라이언트에서 사용하는 변환된 타입
  */
 export type DiaryDetail = {
   id: string;
+  cityId: number;
   city: string;
   country: string;
   countryCode: string;

@@ -29,14 +29,15 @@ export const mapGlobeDataToTravelPatterns = (globeData: GlobeData): TravelPatter
   for (const region of globeData.regions) {
     const regionColor = REGION_COLORS[colorIndex % REGION_COLORS.length];
 
-    for (const city of region.cities) {
+    for (const { countryCode, name, lat, lng, cityId } of region.cities) {
       allCities.push({
-        id: city.countryCode,
-        name: city.name,
-        flag: COUNTRY_CODE_TO_FLAG[city.countryCode] || "🌍",
-        lat: city.lat,
-        lng: city.lng,
+        id: countryCode,
+        name,
+        flag: COUNTRY_CODE_TO_FLAG[countryCode] || "🌍",
+        lat,
+        lng: lng,
         color: regionColor,
+        cityId, // API에서 제공하는 도시 ID
         hasRecords: true, // API 응답에 있는 도시는 모두 기록이 있는 것으로 간주
         thumbnailUrl: "https://picsum.photos/30/40", // TODO: API에서 thumbnailUrl 제공 시 추가
       });

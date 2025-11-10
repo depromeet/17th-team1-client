@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
 
 type ErrorType = "401" | "404" | "500";

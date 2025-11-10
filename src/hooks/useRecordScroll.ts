@@ -3,6 +3,7 @@ import type { Emoji } from "@/types/emoji";
 
 type RecordScrollItem = {
   id: string;
+  cityId: number;
   city: string;
   country: string;
   images: string[];

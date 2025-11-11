@@ -10,6 +10,7 @@ import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
 import { deleteDiary, getDiariesByUuid } from "@/services/diaryService";
 import { getMyProfile } from "@/services/profileService";
+import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
 
@@ -19,6 +20,7 @@ type RecordData = {
   city: string;
   country: string;
   images: string[];
+  imageMetadata?: ImageMetadataFromDiary[];
   category?: string;
   date?: string;
   location?: string;
@@ -95,12 +97,13 @@ const RecordDetailPage = () => {
         const sortedDiaries = [...matchingDiaries, ...otherDiaries];
 
         const recordsData: RecordData[] = sortedDiaries.map(
-          ({ id, cityId, city, country, images, date, location, description, reactions }) => ({
+          ({ id, cityId, city, country, images, imageMetadata, date, location, description, reactions }) => ({
             id,
             cityId,
             city,
             country,
             images: images.length > 0 ? images : [],
+            imageMetadata,
             date,
             location,
             userId: String(memberId),
@@ -136,10 +139,10 @@ const RecordDetailPage = () => {
   const handleEdit = () => {
     if (!currentRecord) return;
     const params = new URLSearchParams();
-    params.set("diaryId", currentRecord.id);
-    params.set("cityId", String(currentRecord.cityId));
-    params.set("country", currentRecord.country);
-    params.set("city", currentRecord.city);
+    params.set("diaryId", id);
+    params.set("cityId", String(cityId));
+    params.set("country", country);
+    params.set("city", city);
     router.push(`/image-metadata?${params.toString()}`);
   };
 
@@ -150,7 +153,7 @@ const RecordDetailPage = () => {
 
     if (confirmed) {
       try {
-        await deleteDiary(currentRecord.id);
+        await deleteDiary(id);
         router.push("/");
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "기록 삭제 중 오류가 발생했습니다";
@@ -178,6 +181,20 @@ const RecordDetailPage = () => {
   }
 
   if (!currentRecord) return null;
+  const {
+    city,
+    country,
+    id,
+    images,
+    imageMetadata,
+    category,
+    date,
+    location,
+    userName,
+    userAvatar,
+    description,
+    reactions,
+  } = currentRecord;
 
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
@@ -186,8 +203,8 @@ const RecordDetailPage = () => {
         {/* 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader
-            city={currentRecord.city}
-            country={currentRecord.country}
+            city={city}
+            country={country}
             onBack={handleBack}
             onEdit={handleEdit}
             onDelete={handleDelete}
@@ -197,15 +214,16 @@ const RecordDetailPage = () => {
 
         {/* 기록 카드 */}
         <RecordCard
-          id={currentRecord.id}
-          images={currentRecord.images}
-          category={currentRecord.category}
-          date={currentRecord.date}
-          location={currentRecord.location}
-          userName={currentRecord.userName}
-          userAvatar={currentRecord.userAvatar}
-          description={currentRecord.description}
-          reactions={currentRecord.reactions}
+          id={id}
+          images={images}
+          imageMetadata={imageMetadata}
+          category={category}
+          date={date}
+          location={location}
+          userName={userName}
+          userAvatar={userAvatar}
+          description={description}
+          reactions={reactions}
           isOwner={isOwner}
         />
       </div>
@@ -218,8 +236,8 @@ const RecordDetailPage = () => {
       {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
       <div className="absolute top-0 left-0 right-0 z-10">
         <RecordDetailHeader
-          city={currentRecord.city}
-          country={currentRecord.country}
+          city={city}
+          country={country}
           onBack={handleBack}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -238,11 +256,12 @@ const RecordDetailPage = () => {
         hasPrevious={hasPrevious}
       >
         {countryRecords.map(
-          ({ id, images, category, date, location, userName, userAvatar, description, reactions }) => (
+          ({ id, images, imageMetadata, category, date, location, userName, userAvatar, description, reactions }) => (
             <RecordCard
               key={id}
               id={id}
               images={images}
+              imageMetadata={imageMetadata}
               category={category}
               date={date}
               location={location}

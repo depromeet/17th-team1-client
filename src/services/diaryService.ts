@@ -24,6 +24,7 @@ import { getS3UploadUrl } from "./profileService";
 const transformDiaryData = (data: DiaryData): DiaryDetail => {
   const { diaryId, city, text, createdAt, photos, emojis } = data;
   const { cityId, cityName, countryName, countryCode, lat, lng } = city;
+  const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "";
 
   return {
     id: String(diaryId),
@@ -34,7 +35,13 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
     lat,
     lng,
     description: text,
-    images: photos.map(({ photoCode }) => (process.env.NEXT_PUBLIC_S3_BASE_URL || "") + photoCode),
+    images: photos.map(({ photoCode }) => baseUrl + photoCode),
+    imageMetadata: photos.map(({ photoCode, takenMonth, placeName, tag }) => ({
+      url: baseUrl + photoCode,
+      takenMonth,
+      placeName,
+      tag,
+    })),
     reactions: emojis.map(({ code, glyph, count }) => ({
       code,
       glyph,

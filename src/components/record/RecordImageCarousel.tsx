@@ -6,13 +6,14 @@ import { useSwipeable } from "react-swipeable";
 
 type RecordImageCarouselProps = {
   images: string[];
+  onImageChange?: (index: number) => void;
 };
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 const RESET_DELAY_MS = 300;
 
-export const RecordImageCarousel = ({ images }: RecordImageCarouselProps) => {
+export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scale, setScale] = useState(1);
 
@@ -23,12 +24,16 @@ export const RecordImageCarousel = ({ images }: RecordImageCarouselProps) => {
   const handlers = useSwipeable({
     onSwipedLeft: () => {
       if (currentIndex < images.length - 1) {
-        setCurrentIndex(currentIndex + 1);
+        const newIndex = currentIndex + 1;
+        setCurrentIndex(newIndex);
+        onImageChange?.(newIndex);
       }
     },
     onSwipedRight: () => {
       if (currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
+        const newIndex = currentIndex - 1;
+        setCurrentIndex(newIndex);
+        onImageChange?.(newIndex);
       }
     },
     trackMouse: true,

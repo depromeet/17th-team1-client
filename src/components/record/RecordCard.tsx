@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { filterValidImageUrls } from "@/utils/imageValidation";
 import { RecordImageCarousel } from "./RecordImageCarousel";
@@ -10,6 +12,7 @@ import { RecordUserInfo } from "./RecordUserInfo";
 type RecordCardProps = {
   id: string;
   images: string[];
+  imageMetadata?: ImageMetadataFromDiary[];
   category?: string;
   date?: string;
   location?: string;
@@ -20,9 +23,29 @@ type RecordCardProps = {
   isOwner?: boolean;
 };
 
+const formatTakenMonth = (
+  takenMonth: string | { year: number; month: string; monthValue: number; leapYear: boolean } | null | undefined,
+): string | undefined => {
+  if (!takenMonth) return undefined;
+  if (typeof takenMonth === "string") {
+    if (takenMonth.length === 6 && /^\d{4}\d{2}$/.test(takenMonth)) {
+      const year = takenMonth.slice(0, 4);
+      const month = takenMonth.slice(4, 6);
+      return `${year}.${month}`;
+    }
+    return takenMonth;
+  }
+  if (takenMonth.year && takenMonth.monthValue) {
+    const monthStr = String(takenMonth.monthValue).padStart(2, "0");
+    return `${takenMonth.year}.${monthStr}`;
+  }
+  return undefined;
+};
+
 export const RecordCard = ({
   id,
   images,
+  imageMetadata,
   category,
   date,
   location,
@@ -32,8 +55,16 @@ export const RecordCard = ({
   reactions,
   isOwner = false,
 }: RecordCardProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   // 이미지 URL 검증 (추가 방어 로직)
   const validImages = filterValidImageUrls(images);
+
+  // 현재 이미지의 메타데이터 가져오기
+  const currentMetadata = imageMetadata?.[currentImageIndex];
+  const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : category;
+  const currentDate = formatTakenMonth(currentMetadata?.takenMonth) || date;
+  const currentLocation = currentMetadata?.placeName || location;
 
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
@@ -47,7 +78,7 @@ export const RecordCard = ({
           }
         }}
       >
-        <RecordImageCarousel images={validImages} />
+        <RecordImageCarousel images={validImages} onImageChange={setCurrentImageIndex} />
 
         {/* 상단 그라데이션 오버레이 */}
         <div
@@ -69,7 +100,7 @@ export const RecordCard = ({
 
         {/* 메타 정보 (태그, 날짜, 위치) */}
         <div className="absolute top-[78px] left-4 z-10">
-          <RecordMetaInfo category={category} date={date} location={location} />
+          <RecordMetaInfo category={currentCategory} date={currentDate} location={currentLocation} />
         </div>
 
         {/* 사용자 정보 및 설명 */}

@@ -112,6 +112,16 @@ export type DiariesByUuidResponse = {
 };
 
 /**
+ * 클라이언트에서 사용하는 이미지 메타데이터 타입
+ */
+export type ImageMetadataFromDiary = {
+  url: string;
+  takenMonth: DiaryPhotoTakenMonth | null;
+  placeName: string | null;
+  tag: ImageTag | null;
+};
+
+/**
  * 클라이언트에서 사용하는 변환된 타입
  */
 export type DiaryDetail = {
@@ -124,6 +134,7 @@ export type DiaryDetail = {
   lng: number;
   description: string;
   images: string[];
+  imageMetadata: ImageMetadataFromDiary[];
   reactions: Emoji[];
   date: string;
   location: string;

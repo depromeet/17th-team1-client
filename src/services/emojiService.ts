@@ -1,12 +1,7 @@
-import { apiPost } from "@/lib/apiClient";
-import type {
-  PressEmojiParams,
-  PressEmojiResponse,
-  RegisterEmojiParams,
-  RegisterEmojiResponse,
-} from "@/types/emoji";
-import { getAuthInfo } from "@/utils/cookies";
 import { StatusCodes } from "http-status-codes";
+import { apiPost } from "@/lib/apiClient";
+import type { PressEmojiParams, PressEmojiResponse, RegisterEmojiParams, RegisterEmojiResponse } from "@/types/emoji";
+import { getAuthInfo } from "@/utils/cookies";
 
 /**
  * 다이어리에 이모지를 등록합니다.
@@ -21,9 +16,7 @@ import { StatusCodes } from "http-status-codes";
  * @example
  * await registerEmoji({ diaryId: "1", code: "1f600", glyph: "😀" });
  */
-export const registerEmoji = async (
-  params: RegisterEmojiParams
-): Promise<RegisterEmojiResponse> => {
+export const registerEmoji = async (params: RegisterEmojiParams): Promise<RegisterEmojiResponse> => {
   const { token } = getAuthInfo();
 
   if (!token) {
@@ -32,22 +25,17 @@ export const registerEmoji = async (
 
   try {
     const response = await apiPost<RegisterEmojiResponse>(
-      `/api/v1/diaries/${params.diaryId}/emojis/register?code=${
-        params.code
-      }&glyph=${encodeURIComponent(params.glyph)}`,
+      `/api/v1/diaries/${params.diaryId}/emojis/register?code=${params.code}&glyph=${encodeURIComponent(params.glyph)}`,
       undefined,
-      token
+      token,
     );
     return response;
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes(StatusCodes.CONFLICT.toString()))
-        throw new Error("이미 등록된 이모지입니다.");
+      if (error.message.includes(StatusCodes.CONFLICT.toString())) throw new Error("이미 등록된 이모지입니다.");
       throw new Error(`이모지 등록에 실패했습니다: ${error.message}`);
     }
-    throw new Error(
-      "이모지를 등록하는데 실패했습니다. 잠시 후 다시 시도해주세요."
-    );
+    throw new Error("이모지를 등록하는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
 
@@ -63,9 +51,7 @@ export const registerEmoji = async (
  * @example
  * await pressEmoji({ diaryId: "1", code: "1f600" });
  */
-export const pressEmoji = async (
-  params: PressEmojiParams
-): Promise<PressEmojiResponse> => {
+export const pressEmoji = async (params: PressEmojiParams): Promise<PressEmojiResponse> => {
   const { token } = getAuthInfo();
 
   if (!token) {
@@ -76,15 +62,13 @@ export const pressEmoji = async (
     const response = await apiPost<PressEmojiResponse>(
       `/api/v1/diaries/${params.diaryId}/emojis/press?code=${params.code}`,
       undefined,
-      token
+      token,
     );
     return response;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`이모지 누르기에 실패했습니다: ${error.message}`);
     }
-    throw new Error(
-      "이모지를 누르는데 실패했습니다. 잠시 후 다시 시도해주세요."
-    );
+    throw new Error("이모지를 누르는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 
 type RecordScrollItem = {
@@ -7,6 +8,7 @@ type RecordScrollItem = {
   city: string;
   country: string;
   images: string[];
+  imageMetadata?: ImageMetadataFromDiary[];
   category?: string;
   date?: string;
   location?: string;

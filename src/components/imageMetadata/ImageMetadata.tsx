@@ -270,7 +270,16 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
   };
 
   const handleTagChange = (id: string, tag: ImageTag | null) => {
-    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, selectedTag: tag } : item)));
+    setMetadataList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        return {
+          ...item,
+          selectedTag: tag,
+          tag: tag ?? "NONE",
+        };
+      }),
+    );
   };
 
   const handleDateChange = (id: string, yearMonth: string | null) => {

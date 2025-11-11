@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost } from "@/lib/apiClient";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/apiClient";
 import type { ProfileData, ProfileResponse, S3UploadUrlParams, S3UploadUrlResponse } from "@/types/member";
 import { getValidatedAuthToken } from "@/utils/cookies";
 
@@ -124,6 +124,27 @@ export const uploadAndUpdateProfile = async (
     return data.data;
   } catch (error) {
     console.error("Failed to upload and update profile:", error);
+    throw error;
+  }
+};
+
+/**
+ * 회원 계정을 삭제합니다. (회원탈퇴)
+ *
+ * @param token - 선택사항. 인증 토큰. 클라이언트 컴포넌트에서는 제공되지 않으면 쿠키에서 가져옵니다.
+ * @returns 회원 삭제 성공 응답
+ * @throws 회원 삭제 실패 시 에러 발생
+ *
+ * @example
+ * // 클라이언트 컴포넌트에서 사용
+ * await withdrawMember();
+ */
+export const withdrawMember = async (token?: string): Promise<void> => {
+  try {
+    const authToken = getValidatedAuthToken(token);
+    await apiDelete("/withdraw", undefined, authToken);
+  } catch (error) {
+    console.error("Failed to withdraw member:", error);
     throw error;
   }
 };

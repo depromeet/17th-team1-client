@@ -81,9 +81,7 @@ export const NationSelectClient = ({
 
         <div className="flex-1 overflow-y-auto px-4 flex justify-center">
           <div className="w-full max-w-[512px]">
-            {!customHeader && (
-              <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />
-            )}
+            {!customHeader && <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
 
             {customHeader && (
               <div className="mb-8">

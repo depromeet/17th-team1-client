@@ -142,7 +142,7 @@ const GlobePage = () => {
   }
 
   return (
-    <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
+    <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-dvh">
       <Header
         title={`${nickname}님의 지구본`}
         variant="navy"

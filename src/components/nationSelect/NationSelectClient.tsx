@@ -79,21 +79,22 @@ export const NationSelectClient = ({
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
 
       <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-        <div className="w-full max-w-[512px] px-4">
+        <div className="w-full max-w-[512px]">
           {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
 
           {customHeader && (
-            <div className="mb-4">
+            <div className="mb-8">
               <SearchInput
                 placeholder="도시/나라를 검색해주세요."
                 value={searchKeyword}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                className="[&>div]:h-[50px]"
               />
             </div>
           )}
 
           <div>
-            <h2 className="text-text-primary text-lg font-bold mb-4">
+            <h2 className="text-text-primary text-lg font-bold mb-2.5">
               {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
             </h2>
 

@@ -255,9 +255,12 @@ const RecordDetailPage = () => {
         hasPrevious={hasPrevious}
       >
         {countryRecords.map(
-          ({ id, images, imageMetadata, category, date, location, userName, userAvatar, description, reactions }) => (
+          (
+            { id, images, imageMetadata, category, date, location, userName, userAvatar, description, reactions },
+            index,
+          ) => (
             <RecordCard
-              key={id}
+              key={`${id}-${index}`}
               id={id}
               images={images}
               imageMetadata={imageMetadata}

@@ -26,7 +26,7 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
         type="button"
         onClick={handleClick}
         disabled={isRegistered}
-        className={`w-full flex items-center justify-between py-[18px] ${
+        className={`w-full flex items-center justify-between py-3 ${
           isRegistered ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
         }`}
       >

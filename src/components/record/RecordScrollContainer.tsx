@@ -98,7 +98,8 @@ export const RecordScrollContainer = ({
         target.closest("a") ||
         target.closest('[role="button"]') ||
         target.closest("input") ||
-        target.closest("textarea");
+        target.closest("textarea") ||
+        target.closest("[data-emoji-reactions]");
       isInteractiveTouch = Boolean(interactiveTarget);
       if (isInteractiveTouch) {
         return;

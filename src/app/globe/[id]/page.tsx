@@ -9,7 +9,6 @@ import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
-import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
@@ -34,8 +33,6 @@ const GlobePage = () => {
   const [countryCount, setCountryCount] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"globe" | "list">("globe");
   const [isMyGlobe, setIsMyGlobe] = useState<boolean>(true);
-  const [isDataReady, setIsDataReady] = useState(false);
-  const [isSplashDone, setIsSplashDone] = useState(false);
   const [nickname, setNickname] = useState<string>("");
   const [targetMemberId, setTargetMemberId] = useState<number | undefined>(undefined);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
@@ -123,8 +120,6 @@ const GlobePage = () => {
         setTravelInsight(insightResponse || "");
       } catch {
         // TODO: 에러 처리 로직 추가
-      } finally {
-        setIsDataReady(true);
       }
     };
 
@@ -134,19 +129,15 @@ const GlobePage = () => {
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
 
-  // 데이터 또는 스플래시가 끝나기 전에는 로딩 유지
-  if (!isDataReady || !isSplashDone) {
-    return <GlobeLoading onComplete={() => setIsSplashDone(true)} />;
-  }
-
   if (travelPatterns.length === 0) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="text-white text-xl text-center">
-          <div>🌍 여행 데이터가 없습니다</div>
-          <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
-        </div>
-      </div>
+      <div></div>
+      // <div className="w-full h-screen flex items-center justify-center">
+      //   <div className="text-white text-xl text-center">
+      //     <div>🌍 여행 데이터가 없습니다</div>
+      //     <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
+      //   </div>
+      // </div>
     );
   }
 

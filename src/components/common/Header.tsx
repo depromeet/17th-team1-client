@@ -62,7 +62,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
           case "back":
             return <BackIcon width={9} height={16} />;
           case "menu":
-            return <MenuIcon width={18} height={14} />;
+            return <MenuIcon width={24} height={24} />;
           case "close":
             return <XIcon width={16} height={16} />;
           default:

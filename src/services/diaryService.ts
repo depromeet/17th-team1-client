@@ -24,7 +24,7 @@ import { getS3UploadUrl } from "./profileService";
 const transformDiaryData = (data: DiaryData): DiaryDetail => {
   const { diaryId, city, text, createdAt, photos, emojis } = data;
   const { cityId, cityName, countryName, countryCode, lat, lng } = city;
-  const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
 
   return {
     id: String(diaryId),

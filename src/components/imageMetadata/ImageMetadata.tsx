@@ -75,7 +75,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
 
         setDiaryText(diary.text ?? "");
 
-        const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "";
+        const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
         const mappedMetadata = diary.photos.map((photo, index) => {
           const takenMonth = normalizeTakenMonth(
             typeof photo.takenMonth === "string"

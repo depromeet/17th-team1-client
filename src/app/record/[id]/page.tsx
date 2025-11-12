@@ -136,6 +136,22 @@ const RecordDetailPage = () => {
     router.back();
   };
 
+  if (!currentRecord) return null;
+  const {
+    city,
+    country,
+    id,
+    images,
+    imageMetadata,
+    category,
+    date,
+    location,
+    userName,
+    userAvatar,
+    description,
+    reactions,
+  } = currentRecord;
+
   const handleEdit = () => {
     if (!currentRecord) return;
     const params = new URLSearchParams();

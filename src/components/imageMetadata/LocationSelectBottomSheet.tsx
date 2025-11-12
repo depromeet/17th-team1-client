@@ -288,7 +288,7 @@ export const LocationSelectBottomSheet = ({
           onKeyDown={handleInputKeyDown}
           placeholder="장소를 검색해주세요."
           disabled={isInputDisabled}
-          className={`w-full bg-transparent outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl pl-12 pr-12 py-[14px] text-base transition-colors ${
+          className={`w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl pl-12 pr-12 py-[14px] text-base transition-colors ${
             isInputDisabled ? "opacity-60 cursor-not-allowed" : ""
           }`}
         />

@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Header } from "@/components/common/Header";
 import type { Continent, RecordResponse } from "@/types/record";
 import { getAuthInfo } from "@/utils/cookies";
 import { RecordContent } from "./RecordContent";
-import { RecordHeader } from "./RecordHeader";
 
 interface RecordClientProps {
   initialData: RecordResponse | null;
@@ -31,19 +31,45 @@ export function RecordClient({ initialData }: RecordClientProps) {
     };
   }, [router]);
 
+  const handleBackClick = () => {
+    const { uuid } = getAuthInfo();
+    if (uuid) {
+      router.push(`/globe/${uuid}`);
+    }
+  };
+
+  const handleEditClick = () => {
+    router.push("/record/edit");
+  };
+
   return (
-    <div className="h-screen bg-surface-secondary flex flex-col">
-      <div className="flex justify-between items-center px-4 pt-4 pb-3" />
-      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-        <div className="w-full max-w-lg px-4">
-          <RecordHeader />
-          <RecordContent
-            initialData={initialData}
-            selectedContinent={selectedContinent}
-            onContinentChange={setSelectedContinent}
+    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header
+            variant="navy"
+            leftIcon="back"
+            onLeftClick={handleBackClick}
+            rightButtonTitle="도시 편집"
+            onRightClick={handleEditClick}
+            style={{
+              backgroundColor: "transparent",
+              position: "relative",
+              zIndex: 20,
+            }}
           />
         </div>
+
+        <div className="flex-1 overflow-y-auto px-4 flex justify-center">
+          <div className="w-full max-w-lg">
+            <RecordContent
+              initialData={initialData}
+              selectedContinent={selectedContinent}
+              onContinentChange={setSelectedContinent}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

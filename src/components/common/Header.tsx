@@ -60,11 +60,11 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
       const getLeftIcon = () => {
         switch (leftIcon) {
           case "back":
-            return <BackIcon width={9} height={16} />;
+            return <BackIcon width={24} height={24} />;
           case "menu":
             return <MenuIcon width={24} height={24} />;
           case "close":
-            return <XIcon width={16} height={16} />;
+            return <XIcon width={24} height={24} />;
           default:
             return null;
         }
@@ -149,14 +149,16 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
     };
 
     return (
-      <Comp className={cn(headerVariants({ variant }), className)} ref={ref} {...props}>
+      <Comp className={cn(headerVariants({ variant }), "relative", className)} ref={ref} {...props}>
         {/* 왼쪽 버튼 영역 */}
         <div className="flex items-center justify-start min-w-0 flex-1">{renderLeftIcon()}</div>
 
-        {/* 가운데 타이틀 영역 */}
-        <div className="flex items-center justify-center flex-1">
-          {title && <h1 className="text-lg font-bold text-text-primary truncate">{title}</h1>}
-        </div>
+        {/* 가운데 타이틀 영역 - absolute positioning으로 정가운데 고정 */}
+        {title && (
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none">
+            <h1 className="text-lg font-bold text-text-primary truncate">{title}</h1>
+          </div>
+        )}
 
         {/* 오른쪽 버튼 영역 */}
         <div className="flex items-center justify-end min-w-0 flex-1 gap-2">

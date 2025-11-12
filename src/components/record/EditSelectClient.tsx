@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Header } from "@/components/common/Header";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
-import { EditHeader } from "@/components/record/EditHeader";
 import type { City } from "@/types/city";
 
 interface EditSelectClientProps {
@@ -120,7 +120,21 @@ export function EditSelectClient({
       mode="edit-add"
       onComplete={handleComplete}
       buttonLabel="내 지구본에 추가하기"
-      customHeader={<EditHeader title="도시 추가" showSaveButton={false} onBack={handleBack} />}
+      customHeader={
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header
+            variant="navy"
+            leftIcon="back"
+            onLeftClick={handleBack}
+            title="도시 추가"
+            style={{
+              backgroundColor: "transparent",
+              position: "relative",
+              zIndex: 20,
+            }}
+          />
+        </div>
+      }
     />
   );
 }

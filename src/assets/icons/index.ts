@@ -13,7 +13,6 @@ export { default as EmojiHintIcon } from "./emoji-hint.svg";
 export { default as GalleryIcon } from "./gallery.svg";
 export { default as GlobberHeaderIcon } from "./globber-header.svg";
 export { default as GlobberLoginIcon } from "./globber-login.svg";
-export { default as ICArrowLeftIcon } from "./ic_arrow_left.svg";
 export { default as ICEditIcon } from "./ic_edit.svg";
 export { default as ICPlusIcon } from "./ic_plus.svg";
 export { default as ICXIcon } from "./ic_X.svg";

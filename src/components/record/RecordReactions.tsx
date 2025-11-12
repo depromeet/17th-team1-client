@@ -242,7 +242,7 @@ export const RecordReactions = ({
         <AddEmojiIcon />
       </button>
 
-      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1">
+      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
         {reactions.map(({ code, glyph, count }, index) => (
           <motion.button
             key={`${code}-${glyph}-${index}`}

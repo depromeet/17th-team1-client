@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { apiPost } from "@/lib/apiClient";
+import { ApiError, apiPost } from "@/lib/apiClient";
 import type { PressEmojiParams, PressEmojiResponse, RegisterEmojiParams, RegisterEmojiResponse } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
 
@@ -32,7 +32,8 @@ export const registerEmoji = async (params: RegisterEmojiParams): Promise<Regist
     return response;
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes(StatusCodes.CONFLICT.toString())) throw new Error("이미 등록된 이모지입니다.");
+      if (error instanceof ApiError && error.status === StatusCodes.CONFLICT)
+        throw new Error("이미 등록된 이모지입니다.");
       throw new Error(`이모지 등록에 실패했습니다: ${error.message}`);
     }
     throw new Error("이모지를 등록하는데 실패했습니다. 잠시 후 다시 시도해주세요.");

@@ -184,54 +184,20 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         );
 
         const uploadedResults = await Promise.all(uploadPromises);
-        const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
+        // 서버에는 아직 등록하지 않고, S3 업로드 결과를 이용해 로컬 상태만 갱신한다.
+        const mappedMetadata = uploadedResults.map(({ metadata, photoCode }) => {
+          const selectedTag = metadata.tag && metadata.tag !== "NONE" ? metadata.tag : null;
+          const baseTakenMonth = toYearMonth(metadata.timestamp);
 
-        const mappedMetadata = await Promise.all(
-          uploadedResults.map(async ({ metadata, photoCode }) => {
-            const selectedTag = metadata.tag && metadata.tag !== "NONE" ? metadata.tag : null;
-            const baseTakenMonth = toYearMonth(metadata.timestamp);
-            const takenMonthForRequest = baseTakenMonth ?? fallbackMonth;
-            const width = metadata.dimensions?.width ?? 1;
-            const height = metadata.dimensions?.height ?? 1;
-            const latitude = metadata.location?.latitude;
-            const longitude = metadata.location?.longitude;
-            const placeName = metadata.location?.address;
-
-            let photoId: number | undefined;
-
-            if (isEditMode && typeof diaryId === "number") {
-              const normalizedTag = selectedTag ?? metadata.tag ?? "NONE";
-              const photoPayload = {
-                photoCode,
-                lat: latitude,
-                lng: longitude,
-                width,
-                height,
-                takenMonth: takenMonthForRequest,
-                tag: normalizedTag,
-                placeName,
-              };
-
-              try {
-                const createdPhoto = await addDiaryPhoto(diaryId, photoPayload);
-                photoId = createdPhoto.photoId;
-              } catch (error) {
-                // throw error;
-                console.error(error);
-                throw new Error("사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
-              }
-            }
-
-            return {
-              ...metadata,
-              selectedTag,
-              customDate: baseTakenMonth ?? null,
-              photoCode,
-              photoId,
-              isExisting: Boolean(photoId),
-            };
-          }),
-        );
+          return {
+            ...metadata,
+            selectedTag,
+            customDate: baseTakenMonth ?? null,
+            photoCode,
+            photoId: undefined,
+            isExisting: false,
+          };
+        });
 
         setMetadataList((prev) => (prev.length > 0 ? [...prev, ...mappedMetadata] : mappedMetadata));
       } catch (error) {
@@ -241,7 +207,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         setIsProcessing(false);
       }
     },
-    [metadataCount, isEditMode, diaryId],
+    [metadataCount],
   );
 
   const handleRemove = async (id: string) => {
@@ -270,7 +236,16 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
   };
 
   const handleTagChange = (id: string, tag: ImageTag | null) => {
-    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, selectedTag: tag } : item)));
+    setMetadataList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        return {
+          ...item,
+          selectedTag: tag,
+          tag: tag ?? "NONE",
+        };
+      }),
+    );
   };
 
   const handleDateChange = (id: string, yearMonth: string | null) => {
@@ -327,37 +302,62 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         const withoutPhotoId = metadataList.filter((item) => item.photoId == null);
 
         if (withoutPhotoId.length > 0) {
-          const createdPhotos = await Promise.all(
-            withoutPhotoId.map(async (metadata) => {
-              if (!metadata.photoCode) {
-                throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
+          const createdPhotos: { targetId: string; photoId: number }[] = [];
+
+          for (const metadata of withoutPhotoId) {
+            if (!metadata.photoCode) {
+              throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
+            }
+
+            // 저장 버튼을 눌렀을 때만 다이어리-사진 매핑 API를 호출한다.
+            // (업로드 직후에는 호출하지 않아 서버에서 3장 제한에 걸리지 않도록 함)
+            const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+            const width = dimensions?.width ?? 1;
+            const height = dimensions?.height ?? 1;
+            const takenMonthValue = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
+            const normalizedTag = selectedTag ?? tag ?? "NONE";
+            const latitude = location?.latitude;
+            const longitude = location?.longitude;
+            const placeName = location?.address;
+
+            const payload = {
+              photoCode: metadata.photoCode,
+              lat: latitude,
+              lng: longitude,
+              width,
+              height,
+              takenMonth: takenMonthValue,
+              tag: normalizedTag,
+              placeName,
+            };
+
+            const createdPhoto = await addDiaryPhoto(diaryId, payload);
+            let resolvedPhotoId =
+              (createdPhoto as { photoId?: number })?.photoId ??
+              (createdPhoto as { data?: { photoId?: number } })?.data?.photoId;
+
+            if (!resolvedPhotoId) {
+              // 응답 포맷이 다르거나 photoId가 늦게 반영되는 경우에는 상세 정보를 다시 불러와 보정한다.
+              console.warn("addDiaryPhoto 응답에서 photoId를 찾지 못했습니다. 상세 정보를 재조회합니다.", createdPhoto);
+              try {
+                const latestDiary = await getDiaryDetail(diaryId);
+                const matchedPhoto = latestDiary.photos.find((photo) => photo.photoCode === metadata.photoCode);
+                if (matchedPhoto?.photoId) {
+                  resolvedPhotoId = matchedPhoto.photoId;
+                }
+              } catch (fetchError) {
+                console.error("사진 ID를 확인하기 위해 다이어리 정보를 재조회하는 데 실패했습니다.", fetchError);
               }
+            }
 
-              const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
-              const width = dimensions?.width ?? 1;
-              const height = dimensions?.height ?? 1;
-              const takenMonthValue = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
-              const normalizedTag = selectedTag ?? tag ?? "NONE";
-              const latitude = location?.latitude;
-              const longitude = location?.longitude;
-              const placeName = location?.address;
+            if (!resolvedPhotoId) {
+              throw new Error("업로드한 사진 ID를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.");
+            }
 
-              const payload = {
-                photoCode: metadata.photoCode,
-                lat: latitude,
-                lng: longitude,
-                width,
-                height,
-                takenMonth: takenMonthValue,
-                tag: normalizedTag,
-                placeName,
-              };
+            createdPhotos.push({ targetId: metadata.id, photoId: resolvedPhotoId });
+          }
 
-              const createdPhoto = await addDiaryPhoto(diaryId, payload);
-              return { targetId: metadata.id, photoId: createdPhoto.photoId };
-            }),
-          );
-
+          // 새로 생성된 photoId를 로컬 상태에도 반영해 이후 updateDiary 요청에서 재사용한다.
           currentMetadataList = metadataList.map((item) => {
             const created = createdPhotos.find((c) => c.targetId === item.id);
             if (!created) return item;

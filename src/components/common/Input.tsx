@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import { useState } from "react";
-import { CloseIcon, SearchIcon } from "@/assets/icons";
+import { CloseIcon, SearchbarActiveIcon, SearchbarInactiveIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(
@@ -50,11 +50,17 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
 
   return (
     <div className={cn("relative", className)}>
-      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center gap-3">
-        <SearchIcon className="w-6 h-6 transition-colors" color={isFocused ? "white" : "#778A9B"} />
+      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+          {isFocused || hasValue ? (
+            <SearchbarActiveIcon className="w-6 h-6" />
+          ) : (
+            <SearchbarInactiveIcon className="w-6 h-6" />
+          )}
+        </div>
         <input
           type="text"
-          className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
+          className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium leading-6 outline-none min-w-0"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           value={value}
@@ -62,14 +68,11 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
           {...props}
         />
         {hasValue && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="flex-shrink-0 p-1 cursor-pointer flex items-center justify-center"
-            aria-label="검색어 지우기"
-          >
-            <CloseIcon color="#778A9B" className="w-4 h-4" />
-          </button>
+          <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+            <button type="button" onClick={handleClear} className="w-full h-full flex items-center justify-center" aria-label="검색어 지우기">
+              <CloseIcon className="w-3 h-3" />
+            </button>
+          </div>
         )}
       </div>
     </div>

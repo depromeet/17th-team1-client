@@ -28,5 +28,7 @@ export { default as PlusIcon } from "./plus.svg";
 export { default as ProfileIcon } from "./profile.svg";
 export { default as ReturnIcon } from "./return.svg";
 export { default as SearchIcon } from "./search.svg";
+export { default as SearchbarActiveIcon } from "./ic_searchbar_active.svg";
+export { default as SearchbarInactiveIcon } from "./ic_searchbar_inactive.svg";
 export { default as WarningIcon } from "./warning.svg";
 export { default as XIcon } from "./x.svg";

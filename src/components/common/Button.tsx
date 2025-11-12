@@ -21,26 +21,29 @@ const iconButtonStyles = cn(
   "enabled:hover:bg-gray-50 enabled:hover:outline-gray-300 enabled:hover:text-gray-900 disabled:opacity-40",
 );
 
-export const buttonVariants = cva("inline-flex justify-center items-center rounded-md disabled:opacity-40", {
-  variants: {
-    variant: {
-      primary: "bg-blue-theme enabled:hover:bg-blue-200 text-black",
-      gray: "bg-[#293949] enabled:hover:bg-gray-1000 text-white",
-      black: "bg-[#0C0D15] enabled:hover:bg-gray-1000 text-white",
-      disabled: "bg-[#243146] enabled:hover:bg-gray-800 text-text-thirdly",
+export const buttonVariants = cva(
+  "inline-flex justify-center items-center rounded-md disabled:opacity-40 cursor-pointer",
+  {
+    variants: {
+      variant: {
+        primary: "bg-blue-theme enabled:hover:bg-blue-200 text-black",
+        gray: "bg-[#293949] enabled:hover:bg-gray-1000 text-white",
+        black: "bg-[#0C0D15] enabled:hover:bg-gray-1000 text-white",
+        disabled: "bg-[#243146] enabled:hover:bg-gray-800 text-text-thirdly",
+      },
+      size: {
+        xs: "p-1 h-6 text-xs",
+        sm: "px-[8px] py-[6px] h-[30px] text-xs",
+        md: "px-[10px] py-[8px] h-[36px] text-sm",
+        lg: "px-[12px] py-[18px] h-[56px] text-lg font-bold rounded-3xl",
+      },
     },
-    size: {
-      xs: "p-1 h-6 text-xs",
-      sm: "px-[8px] py-[6px] h-[30px] text-xs",
-      md: "px-[10px] py-[8px] h-[36px] text-sm",
-      lg: "px-[12px] py-[18px] h-[56px] text-lg font-bold rounded-3xl",
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
     },
   },
-  defaultVariants: {
-    variant: "primary",
-    size: "md",
-  },
-});
+);
 
 export const iconButtonVariants = cva(iconButtonStyles, {
   variants: {

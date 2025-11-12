@@ -113,10 +113,12 @@ export const RecordCard = ({
       {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
         className="px-4 pt-4 shrink-0"
+        data-emoji-reactions
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
       >
         <RecordReactions recordId={id} initialReactions={reactions || []} isOwner={isOwner} />
       </div>

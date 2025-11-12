@@ -29,7 +29,13 @@ export const ProfileCard = ({ name, email, profileImage, onEditClick }: ProfileC
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Image src={"/default-profile.png"} alt="프로필 이미지" width={48} height={48} className="shrink-0" />
+              <Image
+                src={"/assets/default-profile.png"}
+                alt="프로필 이미지"
+                width={48}
+                height={48}
+                className="shrink-0"
+              />
             </div>
           )}
         </div>

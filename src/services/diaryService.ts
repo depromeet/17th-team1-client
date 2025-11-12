@@ -163,9 +163,6 @@ export const getDiaryDetail = async (diaryId: string | number, token?: string): 
     const response = await apiGet<DiaryDetailResponse>(`/api/v1/diaries/${diaryId}`, undefined, authToken);
     return response.data;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록을 불러오는데 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -193,9 +190,6 @@ export const getDiariesByUuid = async (uuid: string, token?: string): Promise<Di
       diaryResponse.diaries.map((diaryData) => transformDiaryData(diaryData)),
     );
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록을 불러오는데 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -213,12 +207,20 @@ export const getDiariesByUuid = async (uuid: string, token?: string): Promise<Di
  * await deleteDiary(1);
  */
 export const deleteDiary = async (diaryId: string | number, token?: string): Promise<void> => {
+  let authToken = token;
+
+  if (!authToken) {
+    const { token: clientToken } = getAuthInfo();
+    authToken = clientToken || undefined;
+  }
+
+  if (!authToken) {
+    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  }
+
   try {
-    await apiDelete(`/api/v1/diaries/${diaryId}`, undefined, token);
+    await apiDelete(`/api/v1/diaries/${diaryId}`, undefined, authToken);
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록 삭제에 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -250,9 +252,6 @@ export const deleteDiaryPhoto = async (diaryId: string | number, photoId: number
   try {
     await apiDelete(`/api/v1/diaries/photo/${diaryId}/${photoId}`, undefined, authToken);
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록 사진 삭제에 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록 사진 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -289,9 +288,6 @@ export const addDiaryPhoto = async (
     const response = await apiPost<DiaryPhotoResponse>(`/api/v1/diaries/photo/${diaryId}`, photo, authToken);
     return response.data;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록 사진 추가에 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록 사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -358,9 +354,6 @@ export const updateDiary = async (
   try {
     await apiPut(`/api/v1/diaries/${diaryId}`, params, authToken);
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`여행 기록 수정에 실패했습니다: $error.message`);
-    }
     throw new Error("여행 기록 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

@@ -242,7 +242,7 @@ export const RecordReactions = ({
         <AddEmojiIcon />
       </button>
 
-      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1">
+      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
         {reactions.map(({ code, glyph, count }, index) => (
           <motion.button
             key={`${code}-${glyph}-${index}`}
@@ -331,16 +331,23 @@ export const RecordReactions = ({
             }}
             aria-label="이모지 피커 닫기"
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto">
+          <div
+            className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto"
+            style={{
+              paddingBottom: "env(safe-area-inset-bottom)",
+            }}
+          >
             <EmojiPicker
               onEmojiClick={handleEmojiSelect}
               width="100%"
-              height="400px"
+              height="354px"
               theme={Theme.DARK}
               searchPlaceHolder="이모지를 검색해 보세요"
               previewConfig={{
                 showPreview: false,
               }}
+              autoFocusSearch={false}
+              skinTonesDisabled
               style={{
                 borderTopLeftRadius: "24px",
                 borderTopRightRadius: "24px",

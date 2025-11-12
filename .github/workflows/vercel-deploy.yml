@@ -15,6 +15,17 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "${{ secrets.VERCEL_DEPLOY_EMAIL }}"
+
+      - name: Fetch and sync with remote
+        run: |
+          git remote add fork https://${{ secrets.VERCEL_DEPLOY }}@github.com/yuminnnnni/17th-team1-client.git || git remote set-url fork https://${{ secrets.VERCEL_DEPLOY }}@github.com/yuminnnnni/17th-team1-client.git
+          git fetch fork main
+          git reset --hard fork/main || true
+
       - name: Push to fork repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
@@ -27,3 +38,4 @@ jobs:
           user-name: github-actions[bot]
           commit-message: ${{ github.event.commits[0].message }}
           target-branch: main
+          create-target-branch-if-needed: true

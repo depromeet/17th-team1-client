@@ -142,27 +142,29 @@ const GlobePage = () => {
   }
 
   return (
-    <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
-      <Header
-        title={`${nickname}님의 지구본`}
-        variant="navy"
-        {...(isMyGlobe && {
-          leftIcon: "menu",
-          onLeftClick: () => router.push("/profile"),
-          rightIcon: "people",
-          onRightClick: () => router.push("/saved-globe"),
-        })}
-        {...(!isMyGlobe &&
-          fromSavedGlobe && {
-            leftIcon: "back",
-            onLeftClick: () => router.back(),
+    <div className="overflow-hidden text-text-primary relative font-sans flex flex-col h-screen">
+      <div className="max-w-[512px] mx-auto w-full">
+        <Header
+          title={`${nickname}님의 지구본`}
+          variant="navy"
+          {...(isMyGlobe && {
+            leftIcon: "menu",
+            onLeftClick: () => router.push("/profile"),
+            rightIcon: "people",
+            onRightClick: () => router.push("/saved-globe"),
           })}
-        style={{
-          backgroundColor: "transparent",
-          position: "relative",
-          zIndex: 20,
-        }}
-      />
+          {...(!isMyGlobe &&
+            fromSavedGlobe && {
+              leftIcon: "back",
+              onLeftClick: () => router.back(),
+            })}
+          style={{
+            backgroundColor: "transparent",
+            position: "relative",
+            zIndex: 20,
+          }}
+        />
+      </div>
       {viewMode === "globe" ? (
         <div className="absolute inset-0">
           {/* 글로브 뷰 */}

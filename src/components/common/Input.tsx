@@ -50,11 +50,13 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
 
   return (
     <div className={cn("relative", className)}>
-      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center gap-3">
-        <SearchIcon className="w-6 h-6 transition-colors" color={isFocused ? "white" : "#778A9B"} />
+      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center">
+        <div className="flex-shrink-0 mr-3">
+          <SearchIcon className="w-6 h-6 transition-colors" color={isFocused ? "white" : "#778A9B"} />
+        </div>
         <input
           type="text"
-          className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
+          className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none min-w-0"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           value={value}
@@ -65,7 +67,7 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
           <button
             type="button"
             onClick={handleClear}
-            className="flex-shrink-0 p-1 cursor-pointer flex items-center justify-center"
+            className="flex-shrink-0 ml-3"
             aria-label="검색어 지우기"
           >
             <CloseIcon color="#778A9B" className="w-4 h-4" />

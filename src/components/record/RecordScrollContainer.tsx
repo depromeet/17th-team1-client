@@ -47,6 +47,12 @@ export const RecordScrollContainer = ({
     const THROTTLE_DELAY = 150;
 
     const handleWheel = (e: WheelEvent) => {
+      // 이모지 영역에서 발생한 wheel 이벤트는 무시
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-emoji-reactions]")) {
+        return;
+      }
+
       e.preventDefault();
 
       if (isTransitioning) return;

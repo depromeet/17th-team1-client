@@ -69,7 +69,12 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
         />
         {hasValue && (
           <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
-            <button type="button" onClick={handleClear} className="w-full h-full flex items-center justify-center" aria-label="검색어 지우기">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="w-full h-full flex items-center justify-center"
+              aria-label="검색어 지우기"
+            >
               <CloseIcon className="w-3 h-3" />
             </button>
           </div>

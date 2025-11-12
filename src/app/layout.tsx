@@ -34,11 +34,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="antialiased min-h-screen"
+        className="antialiased min-h-dvh"
         style={{ background: "linear-gradient(180deg, #001D39 0%, #0D0C14 100%)" }}
       >
         <ClientLayout>
-          <div className="w-full min-h-screen">{children}</div>
+          <div className="w-full min-h-dvh">{children}</div>
         </ClientLayout>
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&language=ko&region=kr`}

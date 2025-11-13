@@ -235,6 +235,21 @@ export const RecordReactions = ({
   const hasEmptySlots = reactions.length < MAX_EMPTY_SLOTS;
   const canInteract = !isOwner;
 
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showEmojiPicker]);
+
   return (
     <div className="flex items-center gap-4 relative">
       <button

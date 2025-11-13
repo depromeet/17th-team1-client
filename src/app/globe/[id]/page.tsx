@@ -202,6 +202,7 @@ const GlobePage = () => {
               isMyGlobe={isMyGlobe}
               memberId={targetMemberId}
               isBookmarked={isBookmarked}
+              onBookmarkChange={setIsBookmarked}
             />
           </div>
 
@@ -243,6 +244,7 @@ const GlobePage = () => {
               isMyGlobe={isMyGlobe}
               memberId={targetMemberId}
               isBookmarked={isBookmarked}
+              onBookmarkChange={setIsBookmarked}
             />
           </div>
         </>

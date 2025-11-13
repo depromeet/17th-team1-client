@@ -20,6 +20,7 @@ type GlobeFooterProps = {
   isFirstGlobe?: boolean;
   memberId?: number;
   isBookmarked?: boolean;
+  onBookmarkChange?: (isBookmarked: boolean) => void;
 };
 
 const DESCRIPTIONS = [
@@ -46,6 +47,7 @@ export const GlobeFooter = ({
   isFirstGlobe = false,
   memberId,
   isBookmarked: initialIsBookmarked = false,
+  onBookmarkChange,
 }: GlobeFooterProps) => {
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
@@ -117,6 +119,11 @@ export const GlobeFooter = ({
     setVisualViewMode((current) => (current === viewMode ? current : viewMode));
   }, [viewMode]);
 
+  // 부모에서 북마크 상태가 업데이트되면 로컬 상태도 동기화
+  useEffect(() => {
+    setIsBookmarked(initialIsBookmarked);
+  }, [initialIsBookmarked]);
+
   useEffect(() => {
     return () => {
       if (toggleTimeoutRef.current) {
@@ -138,6 +145,9 @@ export const GlobeFooter = ({
     const willBeBookmarked = !isBookmarked;
     setIsBookmarked(willBeBookmarked);
 
+    // 부모 컴포넌트에게 상태 변경 알림
+    onBookmarkChange?.(willBeBookmarked);
+
     try {
       if (isBookmarked) {
         await removeBookmark(memberId);
@@ -149,6 +159,8 @@ export const GlobeFooter = ({
       setToastOpen(true);
     } catch {
       setIsBookmarked(previousState);
+      // 실패 시 부모 상태도 롤백
+      onBookmarkChange?.(previousState);
     }
   };
 

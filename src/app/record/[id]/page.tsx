@@ -20,7 +20,6 @@ type RecordData = {
   country: string;
   images: string[];
   imageMetadata?: ImageMetadataFromDiary[];
-  category?: string;
   date?: string;
   location?: string;
   userId: string;
@@ -140,7 +139,6 @@ const RecordDetailPage = () => {
     id,
     images,
     imageMetadata,
-    category,
     date,
     location,
     userName,
@@ -213,7 +211,6 @@ const RecordDetailPage = () => {
           id={id}
           images={images}
           imageMetadata={imageMetadata}
-          category={category}
           date={date}
           location={location}
           userName={userName}
@@ -253,7 +250,7 @@ const RecordDetailPage = () => {
       >
         {countryRecords.map(
           (
-            { id, images, imageMetadata, category, date, location, userName, userAvatar, description, reactions },
+            { id, images, imageMetadata, date, location, userName, userAvatar, description, reactions },
             index,
           ) => (
             <RecordCard
@@ -261,7 +258,6 @@ const RecordDetailPage = () => {
               id={id}
               images={images}
               imageMetadata={imageMetadata}
-              category={category}
               date={date}
               location={location}
               userName={userName}

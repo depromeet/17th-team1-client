@@ -142,7 +142,8 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    handleDragEnd(e.touches.length === 2);
+    const isGestureEnding = isGestureActiveRef.current && e.touches.length < 2;
+    handleDragEnd(isGestureEnding);
   };
 
   const handleTouchCancel = () => {

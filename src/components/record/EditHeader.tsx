@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ICArrowLeftIcon } from "@/assets/icons";
+import { BackIcon } from "@/assets/icons";
 
 interface EditHeaderProps {
   title?: string;
@@ -33,7 +33,7 @@ export function EditHeader({
       <div className="relative flex justify-between items-center">
         <div className="w-24 flex justify-start items-center">
           <button onClick={handleBackClick} className="flex justify-start items-center" type="button">
-            <ICArrowLeftIcon className="w-6 h-6" />
+            <BackIcon className="w-6 h-6" />
           </button>
         </div>
 

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { IconExclamationCircleMonoIcon } from "@/assets/icons";
+import { Header } from "@/components/common/Header";
 import { Popup } from "@/components/common/Popup";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
 import { getCountryName } from "@/constants/countryMapping";
@@ -11,7 +12,6 @@ import type { City } from "@/types/city";
 import type { CreateTravelRecordsResponse } from "@/types/member";
 import { getAuthInfo } from "@/utils/cookies";
 import { EditContent } from "./EditContent";
-import { EditHeader } from "./EditHeader";
 import { EditToastContainer, toast } from "./EditToast";
 
 interface EditClientProps {
@@ -371,14 +371,32 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   };
 
   return (
-    <div className="h-screen bg-surface-secondary flex flex-col">
-      <EditToastContainer />
-      <LoadingOverlay show={isSaving} />
-      <div className="flex justify-between items-center px-4 pt-4 pb-3" />
-      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-        <div className="w-full max-w-lg px-4">
-          <EditHeader canSave={isChanged && !isSaving} onSave={handleSave} onBack={handleBack} />
-          <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
+    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+        <EditToastContainer />
+        <LoadingOverlay show={isSaving} />
+
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header
+            variant="navy"
+            leftIcon="back"
+            onLeftClick={handleBack}
+            title="도시 편집"
+            rightButtonTitle="저장"
+            rightButtonDisabled={!isChanged || isSaving}
+            onRightClick={handleSave}
+            style={{
+              backgroundColor: "transparent",
+              position: "relative",
+              zIndex: 20,
+            }}
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 flex justify-center">
+          <div className="w-full max-w-lg">
+            <EditContent cities={current} onAddClick={handleAddClick} onRemoveClick={handleRemove} />
+          </div>
         </div>
       </div>
       {confirmId && (
@@ -446,6 +464,6 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           </Popup>
         </div>
       )}
-    </div>
+    </main>
   );
 }

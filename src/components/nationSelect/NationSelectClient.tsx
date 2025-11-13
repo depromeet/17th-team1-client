@@ -75,58 +75,60 @@ export const NationSelectClient = ({
   };
 
   return (
-    <div className="h-screen bg-surface-secondary flex flex-col">
-      <div className="flex justify-between items-center px-4 pt-4 pb-3" />
+    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+        {customHeader && customHeader}
 
-      <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-        <div className="w-full max-w-[512px]">
-          {customHeader || <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
+        <div className="flex-1 overflow-y-auto px-4 flex justify-center">
+          <div className="w-full max-w-[512px]">
+            {!customHeader && <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
 
-          {customHeader && (
-            <div className="mb-8">
-              <SearchInput
-                placeholder="도시/나라를 검색해주세요."
-                value={searchKeyword}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="[&>div]:h-[50px]"
-              />
-            </div>
-          )}
-
-          <div>
-            <h2 className="text-text-primary text-lg font-bold mb-2.5">
-              {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
-            </h2>
-
-            {displayError && (
-              <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
-                {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
-                <div className="mt-1 text-xs text-text-thirdly break-words">
-                  {typeof displayError === "string" ? displayError : String(displayError)}
-                </div>
+            {customHeader && (
+              <div className="mb-8">
+                <SearchInput
+                  placeholder="도시/나라를 검색해주세요."
+                  value={searchKeyword}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="[&>div]:h-[50px]"
+                />
               </div>
             )}
 
-            <PopularCitiesList
-              cities={displayCities}
-              selectedCityIds={selectedCityIds}
-              registeredCityNames={registeredCityNamesSet}
-              onAddCity={handleAddCity}
-              onRemoveCity={handleRemoveCity}
-              isLoading={displayLoading}
-              isSearching={isSearchingMode && isSearching}
-              hasSearched={isSearchingMode && hasSearched}
-            />
+            <div>
+              <h2 className="text-text-primary text-lg font-bold mb-2.5">
+                {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
+              </h2>
+
+              {displayError && (
+                <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
+                  {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
+                  <div className="mt-1 text-xs text-text-thirdly break-words">
+                    {typeof displayError === "string" ? displayError : String(displayError)}
+                  </div>
+                </div>
+              )}
+
+              <PopularCitiesList
+                cities={displayCities}
+                selectedCityIds={selectedCityIds}
+                registeredCityNames={registeredCityNamesSet}
+                onAddCity={handleAddCity}
+                onRemoveCity={handleRemoveCity}
+                isLoading={displayLoading}
+                isSearching={isSearchingMode && isSearching}
+                hasSearched={isSearchingMode && hasSearched}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <NationSelectFooter
-        selectedCities={selectedCityList}
-        onRemoveCity={handleRemoveCity}
-        onCreateGlobe={handleCreateGlobe}
-        buttonLabel={buttonLabel}
-      />
-    </div>
+        <NationSelectFooter
+          selectedCities={selectedCityList}
+          onRemoveCity={handleRemoveCity}
+          onCreateGlobe={handleCreateGlobe}
+          buttonLabel={buttonLabel}
+        />
+      </div>
+    </main>
   );
 };

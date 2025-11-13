@@ -94,9 +94,21 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   }, [router]);
 
   return (
-    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
-      <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
-        <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="나의 프로필" />
+    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header
+            variant="navy"
+            leftIcon="back"
+            onLeftClick={() => router.back()}
+            title="나의 프로필"
+            style={{
+              backgroundColor: "transparent",
+              position: "relative",
+              zIndex: 20,
+            }}
+          />
+        </div>
 
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto flex flex-col">

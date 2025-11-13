@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
   description: "지구본으로 완성하는 여행 기록 서비스",
   icons: {
-    icon: "/assets/globe.png",
+    icon: "/favicon.svg",
   },
 };
 

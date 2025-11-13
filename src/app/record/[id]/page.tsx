@@ -93,7 +93,21 @@ const RecordDetailPage = () => {
         const sortedDiaries = [...matchingDiaries, ...otherDiaries];
 
         const recordsData: RecordData[] = sortedDiaries.map(
-          ({ id, cityId, city, country, images, imageMetadata, date, location, description, reactions, userId, userName, userAvatar }) => ({
+          ({
+            id,
+            cityId,
+            city,
+            country,
+            images,
+            imageMetadata,
+            date,
+            location,
+            description,
+            reactions,
+            userId,
+            userName,
+            userAvatar,
+          }) => ({
             id,
             cityId,
             city,
@@ -133,19 +147,8 @@ const RecordDetailPage = () => {
   };
 
   if (!currentRecord) return null;
-  const {
-    city,
-    country,
-    id,
-    images,
-    imageMetadata,
-    date,
-    location,
-    userName,
-    userAvatar,
-    description,
-    reactions,
-  } = currentRecord;
+  const { city, country, id, images, imageMetadata, date, location, userName, userAvatar, description, reactions } =
+    currentRecord;
 
   const handleEdit = () => {
     const params = new URLSearchParams();
@@ -249,10 +252,7 @@ const RecordDetailPage = () => {
         hasPrevious={hasPrevious}
       >
         {countryRecords.map(
-          (
-            { id, images, imageMetadata, date, location, userName, userAvatar, description, reactions },
-            index,
-          ) => (
+          ({ id, images, imageMetadata, date, location, userName, userAvatar, description, reactions }, index) => (
             <RecordCard
               key={`${id}-${index}`}
               id={id}

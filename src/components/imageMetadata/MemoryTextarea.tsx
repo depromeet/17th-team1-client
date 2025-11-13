@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
 
 type MemoryTextareaProps = {
   value?: string;
@@ -8,6 +9,8 @@ type MemoryTextareaProps = {
 };
 
 const MAX_LENGTH = 200;
+const TOAST_DURATION = 1500;
+const TOAST_COOLDOWN = 1500;
 
 export const MemoryTextarea = ({
   value,
@@ -15,37 +18,78 @@ export const MemoryTextarea = ({
   placeholder = "여행 도시에 대한 추억을 남겨주세요...",
   rows = 13,
 }: MemoryTextareaProps) => {
-  const [showError, setShowError] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+  const lastToastTimeRef = useRef<number>(0);
+  const cooldownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (value && value.length >= MAX_LENGTH) {
-      setShowError(true);
-    } else {
-      setShowError(false);
+  const showToast = () => {
+    const now = Date.now();
+    const timeSinceLastToast = now - lastToastTimeRef.current;
+
+    // 1.5초 이내에 연속 초과 입력이 감지되면 토스트 재노출하지 않음
+    if (timeSinceLastToast < TOAST_COOLDOWN) {
+      return;
     }
-  }, [value]);
+
+    if (cooldownTimeoutRef.current) {
+      clearTimeout(cooldownTimeoutRef.current);
+    }
+
+    setToastOpen(true);
+    lastToastTimeRef.current = now;
+
+    cooldownTimeoutRef.current = setTimeout(() => {
+      cooldownTimeoutRef.current = null;
+    }, TOAST_COOLDOWN);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     if (newValue.length <= MAX_LENGTH) {
       onChange?.(newValue);
-      setShowError(false);
     } else {
-      setShowError(true);
+      showToast();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData("text");
+    const currentValue = value || "";
+    const newValue = currentValue + pastedText;
+
+    if (newValue.length > MAX_LENGTH) {
+      e.preventDefault();
+      showToast();
     }
   };
 
   return (
-    <div className="w-full px-2 mt-4">
-      <textarea
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className="w-full bg-transparent text-text-primary text-sm placeholder:text-text-secondary/60 resize-none outline-none"
-        rows={rows}
-        maxLength={MAX_LENGTH}
-      />
-      {showError && <p className="mb-2 text-xs text-red-400">최대 {MAX_LENGTH}자까지만 입력이 가능합니다.</p>}
-    </div>
+    <HeadlessToastProvider viewportClassName="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px]">
+      <div className="w-full px-2 mt-4">
+        <textarea
+          value={value}
+          onChange={handleChange}
+          onPaste={handlePaste}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-text-primary text-sm placeholder:text-text-secondary/60 resize-none outline-none"
+          rows={rows}
+        />
+      </div>
+      <HeadlessToast
+        open={toastOpen}
+        onOpenChange={setToastOpen}
+        duration={TOAST_DURATION}
+        className="flex items-center w-[370px] h-[48px] rounded-lg border text-white px-4"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.08)",
+          borderColor: "rgba(255, 255, 255, 0.04)",
+          paddingTop: "14px",
+          paddingBottom: "14px",
+        }}
+        contentClassName="font-medium text-sm leading-none flex items-center"
+      >
+        최대 {MAX_LENGTH}자까지만 입력이 가능합니다.
+      </HeadlessToast>
+    </HeadlessToastProvider>
   );
 };

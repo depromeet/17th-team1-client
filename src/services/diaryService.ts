@@ -22,9 +22,11 @@ import { getS3UploadUrl } from "./profileService";
  * @returns {DiaryDetail} 변환된 diary 상세 정보
  */
 const transformDiaryData = (data: DiaryData): DiaryDetail => {
-  const { diaryId, city, text, createdAt, photos, emojis } = data;
+  const { diaryId, city, text, createdAt, photos, emojis, memberId, nickname, profileImageUrl } = data;
   const { cityId, cityName, countryName, countryCode, lat, lng } = city;
   const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
+  const defaultProfileImage = "/assets/default-profile.png";
+  const userAvatar = profileImageUrl ? baseUrl + profileImageUrl : defaultProfileImage;
 
   return {
     id: String(diaryId),
@@ -52,6 +54,9 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
       month: "2-digit",
     }),
     location: `${cityName}, ${countryName}`,
+    userId: String(memberId),
+    userName: nickname,
+    userAvatar,
   };
 };
 

@@ -132,7 +132,7 @@ const GlobePage = () => {
   if (travelPatterns.length === 0) {
     return (
       <div></div>
-      // <div className="w-full h-screen flex items-center justify-center">
+      // <div className="w-full h-dvh flex items-center justify-center">
       //   <div className="text-white text-xl text-center">
       //     <div>🌍 여행 데이터가 없습니다</div>
       //     <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>

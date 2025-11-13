@@ -37,7 +37,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
     return () => clearInterval(interval);
   }, [onComplete, duration]);
   return (
-    <div className="w-full h-screen relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
+    <div className="w-full h-dvh relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
       {/* Globe Background - Centered */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-[512px] aspect-square">
         {/* Globe Container with radial gradient background */}

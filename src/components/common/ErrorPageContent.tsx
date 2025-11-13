@@ -103,7 +103,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
   const content = getErrorContent();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8">
+    <div className="min-h-dvh w-full flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="w-48 h-48 relative">
           <Image src={content.icon} alt={`${errorType} 에러 아이콘`} fill className="object-contain" />

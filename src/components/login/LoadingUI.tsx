@@ -1,5 +1,5 @@
 const LoadingUI = () => (
-  <main className="min-h-screen w-full bg-gradient-to-br from-[#0f172a] via-[#0b1024] to-black text-white flex items-center justify-center p-6">
+  <main className="min-h-dvh w-full bg-gradient-to-br from-[#0f172a] via-[#0b1024] to-black text-white flex items-center justify-center p-6">
     <div className="relative w-full max-w-md">
       <div
         className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-[#3b82f6]/30 via-[#22d3ee]/20 to-[#a855f7]/20 blur-2xl"

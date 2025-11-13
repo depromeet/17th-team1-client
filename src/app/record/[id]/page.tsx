@@ -143,7 +143,13 @@ const RecordDetailPage = () => {
   }, [cityId, queryUuid]);
 
   const handleBack = () => {
-    router.back();
+    if (cookieUuid) {
+      const params = new URLSearchParams();
+      params.set("uuid", cookieUuid);
+      router.push(`/globe?${params.toString()}`);
+    } else {
+      router.push("/globe");
+    }
   };
 
   if (!currentRecord) return null;

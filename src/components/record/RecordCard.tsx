@@ -13,7 +13,6 @@ type RecordCardProps = {
   id: string;
   images: string[];
   imageMetadata?: ImageMetadataFromDiary[];
-  category?: string;
   date?: string;
   location?: string;
   userName: string;
@@ -46,7 +45,6 @@ export const RecordCard = ({
   id,
   images,
   imageMetadata,
-  category,
   date,
   location,
   userName,
@@ -62,7 +60,7 @@ export const RecordCard = ({
 
   // 현재 이미지의 메타데이터 가져오기
   const currentMetadata = imageMetadata?.[currentImageIndex];
-  const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : category;
+  const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : undefined;
   const currentDate = formatTakenMonth(currentMetadata?.takenMonth) || date;
   const currentLocation = currentMetadata?.placeName || location;
 

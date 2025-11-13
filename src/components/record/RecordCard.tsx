@@ -67,7 +67,7 @@ export const RecordCard = ({
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
       <div
-        className="relative min-h-0 flex-1 w-full max-h-[652px]"
+        className="relative min-h-0 flex-1 w-full"
         onTouchStart={(e) => {
           // 이미지 캐러셀 내부에서는 수평 스와이프만 허용
           const target = e.target as HTMLElement;
@@ -110,7 +110,7 @@ export const RecordCard = ({
       {/* 하단 영역 - 이모지 반응 */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        className="px-4 pt-4 shrink-0 relative z-20"
+        className="px-4 pt-6 pb-32 shrink-0 relative z-20"
         data-emoji-reactions
         onTouchStart={(e) => {
           e.stopPropagation();

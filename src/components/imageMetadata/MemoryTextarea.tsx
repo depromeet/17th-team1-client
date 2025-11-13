@@ -73,7 +73,7 @@ export const MemoryTextarea = ({
   };
 
   return (
-    <HeadlessToastProvider viewportClassName="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px]">
+    <HeadlessToastProvider viewportClassName="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[calc(100%-32px)] max-w-[370px]">
       <div className="w-full px-2 mt-4">
         <textarea
           ref={textareaRef}
@@ -89,7 +89,7 @@ export const MemoryTextarea = ({
         open={toastOpen}
         onOpenChange={setToastOpen}
         duration={TOAST_DURATION}
-        className="flex items-center w-[370px] h-[48px] rounded-lg border text-white px-4"
+        className="flex items-center w-full h-[48px] rounded-lg border text-white px-4"
         style={{
           backgroundColor: "rgba(255, 255, 255, 0.08)",
           borderColor: "rgba(255, 255, 255, 0.04)",

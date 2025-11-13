@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { ClientLayout } from "@/components/common/ClientLayout";
 import "./globals.css";
@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   icons: {
     icon: "/assets/globe.png",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

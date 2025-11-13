@@ -90,7 +90,7 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
               <button
                 type="button"
                 onClick={handleGoHome}
-                className="w-full h-14 px-12 py-4 rounded-2xl inline-flex justify-center items-center gap-2.5 text-[var(--color-text-primary)] text-lg font-bold font-['Pretendard'] hover:bg-[var(--color-surface-placeholder--8)] transition-colors"
+                className="w-full h-14 px-12 py-4 rounded-2xl inline-flex justify-center items-center gap-2.5 text-[var(--color-text-primary)] text-lg font-bold hover:bg-[var(--color-surface-placeholder--8)] transition-colors"
               >
                 홈으로 이동
               </button>
@@ -109,10 +109,10 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
           <Image src={content.icon} alt={`${errorType} 에러 아이콘`} fill className="object-contain" />
         </div>
         <div className="w-full flex flex-col items-center gap-5">
-          <h1 className="w-full text-center text-[var(--color-text-primary)] text-3xl font-bold font-['Pretendard'] leading-9">
+          <h1 className="w-full text-center text-[var(--color-text-primary)] text-3xl font-bold leading-9">
             {content.title}
           </h1>
-          <p className="w-full text-center text-[var(--color-text-secondary)] text-lg font-medium font-['Pretendard'] leading-7">
+          <p className="w-full text-center text-[var(--color-text-secondary)] text-lg font-medium leading-7">
             {content.description}
           </p>
         </div>

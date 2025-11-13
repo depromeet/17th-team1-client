@@ -18,7 +18,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Pretendard Variable";
 
   /* Design tokens from Figma */
   --color-gray-0: #ffffff;

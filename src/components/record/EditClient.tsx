@@ -405,10 +405,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <IconExclamationCircleMonoIcon className="w-10 h-10" />
               <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                <div className="text-center justify-start text-text-primary text-lg font-bold leading-6">
                   정말 삭제하시겠어요?
                 </div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                <div className="text-center justify-start text-text-primary text-xs font-medium leading-5">
                   도시를 삭제하면, 기록도 함께 사라져요.
                 </div>
               </div>
@@ -419,18 +419,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
                 className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
                 type="button"
               >
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
-                  취소
-                </div>
+                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">취소</div>
               </button>
               <button
                 onClick={handleConfirmDelete}
                 className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline-1 -outline-offset-1 outline-border-absolutewhite--4 flex justify-center items-center gap-2.5"
                 type="button"
               >
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
-                  삭제
-                </div>
+                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">삭제</div>
               </button>
             </div>
           </Popup>
@@ -442,10 +438,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
             <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
               <IconExclamationCircleMonoIcon className="w-10 h-10" />
               <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+                <div className="text-center justify-start text-text-primary text-lg font-bold leading-6">
                   저장에 실패했습니다.
                 </div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium font-['Pretendard'] leading-5">
+                <div className="text-center justify-start text-text-primary text-xs font-medium leading-5">
                   다시 시도해주세요.
                 </div>
               </div>
@@ -456,9 +452,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
                 className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
                 type="button"
               >
-                <div className="text-center justify-start text-text-primary text-sm font-bold font-['Pretendard'] leading-5">
-                  닫기
-                </div>
+                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">닫기</div>
               </button>
             </div>
           </Popup>

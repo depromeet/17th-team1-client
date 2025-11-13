@@ -26,9 +26,7 @@ export function CityList({ filteredRegions }: CityListProps) {
                 key={`${region.regionName}-${city.name}-${city.lat}-${city.lng}`}
                 className="self-stretch pl-5 pr-4 py-3 bg-surface-placeholder--4 rounded-2xl inline-flex justify-between items-center overflow-hidden"
               >
-                <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
-                  {city.name}
-                </div>
+                <div className="justify-start text-text-primary text-sm font-medium leading-5">{city.name}</div>
                 <button
                   type="button"
                   onClick={() => {

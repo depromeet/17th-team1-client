@@ -20,14 +20,12 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
         >
           <div className="flex justify-center items-center gap-1">
             <ICPlusIcon className="w-4 h-4" />
-            <div className="justify-start text-text-inversesecondary text-sm font-bold font-['Pretendard'] leading-5">
-              도시 추가
-            </div>
+            <div className="justify-start text-text-inversesecondary text-sm font-bold leading-5">도시 추가</div>
           </div>
         </button>
       </div>
 
-      <div className="self-stretch justify-start text-text-primary text-base font-medium font-['Pretendard'] leading-5 mb-4">
+      <div className="self-stretch justify-start text-text-primary text-base font-medium leading-5 mb-4">
         다녀온 도시
       </div>
 
@@ -44,7 +42,7 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
                   : "bg-surface-placeholder--4"
               }`}
             >
-              <div className="justify-start text-text-primary text-sm font-medium font-['Pretendard'] leading-5">
+              <div className="justify-start text-text-primary text-sm font-medium leading-5">
                 {flag} {c.name}, {countryName}
               </div>
               <button

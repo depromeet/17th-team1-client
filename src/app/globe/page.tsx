@@ -86,7 +86,7 @@ const GlobeContent = () => {
   }
 
   return (
-    <div className="w-full overflow-hidden text-text-primary relative font-sans flex flex-col h-dvh">
+    <div className="w-full overflow-hidden text-text-primary relative flex flex-col h-dvh">
       <div className="absolute inset-0">
         {/* 상단 헤더 - position absolute */}
         <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-20">

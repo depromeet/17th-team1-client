@@ -37,7 +37,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
     return () => clearInterval(interval);
   }, [onComplete, duration]);
   return (
-    <div className="w-full h-dvh relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
+    <div className="w-full h-screen relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
       {/* Globe Background - Centered */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-[512px] aspect-square">
         {/* Globe Container with radial gradient background */}
@@ -58,12 +58,10 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
 
       {/* Loading Text - Absolute positioned at center */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center px-4 z-10">
-        <h1 className="text-white text-[32px] font-bold leading-[42px] mb-4 font-pretendard whitespace-nowrap">
+        <h1 className="text-white text-[32px] font-bold leading-[42px] mb-4 whitespace-nowrap">
           {isCompleted ? "완성!" : "잠시만 기다려주세요."}
         </h1>
-        <p className="text-white text-[18px] font-medium leading-[27px] text-center font-pretendard">
-          지구본 생성중... {progress}%
-        </p>
+        <p className="text-white text-[18px] font-medium leading-[27px] text-center">지구본 생성중... {progress}%</p>
       </div>
     </div>
   );

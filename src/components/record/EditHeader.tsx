@@ -37,7 +37,7 @@ export function EditHeader({
           </button>
         </div>
 
-        <div className="absolute left-1/2 -translate-x-1/2 text-center text-text-primary text-lg font-bold font-['Pretendard'] leading-6">
+        <div className="absolute left-1/2 -translate-x-1/2 text-center text-text-primary text-lg font-bold leading-6">
           {title}
         </div>
 
@@ -50,7 +50,7 @@ export function EditHeader({
               disabled={!canSave}
             >
               <div
-                className={`text-right justify-start text-base font-bold font-['Pretendard'] leading-5 ${
+                className={`text-right justify-start text-base font-bold leading-5 ${
                   canSave ? "text-theme-color cursor-pointer" : "text-text-thirdly"
                 }`}
               >

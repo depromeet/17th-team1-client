@@ -31,7 +31,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
         </div>
 
         <div className="bg-gray-50 rounded-md p-4">
-          <p className="text-sm font-mono text-gray-700 break-words">{error.message}</p>
+          <p className="text-sm text-gray-700 break-words">{error.message}</p>
         </div>
 
         <div className="flex gap-3">

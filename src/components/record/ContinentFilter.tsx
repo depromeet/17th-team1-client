@@ -36,10 +36,10 @@ export function ContinentFilter({
             <span
               className={`${
                 isSelected
-                  ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
+                  ? "text-text-inverseprimary text-sm font-bold leading-5"
                   : isDisabled
-                    ? "text-text-inversesecondary text-sm font-medium font-['Pretendard'] leading-5"
-                    : "text-white text-sm font-medium font-['Pretendard'] leading-5"
+                    ? "text-text-inversesecondary text-sm font-medium leading-5"
+                    : "text-white text-sm font-medium leading-5"
               }`}
             >
               {continent}
@@ -48,8 +48,8 @@ export function ContinentFilter({
               <span
                 className={`${
                   isSelected
-                    ? "text-text-inverseprimary text-sm font-bold font-['Pretendard'] leading-5"
-                    : "text-white text-sm font-medium font-['Pretendard'] leading-5"
+                    ? "text-text-inverseprimary text-sm font-bold leading-5"
+                    : "text-white text-sm font-medium leading-5"
                 }`}
               >
                 {count}

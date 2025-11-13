@@ -126,11 +126,7 @@ export const EditProfileBottomSheet = ({
           {/* 프로필 이미지 섹션 */}
           <div className="flex flex-col items-center gap-2.5">
             <div className="relative w-[120px] h-[120px] rounded-full overflow-hidden bg-surface-placeholder--16">
-              {image ? (
-                <Image src={image} alt="프로필 이미지" fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full bg-surface-placeholder--8 flex items-center justify-center" />
-              )}
+              <Image src={image || "/assets/default-profile.png"} alt="프로필 이미지" fill className="object-cover" />
             </div>
 
             <label

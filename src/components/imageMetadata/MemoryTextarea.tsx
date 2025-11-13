@@ -21,6 +21,7 @@ export const MemoryTextarea = ({
   const [toastOpen, setToastOpen] = useState(false);
   const lastToastTimeRef = useRef<number>(0);
   const cooldownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const showToast = () => {
     const now = Date.now();
@@ -53,11 +54,19 @@ export const MemoryTextarea = ({
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
     const pastedText = e.clipboardData.getData("text");
     const currentValue = value || "";
-    const newValue = currentValue + pastedText;
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
+    const selectedLength = selectionEnd - selectionStart;
 
-    if (newValue.length > MAX_LENGTH) {
+    // 선택된 영역을 제외하고 붙여넣을 텍스트를 더한 실제 결과 길이 계산
+    const actualResultLength = currentValue.length - selectedLength + pastedText.length;
+
+    if (actualResultLength > MAX_LENGTH) {
       e.preventDefault();
       showToast();
     }
@@ -67,6 +76,7 @@ export const MemoryTextarea = ({
     <HeadlessToastProvider viewportClassName="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px]">
       <div className="w-full px-2 mt-4">
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={handleChange}
           onPaste={handlePaste}

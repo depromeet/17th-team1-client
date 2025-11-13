@@ -5,6 +5,7 @@ import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { pressEmoji, registerEmoji } from "@/services/emojiService";
 import type { Emoji } from "@/types/emoji";
@@ -42,6 +43,7 @@ export const RecordReactions = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
+  const reactionsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isInitialLoad) {
@@ -90,12 +92,20 @@ export const RecordReactions = ({
       const createTimer = setTimeout(() => {
         const randomX = (Math.random() - 0.5) * 60;
 
+        // Portal을 사용하므로 fixed position은 뷰포트 기준
+        // rect는 이미 뷰포트 기준 좌표
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const scaledX = centerX + randomX;
+        const scaledY = centerY;
+
         // viewport 기준 절대 좌표 (fixed position 사용)
         const floatingEmoji: FloatingEmoji = {
           id: `${Date.now()}-${Math.random()}`,
           emoji,
-          x: rect.left + rect.width / 2 + randomX,
-          y: rect.top + rect.height / 2,
+          x: scaledX,
+          y: scaledY,
         };
 
         setFloatingEmojis((prev) => [...prev, floatingEmoji]);
@@ -212,11 +222,12 @@ export const RecordReactions = ({
     }
   };
 
-  const handleAddEmoji = () => {
+  const handleAddEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
     // owner이면 이모지 추가 불가
     if (isOwner) {
       return;
     }
+    e.stopPropagation();
     setShowEmojiPicker(true);
   };
 
@@ -242,7 +253,7 @@ export const RecordReactions = ({
         <AddEmojiIcon />
       </button>
 
-      <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
+      <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
         {reactions.map(({ code, glyph, count }, index) => (
           <motion.button
             key={`${code}-${glyph}-${index}`}
@@ -270,7 +281,7 @@ export const RecordReactions = ({
             <button
               key={uniqueKey}
               type="button"
-              onClick={handleAddEmoji}
+              onClick={(e) => handleAddEmoji(e)}
               disabled={isOwner}
               className={`w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0 ${
                 isOwner ? "opacity-50 cursor-not-allowed" : ""
@@ -286,77 +297,84 @@ export const RecordReactions = ({
           ))}
       </div>
 
-      <AnimatePresence>
-        {floatingEmojis.map((floatingEmoji) => (
-          <motion.div
-            key={floatingEmoji.id}
-            className="fixed pointer-events-none z-50 text-5xl drop-shadow-lg"
-            style={{
-              left: `${floatingEmoji.x}px`,
-              top: `${floatingEmoji.y}px`,
-              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
-            }}
-            initial={{
-              opacity: 0,
-              scale: 0.3,
-              y: 0,
-            }}
-            animate={{
-              opacity: [0, 1, 1, 0],
-              scale: [0.2, 0.5, 1, 0.8],
-              y: -200,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            transition={{
-              duration: 2,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              times: [0, 0.15, 0.85, 1],
-            }}
-          >
-            {floatingEmoji.emoji}
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {floatingEmojis.map((floatingEmoji) => (
+              <motion.div
+                key={floatingEmoji.id}
+                className="fixed pointer-events-none z-40 text-5xl drop-shadow-lg"
+                style={{
+                  left: `${floatingEmoji.x}px`,
+                  top: `${floatingEmoji.y}px`,
+                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                }}
+                initial={{
+                  opacity: 0,
+                  scale: 0.3,
+                  y: 0,
+                }}
+                animate={{
+                  opacity: [0, 1, 1, 0],
+                  scale: [0.2, 0.5, 1, 0.8],
+                  y: -200,
+                }}
+                exit={{
+                  opacity: 0,
+                }}
+                transition={{
+                  duration: 2,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                  times: [0, 0.15, 0.85, 1],
+                }}
+              >
+                {floatingEmoji.emoji}
+              </motion.div>
+            ))}
+          </AnimatePresence>,
+          document.body,
+        )}
 
-      {showEmojiPicker && (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setShowEmojiPicker(false)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setShowEmojiPicker(false);
-            }}
-            aria-label="이모지 피커 닫기"
-          />
-          <div
-            className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto"
-            style={{
-              paddingBottom: "env(safe-area-inset-bottom)",
-            }}
-          >
-            <EmojiPicker
-              onEmojiClick={handleEmojiSelect}
-              width="100%"
-              height="354px"
-              theme={Theme.DARK}
-              searchPlaceHolder="이모지를 검색해 보세요"
-              previewConfig={{
-                showPreview: false,
+      {showEmojiPicker &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setShowEmojiPicker(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setShowEmojiPicker(false);
               }}
-              autoFocusSearch={false}
-              skinTonesDisabled
-              style={{
-                borderTopLeftRadius: "24px",
-                borderTopRightRadius: "24px",
-                backgroundColor: "#0E1724",
-              }}
+              aria-label="이모지 피커 닫기"
             />
-          </div>
-        </>
-      )}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto"
+              style={{
+                paddingBottom: "env(safe-area-inset-bottom)",
+              }}
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiSelect}
+                width="100%"
+                height="354px"
+                theme={Theme.DARK}
+                searchPlaceHolder="이모지를 검색해 보세요"
+                previewConfig={{
+                  showPreview: false,
+                }}
+                autoFocusSearch={false}
+                skinTonesDisabled
+                style={{
+                  borderTopLeftRadius: "24px",
+                  borderTopRightRadius: "24px",
+                  backgroundColor: "#0E1724",
+                }}
+              />
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   );
 };

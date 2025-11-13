@@ -50,6 +50,9 @@ export type DiaryData = {
   updatedAt: string;
   photos: DiaryPhoto[];
   emojis: DiaryEmoji[];
+  memberId: number;
+  nickname: string;
+  profileImageUrl?: string;
 };
 
 export type DiaryDetailResponse = {
@@ -81,6 +84,9 @@ export type DiariesListResponse = {
           tag: string;
         }[];
         emojis: DiaryEmoji[];
+        memberId: number;
+        nickname: string;
+        profileImageUrl?: string;
       }[];
     }[];
   };
@@ -138,6 +144,9 @@ export type DiaryDetail = {
   reactions: Emoji[];
   date: string;
   location: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
 };
 
 export type CreateDiaryPhotoParams = {

@@ -9,7 +9,6 @@ import { RecordScrollContainer } from "@/components/record/RecordScrollContainer
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
 import { deleteDiary, getDiariesByUuid } from "@/services/diaryService";
-import { getMyProfile } from "@/services/profileService";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
@@ -21,7 +20,6 @@ type RecordData = {
   country: string;
   images: string[];
   imageMetadata?: ImageMetadataFromDiary[];
-  category?: string;
   date?: string;
   location?: string;
   userId: string;
@@ -70,9 +68,7 @@ const RecordDetailPage = () => {
       try {
         setError(null);
 
-        const [diaries, profile] = await Promise.all([getDiariesByUuid(queryUuid), getMyProfile()]);
-
-        const { memberId, nickname, profileImageUrl } = profile;
+        const diaries = await getDiariesByUuid(queryUuid);
 
         if (diaries.length === 0) {
           if (isMounted) {
@@ -97,7 +93,21 @@ const RecordDetailPage = () => {
         const sortedDiaries = [...matchingDiaries, ...otherDiaries];
 
         const recordsData: RecordData[] = sortedDiaries.map(
-          ({ id, cityId, city, country, images, imageMetadata, date, location, description, reactions }) => ({
+          ({
+            id,
+            cityId,
+            city,
+            country,
+            images,
+            imageMetadata,
+            date,
+            location,
+            description,
+            reactions,
+            userId,
+            userName,
+            userAvatar,
+          }) => ({
             id,
             cityId,
             city,
@@ -106,9 +116,9 @@ const RecordDetailPage = () => {
             imageMetadata,
             date,
             location,
-            userId: String(memberId),
-            userName: nickname,
-            userAvatar: profileImageUrl,
+            userId,
+            userName,
+            userAvatar,
             description,
             reactions,
           }),
@@ -137,20 +147,8 @@ const RecordDetailPage = () => {
   };
 
   if (!currentRecord) return null;
-  const {
-    city,
-    country,
-    id,
-    images,
-    imageMetadata,
-    category,
-    date,
-    location,
-    userName,
-    userAvatar,
-    description,
-    reactions,
-  } = currentRecord;
+  const { city, country, id, images, imageMetadata, date, location, userName, userAvatar, description, reactions } =
+    currentRecord;
 
   const handleEdit = () => {
     const params = new URLSearchParams();
@@ -216,7 +214,6 @@ const RecordDetailPage = () => {
           id={id}
           images={images}
           imageMetadata={imageMetadata}
-          category={category}
           date={date}
           location={location}
           userName={userName}
@@ -255,13 +252,12 @@ const RecordDetailPage = () => {
         hasPrevious={hasPrevious}
       >
         {countryRecords.map(
-          ({ id, images, imageMetadata, category, date, location, userName, userAvatar, description, reactions }) => (
+          ({ id, images, imageMetadata, date, location, userName, userAvatar, description, reactions }, index) => (
             <RecordCard
-              key={id}
+              key={`${id}-${index}`}
               id={id}
               images={images}
               imageMetadata={imageMetadata}
-              category={category}
               date={date}
               location={location}
               userName={userName}

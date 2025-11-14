@@ -51,7 +51,7 @@ export const RecordDetailHeader = ({
     <div className="relative">
       <Header
         variant="transparent"
-        leftIcon="back"
+        leftIcon="close"
         onLeftClick={onBack}
         title={truncatedTitle}
         rightIcon={

@@ -17,7 +17,7 @@ export function CityList({ filteredRegions }: CityListProps) {
     <div className="flex flex-col gap-[30px] pb-8">
       {filteredRegions.map((region) => (
         <div key={`${region.regionName}-${region.cities[0]?.countryCode || ""}`} className="flex flex-col gap-3">
-          <div className="text-white text-base font-medium">
+          <div className="text-white text-base font-medium font-['Pretendard']">
             {getCountryFlagByCode(region.cities[0]?.countryCode)} {region.regionName}
           </div>
           <div className="flex flex-col gap-2">

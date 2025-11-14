@@ -12,7 +12,7 @@ interface EditContentProps {
 export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentProps) {
   return (
     <div>
-      <div className="mb-8">
+      <div className="mt-5 mb-8">
         <button
           type="button"
           className="w-full px-5 py-3 bg-surface-inverseprimary rounded-xl inline-flex justify-center items-center overflow-hidden"

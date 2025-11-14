@@ -62,6 +62,7 @@ export const getBookmarks = async (token?: string, useToken = true): Promise<Boo
  * 사용자를 북마크에 추가합니다.
  *
  * @param {number} targetMemberId - 북마크할 멤버의 ID
+ * @param {boolean} useToken - 토큰 사용 여부 (기본값: true)
  * @returns {Promise<void>}
  * @throws 북마크 추가 실패 시 에러 발생
  *
@@ -84,21 +85,24 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
   }
 
   try {
-    if (authToken) {
-      await apiPost(`/api/v1/bookmarks`, { targetMemberId }, authToken);
-    } else {
+    // useToken이 false인 경우 (토큰 없이 호출)
+    if (!useToken) {
       const { headers } = await apiPostWithHeaders(`/api/v1/bookmarks`, { targetMemberId });
-      if (headers.get("X-Redirect-URL")) {
-        window.location.href = headers.get("X-Redirect-URL") || "";
+      const redirectUrl = headers.get("X-Redirect-URL");
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
       }
+      return;
     }
+
+    // useToken이 true인 경우 (토큰과 함께 호출)
+    await apiPost(`/api/v1/bookmarks`, { targetMemberId }, authToken);
   } catch (error) {
-    if (error instanceof ApiError) {
-      if (error.status === 401) {
-        clearAllCookies();
-        await addBookmark(targetMemberId, false);
-        return;
-      }
+    // useToken이 false인 경우 (이미 재호출된 상태)에는 재호출하지 않음
+    if (useToken && error instanceof ApiError && error.status === 401) {
+      clearAllCookies();
+      await addBookmark(targetMemberId, false);
+      return;
     }
     throw new Error("북마크를 추가하는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }

@@ -94,7 +94,7 @@ export const EditProfileBottomSheet = ({
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
-      <BottomSheetContent className="min-h-[812px] max-w-lg">
+      <BottomSheetContent className="h-[calc(100dvh-62px)] max-w-lg">
         <BottomSheetHeader className="w-full h-11 relative">
           <BottomSheetCloseButton
             onClick={() => onOpenChange(false)}

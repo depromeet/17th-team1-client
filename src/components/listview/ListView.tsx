@@ -129,10 +129,10 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
   }, [continentCounts]);
 
   return (
-    <div className="w-full h-full relative overflow-y-auto scrollbar-hide">
-      <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto h-full">
         {/* 탭 영역 */}
-        <div className="flex gap-2 items-center px-4 py-5 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex gap-2 items-center px-4 pb-5 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* 전체 탭 */}
           <button
             type="button"
@@ -171,7 +171,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
         </div>
 
         {/* 국가 목록 */}
-        <div className="flex flex-col gap-0 items-start p-4 w-full">
+        <div className="flex-1 flex flex-col gap-0 items-start p-4 w-full overflow-y-auto scrollbar-hide">
           {groupedCountries.map((group) => (
             <div
               key={group.countryCode}

@@ -6,6 +6,7 @@ import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
+import { getAuthInfo } from "@/utils/cookies";
 import { NationSelectFooter } from "./NationSelectFooter";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
@@ -60,7 +61,14 @@ export const NationSelectClient = ({
 
     try {
       await createMemberTravels(selectedCityList);
-      router.push("/globe");
+      const { uuid } = getAuthInfo();
+
+      if (uuid) {
+        router.push(`/globe/${uuid}`);
+      } else {
+        console.error("UUID가 없습니다.");
+        router.push("/error?type=401");
+      }
     } catch (error) {
       console.error("여행 기록 생성 실패:", error);
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");

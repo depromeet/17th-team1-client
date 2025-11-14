@@ -158,7 +158,7 @@ const GlobePage = () => {
               leftIcon: "back",
               onLeftClick: () => {
                 sessionStorage.removeItem("fromSavedGlobe");
-                router.push(`/globe/${cookieUuid}`);
+                router.push(`/saved-globe`);
               },
             })}
           className="bg-transparent"

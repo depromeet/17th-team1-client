@@ -27,6 +27,7 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
     if (!emblaApi) return;
     const index = emblaApi.selectedScrollSnap();
     setCurrentIndex(index);
+    setScale(1); // 슬라이드 변경 시 줌 리셋
     onImageChange?.(index);
   }, [emblaApi, onImageChange]);
 

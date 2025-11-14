@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import { useState } from "react";
-import { CloseIcon, SearchbarActiveIcon, SearchbarInactiveIcon, SearchCloseIcon } from "@/assets/icons";
+import { SearchbarActiveIcon, SearchbarInactiveIcon, SearchCloseIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(

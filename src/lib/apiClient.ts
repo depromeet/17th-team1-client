@@ -132,22 +132,9 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
       method: "POST",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
       body: requestBody,
-      redirect: "manual", // ⭐ 리다이렉트를 수동으로 처리 (CORS 에러 방지)
     });
 
     logger.log(`[API] Response status:`, response.status);
-
-    // ⭐ 리다이렉트 응답(3xx) 처리 - 서버가 카카오 로그인으로 리다이렉트하는 경우
-    if (response.status >= 300 && response.status < 400) {
-      const redirectUrl = response.headers.get("Location");
-      if (redirectUrl && typeof window !== "undefined") {
-        logger.log(`[API] Redirecting to: ${redirectUrl}`);
-        // 브라우저가 직접 페이지를 이동하므로 CORS 문제 없음
-        window.location.href = redirectUrl;
-        // 리다이렉트 시작 후 에러를 던지지 않고 무한 대기 (페이지 이동으로 실행이 중단됨)
-        return new Promise(() => {}) as Promise<T>;
-      }
-    }
 
     if (!response.ok) {
       const responseText = await response.text().catch(() => "Unable to read response");
@@ -243,22 +230,9 @@ export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: str
       method: "DELETE",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
       body: requestBody,
-      redirect: "manual", // ⭐ 리다이렉트를 수동으로 처리 (CORS 에러 방지)
     });
 
     logger.log(`[API] Response status:`, response.status);
-
-    // ⭐ 리다이렉트 응답(3xx) 처리 - 서버가 카카오 로그인으로 리다이렉트하는 경우
-    if (response.status >= 300 && response.status < 400) {
-      const redirectUrl = response.headers.get("Location");
-      if (redirectUrl && typeof window !== "undefined") {
-        logger.log(`[API] Redirecting to: ${redirectUrl}`);
-        // 브라우저가 직접 페이지를 이동하므로 CORS 문제 없음
-        window.location.href = redirectUrl;
-        // 리다이렉트 시작 후 에러를 던지지 않고 무한 대기 (페이지 이동으로 실행이 중단됨)
-        return new Promise(() => {}) as Promise<T>;
-      }
-    }
 
     if (!response.ok) {
       const responseText = await response.text().catch(() => "Unable to read response");

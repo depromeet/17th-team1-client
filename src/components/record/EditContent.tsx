@@ -50,7 +50,7 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
               <button
                 type="button"
                 onClick={() => onRemoveClick?.(c.id, c.isNew)}
-                className="w-4 h-4 flex items-center justify-center"
+                className="w-4 h-4 flex items-center justify-center text-text-secondary"
               >
                 <ICXIcon className="w-4 h-4" />
               </button>

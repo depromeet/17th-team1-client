@@ -6,8 +6,8 @@ import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
+import { getAuthInfo } from "@/utils/cookies";
 import { NationSelectFooter } from "./NationSelectFooter";
-import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
 
 type NationSelectClientProps = {
@@ -60,7 +60,14 @@ export const NationSelectClient = ({
 
     try {
       await createMemberTravels(selectedCityList);
-      router.push("/globe");
+      const { uuid } = getAuthInfo();
+
+      if (uuid) {
+        router.push(`/globe/${uuid}`);
+      } else {
+        console.error("UUID가 없습니다.");
+        router.push("/error?type=401");
+      }
     } catch (error) {
       console.error("여행 기록 생성 실패:", error);
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
@@ -79,9 +86,36 @@ export const NationSelectClient = ({
       <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
         {customHeader && customHeader}
 
+        {!customHeader && (
+          <div className="max-w-[512px] mx-auto w-full shrink-0">
+            <header
+              className="w-full px-4 pt-10 pb-[30px] bg-surface-secondary relative"
+              style={{
+                backgroundColor: "transparent",
+                position: "relative",
+                zIndex: 20,
+              }}
+            >
+              <h1 className="text-text-primary text-2xl font-bold leading-8">
+                그동안 여행했던 도시들을
+                <br />
+                선택해보세요.
+              </h1>
+            </header>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto px-4 flex justify-center">
           <div className="w-full max-w-[512px]">
-            {!customHeader && <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
+            {!customHeader && (
+              <div className="mb-8">
+                <SearchInput
+                  placeholder="도시/나라를 검색해주세요."
+                  value={searchKeyword}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+            )}
 
             {customHeader && (
               <div className="mb-8">

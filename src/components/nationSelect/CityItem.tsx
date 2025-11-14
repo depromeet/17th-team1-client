@@ -30,7 +30,9 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
           isRegistered ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
         }`}
       >
-        <span className={`font-medium text-left ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}>
+        <span
+          className={`flex-1 font-medium text-left whitespace-nowrap overflow-hidden text-ellipsis ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}
+        >
           {city.flag} {city.name}, {city.country}
         </span>
         {!isRegistered && (

@@ -8,7 +8,6 @@ import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
 import { getAuthInfo } from "@/utils/cookies";
 import { NationSelectFooter } from "./NationSelectFooter";
-import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
 
 type NationSelectClientProps = {

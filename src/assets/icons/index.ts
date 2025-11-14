@@ -31,3 +31,4 @@ export { default as ReturnIcon } from "./return.svg";
 export { default as SearchIcon } from "./search.svg";
 export { default as WarningIcon } from "./warning.svg";
 export { default as XIcon } from "./x.svg";
+export { default as SearchCloseIcon } from "./search-close.svg";

@@ -58,7 +58,7 @@ const EmptyState = () => {
           {/* Globe Image */}
           <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
             {/* biome-ignore lint/performance/noImgElement: Empty state visual, optimization not needed */}
-            <img src="/assets/globe.png" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
+            <img src="/assets/globe-empty.png" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
           </div>
         </div>
 

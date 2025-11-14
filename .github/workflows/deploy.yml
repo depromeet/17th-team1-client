@@ -12,9 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Sync project to production directory
+      - name: Sync project to production directory (exclude compose)
         run: |
-          rsync -av --delete ./ ~/17th-team1-client/
+          rsync -av --delete \
+            --exclude=docker-compose-prod.yml \
+            ./ ~/17th-team1-client/
 
       - name: Stop existing containers
         run: |

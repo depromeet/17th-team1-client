@@ -57,7 +57,7 @@ export const SearchInput = ({ className, value, onChange, backgroundColor, ...pr
       <div
         className={cn(
           "border border-surface-placeholder--4 rounded-2xl px-4 py-3.5 flex items-center gap-3",
-          !backgroundColor && "bg-surface-thirdly"
+          !backgroundColor && "bg-surface-thirdly",
         )}
         style={{ backgroundColor: backgroundColor || undefined }}
       >

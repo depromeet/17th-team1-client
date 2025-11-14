@@ -4,7 +4,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { IconExclamationCircleMonoIcon } from "@/assets/icons";
 import { Header } from "@/components/common/Header";
-import { Popup } from "@/components/common/Popup";
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/common/Dialog";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
 import { getCountryName } from "@/constants/countryMapping";
 import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
@@ -42,6 +49,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showCannotDeleteModal, setShowCannotDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // 삭제된 도시 정보 저장 (삭제 시점의 도시 정보를 저장)
@@ -154,6 +162,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   }, [base.length, baseIds, current, currentIds, removedIds.size]);
 
   const handleRemove = (cityId: string, isNew?: boolean) => {
+    // 마지막 1개 남은 도시를 삭제하려고 하는 경우
+    if (current.length === 1) {
+      setShowCannotDeleteModal(true);
+      return;
+    }
+
     if (isNew) {
       // 새로 추가한 도시 삭제 - current에서 제거하고 URL도 업데이트
       const updatedCurrent = current.filter((c) => c.id !== cityId);
@@ -399,65 +413,83 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           </div>
         </div>
       </div>
-      {confirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.50)]">
-          <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
-            <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
-              <IconExclamationCircleMonoIcon className="w-10 h-10" />
-              <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold leading-6">
-                  정말 삭제하시겠어요?
-                </div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium leading-5">
-                  도시를 삭제하면, 기록도 함께 사라져요.
-                </div>
-              </div>
-            </div>
-            <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
+      <Dialog open={!!confirmId} onOpenChange={() => setConfirmId(null)}>
+        <DialogContent className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]">
+          <DialogBody className="flex flex-col items-center px-5 pt-7 pb-5 gap-2.5">
+            <DialogHeader className="items-center gap-1">
+              <IconExclamationCircleMonoIcon className="w-10 h-10 mb-1.5" />
+              <DialogTitle className="text-center text-text-primary text-lg font-bold leading-6">
+                정말 삭제하시겠어요?
+              </DialogTitle>
+              <DialogDescription className="text-center text-text-primary text-xs font-medium leading-5">
+                도시를 삭제하면, 기록도 함께 사라져요.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="w-full flex gap-2.5 mt-2.5">
               <button
                 onClick={handleCancelDelete}
-                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
+                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center"
                 type="button"
               >
-                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">취소</div>
+                <span className="text-center text-text-primary text-sm font-bold leading-5">취소</span>
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline-1 -outline-offset-1 outline-border-absolutewhite--4 flex justify-center items-center gap-2.5"
+                className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline-1 -outline-offset-1 outline-border-absolutewhite--4 flex justify-center items-center"
                 type="button"
               >
-                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">삭제</div>
+                <span className="text-center text-text-primary text-sm font-bold leading-5">삭제</span>
               </button>
             </div>
-          </Popup>
-        </div>
-      )}
-      {showErrorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.50)]">
-          <Popup className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-start items-start p-0">
-            <div className="self-stretch px-5 pt-7 pb-5 rounded-tl-[20px] rounded-tr-[20px] flex flex-col justify-center items-center gap-2.5">
-              <IconExclamationCircleMonoIcon className="w-10 h-10" />
-              <div className="flex flex-col justify-start items-center gap-1">
-                <div className="text-center justify-start text-text-primary text-lg font-bold leading-6">
-                  저장에 실패했습니다.
-                </div>
-                <div className="text-center justify-start text-text-primary text-xs font-medium leading-5">
-                  다시 시도해주세요.
-                </div>
-              </div>
-            </div>
-            <div className="self-stretch px-5 pb-5 rounded-bl-[20px] rounded-br-[20px] inline-flex justify-center items-center gap-2.5 w-full">
-              <button
-                onClick={() => setShowErrorModal(false)}
-                className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center gap-2.5"
-                type="button"
-              >
-                <div className="text-center justify-start text-text-primary text-sm font-bold leading-5">닫기</div>
-              </button>
-            </div>
-          </Popup>
-        </div>
-      )}
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showErrorModal} onOpenChange={() => setShowErrorModal(false)}>
+        <DialogContent className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]">
+          <DialogBody className="flex flex-col items-center px-5 pt-7 pb-5 gap-2.5">
+            <DialogHeader className="items-center gap-1">
+              <IconExclamationCircleMonoIcon className="w-10 h-10 mb-1.5" />
+              <DialogTitle className="text-center text-text-primary text-lg font-bold leading-6">
+                저장에 실패했습니다.
+              </DialogTitle>
+              <DialogDescription className="text-center text-text-primary text-xs font-medium leading-5">
+                다시 시도해주세요.
+              </DialogDescription>
+            </DialogHeader>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center mt-2.5"
+              type="button"
+            >
+              <span className="text-center text-text-primary text-sm font-bold leading-5">닫기</span>
+            </button>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCannotDeleteModal} onOpenChange={() => setShowCannotDeleteModal(false)}>
+        <DialogContent className="w-72 bg-[#0F1A26] rounded-2xl shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]">
+          <DialogBody className="flex flex-col items-center px-5 pt-7 pb-5 gap-2.5">
+            <DialogHeader className="items-center gap-1">
+              <IconExclamationCircleMonoIcon className="w-10 h-10 mb-1.5" />
+              <DialogTitle className="text-center text-text-primary text-lg font-bold leading-6">
+                이 도시를 지울 수 없어요
+              </DialogTitle>
+              <DialogDescription className="text-center text-text-primary text-xs font-medium leading-5">
+                지구본을 유지하려면 최소 1개의 도시가 필요해요
+              </DialogDescription>
+            </DialogHeader>
+            <button
+              onClick={() => setShowCannotDeleteModal(false)}
+              className="w-full px-5 py-3 bg-surface-placeholder--16 rounded-[10px] flex justify-center items-center mt-2.5"
+              type="button"
+            >
+              <span className="text-center text-text-primary text-sm font-bold leading-5">확인</span>
+            </button>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

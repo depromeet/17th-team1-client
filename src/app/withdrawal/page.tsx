@@ -32,9 +32,11 @@ export default function WithdrawalPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary p-4">
-      <div className="bg-surface-secondary relative w-full max-w-[402px] h-dvh flex flex-col">
-        <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="회원탈퇴" />
+    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="회원탈퇴" />
+        </div>
 
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto flex flex-col">
@@ -65,16 +67,18 @@ export default function WithdrawalPage() {
         </div>
 
         {/* Withdrawal Button - Fixed at Bottom */}
-        <button
-          type="button"
-          onClick={() => setIsDialogOpen(true)}
-          disabled={isLoading}
-          className="w-full px-4 pt-4 pb-[30px] flex col justify-center items-center gap-2 cursor-pointer"
-        >
-          <p className="text-sm font-semibold underline text-[rgba(255,255,255,0.60)] ">
-            {isLoading ? "탈퇴 중..." : "회원탈퇴"}
-          </p>
-        </button>
+        <div className="max-w-[512px] mx-auto w-full">
+          <button
+            type="button"
+            onClick={() => setIsDialogOpen(true)}
+            disabled={isLoading}
+            className="w-full px-4 pt-4 pb-[30px] flex justify-center items-center gap-2 cursor-pointer"
+          >
+            <p className="text-sm font-semibold underline text-[rgba(255,255,255,0.60)]">
+              {isLoading ? "탈퇴 중..." : "회원탈퇴"}
+            </p>
+          </button>
+        </div>
       </div>
 
       <WithdrawalDialog

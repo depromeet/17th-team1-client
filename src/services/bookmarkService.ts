@@ -6,6 +6,7 @@ import { getAuthInfo } from "@/utils/cookies";
  * 북마크된 사용자 목록을 조회합니다.
  *
  * @param {string} [token] - 선택사항. 서버에서 전달받은 인증 토큰
+ * @param {boolean} [useToken=true] - 토큰 사용 여부 (기본값: true)
  * @returns {Promise<BookmarkUser[]>} 북마크된 사용자 목록
  * @throws 데이터 조회 실패 시 에러 발생
  *
@@ -15,17 +16,25 @@ import { getAuthInfo } from "@/utils/cookies";
  *
  * // 클라이언트 컴포넌트에서 사용
  * const bookmarks = await getBookmarks();
+ *
+ * // 토큰 없이 사용 (공개 API)
+ * const bookmarks = await getBookmarks(undefined, false);
  */
-export const getBookmarks = async (token?: string): Promise<BookmarkUser[]> => {
-  let authToken = token;
+export const getBookmarks = async (token?: string, useToken = true): Promise<BookmarkUser[]> => {
+  let authToken = "";
 
-  if (!authToken) {
-    const { token: clientToken } = getAuthInfo();
-    authToken = clientToken || undefined;
-  }
+  // useToken이 true인 경우에만 토큰 사용
+  if (useToken) {
+    authToken = token || "";
 
-  if (!authToken) {
-    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    if (!authToken) {
+      const { token: clientToken } = getAuthInfo();
+      authToken = clientToken || "";
+    }
+
+    if (!authToken) {
+      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    }
   }
 
   try {

@@ -69,12 +69,12 @@ const GlobePage = () => {
         const isMyGlobeCheck = myUuid === urlUuid;
         setIsMyGlobe(isMyGlobeCheck);
 
-        // URL의 uuid로 지구본 데이터 요청
-        const globeResponse = await getGlobeData(urlUuid);
+        // URL의 uuid로 지구본 데이터 요청 (토큰 없이)
+        const globeResponse = await getGlobeData(urlUuid, undefined, false);
         let insightResponse: string | undefined;
-        // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능)
+        // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능, 토큰 없이)
         if (memberId) {
-          insightResponse = await getTravelInsight(parseInt(memberId, 10));
+          insightResponse = await getTravelInsight(parseInt(memberId, 10), false);
         }
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
@@ -105,7 +105,7 @@ const GlobePage = () => {
           if (!isMyGlobeCheck && globeResponse.data.memberId) {
             setTargetMemberId(globeResponse.data.memberId);
 
-            // 북마크 상태 확인
+            // 북마크 상태 확인 (토큰 없이)
             try {
               const bookmarks = await getBookmarks();
               const isAlreadyBookmarked = bookmarks.some(
@@ -132,7 +132,7 @@ const GlobePage = () => {
   if (travelPatterns.length === 0) {
     return (
       <div></div>
-      // <div className="w-full h-screen flex items-center justify-center">
+      // <div className="w-full h-dvh flex items-center justify-center">
       //   <div className="text-white text-xl text-center">
       //     <div>🌍 여행 데이터가 없습니다</div>
       //     <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
@@ -142,7 +142,7 @@ const GlobePage = () => {
   }
 
   return (
-    <div className="overflow-hidden text-text-primary relative font-sans flex flex-col h-dvh">
+    <div className="overflow-hidden text-text-primary relative flex flex-col h-dvh">
       <div className="max-w-[512px] mx-auto w-full">
         <Header
           title={`${nickname}님의 지구본`}

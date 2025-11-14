@@ -22,6 +22,7 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
 
   const initialDistanceRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isGestureActiveRef = useRef(false);
 
   useEffect(() => {
@@ -29,6 +30,10 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
       if (resetTimeoutRef.current) {
         clearTimeout(resetTimeoutRef.current);
         resetTimeoutRef.current = null;
+      }
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
       }
     };
   }, []);
@@ -64,9 +69,13 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
           }
         }
 
-        setTimeout(() => {
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+        animationTimeoutRef.current = setTimeout(() => {
           setDragX(0);
           setIsAnimating(false);
+          animationTimeoutRef.current = null;
         }, 300);
       } else {
         // 스와이프 거리가 부족하면 원래 위치로 돌아감

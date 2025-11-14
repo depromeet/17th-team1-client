@@ -1,8 +1,8 @@
 "use client";
 
+import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { useSwipeable } from "react-swipeable";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type RecordImageCarouselProps = {
   images: string[];
@@ -14,77 +14,42 @@ const MAX_SCALE = 3;
 const RESET_DELAY_MS = 300;
 
 export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarouselProps) => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scale, setScale] = useState(1);
-  const [dragX, setDragX] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const initialDistanceRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isGestureActiveRef = useRef(false);
 
+  // Embla 이벤트 리스너 설정
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setCurrentIndex(index);
+    onImageChange?.(index);
+  }, [emblaApi, onImageChange]);
+
   useEffect(() => {
+    if (!emblaApi) return;
+
+    emblaApi.on("select", onSelect);
+    onSelect();
+
     return () => {
-      if (resetTimeoutRef.current) {
-        clearTimeout(resetTimeoutRef.current);
-        resetTimeoutRef.current = null;
-      }
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-        animationTimeoutRef.current = null;
-      }
+      emblaApi.off("select", onSelect);
     };
-  }, []);
+  }, [emblaApi, onSelect]);
 
-  // react-swipeable 핸들러
-  const swipeHandlers = useSwipeable({
-    onSwiping: (eventData) => {
-      if (scale > 1) return; // 줌된 상태에서는 스와이프 비활성화
-      setIsDragging(true);
-      setDragX(eventData.deltaX);
-    },
-    onSwiped: (eventData) => {
-      if (scale > 1) return; // 줌된 상태에서는 스와이프 비활성화
-      setIsDragging(false);
-
-      const threshold = 50;
-      const deltaX = eventData.deltaX;
-
-      if (Math.abs(deltaX) > threshold) {
-        setIsAnimating(true);
-
-        if (deltaX > 0) {
-          // 오른쪽 스와이프 (이전 이미지)
-          if (currentIndex > 0) {
-            setCurrentIndex(currentIndex - 1);
-            onImageChange?.(currentIndex - 1);
-          }
-        } else {
-          // 왼쪽 스와이프 (다음 이미지)
-          if (currentIndex < images.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-            onImageChange?.(currentIndex + 1);
-          }
-        }
-
-        if (animationTimeoutRef.current) {
-          clearTimeout(animationTimeoutRef.current);
-        }
-        animationTimeoutRef.current = setTimeout(() => {
-          setDragX(0);
-          setIsAnimating(false);
-          animationTimeoutRef.current = null;
-        }, 300);
-      } else {
-        // 스와이프 거리가 부족하면 원래 위치로 돌아감
-        setDragX(0);
+  // 지표에서 슬라이드 선택
+  const handleIndicatorClick = useCallback(
+    (index: number) => {
+      if (emblaApi) {
+        emblaApi.scrollTo(index);
       }
     },
-    trackMouse: true,
-    trackTouch: true,
-  });
+    [emblaApi],
+  );
 
   // 피치 줌 처리 (터치 제스처)
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -130,6 +95,15 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+        resetTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   if (images.length === 0) {
     return (
       <div className="w-full h-full bg-surface-thirdly flex items-center justify-center">
@@ -139,30 +113,29 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
   }
 
   return (
-    <div
-      className="relative w-full h-full select-none"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      {...swipeHandlers}
-    >
-      {/* 이미지 슬라이더 */}
-      <div className="w-full h-full overflow-hidden select-none">
-        <div
-          className={`w-full h-full transition-transform ${isDragging || isAnimating ? "duration-300 ease-out" : ""}`}
-          style={{
-            transform: `translateX(${dragX}px)`,
-          }}
-        >
-          <Image
-            src={images[currentIndex]}
-            alt={`Record image ${currentIndex + 1}`}
-            fill
-            className="object-cover pointer-events-none"
-            style={{ transform: `scale(${scale})` }}
-            priority
-            draggable={false}
-          />
+    <div className="relative w-full h-full select-none">
+      {/* Embla Carousel 컨테이너 */}
+      <div
+        className="w-full h-full overflow-hidden select-none"
+        ref={emblaRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex h-full">
+          {images.map((src, index) => (
+            <div key={`carousel-slide-${index}`} className="relative min-w-full h-full shrink-0">
+              <Image
+                src={src}
+                alt={`Record image ${index + 1}`}
+                fill
+                className="object-cover pointer-events-none"
+                style={{ transform: `scale(${scale})` }}
+                priority={index === currentIndex}
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -173,10 +146,7 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
             <button
               key={`indicator-${index}`}
               type="button"
-              onClick={() => {
-                setCurrentIndex(index);
-                onImageChange?.(index);
-              }}
+              onClick={() => handleIndicatorClick(index)}
               className={`h-1.5 rounded-full transition-all ${
                 index === currentIndex ? "bg-white w-1.5" : "bg-white/30 w-1.5"
               }`}

@@ -68,7 +68,7 @@ export const WithdrawalDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = 
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
             className={cn(
-              "flex flex-1 rounded-[10px] h-[45px] px-5 py-3 justify-center items-center",
+              "flex flex-1 rounded-[16px] h-[45px] px-5 py-3 justify-center items-center",
               "bg-surface-placeholder--8",
               "text-white text-[14px] font-bold leading-[1.5]",
               "hover:bg-surface-placeholder--16 transition-colors",
@@ -80,7 +80,7 @@ export const WithdrawalDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = 
             onClick={handleConfirm}
             disabled={isLoading}
             className={cn(
-              "flex flex-1 rounded-[10px] h-[45px] px-5 py-3 justify-center items-center",
+              "flex flex-1 rounded-[16px] h-[45px] px-5 py-3 justify-center items-center",
               "!bg-state-warning",
               "text-white text-[14px] font-bold leading-[1.5]",
               "hover:!bg-[#ff5a3a] transition-colors disabled:opacity-70",

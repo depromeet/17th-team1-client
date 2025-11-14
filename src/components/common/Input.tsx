@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import { useState } from "react";
-import { CloseIcon, SearchbarActiveIcon, SearchbarInactiveIcon } from "@/assets/icons";
+import { SearchbarActiveIcon, SearchbarInactiveIcon, SearchCloseIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(
@@ -75,7 +75,7 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
               className="w-full h-full flex items-center justify-center"
               aria-label="검색어 지우기"
             >
-              <CloseIcon className="w-3 h-3" />
+              <SearchCloseIcon className="w-6 h-6" />
             </button>
           </div>
         )}

@@ -143,8 +143,8 @@ const RecordDetailPage = () => {
   }, [cityId, queryUuid]);
 
   const handleBack = () => {
-    if (cookieUuid) {
-      router.push(`/globe/${cookieUuid}`);
+    if (queryUuid) {
+      router.push(`/globe/${queryUuid}`);
     } else {
       router.push("/globe");
     }

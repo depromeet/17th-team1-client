@@ -7,9 +7,11 @@ export default function TermsPage() {
   const router = useRouter();
 
   return (
-    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary p-4">
-      <div className="bg-surface-secondary relative w-full max-w-[402px] h-dvh flex flex-col">
-        <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="약관 및 정책" />
+    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
+        <div className="max-w-[512px] mx-auto w-full">
+          <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="약관 및 정책" />
+        </div>
 
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto flex flex-col">

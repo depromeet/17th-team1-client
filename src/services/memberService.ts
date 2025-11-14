@@ -77,16 +77,19 @@ export const createMemberTravels = async (cities: City[]): Promise<CreateTravelR
 };
 
 // 지구본 조회 API
-export const getGlobeData = async (uuid: string, token?: string): Promise<GlobeResponse | null> => {
+export const getGlobeData = async (uuid: string, token?: string, useToken = true): Promise<GlobeResponse | null> => {
   try {
-    // 토큰이 제공되지 않으면 쿠키에서 가져오기 시도 (선택적)
-    let authToken = token;
-    if (!authToken) {
-      const { token: clientToken } = getAuthInfo();
-      authToken = clientToken || undefined;
+    let authToken = "";
+
+    // useToken이 true인 경우에만 토큰 사용
+    if (useToken) {
+      authToken = token || "";
+      if (!authToken) {
+        const { token: clientToken } = getAuthInfo();
+        authToken = clientToken || "";
+      }
     }
 
-    // 토큰 없이도 공유된 지구본 조회 가능
     const data = await apiGet<GlobeResponse>(`/api/v1/globes/${uuid}`, {}, authToken);
     return data;
   } catch (error) {
@@ -102,12 +105,18 @@ export const getGlobeData = async (uuid: string, token?: string): Promise<GlobeR
 };
 
 // AI 인사이트 API
-export const getTravelInsight = async (memberId: number): Promise<string> => {
+export const getTravelInsight = async (memberId: number, useToken = true): Promise<string> => {
   try {
-    const { token } = getAuthInfo();
-    if (!token) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    let authToken = "";
 
-    const data = await apiGet<TravelInsightResponse>(`/api/v1/travel-insights/${memberId}`, {}, token);
+    // useToken이 true인 경우에만 토큰 사용
+    if (useToken) {
+      const { token } = getAuthInfo();
+      if (!token) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+      authToken = token;
+    }
+
+    const data = await apiGet<TravelInsightResponse>(`/api/v1/travel-insights/${memberId}`, {}, authToken);
     return data.data.title;
   } catch (error) {
     // 서버 사이드에서 401/500 에러는 다시 throw (error.tsx에서 처리)

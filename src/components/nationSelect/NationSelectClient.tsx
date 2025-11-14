@@ -129,14 +129,14 @@ export const NationSelectClient = ({
             )}
 
             <div>
-              <h2 className="text-text-primary text-lg font-bold mb-2.5 font-['Pretendard']">
+              <h2 className="text-text-primary text-lg font-bold mb-2.5">
                 {isSearchingMode ? `검색 결과 ${searchResults.length}건` : "인기 여행지"}
               </h2>
 
               {displayError && (
-                <div className="text-red-500 text-center py-4 font-['Pretendard']" role="alert" aria-live="polite">
+                <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
                   {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
-                  <div className="mt-1 text-xs text-text-thirdly break-words font-['Pretendard']">
+                  <div className="mt-1 text-xs text-text-thirdly break-words">
                     {typeof displayError === "string" ? displayError : String(displayError)}
                   </div>
                 </div>

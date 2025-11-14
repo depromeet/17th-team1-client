@@ -68,7 +68,7 @@ export const PopularCitiesList = ({
   if (!isSearching && hasSearched && cities.length === 0) {
     return (
       <div className="flex justify-center items-center pt-30">
-        <div className="text-text-thirdly text-base font-['Pretendard']">검색 결과가 없어요</div>
+        <div className="text-text-thirdly text-base">검색 결과가 없어요</div>
       </div>
     );
   }

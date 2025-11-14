@@ -144,7 +144,8 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
         logger.log(`[API] Redirecting to: ${redirectUrl}`);
         // 브라우저가 직접 페이지를 이동하므로 CORS 문제 없음
         window.location.href = redirectUrl;
-        throw new ApiError(`Redirecting to login`, 401, endpoint);
+        // 리다이렉트 시작 후 에러를 던지지 않고 무한 대기 (페이지 이동으로 실행이 중단됨)
+        return new Promise(() => {}) as Promise<T>;
       }
     }
 
@@ -254,7 +255,8 @@ export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: str
         logger.log(`[API] Redirecting to: ${redirectUrl}`);
         // 브라우저가 직접 페이지를 이동하므로 CORS 문제 없음
         window.location.href = redirectUrl;
-        throw new ApiError(`Redirecting to login`, 401, endpoint);
+        // 리다이렉트 시작 후 에러를 던지지 않고 무한 대기 (페이지 이동으로 실행이 중단됨)
+        return new Promise(() => {}) as Promise<T>;
       }
     }
 

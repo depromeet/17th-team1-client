@@ -143,7 +143,7 @@ const GlobePage = () => {
 
   return (
     <div className="overflow-hidden text-text-primary relative flex flex-col h-dvh">
-      <div className="max-w-[512px] mx-auto w-full">
+      <div className="max-w-[512px] mx-auto w-full relative z-20">
         <Header
           title={`${nickname}님의 지구본`}
           variant="navy"
@@ -161,11 +161,7 @@ const GlobePage = () => {
                 router.push(`/globe/${cookieUuid}`);
               },
             })}
-          style={{
-            backgroundColor: "transparent",
-            position: "relative",
-            zIndex: 20,
-          }}
+          className="bg-transparent"
         />
       </div>
       {viewMode === "globe" ? (

@@ -6,7 +6,7 @@ import * as React from "react";
 import { BackIcon, DotIcon, MenuIcon, PeopleIcon, XIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
-export const headerVariants = cva("flex items-center justify-between w-full px-4 py-3", {
+export const headerVariants = cva("flex items-center justify-between w-full px-4 py-3 min-h-[60px]", {
   variants: {
     variant: {
       dark: "bg-black",

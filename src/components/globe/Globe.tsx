@@ -271,9 +271,61 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
             el.addEventListener("click", clickHandler);
           }
         } else if (clusterData.clusterType === "continent_cluster") {
-          // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
+          // 대륙 클러스터 표시 (텍스트로 +숫자)
           el.innerHTML = createContinentClusterHTML(styles, clusterData.name, clusterData.count, clusterData.flag);
-          // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
+
+          // 대륙 클러스터 클릭 시 국가 클러스터로 쪼개기
+          const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {
+            const cluster = clusteredData.find(({ id }) => id === clusterId);
+            if (cluster && localHandleClusterSelect && globeRef.current) {
+              const clusterItems = localHandleClusterSelect(cluster);
+              globalHandleClusterSelect({ ...cluster, items: clusterItems });
+              onClusterSelect?.(cluster);
+
+              // 국가별로 그룹핑하여 각 국가의 중심점 계산
+              const countryGroups = new Map<string, typeof clusterItems>();
+              clusterItems.forEach((item) => {
+                if (!countryGroups.has(item.id)) {
+                  countryGroups.set(item.id, []);
+                }
+                countryGroups.get(item.id)?.push(item);
+              });
+
+              // 각 국가의 중심점
+              const countryCenters = Array.from(countryGroups.values()).map((countryItems) => {
+                const centerLat = countryItems.reduce((sum, item) => sum + item.lat, 0) / countryItems.length;
+                const centerLng = countryItems.reduce((sum, item) => sum + item.lng, 0) / countryItems.length;
+                return {
+                  ...countryItems[0],
+                  lat: centerLat,
+                  lng: centerLng,
+                };
+              });
+
+              // 국가들이 모두 보이도록 자동 줌인
+              const autoFitCamera = calculateAutoFitCamera(countryCenters);
+              const currentPov = globeRef.current.pointOfView();
+
+              const animationDuration = calculateAnimationDuration(
+                currentPov.lat || 0,
+                currentPov.lng || 0,
+                currentPov.altitude || 2.5,
+                autoFitCamera.lat,
+                autoFitCamera.lng,
+                autoFitCamera.altitude,
+              );
+
+              globeRef.current.pointOfView(
+                {
+                  lat: autoFitCamera.lat,
+                  lng: autoFitCamera.lng,
+                  altitude: autoFitCamera.altitude,
+                },
+                animationDuration,
+              );
+            }
+          });
+          el.addEventListener("click", clickHandler);
         } else if (clusterData.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
           // ClusterData 자체의 hasRecords와 thumbnailUrl 사용

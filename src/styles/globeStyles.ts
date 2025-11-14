@@ -177,9 +177,9 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
       font-weight: 500;
       line-height: 128%;
       font-feature-settings: 'liga' off, 'clig' off;
-      cursor: default;
+      cursor: pointer;
       user-select: none;
-      pointer-events: none;
+      pointer-events: auto;
       position: absolute;
       z-index: ${20 + index};
       top: ${offsetY}px;

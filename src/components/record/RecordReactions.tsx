@@ -135,30 +135,30 @@ export const RecordReactions = ({
   };
 
   const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
-    // owner면 리액션 불가
-    if (isOwner) return;
-
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
-    // 먼저 UI 업데이트 (낙관적 업데이트)
-    setReactions((prev) => {
-      const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
-      onReactionUpdate?.(updatedReactions);
-      return updatedReactions;
-    });
+    // owner가 아닐 때만 카운트 증가 및 애니메이션
+    if (!isOwner) {
+      // 먼저 UI 업데이트 (낙관적 업데이트)
+      setReactions((prev) => {
+        const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
+        onReactionUpdate?.(updatedReactions);
+        return updatedReactions;
+      });
 
-    // 애니메이션 실행 - 버튼 위치를 미리 저장
-    const buttonElement = event.currentTarget;
-    const rect = buttonElement.getBoundingClientRect();
+      // 애니메이션 실행 - 버튼 위치를 미리 저장
+      const buttonElement = event.currentTarget;
+      const rect = buttonElement.getBoundingClientRect();
 
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      debounceTimerRef.current = setTimeout(() => {
+        createFloatingEmojiWithRect(reaction.glyph, rect);
+      }, 100);
     }
-
-    debounceTimerRef.current = setTimeout(() => {
-      createFloatingEmojiWithRect(reaction.glyph, rect);
-    }, 100);
 
     try {
       await pressEmoji({
@@ -166,12 +166,14 @@ export const RecordReactions = ({
         code: reactionCode,
       });
     } catch (error) {
-      // API 실패 시 카운트 롤백
-      setReactions((prev) => {
-        const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
-        onReactionUpdate?.(rolledBackReactions);
-        return rolledBackReactions;
-      });
+      // owner가 아닐 때만 롤백 처리
+      if (!isOwner) {
+        setReactions((prev) => {
+          const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+          onReactionUpdate?.(rolledBackReactions);
+          return rolledBackReactions;
+        });
+      }
 
       const errorMessage = error instanceof Error ? error.message : "이모지 누르기에 실패했습니다";
       alert(errorMessage);
@@ -193,8 +195,11 @@ export const RecordReactions = ({
       setReactions((prev) => {
         const existingReaction = prev.find((r) => r.glyph === glyph);
 
+        // owner가 아닐 때만 카운트 증가
         if (existingReaction) {
-          const updatedReactions = prev.map((r) => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
+          const updatedReactions = prev.map((r) =>
+            r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r,
+          );
 
           const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
           const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
@@ -207,7 +212,7 @@ export const RecordReactions = ({
         const newReaction: Reaction = {
           code,
           glyph,
-          count: 1,
+          count: isOwner ? 0 : 1,
         };
 
         const newReactions = [newReaction, ...prev];
@@ -223,10 +228,6 @@ export const RecordReactions = ({
   };
 
   const handleAddEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // owner이면 이모지 추가 불가
-    if (isOwner) {
-      return;
-    }
     e.stopPropagation();
     setShowEmojiPicker(true);
   };
@@ -255,10 +256,7 @@ export const RecordReactions = ({
       <button
         type="button"
         onClick={handleAddEmoji}
-        disabled={isOwner}
-        className={`w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)] ${
-          isOwner ? "opacity-50 cursor-not-allowed" : ""
-        }`}
+        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
         style={{
           background:
             "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
@@ -274,12 +272,9 @@ export const RecordReactions = ({
             key={`${code}-${glyph}-${index}`}
             type="button"
             onClick={(e) => handleReactionClick(code, e)}
-            disabled={isOwner}
             whileTap={canInteract ? { scale: 0.85 } : {}}
             whileHover={canInteract ? { scale: 1.05 } : {}}
-            className={`w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0 ${
-              isOwner ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0"
             style={{
               backgroundImage:
                 "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
@@ -297,10 +292,7 @@ export const RecordReactions = ({
               key={uniqueKey}
               type="button"
               onClick={(e) => handleAddEmoji(e)}
-              disabled={isOwner}
-              className={`w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0 ${
-                isOwner ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",

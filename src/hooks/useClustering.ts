@@ -242,54 +242,99 @@ const clusterLocations = (
       }
     }
 
-    // 겹치는 클러스터가 2개 이상이면 대륙별로 그룹핑
+    // 겹치는 클러스터가 2개 이상이면 지리적 거리 기반으로 서브클러스터링
     if (overlappingClusters.length > 1) {
-      const continentGroups = new Map<string, typeof overlappingClusters>();
+      // 거리 기반 서브클러스터링
+      const subClusters: ClusterData[][] = [];
+      const processedInSubCluster = new Set<string>();
 
-      overlappingClusters.forEach((cluster) => {
-        const continent = getContinent(cluster.items[0].id);
-        if (!continentGroups.has(continent)) {
-          continentGroups.set(continent, []);
+      // 지리적 거리 임계값 (약 1500km 정도)
+      const GEO_DISTANCE_THRESHOLD = 20;
+
+      for (const cluster of overlappingClusters) {
+        if (processedInSubCluster.has(cluster.id)) {
+          continue;
         }
-        (continentGroups.get(continent) as ClusterData[]).push(cluster);
-      });
 
-      continentGroups.forEach((group, continent) => {
-        if (group.length > 1) {
-          const allItems = group.flatMap((cluster) => cluster.items);
-          const uniqueCountries = [...new Set(allItems.map(({ id }) => id))];
+        const subCluster = [cluster];
+        processedInSubCluster.add(cluster.id);
 
-          let totalWeight = 0;
-          let weightedLat = 0;
-          let weightedLng = 0;
+        // 현재 클러스터와 지리적으로 가까운 다른 클러스터 찾기
+        for (const candidate of overlappingClusters) {
+          if (processedInSubCluster.has(candidate.id)) {
+            continue;
+          }
 
-          group.forEach((cluster) => {
-            const weight = cluster.count;
-            weightedLat += cluster.lat * weight;
-            weightedLng += cluster.lng * weight;
-            totalWeight += weight;
+          // 위경도 차이로 거리 계산 (간단한 버전)
+          const latDiff = Math.abs(cluster.lat - candidate.lat);
+          const lngDiff = Math.abs(cluster.lng - candidate.lng);
+          const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+
+          if (distance < GEO_DISTANCE_THRESHOLD) {
+            subCluster.push(candidate);
+            processedInSubCluster.add(candidate.id);
+          }
+        }
+
+        subClusters.push(subCluster);
+      }
+
+      // 각 서브클러스터를 처리
+      subClusters.forEach((subCluster) => {
+        if (subCluster.length > 1) {
+          // 대륙별로 그룹핑 (근접한 국가들끼리만)
+          const continentGroups = new Map<string, typeof subCluster>();
+
+          subCluster.forEach((cluster) => {
+            const continent = getContinent(cluster.items[0].id);
+            if (!continentGroups.has(continent)) {
+              continentGroups.set(continent, []);
+            }
+            (continentGroups.get(continent) as ClusterData[]).push(cluster);
           });
 
-          const centerLat = weightedLat / totalWeight;
-          const centerLng = weightedLng / totalWeight;
+          continentGroups.forEach((group, continent) => {
+            if (group.length > 1) {
+              const allItems = group.flatMap((cluster) => cluster.items);
+              const uniqueCountries = [...new Set(allItems.map(({ id }) => id))];
 
-          const representativeCluster = group.reduce((prev, current) => (prev.count > current.count ? prev : current));
+              let totalWeight = 0;
+              let weightedLat = 0;
+              let weightedLng = 0;
 
-          const continentCluster = {
-            id: `continent_${continent}_${Date.now()}_${i}`,
-            name: `${continent} +${uniqueCountries.length}`,
-            flag: representativeCluster.flag,
-            lat: centerLat,
-            lng: centerLng,
-            color: representativeCluster.color,
-            items: allItems,
-            count: allItems.length,
-            clusterType: "continent_cluster" as const,
-          };
+              group.forEach((cluster) => {
+                const weight = cluster.count;
+                weightedLat += cluster.lat * weight;
+                weightedLng += cluster.lng * weight;
+                totalWeight += weight;
+              });
 
-          finalClusters.push(continentCluster);
+              const centerLat = weightedLat / totalWeight;
+              const centerLng = weightedLng / totalWeight;
+
+              const representativeCluster = group.reduce((prev, current) =>
+                prev.count > current.count ? prev : current,
+              );
+
+              const continentCluster = {
+                id: `continent_${continent}_${Date.now()}_${i}`,
+                name: `${continent} +${uniqueCountries.length}`,
+                flag: representativeCluster.flag,
+                lat: centerLat,
+                lng: centerLng,
+                color: representativeCluster.color,
+                items: allItems,
+                count: allItems.length,
+                clusterType: "continent_cluster" as const,
+              };
+
+              finalClusters.push(continentCluster);
+            } else {
+              finalClusters.push(group[0]);
+            }
+          });
         } else {
-          finalClusters.push(group[0]);
+          finalClusters.push(subCluster[0]);
         }
       });
     } else {
@@ -329,6 +374,18 @@ const createClusterSelectHandler = (
 ) => {
   return (cluster: ClusterData) => {
     if (cluster.clusterType === "continent_cluster") {
+      // 대륙 클러스터 클릭 시 국가 모드로 전환하고 스택에 추가
+      setState((prev) => ({
+        ...prev,
+        mode: "country",
+        expandedCountry: null,
+        selectedCluster: null,
+        clickBasedExpansion: false,
+        lastInteraction: Date.now(),
+      }));
+
+      setSelectionStack((stack) => [...stack, selectedClusterData || null]);
+
       return cluster.items;
     }
 

@@ -32,8 +32,8 @@ export default function WithdrawalPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary p-4">
-      <div className="bg-surface-secondary relative w-full max-w-[402px] h-screen flex flex-col">
+    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary p-4">
+      <div className="bg-surface-secondary relative w-full max-w-[402px] h-dvh flex flex-col">
         <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="회원탈퇴" />
 
         {/* Main Content - Scrollable */}

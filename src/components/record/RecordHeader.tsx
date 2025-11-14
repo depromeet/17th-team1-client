@@ -25,9 +25,7 @@ export function RecordHeader() {
           <BackIcon className="w-6 h-6" />
         </button>
         <button onClick={handleEditClick} type="button" className="px-2 inline-flex justify-end items-center">
-          <div className="text-right justify-start text-state-focused text-base font-bold font-['Pretendard'] leading-5">
-            도시 편집
-          </div>
+          <div className="text-right justify-start text-state-focused text-base font-bold leading-5">도시 편집</div>
         </button>
       </div>
     </div>

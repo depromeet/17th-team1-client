@@ -210,7 +210,7 @@ const RecordDetailPage = () => {
 
   if (error) {
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-surface-secondary px-4">
+      <div className="w-full h-dvh flex flex-col items-center justify-center gap-4 bg-surface-secondary px-4">
         <div className="text-text-primary text-center">
           <p className="text-lg font-semibold mb-2">오류가 발생했습니다</p>
           <p className="text-text-secondary text-sm">{error}</p>
@@ -229,7 +229,7 @@ const RecordDetailPage = () => {
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
     return (
-      <div className="w-full h-screen bg-surface-secondary relative max-w-lg mx-auto">
+      <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
         {/* 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader
@@ -261,7 +261,7 @@ const RecordDetailPage = () => {
 
   // 여러 기록이 있는 경우 (스크롤 가능)
   return (
-    <div className="w-full h-screen bg-surface-secondary relative max-w-lg mx-auto">
+    <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
       {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
       <div className="absolute top-0 left-0 right-0 z-10">
         <RecordDetailHeader

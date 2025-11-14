@@ -65,7 +65,7 @@ export function EditToastContainer() {
         className={`w-full min-h-12 px-4 py-3.5 rounded-lg outline-1 outline-offset-[-1px] backdrop-blur-[5.15px] inline-flex justify-start items-center gap-4 bg-[rgba(255,255,255,0.1)] outline-[rgba(255,255,255,0.05)]`}
       >
         <div
-          className={`text-center justify-start text-sm font-medium font-['Pretendard'] leading-5 ${
+          className={`text-center justify-start text-sm font-medium leading-5 ${
             toast.type === "success" ? "text-text-primary" : "text-white"
           }`}
         >

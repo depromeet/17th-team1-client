@@ -434,7 +434,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
 
   if (!isCityIdValid) {
     return (
-      <div className="max-w-md mx-auto min-h-screen bg-black text-white">
+      <div className="max-w-md mx-auto min-h-dvh bg-black text-white">
         <Header title="도시 선택 필요" variant="dark" leftIcon="back" onLeftClick={handleBack} />
         <div className="flex flex-col items-center justify-center gap-6 px-6 py-16 text-center">
           <div className="flex flex-col gap-2">
@@ -456,7 +456,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-black text-white">
+    <div className="max-w-md mx-auto min-h-dvh bg-black text-white">
       <LoadingOverlay show={isProcessing || isInitialLoading || Boolean(deletingPhotoId)} />
       <Header
         title={headerTitle}

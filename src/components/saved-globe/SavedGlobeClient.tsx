@@ -234,8 +234,8 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
 
   if (error) {
     return (
-      <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
-        <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+      <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
+        <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
           <div className="max-w-[512px] mx-auto w-full">
             <Header
               variant="navy"
@@ -258,8 +258,8 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
 
   if (!hasBookmarks) {
     return (
-      <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
-        <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+      <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
+        <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
           <div className="max-w-[512px] mx-auto w-full">
             <Header
               variant="navy"
@@ -281,8 +281,8 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
+    <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
+      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
         <div className="max-w-[512px] mx-auto w-full">
           <Header
             variant="navy"

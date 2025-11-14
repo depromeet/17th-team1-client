@@ -191,7 +191,7 @@ export const RecordScrollContainer = ({
         {children.map((child, index) => {
           const key = isValidElement(child) && child.key ? child.key : `record-${index}`;
           return (
-            <div key={key} className="w-full h-screen">
+            <div key={key} className="w-full h-dvh">
               {child}
             </div>
           );

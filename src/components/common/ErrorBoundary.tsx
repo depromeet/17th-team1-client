@@ -10,7 +10,7 @@ type ErrorFallbackProps = {
 
 const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 p-4">
+    <div className="min-h-dvh flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900 p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -31,7 +31,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
         </div>
 
         <div className="bg-gray-50 rounded-md p-4">
-          <p className="text-sm font-mono text-gray-700 break-words">{error.message}</p>
+          <p className="text-sm text-gray-700 break-words">{error.message}</p>
         </div>
 
         <div className="flex gap-3">

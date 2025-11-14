@@ -5,8 +5,8 @@ type NationSelectHeaderProps = SearchProps;
 
 export const NationSelectHeader = ({ searchValue, onSearchChange }: NationSelectHeaderProps) => {
   return (
-    <div className="mb-8">
-      <h1 className="text-text-primary text-2xl font-bold leading-[31px] mb-10">
+    <div className="pt-10 pb-7 flex flex-col gap-7">
+      <h1 className="text-text-primary text-2xl font-bold leading-8">
         그동안 여행했던 도시들을
         <br />
         선택해보세요.

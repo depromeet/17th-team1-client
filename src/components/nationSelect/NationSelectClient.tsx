@@ -79,9 +79,39 @@ export const NationSelectClient = ({
       <div className="bg-surface-secondary relative w-full max-w-[512px] h-screen flex flex-col">
         {customHeader && customHeader}
 
+        {!customHeader && (
+          <div className="max-w-[512px] mx-auto w-full shrink-0">
+            <header
+              className="flex items-center justify-between w-full px-4 pt-10 pb-[30px] bg-surface-secondary relative"
+              style={{
+                backgroundColor: "transparent",
+                position: "relative",
+                zIndex: 20,
+              }}
+            >
+              <div className="flex items-start justify-start min-w-0 flex-1">
+                <h1 className="text-text-primary text-2xl font-bold leading-8">
+                  그동안 여행했던 도시들을
+                  <br />
+                  선택해보세요.
+                </h1>
+              </div>
+              <div className="flex items-center justify-end min-w-0 flex-1 gap-2" />
+            </header>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto px-4 flex justify-center">
           <div className="w-full max-w-[512px]">
-            {!customHeader && <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />}
+            {!customHeader && (
+              <div className="mb-8">
+                <SearchInput
+                  placeholder="도시/나라를 검색해주세요."
+                  value={searchKeyword}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+            )}
 
             {customHeader && (
               <div className="mb-8">

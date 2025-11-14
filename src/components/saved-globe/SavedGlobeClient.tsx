@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
+import BookmarkIcon from "@/assets/icons/bookmark.svg";
+import BookmarkFilledIcon from "@/assets/icons/bookmark-filled.svg";
 import { Dropdown } from "@/components/common/Dropdown";
 import { Header } from "@/components/common/Header";
 import { addBookmark, getBookmarks, removeBookmark } from "@/services/bookmarkService";
@@ -148,18 +150,7 @@ const GlobeList = ({
               className="shrink-0 w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={bookmarked ? "저장 해제" : "저장"}
             >
-              <svg
-                className="w-5 h-5"
-                viewBox="0 0 20 24"
-                fill={bookmarked ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="1.5"
-                color="white"
-                role="img"
-              >
-                <title>{bookmarked ? "저장됨" : "저장 안 됨"}</title>
-                <path d="M2 2v20l8-5 8 5V2H2z" />
-              </svg>
+              {bookmarked ? <BookmarkFilledIcon alt="저장됨" /> : <BookmarkIcon alt="저장 안 됨" />}
             </button>
           </div>
         ))}

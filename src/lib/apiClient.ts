@@ -46,7 +46,10 @@ const parseJsonSafely = async <T>(response: Response): Promise<T> => {
  * 클라이언트 사이드에서 401/500 에러를 자동으로 에러 페이지로 리다이렉트합니다.
  * 서버 사이드에서는 에러를 그대로 throw하여 서버 컴포넌트의 error.tsx에서 처리합니다.
  */
-const handleGlobalError = (status: number): void => {
+const handleGlobalError = (status: number, skipGlobalErrorHandling?: boolean): void => {
+  // 전역 에러 처리 스킵 플래그가 있으면 리턴
+  if (skipGlobalErrorHandling) return;
+
   // 클라이언트 사이드에서만 자동 리다이렉트
   if (typeof window === "undefined") return;
 
@@ -61,6 +64,7 @@ export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   token?: string,
+  options?: { skipGlobalErrorHandling?: boolean },
 ): Promise<T> => {
   try {
     const searchParams = new URLSearchParams();
@@ -93,7 +97,7 @@ export const apiGet = async <T>(
 
       // 401/500 에러는 전역으로 처리 (클라이언트 사이드에서만 자동 리다이렉트)
       // 서버 사이드에서는 에러를 그대로 throw하여 서버 컴포넌트의 error.tsx에서 처리
-      handleGlobalError(response.status);
+      handleGlobalError(response.status, options?.skipGlobalErrorHandling);
 
       // 404와 5xx 서버 에러를 제외하고만 로그 출력
       if (response.status !== 404 && response.status < 500) {

@@ -1,6 +1,6 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import { ApiError, apiDelete, apiGet, apiPost } from "@/lib/apiClient";
 import type { BookmarkListResponse, BookmarkUser } from "@/types/bookmark";
-import { getAuthInfo } from "@/utils/cookies";
+import { clearAllCookies, getAuthInfo } from "@/utils/cookies";
 
 /**
  * 북마크된 사용자 목록을 조회합니다.
@@ -38,9 +38,19 @@ export const getBookmarks = async (token?: string, useToken = true): Promise<Boo
   }
 
   try {
-    const data = await apiGet<BookmarkListResponse>(`/api/v1/bookmarks`, {}, authToken);
+    const data = await apiGet<BookmarkListResponse>(
+      `/api/v1/bookmarks`,
+      {},
+      authToken,
+      { skipGlobalErrorHandling: true }, // 401 에러 시 자동 리다이렉트 방지
+    );
     return data.data;
   } catch (error) {
+    // 401 에러는 조용히 처리 (빈 배열 반환)
+    if (error instanceof ApiError && error.status === 401) {
+      return [];
+    }
+
     if (error instanceof Error) {
       throw new Error(`북마크 목록을 불러오는데 실패했습니다: ${error.message}`);
     }
@@ -58,18 +68,30 @@ export const getBookmarks = async (token?: string, useToken = true): Promise<Boo
  * @example
  * await addBookmark(123);
  */
-export const addBookmark = async (targetMemberId: number): Promise<void> => {
-  const { token } = getAuthInfo();
+export const addBookmark = async (targetMemberId: number, useToken = true): Promise<void> => {
+  let authToken = "";
 
-  if (!token) {
-    throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+  if (useToken) {
+    const { token } = getAuthInfo();
+    authToken = token || "";
+
+    // 토큰이 없으면 바로 토큰 없이 재호출
+    if (!authToken) {
+      clearAllCookies();
+      await addBookmark(targetMemberId, false);
+      return;
+    }
   }
 
   try {
-    await apiPost(`/api/v1/bookmarks`, { targetMemberId }, token);
+    await apiPost(`/api/v1/bookmarks`, { targetMemberId }, authToken);
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`북마크 추가에 실패했습니다: ${error.message}`);
+    if (error instanceof ApiError) {
+      if (error.status === 401) {
+        clearAllCookies();
+        await addBookmark(targetMemberId, false);
+        return;
+      }
     }
     throw new Error("북마크를 추가하는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }

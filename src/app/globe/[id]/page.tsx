@@ -105,7 +105,7 @@ const GlobePage = () => {
           if (!isMyGlobeCheck && globeResponse.data.memberId) {
             setTargetMemberId(globeResponse.data.memberId);
 
-            // 북마크 상태 확인 (토큰 없이)
+            // 북마크 상태 확인
             try {
               const bookmarks = await getBookmarks();
               const isAlreadyBookmarked = bookmarks.some(

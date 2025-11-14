@@ -22,6 +22,7 @@ export { default as IconExclamationCircleMonoIcon } from "./icon-exclamation-cir
 export { default as KakaoIcon } from "./kakao.svg";
 export { default as KakaoLogoIcon } from "./kakaoLogo.svg";
 export { default as LoadingIcon } from "./loading.svg";
+export { default as LoginLogoIcon } from "./login-logo.svg";
 export { default as MapPinIcon } from "./map-pin.svg";
 export { default as MenuIcon } from "./menu.svg";
 export { default as PeopleIcon } from "./people.svg";

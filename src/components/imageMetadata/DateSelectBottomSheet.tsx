@@ -64,7 +64,7 @@ export const DateSelectBottomSheet = ({ isOpen, onClose, onConfirm }: DateSelect
         value={dateInput}
         onChange={handleInputChange}
         placeholder="YYYY.MM"
-        className="w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl px-4 py-[14px] text-base transition-colors"
+        className="w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-2xl px-4 py-[14px] text-base transition-colors"
         inputMode="numeric"
       />
     </BaseInputBottomSheet>

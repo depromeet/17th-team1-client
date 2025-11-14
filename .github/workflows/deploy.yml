@@ -12,14 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install rsync
+      - name: Sync project to production directory (exclude compose)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y rsync
-
-      - name: Sync project to production directory
-        run: |
-          rsync -av --delete ./ ~/17th-team1-client/
+          rsync -av --delete \
+            --exclude=docker-compose-prod.yml \
+            ./ ~/17th-team1-client/
 
       - name: Stop existing containers
         run: |
@@ -29,4 +26,4 @@ jobs:
       - name: Rebuild & start containers
         run: |
           cd ~/17th-team1-client
-          docker compose -f docker-compose-prod.yml up -d --build
+          docker compose -f docker-compose-prod.yml up -d —build

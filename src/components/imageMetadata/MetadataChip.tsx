@@ -33,18 +33,8 @@ export const MetadataChip = ({
     return null;
   };
 
-  const handleClickChip = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("[data-remove-chip]")) {
-      event.stopPropagation();
-      onRemove?.();
-      return;
-    }
-    event.stopPropagation();
-    onClick?.();
-  };
-
   const handleRemoveChip = (event: React.MouseEvent) => {
+    event.preventDefault();
     event.stopPropagation();
     onRemove?.();
   };
@@ -53,21 +43,38 @@ export const MetadataChip = ({
   const textClasses = isPlaceholder ? "text-[#FFFFFF80]" : "text-white";
   const interactiveClasses = onClick ? "cursor-pointer hover:bg-[#000000]/50 transition-colors" : "";
 
+  if (onClick && onRemove) {
+    return (
+      <div className={`${baseClasses} relative`}>
+        <button onClick={onClick} className={`${interactiveClasses} flex items-center gap-2`} type="button">
+          {/* Left Icon */}
+          <div className="flex-shrink-0">{renderIcon()}</div>
+
+          {/* Center Text */}
+          <span className={`text-sm font-medium truncate max-w-[120px] ${textClasses} pr-[18px]`}>{text}</span>
+        </button>
+
+        {/* Right X Icon */}
+        <button
+          onClick={handleRemoveChip}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 flex-shrink-0 hover:opacity-70 transition-opacity"
+          aria-label="Remove MetadataChip"
+          type="button"
+        >
+          <CloseIcon width={8} height={8} className="text-[#A8B8C6]" />
+        </button>
+      </div>
+    );
+  }
+
   if (onClick) {
     return (
-      <button onClick={handleClickChip} className={`${baseClasses} ${interactiveClasses}`} type="button">
+      <button onClick={onClick} className={`${baseClasses} ${interactiveClasses}`} type="button">
         {/* Left Icon */}
         <div className="flex-shrink-0">{renderIcon()}</div>
 
         {/* Center Text */}
         <span className={`text-sm font-medium truncate max-w-[120px] ${textClasses}`}>{text}</span>
-
-        {/* Right X Icon */}
-        {onRemove && (
-          <span data-remove-chip className="flex-shrink-0 ml-auto hover:opacity-70 transition-opacity">
-            <CloseIcon width={8} height={8} className="text-[#A8B8C6]" />
-          </span>
-        )}
       </button>
     );
   }

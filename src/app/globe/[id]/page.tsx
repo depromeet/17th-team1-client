@@ -26,6 +26,7 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 const GlobePage = () => {
   const router = useRouter();
   const { id: urlUuid } = useParams<{ id: string }>();
+  const { uuid: cookieUuid } = getAuthInfo();
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [travelInsight, setTravelInsight] = useState<string>("");
@@ -48,7 +49,6 @@ const GlobePage = () => {
     const fromPage = sessionStorage.getItem("fromSavedGlobe");
     if (fromPage === "true") {
       setFromSavedGlobe(true);
-      sessionStorage.removeItem("fromSavedGlobe");
     }
   }, []);
 
@@ -156,7 +156,10 @@ const GlobePage = () => {
           {...(!isMyGlobe &&
             fromSavedGlobe && {
               leftIcon: "back",
-              onLeftClick: () => router.back(),
+              onLeftClick: () => {
+                sessionStorage.removeItem("fromSavedGlobe");
+                router.push(`/globe/${cookieUuid}`);
+              },
             })}
           style={{
             backgroundColor: "transparent",

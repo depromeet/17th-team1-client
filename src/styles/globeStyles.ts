@@ -70,7 +70,6 @@ export const createSingleLabelStyles = (
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #1f4263;
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
       font-style: normal;
       font-weight: 500;
@@ -173,7 +172,6 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #FFF;
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 16px;
       font-style: normal;
       font-weight: 500;
@@ -248,7 +246,6 @@ export const createCountryClusterStyles = (
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #FFF;
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
       font-style: normal;
       font-weight: 500;
@@ -279,7 +276,6 @@ export const createCountryClusterStyles = (
       background: rgba(89, 190, 229, 0.5);
       color: #FFF;
       text-align: center;
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 12px;
       font-style: normal;
       font-weight: 500;

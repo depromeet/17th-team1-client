@@ -1,4 +1,4 @@
-import { ApiError, apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+import { ApiError, apiDelete, apiGet, apiPost, apiPostWithHeaders } from "@/lib/apiClient";
 import type { BookmarkListResponse, BookmarkUser } from "@/types/bookmark";
 import { clearAllCookies, getAuthInfo } from "@/utils/cookies";
 
@@ -84,7 +84,14 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
   }
 
   try {
-    await apiPost(`/api/v1/bookmarks`, { targetMemberId }, authToken);
+    if (authToken) {
+      await apiPost(`/api/v1/bookmarks`, { targetMemberId }, authToken);
+    } else {
+      const { headers } = await apiPostWithHeaders(`/api/v1/bookmarks`, { targetMemberId });
+      if (headers.get("X-Redirect-URL")) {
+        window.location.href = headers.get("X-Redirect-URL") || "";
+      }
+    }
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 401) {

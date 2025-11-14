@@ -152,6 +152,53 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
   }
 };
 
+/**
+ * POST 요청을 보내고 응답 데이터와 함께 헤더도 반환합니다.
+ * 백엔드에서 리다이렉트 URL 등을 헤더로 전달할 때 사용합니다.
+ */
+export const apiPostWithHeaders = async <T>(
+  endpoint: string,
+  data?: unknown,
+  token?: string,
+): Promise<{ data: T; headers: Headers }> => {
+  try {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const requestBody = data ? JSON.stringify(data) : undefined;
+
+    logger.log(`[API] POST ${endpoint}`);
+    logger.log(`[API] URL:`, url);
+    logger.log(`[API] Request Body:`, requestBody);
+    logger.log(`[API] Headers:`, token ? getAuthHeaders(token) : getDefaultHeaders());
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
+      body: requestBody,
+    });
+
+    logger.log(`[API] Response status:`, response.status);
+
+    if (!response.ok) {
+      const responseText = await response.text().catch(() => "Unable to read response");
+      logger.log(`[API] Error response body:`, responseText);
+
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+    }
+
+    const result = await parseJsonSafely<T>(response);
+    logger.log(`[API] Response data:`, result);
+    logger.log(`[API] Response headers:`, Object.fromEntries(response.headers.entries()));
+
+    return {
+      data: result,
+      headers: response.headers,
+    };
+  } catch (error) {
+    logger.error(`API POST Error (${endpoint}):`, error);
+    throw error;
+  }
+};
+
 export const apiPut = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;

@@ -2,7 +2,6 @@
 
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SearchIcon } from "@/assets/icons";
 import { SearchInput } from "@/components/common/Input";
 import { useGoogleMapsScript } from "@/hooks/useGoogleMapsScript";
 import { cn } from "@/utils/cn";
@@ -31,7 +30,6 @@ export const LocationSelectBottomSheet = ({
 }: LocationSelectBottomSheetProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationSelection | null>(null);
@@ -265,19 +263,10 @@ export const LocationSelectBottomSheet = ({
       isValid={Boolean(selectedLocation)}
     >
       <div className="flex flex-col h-full min-h-0">
-        <div className="relative shrink-0">
-          <SearchIcon
-            width={20}
-            height={20}
-            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors pointer-events-none ${
-              isFocused ? "text-white" : "text-gray-400"
-            }`}
-          />
+        <div className="shrink-0">
           <SearchInput
             value={searchQuery}
             onChange={handleInputChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             onKeyDown={handleInputKeyDown}
             placeholder="장소를 검색해주세요."
             disabled={isInputDisabled}

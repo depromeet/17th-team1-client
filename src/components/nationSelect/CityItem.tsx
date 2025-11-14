@@ -31,7 +31,7 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
         }`}
       >
         <span
-          className={`font-medium text-left font-['Pretendard'] ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}
+          className={`font-medium text-left font-['Pretendard'] whitespace-nowrap overflow-hidden text-ellipsis ${isSelected ? "text-[#66717D]" : "text-text-primary"}`}
         >
           {city.flag} {city.name}, {city.country}
         </span>

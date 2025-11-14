@@ -35,6 +35,7 @@ const RecordDetailPage = () => {
   const searchParams = useSearchParams();
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
 
   const cityId = typeof params.id === "string" ? Number(params.id) : 0;
 
@@ -53,7 +54,16 @@ const RecordDetailPage = () => {
   // 스크롤 상태 관리
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
     countryRecords,
+    shouldShowHint: hasShownScrollHint,
   });
+
+  // 스크롤 발생 시 힌트 숨김 상태로 변경
+  const handleScroll = (index: number) => {
+    if (index > 0) {
+      setHasShownScrollHint(false);
+    }
+    onScroll(index);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -225,6 +235,7 @@ const RecordDetailPage = () => {
           description={description}
           reactions={reactions}
           isOwner={isOwner}
+          showScrollHint={showScrollHint}
         />
       </div>
     );
@@ -251,7 +262,7 @@ const RecordDetailPage = () => {
       {/* 스크롤 컨테이너 */}
       <RecordScrollContainer
         currentIndex={currentIndex}
-        onIndexChange={onScroll}
+        onIndexChange={handleScroll}
         hasNext={hasNext}
         hasPrevious={hasPrevious}
       >
@@ -269,6 +280,7 @@ const RecordDetailPage = () => {
               description={description}
               reactions={reactions}
               isOwner={isOwner}
+              showScrollHint={showScrollHint && index === 0}
             />
           ),
         )}

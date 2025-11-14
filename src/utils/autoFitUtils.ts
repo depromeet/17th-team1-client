@@ -100,56 +100,65 @@ export const calculateOptimalZoom = (
     return 0.15;
   }
 
-  // 지구본의 가시 영역을 고려한 패딩 (여백 포함)
-  const padding = 2;
-  const effectiveLatRange = latRange * (1 + padding);
-  const effectiveLngRange = lngRange * (1 + padding);
+  // 라벨 돌출 영역을 고려한 마진 계산
+  // 라벨이 약 100-150px 돌출되므로, 이를 각도로 환산
+  // 화면 512px에서 150px는 약 29% -> 시야각 110도 기준 약 32도
+  const labelMargin = 20; // 각도 단위로 여유 공간
 
-  // Globe.gl의 줌 레벨은 카메라 높이와 관련
-  // 높이가 낮을수록 더 가깝게 보임
-  // 범위가 클수록 더 멀리서 봐야 함
+  // 기본 패딩: 범위의 50%를 여백으로 추가
+  const basePadding = 0.5;
+  const effectiveLatRange = latRange * (1 + basePadding) + labelMargin;
+  const effectiveLngRange = lngRange * (1 + basePadding) + labelMargin;
 
   const maxRange = Math.max(effectiveLatRange, effectiveLngRange);
   const minRange = Math.min(effectiveLatRange, effectiveLngRange);
   const rangeRatio = minRange > 0 ? maxRange / minRange : 1;
 
-  // 줌 레벨 계산 (개선된 경험적 공식)
+  // 줌 레벨 계산 (안전한 경험적 공식)
   let zoomLevel: number;
 
-  if (maxRange > 80) {
+  if (maxRange > 100) {
     // 매우 넓은 범위 (여러 대륙)
-    zoomLevel = 2.0;
-  } else if (maxRange > 60) {
+    zoomLevel = 2.2;
+  } else if (maxRange > 80) {
     // 넓은 범위 (대륙 전체)
-    zoomLevel = 1.5;
+    zoomLevel = 1.8;
+  } else if (maxRange > 60) {
+    // 큰 지역
+    zoomLevel = 1.3;
   } else if (maxRange > 40) {
     // 큰 국가 (미국, 러시아 등)
-    zoomLevel = 0.8;
-  } else if (maxRange > 25) {
+    zoomLevel = 1.0;
+  } else if (maxRange > 30) {
     // 중간 크기 국가
-    zoomLevel = 0.4;
-  } else if (maxRange > 15) {
+    zoomLevel = 0.7;
+  } else if (maxRange > 20) {
     // 작은 국가
-    zoomLevel = 0.25;
-  } else if (maxRange > 8) {
+    zoomLevel = 0.5;
+  } else if (maxRange > 12) {
     // 매우 작은 지역
-    zoomLevel = 0.15;
-  } else if (maxRange > 3) {
+    zoomLevel = 0.3;
+  } else if (maxRange > 6) {
     // 도시 내 여러 지점
-    zoomLevel = 0.1;
+    zoomLevel = 0.2;
   } else {
     // 매우 가까운 지점들
-    zoomLevel = 0.08;
+    zoomLevel = 0.15;
   }
 
   // 범위 비율에 따른 조정 (세로로 긴 경우 vs 가로로 긴 경우)
   if (rangeRatio > 3) {
-    // 매우 긴 형태인 경우 약간 더 멀리서
-    zoomLevel *= 1.2;
+    // 매우 긴 형태인 경우 더 멀리서
+    zoomLevel *= 1.3;
+  } else if (rangeRatio > 2) {
+    zoomLevel *= 1.15;
   }
 
+  // 안전 마진: 추가로 1.2배 더 멀리서 보기
+  zoomLevel *= 1.2;
+
   // 최소/최대 줌 레벨 제한
-  return Math.max(0.06, Math.min(2.2, zoomLevel));
+  return Math.max(0.1, Math.min(2.5, zoomLevel));
 };
 
 // 도시들을 자동으로 fit하는 카메라 위치와 줌을 계산하는 메인 함수

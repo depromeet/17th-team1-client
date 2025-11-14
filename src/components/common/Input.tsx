@@ -34,7 +34,11 @@ export const Input = ({
   );
 };
 
-export const SearchInput = ({ className, value, onChange, ...props }: React.ComponentProps<"input">) => {
+type SearchInputProps = React.ComponentProps<"input"> & {
+  backgroundColor?: string;
+};
+
+export const SearchInput = ({ className, value, onChange, backgroundColor, ...props }: SearchInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleClear = () => {
@@ -50,7 +54,13 @@ export const SearchInput = ({ className, value, onChange, ...props }: React.Comp
 
   return (
     <div className={cn("relative", className)}>
-      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+      <div
+        className={cn(
+          "border border-surface-placeholder--4 rounded-2xl px-4 py-3.5 flex items-center gap-3",
+          !backgroundColor && "bg-surface-thirdly"
+        )}
+        style={{ backgroundColor: backgroundColor || undefined }}
+      >
         <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
           {isFocused || hasValue ? (
             <SearchbarActiveIcon className="w-6 h-6" />

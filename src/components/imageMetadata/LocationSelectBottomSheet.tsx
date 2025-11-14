@@ -1,8 +1,8 @@
 "use client";
 
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SearchIcon } from "@/assets/icons";
+import { SearchInput } from "@/components/common/Input";
 import { useGoogleMapsScript } from "@/hooks/useGoogleMapsScript";
 import { cn } from "@/utils/cn";
 import { BaseInputBottomSheet } from "./BaseInputBottomSheet";
@@ -30,7 +30,6 @@ export const LocationSelectBottomSheet = ({
 }: LocationSelectBottomSheetProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationSelection | null>(null);
@@ -240,14 +239,6 @@ export const LocationSelectBottomSheet = ({
     resetState();
   };
 
-  const handleClearInput = () => {
-    setSearchQuery("");
-    setSelectedLocation(null);
-    setPredictions([]);
-    setErrorMessage(null);
-    setActivePlaceId(null);
-  };
-
   const renderStatusMessage = () => {
     if (scriptError) {
       return scriptError.message;
@@ -271,101 +262,83 @@ export const LocationSelectBottomSheet = ({
       title="위치 추가"
       isValid={Boolean(selectedLocation)}
     >
-      <div className="relative">
-        <SearchIcon
-          width={20}
-          height={20}
-          className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors pointer-events-none ${
-            isFocused ? "text-white" : "text-gray-400"
-          }`}
-        />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleInputChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleInputKeyDown}
-          placeholder="장소를 검색해주세요."
-          disabled={isInputDisabled}
-          className={`w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-3xl pl-12 pr-12 py-[14px] text-base transition-colors ${
-            isInputDisabled ? "opacity-60 cursor-not-allowed" : ""
-          }`}
-        />
-        {searchQuery && !isInputDisabled && (
-          <button
-            type="button"
-            onClick={handleClearInput}
-            aria-label="검색어 지우기"
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-          >
-            <X size={18} />
-          </button>
-        )}
-      </div>
-
-      {statusMessage && (
-        <div className="mt-6 flex flex-col items-center justify-center text-sm text-text-thirdly gap-2">
-          {isLoading && <Loader2 className="animate-spin" size={18} />}
-          <span>{statusMessage}</span>
+      <div className="flex flex-col h-full min-h-0">
+        <div className="shrink-0">
+          <SearchInput
+            value={searchQuery}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+            placeholder="장소를 검색해주세요."
+            disabled={isInputDisabled}
+            backgroundColor="#1B293E"
+          />
         </div>
-      )}
 
-      {!statusMessage && (
-        <>
-          {isSearching && (
-            <div className="mt-6 flex items-center gap-2 text-sm text-text-thirdly">
-              <Loader2 className="animate-spin" size={16} />
-              <span>검색 중...</span>
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide mt-6">
+          {statusMessage && (
+            <div className="flex flex-col items-center justify-center text-sm text-text-thirdly gap-2">
+              {isLoading && <Loader2 className="animate-spin" size={18} />}
+              <span>{statusMessage}</span>
             </div>
           )}
 
-          {!isSearching && predictions.length > 0 && (
-            <ul className="mt-6 flex flex-col gap-3">
-              {predictions.map((prediction) => {
-                const isSelected = prediction.place_id === (activePlaceId ?? selectedLocation?.placeId ?? null);
-                const mainText = prediction.structured_formatting?.main_text || prediction.description || "";
-                const secondaryText =
-                  prediction.structured_formatting?.secondary_text || prediction.description || "상세 정보 없음";
-                return (
-                  <li key={prediction.place_id}>
-                    <button
-                      type="button"
-                      onClick={() => handlePredictionSelect(prediction)}
-                      className={cn(
-                        "w-full rounded-2xl border px-4 py-4 text-left transition-colors cursor-pointer",
-                        isSelected
-                          ? "border-[#00D9FF] bg-transparent hover:border-[#00D9FF]"
-                          : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]",
-                      )}
-                    >
-                      <div className="font-bold text-white">{mainText}</div>
-                      <div className="mt-1 text-sm text-text-secondary font-medium">{secondaryText}</div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          {!statusMessage && (
+            <>
+              {isSearching && (
+                <div className="flex items-center gap-2 text-sm text-text-thirdly">
+                  <Loader2 className="animate-spin" size={16} />
+                  <span>검색 중...</span>
+                </div>
+              )}
 
-          {!isSearching && hasTyped && predictions.length === 0 && !errorMessage && (
-            <div className="mt-6 text-sm text-text-thirdly">검색 결과가 없습니다.</div>
-          )}
+              {!isSearching && predictions.length > 0 && (
+                <ul className="flex flex-col gap-3">
+                  {predictions.map((prediction) => {
+                    const isSelected = prediction.place_id === (activePlaceId ?? selectedLocation?.placeId ?? null);
+                    const mainText = prediction.structured_formatting?.main_text || prediction.description || "";
+                    const secondaryText =
+                      prediction.structured_formatting?.secondary_text || prediction.description || "상세 정보 없음";
+                    return (
+                      <li key={prediction.place_id}>
+                        <button
+                          type="button"
+                          onClick={() => handlePredictionSelect(prediction)}
+                          className={cn(
+                            "w-full rounded-2xl border text-left transition-colors cursor-pointer flex flex-col items-start gap-1 px-5 py-[15px]",
+                            isSelected
+                              ? "border-[#00D9FF] bg-transparent hover:border-[#00D9FF]"
+                              : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]",
+                          )}
+                        >
+                          <div className="text-base font-bold text-white truncate w-full">{mainText}</div>
+                          <div className="text-sm text-text-secondary font-medium truncate w-full">{secondaryText}</div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
 
-          {errorMessage && (
-            <div className="mt-6 text-sm text-red-400" role="alert">
-              {errorMessage}
-            </div>
-          )}
+              {!isSearching && hasTyped && predictions.length === 0 && !errorMessage && (
+                <div className="text-sm text-text-thirdly">검색 결과가 없습니다.</div>
+              )}
 
-          {isFetchingDetails && (
-            <div className="mt-6 flex items-center gap-2 text-sm text-text-thirdly">
-              <Loader2 className="animate-spin" size={16} />
-              <span>장소 정보를 불러오는 중...</span>
-            </div>
+              {errorMessage && (
+                <div className="text-sm text-red-400" role="alert">
+                  {errorMessage}
+                </div>
+              )}
+
+              {isFetchingDetails && (
+                <div className="flex items-center gap-2 text-sm text-text-thirdly">
+                  <Loader2 className="animate-spin" size={16} />
+                  <span>장소 정보를 불러오는 중...</span>
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </BaseInputBottomSheet>
   );
 };

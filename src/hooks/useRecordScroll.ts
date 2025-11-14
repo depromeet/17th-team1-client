@@ -21,6 +21,7 @@ type RecordScrollItem = {
 
 type UseRecordScrollParams = {
   countryRecords: RecordScrollItem[];
+  shouldShowHint?: boolean;
 };
 
 type UseRecordScrollReturn = {
@@ -33,7 +34,7 @@ type UseRecordScrollReturn = {
   hideScrollHint: () => void;
 };
 
-export const useRecordScroll = ({ countryRecords }: UseRecordScrollParams): UseRecordScrollReturn => {
+export const useRecordScroll = ({ countryRecords, shouldShowHint = true }: UseRecordScrollParams): UseRecordScrollReturn => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
@@ -70,14 +71,15 @@ export const useRecordScroll = ({ countryRecords }: UseRecordScrollParams): UseR
   }, []);
 
   // 초기 힌트 표시 (해당 국가의 기록 수 >= 2일 때만)
+  // shouldShowHint 프로퍼티로 페이지 레벨의 제어를 받음
   useEffect(() => {
-    if (countryRecords.length >= 2) {
-      // 페이지 로드 후 힌트 표시
-      setShowScrollHint(true);
-    } else {
+    if (countryRecords.length < 2 || !shouldShowHint) {
       setShowScrollHint(false);
+      return;
     }
-  }, [countryRecords.length]);
+
+    setShowScrollHint(true);
+  }, [countryRecords.length, shouldShowHint]);
 
   return {
     currentRecord,

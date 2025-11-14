@@ -3,6 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { HeadlessToastProvider } from "@/components/common/Toast";
 import { RecordCard } from "@/components/record/RecordCard";
 import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
 import { RecordScrollContainer } from "@/components/record/RecordScrollContainer";
@@ -35,6 +36,7 @@ const RecordDetailPage = () => {
   const searchParams = useSearchParams();
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
 
   const cityId = typeof params.id === "string" ? Number(params.id) : 0;
 
@@ -53,7 +55,16 @@ const RecordDetailPage = () => {
   // 스크롤 상태 관리
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
     countryRecords,
+    shouldShowHint: hasShownScrollHint,
   });
+
+  // 스크롤 발생 시 힌트 숨김 상태로 변경
+  const handleScroll = (index: number) => {
+    if (index > 0) {
+      setHasShownScrollHint(false);
+    }
+    onScroll(index);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -200,8 +211,44 @@ const RecordDetailPage = () => {
   // 단일 기록인 경우 (스크롤 없이 표시)
   if (countryRecords.length === 1) {
     return (
+      <HeadlessToastProvider viewportClassName="fixed bottom-40 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px] max-w-[calc(100%-32px)]">
+        <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
+          {/* 헤더 */}
+          <div className="absolute top-0 left-0 right-0 z-10">
+            <RecordDetailHeader
+              city={city}
+              country={country}
+              onBack={handleBack}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isOwner={isOwner}
+            />
+          </div>
+
+          {/* 기록 카드 */}
+          <RecordCard
+            id={id}
+            images={images}
+            imageMetadata={imageMetadata}
+            date={date}
+            location={location}
+            userName={userName}
+            userAvatar={userAvatar}
+            description={description}
+            reactions={reactions}
+            isOwner={isOwner}
+            showScrollHint={showScrollHint}
+          />
+        </div>
+      </HeadlessToastProvider>
+    );
+  }
+
+  // 여러 기록이 있는 경우 (스크롤 가능)
+  return (
+    <HeadlessToastProvider viewportClassName="fixed bottom-40 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px] max-w-[calc(100%-32px)]">
       <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
-        {/* 헤더 */}
+        {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <RecordDetailHeader
             city={city}
@@ -213,67 +260,39 @@ const RecordDetailPage = () => {
           />
         </div>
 
-        {/* 기록 카드 */}
-        <RecordCard
-          id={id}
-          images={images}
-          imageMetadata={imageMetadata}
-          date={date}
-          location={location}
-          userName={userName}
-          userAvatar={userAvatar}
-          description={description}
-          reactions={reactions}
-          isOwner={isOwner}
-        />
+        {/* 스크롤 힌트 */}
+        <RecordScrollHint show={showScrollHint} />
+
+        {/* 스크롤 컨테이너 */}
+        <RecordScrollContainer
+          currentIndex={currentIndex}
+          onIndexChange={handleScroll}
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+        >
+          {countryRecords.map(
+            ({ id, images, imageMetadata, date, location, userName, userAvatar, description, reactions }, index) => {
+              return (
+                <RecordCard
+                  key={`${id}-${index}`}
+                  id={id}
+                  images={images}
+                  imageMetadata={imageMetadata}
+                  date={date}
+                  location={location}
+                  userName={userName}
+                  userAvatar={userAvatar}
+                  description={description}
+                  reactions={reactions}
+                  isOwner={isOwner}
+                  showScrollHint={showScrollHint && index === 0}
+                />
+              );
+            },
+          )}
+        </RecordScrollContainer>
       </div>
-    );
-  }
-
-  // 여러 기록이 있는 경우 (스크롤 가능)
-  return (
-    <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
-      {/* 고정 헤더 - 현재 기록의 도시/국가로 업데이트 */}
-      <div className="absolute top-0 left-0 right-0 z-10">
-        <RecordDetailHeader
-          city={city}
-          country={country}
-          onBack={handleBack}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          isOwner={isOwner}
-        />
-      </div>
-
-      {/* 스크롤 힌트 */}
-      <RecordScrollHint show={showScrollHint} />
-
-      {/* 스크롤 컨테이너 */}
-      <RecordScrollContainer
-        currentIndex={currentIndex}
-        onIndexChange={onScroll}
-        hasNext={hasNext}
-        hasPrevious={hasPrevious}
-      >
-        {countryRecords.map(
-          ({ id, images, imageMetadata, date, location, userName, userAvatar, description, reactions }, index) => (
-            <RecordCard
-              key={`${id}-${index}`}
-              id={id}
-              images={images}
-              imageMetadata={imageMetadata}
-              date={date}
-              location={location}
-              userName={userName}
-              userAvatar={userAvatar}
-              description={description}
-              reactions={reactions}
-              isOwner={isOwner}
-            />
-          ),
-        )}
-      </RecordScrollContainer>
-    </div>
+    </HeadlessToastProvider>
   );
 };
 

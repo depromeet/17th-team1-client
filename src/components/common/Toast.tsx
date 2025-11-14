@@ -48,9 +48,9 @@ export type HeadlessToastProps = React.ComponentPropsWithoutRef<typeof ToastPrim
  * - 시맨틱/접근성은 유지, 시각 스타일은 전부 외부 className으로 주입
  */
 export const HeadlessToast = React.forwardRef<HTMLLIElement, HeadlessToastProps>(
-  ({ leading, children, className, leadingClassName, contentClassName, ...rootProps }, ref) => {
+  ({ leading, children, className, leadingClassName, contentClassName, open, ...rootProps }, ref) => {
     return (
-      <ToastPrimitive.Root ref={ref} className={className} {...rootProps}>
+      <ToastPrimitive.Root ref={ref} className={className} open={open} {...rootProps}>
         {leading ? <div className={leadingClassName}>{leading}</div> : null}
         {children ? <div className={contentClassName}>{children}</div> : null}
         <ToastPrimitive.Close aria-label="Close" asChild>

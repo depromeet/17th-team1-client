@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
+import { HeadlessToast } from "@/components/common/Toast";
 import { pressEmoji, registerEmoji } from "@/services/emojiService";
 import type { Emoji } from "@/types/emoji";
 
@@ -40,7 +41,10 @@ export const RecordReactions = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
+  const [showToast, setShowToast] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastToastTimeRef = useRef<number>(0);
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const reactionsContainerRef = useRef<HTMLDivElement>(null);
@@ -63,6 +67,9 @@ export const RecordReactions = ({
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
       }
       timersRef.current.forEach((timer) => {
         clearTimeout(timer);
@@ -138,27 +145,52 @@ export const RecordReactions = ({
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
-    // owner가 아닐 때만 카운트 증가 및 애니메이션
-    if (!isOwner) {
-      // 먼저 UI 업데이트 (낙관적 업데이트)
-      setReactions((prev) => {
-        const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
-        onReactionUpdate?.(updatedReactions);
-        return updatedReactions;
-      });
+    // owner일 때: Toast 표시
+    if (isOwner) {
+      const now = Date.now();
+      const timeSinceLastToast = now - lastToastTimeRef.current;
 
-      // 애니메이션 실행 - 버튼 위치를 미리 저장
-      const buttonElement = event.currentTarget;
-      const rect = buttonElement.getBoundingClientRect();
-
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      // 1.5초(1500ms) 이내 연속 클릭: Toast 재노출 X (중복 방지)
+      if (timeSinceLastToast < 1500) {
+        return;
       }
 
-      debounceTimerRef.current = setTimeout(() => {
-        createFloatingEmojiWithRect(reaction.glyph, rect);
-      }, 100);
+      // 1.5초 이후 재클릭: Toast 재노출
+      lastToastTimeRef.current = now;
+      setShowToast(true);
+
+      // 기존 타이머 정리
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+
+      // 1.5초 후 Toast 자동 닫기
+      toastTimerRef.current = setTimeout(() => {
+        setShowToast(false);
+      }, 1500);
+
+      return;
     }
+
+    // owner가 아닐 때만 카운트 증가 및 애니메이션
+    // 먼저 UI 업데이트 (낙관적 업데이트)
+    setReactions((prev) => {
+      const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
+      onReactionUpdate?.(updatedReactions);
+      return updatedReactions;
+    });
+
+    // 애니메이션 실행 - 버튼 위치를 미리 저장
+    const buttonElement = event.currentTarget;
+    const rect = buttonElement.getBoundingClientRect();
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      createFloatingEmojiWithRect(reaction.glyph, rect);
+    }, 100);
 
     try {
       await pressEmoji({
@@ -167,13 +199,11 @@ export const RecordReactions = ({
       });
     } catch (error) {
       // owner가 아닐 때만 롤백 처리
-      if (!isOwner) {
-        setReactions((prev) => {
-          const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
-          onReactionUpdate?.(rolledBackReactions);
-          return rolledBackReactions;
-        });
-      }
+      setReactions((prev) => {
+        const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+        onReactionUpdate?.(rolledBackReactions);
+        return rolledBackReactions;
+      });
 
       const errorMessage = error instanceof Error ? error.message : "이모지 누르기에 실패했습니다";
       alert(errorMessage);
@@ -252,136 +282,144 @@ export const RecordReactions = ({
   }, [showEmojiPicker]);
 
   return (
-    <div className="flex items-center gap-4 relative">
-      <button
-        type="button"
-        onClick={handleAddEmoji}
-        className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
-        style={{
-          background:
-            "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
-        }}
-        aria-label="이모지 추가"
-      >
-        <AddEmojiIcon />
-      </button>
+    <div>
+      <div className="flex items-center gap-4 relative">
+        <button
+          type="button"
+          onClick={handleAddEmoji}
+          className="w-[68px] h-[68px] rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-[0px_4px_30px_0px_rgba(0,0,0,0.25)]"
+          style={{
+            background:
+              "radial-gradient(circle at 17.15% 14.06%, #00d9ff 0%, #0cdaff 7.02%, #18ddff 14.04%, #30e0ff 28.07%, #48e4ff 42.11%, #60e7ff 56.15%, #93efff 78.07%, #c6f6ff 100%)",
+          }}
+          aria-label="이모지 추가"
+        >
+          <AddEmojiIcon />
+        </button>
 
-      <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
-        {reactions.map(({ code, glyph, count }, index) => (
-          <motion.button
-            key={`${code}-${glyph}-${index}`}
-            type="button"
-            onClick={(e) => handleReactionClick(code, e)}
-            whileTap={canInteract ? { scale: 0.85 } : {}}
-            whileHover={canInteract ? { scale: 1.05 } : {}}
-            className="w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
-            }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
-            <span className="text-[20px] leading-none tracking-[-0.8px]">{glyph}</span>
-            <span className="text-[12px] font-semibold text-white leading-normal tracking-[-0.48px]">{count}</span>
-          </motion.button>
-        ))}
-
-        {hasEmptySlots &&
-          Array.from({ length: emptySlots }, (_, i) => `empty-${reactions.length + i}`).map((uniqueKey) => (
-            <button
-              key={uniqueKey}
+        <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
+          {reactions.map(({ code, glyph, count }, index) => (
+            <motion.button
+              key={`${code}-${glyph}-${index}`}
               type="button"
-              onClick={(e) => handleAddEmoji(e)}
-              className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
+              onClick={(e) => handleReactionClick(code, e)}
+              whileTap={canInteract ? { scale: 0.85 } : {}}
+              whileHover={canInteract ? { scale: 1.05 } : {}}
+              className="w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
               }}
-              aria-label="이모지 추가"
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <EmojiHintIcon />
-            </button>
+              <span className="text-[20px] leading-none tracking-[-0.8px]">{glyph}</span>
+              <span className="text-[12px] font-semibold text-white leading-normal tracking-[-0.48px]">{count}</span>
+            </motion.button>
           ))}
-      </div>
 
-      {typeof document !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {floatingEmojis.map((floatingEmoji) => (
-              <motion.div
-                key={floatingEmoji.id}
-                className="fixed pointer-events-none z-40 text-5xl drop-shadow-lg"
+          {hasEmptySlots &&
+            Array.from({ length: emptySlots }, (_, i) => `empty-${reactions.length + i}`).map((uniqueKey) => (
+              <button
+                key={uniqueKey}
+                type="button"
+                onClick={(e) => handleAddEmoji(e)}
+                className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
                 style={{
-                  left: `${floatingEmoji.x}px`,
-                  top: `${floatingEmoji.y}px`,
-                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                  backgroundImage:
+                    "linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.04) 100%), linear-gradient(90deg, rgba(14, 23, 36, 0.87) 0%, rgba(14, 23, 36, 0.87) 100%)",
                 }}
-                initial={{
-                  opacity: 0,
-                  scale: 0.3,
-                  y: 0,
+                aria-label="이모지 추가"
+              >
+                <EmojiHintIcon />
+              </button>
+            ))}
+        </div>
+
+        {typeof document !== "undefined" &&
+          createPortal(
+            <AnimatePresence>
+              {floatingEmojis.map((floatingEmoji) => (
+                <motion.div
+                  key={floatingEmoji.id}
+                  className="fixed pointer-events-none z-40 text-5xl drop-shadow-lg"
+                  style={{
+                    left: `${floatingEmoji.x}px`,
+                    top: `${floatingEmoji.y}px`,
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                  }}
+                  initial={{
+                    opacity: 0,
+                    scale: 0.3,
+                    y: 0,
+                  }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    scale: [0.2, 0.5, 1, 0.8],
+                    y: -200,
+                  }}
+                  exit={{
+                    opacity: 0,
+                  }}
+                  transition={{
+                    duration: 2,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    times: [0, 0.15, 0.85, 1],
+                  }}
+                >
+                  {floatingEmoji.emoji}
+                </motion.div>
+              ))}
+            </AnimatePresence>,
+            document.body,
+          )}
+
+        {showEmojiPicker &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <>
+              <button
+                type="button"
+                className="fixed inset-0 bg-black/50 z-50"
+                onClick={() => setShowEmojiPicker(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setShowEmojiPicker(false);
                 }}
-                animate={{
-                  opacity: [0, 1, 1, 0],
-                  scale: [0.2, 0.5, 1, 0.8],
-                  y: -200,
-                }}
-                exit={{
-                  opacity: 0,
-                }}
-                transition={{
-                  duration: 2,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                  times: [0, 0.15, 0.85, 1],
+                aria-label="이모지 피커 닫기"
+              />
+              <div
+                className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-[24px] bg-[#0E1724] overflow-hidden"
+                style={{
+                  paddingBottom: "env(safe-area-inset-bottom)",
                 }}
               >
-                {floatingEmoji.emoji}
-              </motion.div>
-            ))}
-          </AnimatePresence>,
-          document.body,
-        )}
+                <EmojiPicker
+                  onEmojiClick={handleEmojiSelect}
+                  width="100%"
+                  height="354px"
+                  theme={Theme.DARK}
+                  searchPlaceHolder="이모지를 검색해 보세요"
+                  previewConfig={{
+                    showPreview: false,
+                  }}
+                  autoFocusSearch={false}
+                  skinTonesDisabled
+                />
+              </div>
+            </>,
+            document.body,
+          )}
 
-      {showEmojiPicker &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <>
-            <button
-              type="button"
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowEmojiPicker(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setShowEmojiPicker(false);
-              }}
-              aria-label="이모지 피커 닫기"
-            />
-            <div
-              className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto"
-              style={{
-                paddingBottom: "env(safe-area-inset-bottom)",
-              }}
-            >
-              <EmojiPicker
-                onEmojiClick={handleEmojiSelect}
-                width="100%"
-                height="354px"
-                theme={Theme.DARK}
-                searchPlaceHolder="이모지를 검색해 보세요"
-                previewConfig={{
-                  showPreview: false,
-                }}
-                autoFocusSearch={false}
-                skinTonesDisabled
-                style={{
-                  borderTopLeftRadius: "24px",
-                  borderTopRightRadius: "24px",
-                  backgroundColor: "#0E1724",
-                }}
-              />
-            </div>
-          </>,
-          document.body,
-        )}
+        {/* Toast 알림 - owner가 클릭했을 때 */}
+        <HeadlessToast
+          open={showToast}
+          onOpenChange={setShowToast}
+          duration={1500}
+          className="backdrop-blur-[25px] backdrop-filter flex items-center gap-4 px-4 py-3.5 rounded-lg"
+          contentClassName="text-sm font-medium text-white text-center text-nowrap"
+        >
+          친구들만 이모지를 눌러줄 수 있어요!
+        </HeadlessToast>
+      </div>
     </div>
   );
 };

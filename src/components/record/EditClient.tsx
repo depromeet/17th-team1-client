@@ -428,14 +428,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
             <div className="w-full flex gap-2.5 mt-2.5">
               <button
                 onClick={handleCancelDelete}
-                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center"
+                className="flex-1 px-5 py-3 bg-surface-placeholder--8 rounded-[16px] flex justify-center items-center"
                 type="button"
               >
                 <span className="text-center text-text-primary text-sm font-bold leading-5">취소</span>
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="flex-1 px-5 py-3 bg-state-warning rounded-[10px] outline-1 -outline-offset-1 outline-border-absolutewhite--4 flex justify-center items-center"
+                className="flex-1 px-5 py-3 bg-state-warning rounded-[16px] outline-1 -outline-offset-1 outline-border-absolutewhite--4 flex justify-center items-center"
                 type="button"
               >
                 <span className="text-center text-text-primary text-sm font-bold leading-5">삭제</span>
@@ -459,7 +459,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
             </DialogHeader>
             <button
               onClick={() => setShowErrorModal(false)}
-              className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[10px] flex justify-center items-center mt-2.5"
+              className="w-full px-5 py-3 bg-surface-placeholder--8 rounded-[16px] flex justify-center items-center mt-2.5"
               type="button"
             >
               <span className="text-center text-text-primary text-sm font-bold leading-5">닫기</span>
@@ -482,7 +482,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
             </DialogHeader>
             <button
               onClick={() => setShowCannotDeleteModal(false)}
-              className="w-full px-5 py-3 bg-surface-placeholder--16 rounded-[10px] flex justify-center items-center mt-2.5"
+              className="w-full px-5 py-3 bg-surface-placeholder--16 rounded-[16px] flex justify-center items-center mt-2.5"
               type="button"
             >
               <span className="text-center text-text-primary text-sm font-bold leading-5">확인</span>

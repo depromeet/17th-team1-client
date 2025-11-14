@@ -45,7 +45,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
             variant="gray"
             size="lg"
             className={cn(
-              "flex flex-1 rounded-[10px] h-[45px] px-5 py-3 justify-center items-center",
+              "flex flex-1 rounded-[16px] h-[45px] px-5 py-3 justify-center items-center",
               "bg-surface-placeholder--8",
               "text-white text-[14px] font-bold leading-[1.5]",
             )}
@@ -58,7 +58,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
             variant="primary"
             size="lg"
             className={cn(
-              "flex flex-1 rounded-[10px] h-[45px] px-5 py-3 justify-center items-center",
+              "flex flex-1 rounded-[16px] h-[45px] px-5 py-3 justify-center items-center",
               "!bg-state-warning",
               "text-white text-[14px] font-bold leading-[1.5]",
             )}

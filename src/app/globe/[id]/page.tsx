@@ -26,6 +26,7 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 const GlobePage = () => {
   const router = useRouter();
   const { id: urlUuid } = useParams<{ id: string }>();
+  const { uuid: cookieUuid } = getAuthInfo();
   const globeRef = useRef<GlobeRef | null>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [travelInsight, setTravelInsight] = useState<string>("");
@@ -48,7 +49,6 @@ const GlobePage = () => {
     const fromPage = sessionStorage.getItem("fromSavedGlobe");
     if (fromPage === "true") {
       setFromSavedGlobe(true);
-      sessionStorage.removeItem("fromSavedGlobe");
     }
   }, []);
 
@@ -69,12 +69,12 @@ const GlobePage = () => {
         const isMyGlobeCheck = myUuid === urlUuid;
         setIsMyGlobe(isMyGlobeCheck);
 
-        // URL의 uuid로 지구본 데이터 요청
-        const globeResponse = await getGlobeData(urlUuid);
+        // URL의 uuid로 지구본 데이터 요청 (토큰 없이)
+        const globeResponse = await getGlobeData(urlUuid, undefined, false);
         let insightResponse: string | undefined;
-        // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능)
+        // 내 지구본일 때만 인사이트 요청 (필요 시 정책 변경 가능, 토큰 없이)
         if (memberId) {
-          insightResponse = await getTravelInsight(parseInt(memberId, 10));
+          insightResponse = await getTravelInsight(parseInt(memberId, 10), false);
         }
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
@@ -143,7 +143,7 @@ const GlobePage = () => {
 
   return (
     <div className="overflow-hidden text-text-primary relative flex flex-col h-dvh">
-      <div className="max-w-[512px] mx-auto w-full">
+      <div className="max-w-[512px] mx-auto w-full relative z-20">
         <Header
           title={`${nickname}님의 지구본`}
           variant="navy"
@@ -156,13 +156,12 @@ const GlobePage = () => {
           {...(!isMyGlobe &&
             fromSavedGlobe && {
               leftIcon: "back",
-              onLeftClick: () => router.back(),
+              onLeftClick: () => {
+                sessionStorage.removeItem("fromSavedGlobe");
+                router.push(`/globe/${cookieUuid}`);
+              },
             })}
-          style={{
-            backgroundColor: "transparent",
-            position: "relative",
-            zIndex: 20,
-          }}
+          className="bg-transparent"
         />
       </div>
       {viewMode === "globe" ? (

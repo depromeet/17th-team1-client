@@ -133,12 +133,6 @@ export const GlobeFooter = ({
   }, []);
 
   const handleBookmarkClick = async () => {
-    const { uuid } = getAuthInfo();
-    if (!uuid) {
-      router.push("/login");
-      return;
-    }
-
     if (!memberId) return;
 
     const previousState = isBookmarked;

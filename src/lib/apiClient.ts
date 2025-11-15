@@ -174,6 +174,7 @@ export const apiPostWithHeaders = async <T>(
       method: "POST",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
       body: requestBody,
+      credentials: "include",
     });
 
     logger.log(`[API] Response status:`, response.status);

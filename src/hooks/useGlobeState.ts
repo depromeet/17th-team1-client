@@ -4,6 +4,8 @@ import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import type { ClusterData } from "@/hooks/useClustering";
 import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
+type AnchoringState = 'pending' | 'completed' | 'failed';
+
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const currentGlobeIndex = 0; // 항상 첫 번째 패턴만 사용
@@ -13,6 +15,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   const [snapZoomTo, setSnapZoomTo] = useState<number | null>(ZOOM_LEVELS.DEFAULT);
   const [_selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [anchoringState, setAnchoringState] = useState<AnchoringState>('pending');
 
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
   useEffect(() => {
@@ -34,6 +37,76 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   );
 
   const currentPattern = useMemo(() => travelPatternsWithFlags[currentGlobeIndex], [travelPatternsWithFlags]);
+
+  /**
+   * Top 1 국가 선택 로직:
+   * 1. city_count가 가장 많은 국가(Top 1)를 선택
+   * 2. 동률 발생 시 최근에 기록(updatedAt)된 도시가 포함된 국가를 우선 선정
+   */
+  const topCountry = useMemo(() => {
+    if (!currentPattern?.countries || currentPattern.countries.length === 0) {
+      return null;
+    }
+
+    // 예외 처리: 1개 국가만 있으면 해당 국가 반환
+    const uniqueCountries = Array.from(
+      new Map(currentPattern.countries.map((c) => [c.id, c])).values(),
+    );
+    if (uniqueCountries.length === 1) {
+      return uniqueCountries[0];
+    }
+
+    // city_count로 그룹핑하여 Top 1 찾기
+    const countryGroups = new Map<string, CountryData[]>();
+    uniqueCountries.forEach((country) => {
+      const countryCode = country.id;
+      if (!countryGroups.has(countryCode)) {
+        countryGroups.set(countryCode, []);
+      }
+      countryGroups.get(countryCode)?.push(country);
+    });
+
+    // 국가별 city_count와 최근 updatedAt 계산
+    const countryStats = Array.from(countryGroups.entries()).map(([countryCode, cities]) => {
+      const cityCount = cities.length; // 실제 도시 수
+      // 최근 기록 시간 (updatedAt이 가장 최신인 도시)
+      const latestCity = cities.reduce((latest, city) => {
+        const latestTime = new Date(latest.updatedAt || 0).getTime();
+        const currentTime = new Date(city.updatedAt || 0).getTime();
+        return currentTime > latestTime ? city : latest;
+      });
+
+      return {
+        country: cities[0], // 국가 대표 정보 (같은 countryCode)
+        countryCode,
+        cityCount,
+        latestUpdatedAt: latestCity.updatedAt || new Date().toISOString(),
+        latestTime: new Date(latestCity.updatedAt || 0).getTime(),
+      };
+    });
+
+    // city_count로 정렬하여 Top 1 찾기
+    countryStats.sort((a, b) => {
+      // city_count 내림차순
+      if (b.cityCount !== a.cityCount) {
+        return b.cityCount - a.cityCount;
+      }
+      // 동률 시 최근 기록 시간 (내림차순)
+      return b.latestTime - a.latestTime;
+    });
+
+    return countryStats[0]?.country || null;
+  }, [currentPattern]);
+
+  /**
+   * Top 1 국가의 모든 도시 데이터 (초기 앵커링 시 사용)
+   */
+  const topCountryCities = useMemo(() => {
+    if (!topCountry || !currentPattern?.countries) {
+      return null;
+    }
+    return currentPattern.countries.filter((city) => city.id === topCountry.id);
+  }, [topCountry, currentPattern]);
 
   // 핸들러 함수들
   const handleCountrySelect = useCallback((countryId: string | null) => {
@@ -149,8 +222,11 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     selectedClusterData,
     snapZoomTo,
     isZoomed,
+    anchoringState,
     travelPatternsWithFlags,
     currentPattern,
+    topCountry,
+    topCountryCities,
 
     // Handlers
     handleCountrySelect,

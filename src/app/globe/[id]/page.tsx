@@ -193,7 +193,7 @@ const GlobePage = () => {
           </div>
 
           {/* 하단 버튼들 - position absolute */}
-          <div className="absolute bottom-14 left-0 right-0 z-10 px-4">
+          <div className="absolute bottom-[46px] left-0 right-0 z-10 px-4">
             <GlobeFooter
               isZoomed={isZoomed}
               viewMode={viewMode}

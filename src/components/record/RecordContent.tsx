@@ -38,15 +38,19 @@ export function RecordContent({ initialData, selectedContinent, onContinentChang
   const sortedContinents = useMemo(() => sortContinentsByCount(continentStats), [continentStats]);
 
   return (
-    <div className="space-y-8">
-      <RecordHeaderText />
-      <ContinentFilter
-        continents={sortedContinents}
-        continentStats={continentStats}
-        selectedContinent={selectedContinent}
-        onContinentChange={onContinentChange}
-      />
-      <CityList filteredRegions={filteredRegions} />
+    <div className="flex flex-col h-full">
+      <div className="shrink-0 space-y-8 mb-8">
+        <RecordHeaderText />
+        <ContinentFilter
+          continents={sortedContinents}
+          continentStats={continentStats}
+          selectedContinent={selectedContinent}
+          onContinentChange={onContinentChange}
+        />
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <CityList filteredRegions={filteredRegions} />
+      </div>
     </div>
   );
 }

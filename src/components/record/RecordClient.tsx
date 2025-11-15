@@ -45,7 +45,7 @@ export function RecordClient({ initialData }: RecordClientProps) {
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
       <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-        <div className="max-w-[512px] mx-auto w-full">
+        <div className="max-w-[512px] mx-auto w-full shrink-0">
           <Header
             variant="navy"
             leftIcon="back"
@@ -60,8 +60,8 @@ export function RecordClient({ initialData }: RecordClientProps) {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 flex justify-center">
-          <div className="w-full max-w-lg">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="w-full max-w-lg mx-auto flex flex-col h-full">
             <RecordContent
               initialData={initialData}
               selectedContinent={selectedContinent}

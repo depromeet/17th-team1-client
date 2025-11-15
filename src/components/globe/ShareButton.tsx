@@ -112,12 +112,7 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
       type="button"
       onClick={handleShare}
       disabled={isLoading}
-      className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-      style={{
-        background: isShared
-          ? "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)"
-          : "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #ffffff2e 0%, #ffffff14 56.15%, #ffffff09 100%)",
-      }}
+      className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] bg-surface-placeholder--8 transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       aria-label={isShared ? "공유 완료" : isLoading ? "공유 중..." : "공유하기"}
     >
       <ShareIcon className={`w-8 h-8 ${isLoading ? "animate-pulse" : ""}`} />

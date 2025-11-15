@@ -93,7 +93,7 @@ export const GlobeFooter = ({
         />
         <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
           <ListIcon
-            className="w-8 h-8 transition-colors duration-200 ease-in-out"
+            className="w-6 h-6 transition-colors duration-200 ease-in-out"
             style={{ color: isListMode ? "var(--color-surface-primary)" : "white" }}
           />
         </span>
@@ -204,7 +204,7 @@ export const GlobeFooter = ({
           <>
             {/* 설명 문구 - 지구본 뷰일 때만 표시 (내 지구본일 때만) */}
             {viewMode === "globe" && isMyGlobe && (
-              <div className="mb-14 text-center min-h-[28px]">
+              <div className="mb-10 text-center min-h-[28px]">
                 <p
                   key={descriptionIndex}
                   className="text-sm font-medium text-text-secondary"

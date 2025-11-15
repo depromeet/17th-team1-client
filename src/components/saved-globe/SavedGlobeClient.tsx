@@ -8,6 +8,7 @@ import { Dropdown } from "@/components/common/Dropdown";
 import { Header } from "@/components/common/Header";
 import { addBookmark, getBookmarks, removeBookmark } from "@/services/bookmarkService";
 import type { BookmarkUser } from "@/types/bookmark";
+import { getAuthInfo } from "@/utils/cookies";
 
 type SortOption = "latest" | "alphabetical";
 
@@ -165,6 +166,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
   const [error, setError] = useState<string | null>(initialError);
+  const { uuid } = getAuthInfo();
 
   const loadBookmarks = useCallback(async () => {
     try {
@@ -231,7 +233,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
             <Header
               variant="navy"
               leftIcon="back"
-              onLeftClick={() => router.back()}
+              onLeftClick={() => router.push(`/globe/${uuid}`)}
               title="저장된 지구본"
               style={{
                 backgroundColor: "transparent",
@@ -255,7 +257,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
             <Header
               variant="navy"
               leftIcon="back"
-              onLeftClick={() => router.back()}
+              onLeftClick={() => router.push(`/globe/${uuid}`)}
               title="저장된 지구본"
               style={{
                 backgroundColor: "transparent",
@@ -278,7 +280,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
           <Header
             variant="navy"
             leftIcon="back"
-            onLeftClick={() => router.back()}
+            onLeftClick={() => router.push(`/globe/${uuid}`)}
             title="저장된 지구본"
             style={{
               backgroundColor: "transparent",

@@ -92,7 +92,8 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
       if (redirectUrl) {
         window.location.href = redirectUrl;
       }
-      return;
+
+      throw Error; // '저장되었습니다' toast 메시지를 표시하지 않기위해 임의로 에러 발생시킴
     }
 
     // useToken이 true인 경우 (토큰과 함께 호출)

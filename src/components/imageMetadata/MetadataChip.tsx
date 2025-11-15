@@ -50,7 +50,7 @@ export const MetadataChip = ({
           <div className="flex-shrink-0">{renderIcon()}</div>
 
           {/* Center Text */}
-          <span className={`text-sm font-medium truncate max-w-[120px] ${textClasses} pr-[18px]`}>{text}</span>
+          <span className={`text-sm font-medium truncate max-w-[170px] ${textClasses} pr-[18px]`}>{text}</span>
         </button>
 
         {/* Right X Icon */}
@@ -73,7 +73,7 @@ export const MetadataChip = ({
         <div className="flex-shrink-0">{renderIcon()}</div>
 
         {/* Center Text */}
-        <span className={`text-sm font-medium truncate max-w-[120px] ${textClasses}`}>{text}</span>
+        <span className={`text-sm font-medium truncate max-w-[170px] ${textClasses}`}>{text}</span>
       </button>
     );
   }
@@ -84,7 +84,7 @@ export const MetadataChip = ({
       <div className="flex-shrink-0">{renderIcon()}</div>
 
       {/* Center Text */}
-      <span className={`text-sm font-medium truncate max-w-[120px] ${textClasses}`}>{text}</span>
+      <span className={`text-sm font-medium truncate max-w-[220px] ${textClasses}`}>{text}</span>
 
       {/* Right X Icon */}
       {onRemove && (

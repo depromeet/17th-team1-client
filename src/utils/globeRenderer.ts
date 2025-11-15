@@ -187,10 +187,6 @@ export const createContinentClusterHTML = (
   _flagEmoji: string,
 ) => {
   return `
-    <!-- 중심 dot -->
-    <div style="${styles.dot}"></div>
-    <!-- 단색 수평선 -->
-    <div style="${styles.horizontalLine}"></div>
     <!-- 외부 wrapper - 그라디언트 border -->
     <div style="${styles.labelWrapper}">
       <!-- 내부 label - 실제 콘텐츠 -->

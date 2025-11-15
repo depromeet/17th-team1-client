@@ -204,7 +204,7 @@ export const GlobeFooter = ({
           <>
             {/* 설명 문구 - 지구본 뷰일 때만 표시 (내 지구본일 때만) */}
             {viewMode === "globe" && isMyGlobe && (
-              <div className="mb-14 text-center min-h-[28px]">
+              <div className="mb-10 text-center min-h-[28px]">
                 <p
                   key={descriptionIndex}
                   className="text-sm font-medium text-text-secondary"

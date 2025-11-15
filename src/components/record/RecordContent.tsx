@@ -48,7 +48,7 @@ export function RecordContent({ initialData, selectedContinent, onContinentChang
           onContinentChange={onContinentChange}
         />
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
         <CityList filteredRegions={filteredRegions} />
       </div>
     </div>

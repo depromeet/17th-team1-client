@@ -105,7 +105,7 @@ export const NationSelectClient = ({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-4 flex justify-center">
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-4 flex justify-center">
           <div className="w-full max-w-[512px]">
             {!customHeader && (
               <div className="mb-8">

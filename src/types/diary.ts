@@ -156,7 +156,7 @@ export type CreateDiaryPhotoParams = {
   lng?: number;
   width: number;
   height: number;
-  takenMonth: string;
+  takenMonth?: string | null;
   tag?: ImageTag;
   placeName?: string;
 };

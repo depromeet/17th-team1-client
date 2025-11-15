@@ -6,7 +6,6 @@ import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
-import { getAuthInfo } from "@/utils/cookies";
 import { NationSelectFooter } from "./NationSelectFooter";
 import { PopularCitiesList } from "./PopularCitiesList";
 

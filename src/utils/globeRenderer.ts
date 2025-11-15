@@ -191,11 +191,15 @@ export const createContinentClusterHTML = (
     <div style="${styles.dot}"></div>
     <!-- 단색 수평선 -->
     <div style="${styles.horizontalLine}"></div>
-    <div style="${styles.label}">
-      <!-- 대륙명만 표시 (국기 없음) -->
-      <span>
-        ${continentName}
-      </span>
+    <!-- 외부 wrapper - 그라디언트 border -->
+    <div style="${styles.labelWrapper}">
+      <!-- 내부 label - 실제 콘텐츠 -->
+      <div style="${styles.label}">
+        <!-- 대륙명만 표시 (국기 없음) -->
+        <span>
+          ${continentName}
+        </span>
+      </div>
     </div>
   `;
 };

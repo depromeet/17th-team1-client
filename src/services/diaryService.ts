@@ -28,7 +28,11 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
   const defaultProfileImage = "/assets/default-profile.png";
   const userAvatar = profileImageUrl ? baseUrl + profileImageUrl : defaultProfileImage;
 
-  const imageMetadata = photos.map(({ photoCode, takenMonth, placeName, tag }) => {
+  // photos를 photoId 순서대로 정렬하여 원래 업로드 순서 유지
+  // photoId가 작을수록 먼저 업로드된 사진이므로, photoId로 정렬
+  const sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
+
+  const imageMetadata = sortedPhotos.map(({ photoCode, takenMonth, placeName, tag }) => {
     return {
       url: baseUrl + photoCode,
       takenMonth,
@@ -46,7 +50,7 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
     lat,
     lng,
     description: text,
-    images: photos.map(({ photoCode }) => baseUrl + photoCode),
+    images: sortedPhotos.map(({ photoCode }) => baseUrl + photoCode),
     imageMetadata,
     reactions: emojis.map(({ code, glyph, count }) => ({
       code,

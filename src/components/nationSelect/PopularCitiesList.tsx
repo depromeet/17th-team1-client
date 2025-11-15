@@ -67,8 +67,9 @@ export const PopularCitiesList = ({
 
   if (!isSearching && hasSearched && cities.length === 0) {
     return (
-      <div className="flex justify-center items-center pt-30">
-        <div className="text-text-thirdly text-base">검색 결과가 없어요</div>
+      <div className="flex flex-col justify-center items-center pt-30 gap-2">
+        <div className="text-white font-medium text-xl">검색 결과가 없습니다</div>
+        <div className="text-[#808992] font-medium text-base">일부 나라 및 도시는 순차적으로 추가될 예정이에요</div>
       </div>
     );
   }

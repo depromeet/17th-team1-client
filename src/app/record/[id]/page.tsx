@@ -13,6 +13,7 @@ import { deleteDiary, getDiariesByUuid } from "@/services/diaryService";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
+import { sortDiariesByCountryGrouping } from "@/utils/recordUtils";
 
 type RecordData = {
   id: string;
@@ -88,20 +89,17 @@ const RecordDetailPage = () => {
           return;
         }
 
-        // cityId와 일치하는 다이어리들과 나머지 분리
-        const matchingDiaries = diaries.filter((diary) => diary.cityId === cityId);
-        const otherDiaries = diaries.filter((diary) => diary.cityId !== cityId);
-
-        // cityId와 일치하는 다이어리가 없으면 에러
-        if (matchingDiaries.length === 0) {
+        // 선택한 도시가 있는지 확인
+        const selectedDiary = diaries.find((diary) => diary.cityId === cityId);
+        if (!selectedDiary) {
           if (isMounted) {
             setError("해당 도시의 여행 기록을 찾을 수 없습니다");
           }
           return;
         }
 
-        // 정렬: 일치하는 다이어리들 먼저 → 나머지 다이어리들
-        const sortedDiaries = [...matchingDiaries, ...otherDiaries];
+        // 국가별로 그룹핑하여 정렬 (선택한 도시의 국가부터 시작)
+        const sortedDiaries = sortDiariesByCountryGrouping(diaries, cityId);
 
         const recordsData: RecordData[] = sortedDiaries.map(
           ({

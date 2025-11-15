@@ -61,3 +61,74 @@ export const sortContinentsByCount = (continentStats: Record<Continent, number>)
 
   return allContinents.sort((a, b) => continentStats[b] - continentStats[a]);
 };
+
+/**
+ * 다이어리를 국가별로 그룹핑하여 정렬합니다.
+ * 선택한 도시의 국가부터 시작하고, 같은 국가 내 도시들이 함께 표시됩니다.
+ *
+ * @param diaries - 정렬할 다이어리 목록
+ * @param selectedCityId - 선택한 도시 ID (이 도시의 국가를 우선으로)
+ * @returns 국가별로 그룹핑되어 정렬된 다이어리 목록
+ *
+ * @example
+ * // 입력: [도쿄(일본), 오사카(일본), 파리(프랑스), 교토(일본)]
+ * // 선택: 오사카(cityId: 2)
+ * // 결과: [오사카(일본), 도쿄(일본), 교토(일본), 파리(프랑스)]
+ */
+export const sortDiariesByCountryGrouping = <T extends { cityId: number; city: string; country: string }>(
+  diaries: T[],
+  selectedCityId: number,
+): T[] => {
+  // 1. 선택한 도시 찾기
+  const selectedDiary = diaries.find((diary) => diary.cityId === selectedCityId);
+  if (!selectedDiary) {
+    return diaries;
+  }
+
+  // 2. 선택한 도시의 국가
+  const selectedCountry = selectedDiary.country;
+
+  // 3. 국가별로 그룹핑
+  const countryGroups = new Map<string, typeof diaries>();
+  const countryOrder: string[] = [];
+
+  for (const diary of diaries) {
+    if (!countryGroups.has(diary.country)) {
+      countryGroups.set(diary.country, []);
+      countryOrder.push(diary.country);
+    }
+    const countryDiaries = countryGroups.get(diary.country);
+    if (countryDiaries) {
+      countryDiaries.push(diary);
+    }
+  }
+
+  // 4. 같은 국가 내 도시 정렬 (cityId 기준 - 추가 순서 유지)
+  for (const countryDiaries of countryGroups.values()) {
+    countryDiaries.sort((a, b) => a.cityId - b.cityId);
+  }
+
+  // 5. 선택한 국가를 맨 앞으로, 나머지는 원래 순서 유지
+  const result: typeof diaries = [];
+  const addedCountries = new Set<string>();
+
+  // 5-1. 선택한 국가 먼저 추가
+  const selectedCountryDiaries = countryGroups.get(selectedCountry);
+  if (selectedCountryDiaries) {
+    result.push(...selectedCountryDiaries);
+    addedCountries.add(selectedCountry);
+  }
+
+  // 5-2. 나머지 국가 추가 (원래 순서 유지)
+  for (const country of countryOrder) {
+    if (!addedCountries.has(country)) {
+      const countryDiaries = countryGroups.get(country);
+      if (countryDiaries) {
+        result.push(...countryDiaries);
+        addedCountries.add(country);
+      }
+    }
+  }
+
+  return result;
+};

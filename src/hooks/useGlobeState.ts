@@ -49,9 +49,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     }
 
     // 국가별로 유일한 데이터 추출 (각 국가당 1개만 필요 - cityCount는 동일)
-    const uniqueCountries = Array.from(
-      new Map(currentPattern.countries.map((c) => [c.id, c])).values(),
-    );
+    const uniqueCountries = Array.from(new Map(currentPattern.countries.map((c) => [c.id, c])).values());
 
     // 예외 처리: 1개 국가만 있으면 해당 국가 반환
     if (uniqueCountries.length === 1) {

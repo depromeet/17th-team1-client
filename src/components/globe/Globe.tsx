@@ -113,7 +113,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           // 스택이 비어있으면 selectedClusterData를 null로 설정
           resetGlobe();
         }
-
       },
       [globalHandleClusterSelect, resetGlobe],
     );

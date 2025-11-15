@@ -271,8 +271,10 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           el.innerHTML = createContinentClusterHTML(styles, clusterData.name, clusterData.count, clusterData.flag);
 
           // 대륙 클러스터 클릭 시 국가 클러스터로 쪼개기
-          const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {
-            const cluster = clusteredData.find(({ id }) => id === clusterId);
+          // clusteredData.find()는 배열 순서 변경 시 잘못된 클러스터를 반환할 수 있으므로
+          // 클로저에 캡처된 clusterData를 직접 사용
+          const clickHandler = createClusterClickHandler(clusterData.id, () => {
+            const cluster = clusterData;
             if (cluster && localHandleClusterSelect && globeRef.current) {
               const clusterItems = localHandleClusterSelect(cluster);
               globalHandleClusterSelect({ ...cluster, items: clusterItems });

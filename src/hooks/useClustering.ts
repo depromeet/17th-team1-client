@@ -248,8 +248,20 @@ const clusterLocations = (
       const subClusters: ClusterData[][] = [];
       const processedInSubCluster = new Set<string>();
 
-      // 지리적 거리 임계값 (약 1500km 정도)
-      const GEO_DISTANCE_THRESHOLD = 20;
+      // 하버신 공식으로 실제 거리 계산 (km 단위)
+      const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+        const R = 6371; // 지구 반지름 (km)
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLng = ((lng2 - lng1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      };
+
+      // 지리적 거리 임계값 (1500km 정도)
+      const GEO_DISTANCE_THRESHOLD = 1500;
 
       for (const cluster of overlappingClusters) {
         if (processedInSubCluster.has(cluster.id)) {
@@ -265,10 +277,8 @@ const clusterLocations = (
             continue;
           }
 
-          // 위경도 차이로 거리 계산 (간단한 버전)
-          const latDiff = Math.abs(cluster.lat - candidate.lat);
-          const lngDiff = Math.abs(cluster.lng - candidate.lng);
-          const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+          // 하버신 공식으로 실제 거리 계산
+          const distance = haversineDistance(cluster.lat, cluster.lng, candidate.lat, candidate.lng);
 
           if (distance < GEO_DISTANCE_THRESHOLD) {
             subCluster.push(candidate);

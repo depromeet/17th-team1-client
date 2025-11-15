@@ -14,7 +14,7 @@ export function CityList({ filteredRegions }: CityListProps) {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col gap-[30px] pb-8">
+    <div className="flex flex-col gap-[30px] px-4 pb-8">
       {filteredRegions.map((region) => (
         <div key={`${region.regionName}-${region.cities[0]?.countryCode || ""}`} className="flex flex-col gap-3">
           <div className="text-white text-base font-medium">

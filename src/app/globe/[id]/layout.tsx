@@ -25,11 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // 닉네임이 있으면 사용, 없으면 기본값
     const pageTitle = nickname
-      ? `${nickname}님의 지구본 - ${countryCount}개 국가, ${cityCount}개 도시 여행기`
+      ? `Globber(글로버) - ${nickname}님의 지구본`
       : "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!";
 
     const pageDescription = nickname
-      ? `${nickname}님이 ${countryCount}개 국가, ${cityCount}개 도시를 여행한 기록입니다.`
+      ? `${nickname}님의 여행 기록을 담은 지구본을 확인해보세요!`
       : "지구본으로 완성하는 여행 기록 서비스";
 
     return {

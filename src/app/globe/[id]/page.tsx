@@ -231,7 +231,7 @@ const GlobePage = () => {
 
           {/* 하단 버튼들 - 푸터 영역 (absolute 제거) */}
           <div
-            className="fixed bottom-0 left-0 right-0 z-10 h-[156px]"
+            className="fixed bottom-0 left-0 right-0 z-10 h-[146px]"
             style={{
               background: "linear-gradient(180deg, rgba(13, 13, 20, 0.00) 0%, #0D0D14 16.35%)",
             }}

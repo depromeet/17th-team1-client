@@ -30,11 +30,7 @@ type RecordReactionsProps = {
 
 const MAX_EMPTY_SLOTS = 4;
 
-export const RecordReactions = ({
-  recordId,
-  initialReactions = [],
-  isOwner = false,
-}: RecordReactionsProps) => {
+export const RecordReactions = ({ recordId, initialReactions = [], isOwner = false }: RecordReactionsProps) => {
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -279,8 +275,7 @@ export const RecordReactions = ({
 
           setShowEmojiPicker(false);
         } catch (pressError) {
-          const pressErrorMessage =
-            pressError instanceof Error ? pressError.message : "이모지 처리에 실패했습니다";
+          const pressErrorMessage = pressError instanceof Error ? pressError.message : "이모지 처리에 실패했습니다";
           alert(pressErrorMessage);
         }
       } else {

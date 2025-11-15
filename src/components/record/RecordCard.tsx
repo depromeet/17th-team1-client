@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { filterValidImageUrls } from "@/utils/imageValidation";
@@ -56,9 +56,18 @@ export const RecordCard = ({
   showScrollHint = false,
 }: RecordCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [userInfoHeight, setUserInfoHeight] = useState(0);
+  const userInfoRef = useRef<HTMLDivElement>(null);
 
   // 이미지 URL 검증 (추가 방어 로직)
   const validImages = filterValidImageUrls(images);
+
+  // RecordUserInfo 높이 측정
+  useEffect(() => {
+    if (userInfoRef.current) {
+      setUserInfoHeight(userInfoRef.current.offsetHeight);
+    }
+  }, []);
 
   // 현재 이미지의 메타데이터 가져오기
   const currentMetadata = imageMetadata?.[currentImageIndex];
@@ -78,7 +87,11 @@ export const RecordCard = ({
           }
         }}
       >
-        <RecordImageCarousel images={validImages} onImageChange={setCurrentImageIndex} />
+        <RecordImageCarousel
+          images={validImages}
+          onImageChange={setCurrentImageIndex}
+          userInfoHeight={userInfoHeight}
+        />
 
         {/* 상단 그라데이션 오버레이 */}
         <div
@@ -104,16 +117,16 @@ export const RecordCard = ({
         </div>
 
         {/* 사용자 정보 및 설명 */}
-        <div className="absolute bottom-0 left-4 right-4 pb-6 z-10">
+        <div ref={userInfoRef} className="absolute bottom-0 left-4 right-4 pb-5 z-10">
           <RecordUserInfo userName={userName} userAvatar={userAvatar} description={description} />
         </div>
       </div>
 
       {/* 하단 영역 - 이모지 반응 */}
-      {/* 힌트 표시 여부에 따라 패딩 동적 변경: 첫 진입(힌트 있음) pb-32, 이후(힌트 없음) pb-10 */}
+      {/* 힌트 표시 여부에 따라 패딩 동적 변경: 힌트 있음(20px+힌트높이+16px≈104px), 없음(30px) */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        className={`px-4 pt-6 shrink-0 relative z-20 ${showScrollHint ? "pb-32" : "pb-10"}`}
+        className={`px-4 shrink-0 relative z-20 ${showScrollHint ? "pb-[calc(20px+49px+16px)]" : "pb-[30px]"}`}
         data-emoji-reactions
         onTouchStart={(e) => {
           e.stopPropagation();

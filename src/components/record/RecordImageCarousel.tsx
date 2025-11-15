@@ -7,16 +7,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type RecordImageCarouselProps = {
   images: string[];
   onImageChange?: (index: number) => void;
+  userInfoHeight?: number;
 };
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 const RESET_DELAY_MS = 300;
 
-export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarouselProps) => {
+export const RecordImageCarousel = ({ images, onImageChange, userInfoHeight = 0 }: RecordImageCarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scale, setScale] = useState(1);
+
+  // 페이지네이션 인디케이터 위치 계산: userInfoHeight + gap(16px)
+  const indicatorBottomPx = userInfoHeight + 16;
 
   const initialDistanceRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -142,7 +146,10 @@ export const RecordImageCarousel = ({ images, onImageChange }: RecordImageCarous
 
       {/* 이미지 인디케이터 (여러 장일 경우만) */}
       {images.length > 1 && (
-        <div className="absolute bottom-30 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex gap-1.5 z-10"
+          style={{ bottom: `${indicatorBottomPx}px` }}
+        >
           {images.map((_, index) => (
             <button
               key={`indicator-${index}`}

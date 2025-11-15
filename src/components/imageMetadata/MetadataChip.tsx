@@ -41,7 +41,7 @@ export const MetadataChip = ({
 
   const baseClasses = "inline-flex items-center gap-2 bg-[#000000]/40 pl-2 pr-2.5 py-1.5 rounded-lg";
   const textClasses = isPlaceholder ? "text-[#FFFFFF80]" : "text-white";
-  const interactiveClasses = onClick ? "cursor-pointer hover:bg-[#000000]/50 transition-colors" : "";
+  const interactiveClasses = onClick ? "cursor-pointer" : "";
 
   if (onClick && onRemove) {
     return (

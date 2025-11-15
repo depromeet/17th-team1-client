@@ -34,7 +34,10 @@ type UseRecordScrollReturn = {
   hideScrollHint: () => void;
 };
 
-export const useRecordScroll = ({ countryRecords, shouldShowHint = true }: UseRecordScrollParams): UseRecordScrollReturn => {
+export const useRecordScroll = ({
+  countryRecords,
+  shouldShowHint = true,
+}: UseRecordScrollParams): UseRecordScrollReturn => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showScrollHint, setShowScrollHint] = useState(false);
 

@@ -22,8 +22,6 @@ type RecordData = {
   country: string;
   images: string[];
   imageMetadata?: ImageMetadataFromDiary[];
-  date?: string;
-  location?: string;
   userId: string;
   userName: string;
   userAvatar?: string;
@@ -109,8 +107,6 @@ const RecordDetailPage = () => {
             country,
             images,
             imageMetadata,
-            date,
-            location,
             description,
             reactions,
             userId,
@@ -123,8 +119,6 @@ const RecordDetailPage = () => {
             country,
             images: images.length > 0 ? images : [],
             imageMetadata,
-            date,
-            location,
             userId,
             userName,
             userAvatar,
@@ -160,7 +154,7 @@ const RecordDetailPage = () => {
   };
 
   if (!currentRecord) return null;
-  const { city, country, id, images, imageMetadata, date, location, userName, userAvatar, description, reactions } =
+  const { city, country, id, images, imageMetadata, userName, userAvatar, description, reactions } =
     currentRecord;
 
   const handleEdit = () => {
@@ -228,8 +222,6 @@ const RecordDetailPage = () => {
             id={id}
             images={images}
             imageMetadata={imageMetadata}
-            date={date}
-            location={location}
             userName={userName}
             userAvatar={userAvatar}
             description={description}
@@ -269,15 +261,13 @@ const RecordDetailPage = () => {
           hasPrevious={hasPrevious}
         >
           {countryRecords.map(
-            ({ id, images, imageMetadata, date, location, userName, userAvatar, description, reactions }, index) => {
+            ({ id, images, imageMetadata, userName, userAvatar, description, reactions }, index) => {
               return (
                 <RecordCard
                   key={`${id}-${index}`}
                   id={id}
                   images={images}
                   imageMetadata={imageMetadata}
-                  date={date}
-                  location={location}
                   userName={userName}
                   userAvatar={userAvatar}
                   description={description}

@@ -4,8 +4,6 @@ import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import type { ClusterData } from "@/hooks/useClustering";
 import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
-type AnchoringState = 'pending' | 'completed' | 'failed';
-
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const currentGlobeIndex = 0; // 항상 첫 번째 패턴만 사용
@@ -15,7 +13,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   const [snapZoomTo, setSnapZoomTo] = useState<number | null>(ZOOM_LEVELS.DEFAULT);
   const [_selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [anchoringState, setAnchoringState] = useState<AnchoringState>('pending');
 
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
   useEffect(() => {
@@ -42,60 +39,46 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
    * Top 1 국가 선택 로직:
    * 1. city_count가 가장 많은 국가(Top 1)를 선택
    * 2. 동률 발생 시 최근에 기록(updatedAt)된 도시가 포함된 국가를 우선 선정
+   *
+   * mapper에서 이미 cityCount와 updatedAt을 준비했으므로,
+   * 국가별 유일한 데이터 하나를 선택하여 정렬만 수행합니다.
    */
   const topCountry = useMemo(() => {
     if (!currentPattern?.countries || currentPattern.countries.length === 0) {
       return null;
     }
 
-    // 예외 처리: 1개 국가만 있으면 해당 국가 반환
+    // 국가별로 유일한 데이터 추출 (각 국가당 1개만 필요 - cityCount는 동일)
     const uniqueCountries = Array.from(
       new Map(currentPattern.countries.map((c) => [c.id, c])).values(),
     );
+
+    // 예외 처리: 1개 국가만 있으면 해당 국가 반환
     if (uniqueCountries.length === 1) {
       return uniqueCountries[0];
     }
 
-    // city_count로 그룹핑하여 Top 1 찾기
-    const countryGroups = new Map<string, CountryData[]>();
-    uniqueCountries.forEach((country) => {
-      const countryCode = country.id;
-      if (!countryGroups.has(countryCode)) {
-        countryGroups.set(countryCode, []);
-      }
-      countryGroups.get(countryCode)?.push(country);
-    });
-
-    // 국가별 city_count와 최근 updatedAt 계산
-    const countryStats = Array.from(countryGroups.entries()).map(([countryCode, cities]) => {
-      const cityCount = cities.length; // 실제 도시 수
-      // 최근 기록 시간 (updatedAt이 가장 최신인 도시)
-      const latestCity = cities.reduce((latest, city) => {
-        const latestTime = new Date(latest.updatedAt || 0).getTime();
-        const currentTime = new Date(city.updatedAt || 0).getTime();
-        return currentTime > latestTime ? city : latest;
-      });
-
-      return {
-        country: cities[0], // 국가 대표 정보 (같은 countryCode)
-        countryCode,
-        cityCount,
-        latestUpdatedAt: latestCity.updatedAt || new Date().toISOString(),
-        latestTime: new Date(latestCity.updatedAt || 0).getTime(),
-      };
-    });
+    // mapper에서 준비한 cityCount와 updatedAt으로 정렬
+    // NOTE: updatedAt은 백엔드에서 도시별 기록 시간을 제공할 때까지 설정되지 않음
+    // 현재는 cityCount 기준으로만 Top 1을 선정하며, updatedAt이 추가되면 동률 처리도 적용됨
+    const countryStats = uniqueCountries.map((country) => ({
+      country,
+      cityCount: country.cityCount ?? 1,
+      latestTime: country.updatedAt ? new Date(country.updatedAt).getTime() : 0,
+    }));
 
     // city_count로 정렬하여 Top 1 찾기
     countryStats.sort((a, b) => {
-      // city_count 내림차순
+      // city_count 내림차순 (기획: 가장 많은 도시 기록 국가)
       if (b.cityCount !== a.cityCount) {
         return b.cityCount - a.cityCount;
       }
-      // 동률 시 최근 기록 시간 (내림차순)
+      // 동률 시 최근 기록 시간 (내림차순, 기획: 최근에 기록된 도시)
+      // updatedAt이 없으면 latestTime = 0이므로 자동으로 이 기준은 미적용됨
       return b.latestTime - a.latestTime;
     });
 
-    return countryStats[0]?.country || null;
+    return countryStats[0]?.country ?? null;
   }, [currentPattern]);
 
   /**
@@ -222,7 +205,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     selectedClusterData,
     snapZoomTo,
     isZoomed,
-    anchoringState,
     travelPatternsWithFlags,
     currentPattern,
     topCountry,

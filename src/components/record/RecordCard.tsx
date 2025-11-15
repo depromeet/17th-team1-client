@@ -123,10 +123,10 @@ export const RecordCard = ({
       </div>
 
       {/* 하단 영역 - 이모지 반응 */}
-      {/* 힌트 표시 여부에 따라 패딩 동적 변경: 첫 진입(힌트 있음) pb-32, 이후(힌트 없음) pb-10 */}
+      {/* 힌트 표시 여부에 따라 패딩 동적 변경: 힌트 있음(20px+힌트높이+16px≈104px), 없음(30px) */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
-        className={`px-4 shrink-0 relative z-20 ${showScrollHint ? "pb-32" : "pb-10"}`}
+        className={`px-4 shrink-0 relative z-20 ${showScrollHint ? "pb-[calc(20px+49px+16px)]" : "pb-[30px]"}`}
         data-emoji-reactions
         onTouchStart={(e) => {
           e.stopPropagation();

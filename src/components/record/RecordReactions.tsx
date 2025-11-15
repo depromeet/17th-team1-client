@@ -36,6 +36,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastToastTimeRef = useRef<number>(0);
@@ -151,6 +152,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
       // 1.5초 이후 재클릭: Toast 재노출
       lastToastTimeRef.current = now;
+      setToastMessage("친구들만 이모지를 눌러줄 수 있어요!");
       setShowToast(true);
 
       // 기존 타이머 정리
@@ -247,6 +249,28 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       const isDuplicateError = errorMessage.includes("already") || errorMessage.includes("이미");
 
       if (isDuplicateError) {
+        // owner일 때: Toast 표시
+        if (isOwner) {
+          const now = Date.now();
+          lastToastTimeRef.current = now;
+          setToastMessage("이미 등록된 이모지입니다.");
+          setShowToast(true);
+
+          // 기존 타이머 정리
+          if (toastTimerRef.current) {
+            clearTimeout(toastTimerRef.current);
+          }
+
+          // 1.5초 후 Toast 자동 닫기
+          toastTimerRef.current = setTimeout(() => {
+            setShowToast(false);
+          }, 1500);
+
+          setShowEmojiPicker(false);
+          return;
+        }
+
+        // owner가 아닐 때: 카운트 증가 및 애니메이션 실행
         try {
           // 이미 등록된 이모지이므로 pressEmoji를 호출하여 카운트 증가
           await pressEmoji({
@@ -259,9 +283,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
             const existingReaction = prev.find((r) => r.glyph === glyph);
 
             if (existingReaction) {
-              const updatedReactions = prev.map((r) =>
-                r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r,
-              );
+              const updatedReactions = prev.map((r) => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
 
               const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
               const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
@@ -272,6 +294,16 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
             return prev;
           });
+
+          // 애니메이션 실행 - 해당 이모지 버튼 찾기
+          const reactionButton = reactionsContainerRef.current?.querySelector(
+            `button[data-emoji-code="${code}"]`,
+          ) as HTMLButtonElement;
+
+          if (reactionButton) {
+            const rect = reactionButton.getBoundingClientRect();
+            createFloatingEmojiWithRect(glyph, rect);
+          }
 
           setShowEmojiPicker(false);
         } catch (pressError) {
@@ -324,11 +356,20 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           <AddEmojiIcon />
         </button>
 
+        {/* 그라디언트 오버레이 - 좌측 페이드 효과 */}
+        <div
+          className="absolute left-[68px] top-0 bottom-0 w-20 pointer-events-none z-10"
+          style={{
+            background: "linear-gradient(90deg, #001326 0%, rgba(0, 19, 38, 0) 81.63%)",
+          }}
+        />
+
         <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
           {reactions.map(({ code, glyph, count }, index) => (
             <motion.button
               key={`${code}-${glyph}-${index}`}
               type="button"
+              data-emoji-code={code}
               onClick={(e) => handleReactionClick(code, e)}
               whileTap={canInteract ? { scale: 0.85 } : {}}
               whileHover={canInteract ? { scale: 1.05 } : {}}
@@ -444,7 +485,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           className="backdrop-blur-[25px] backdrop-filter flex items-center gap-4 px-4 py-3.5 rounded-lg"
           contentClassName="text-sm font-medium text-white text-center text-nowrap"
         >
-          친구들만 이모지를 눌러줄 수 있어요!
+          {toastMessage}
         </HeadlessToast>
       </div>
     </div>

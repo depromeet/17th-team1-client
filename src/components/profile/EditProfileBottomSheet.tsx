@@ -30,6 +30,8 @@ export const EditProfileBottomSheet = ({
   initialImage,
   onSave,
 }: EditProfileBottomSheetProps) => {
+  const MAX_NICKNAME_LENGTH = 10;
+
   const nicknameId = useId();
   const [name, setName] = useState(initialName);
   const [image, setImage] = useState(initialImage);
@@ -160,11 +162,11 @@ export const EditProfileBottomSheet = ({
                 value={name}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value.length <= 20) {
+                  if (value.length <= MAX_NICKNAME_LENGTH) {
                     setName(value);
                   }
                 }}
-                maxLength={20}
+                maxLength={MAX_NICKNAME_LENGTH}
                 placeholder="닉네임을 입력하세요"
                 className={cn(
                   "w-full h-[50px] px-4 py-3.5",
@@ -183,10 +185,10 @@ export const EditProfileBottomSheet = ({
                 <span
                   className={cn(
                     "text-xs font-medium transition-colors",
-                    name.length === 20 ? "text-white" : "text-text-thirdly",
+                    name.length === MAX_NICKNAME_LENGTH ? "text-white" : "text-text-thirdly",
                   )}
                 >
-                  {name.length} / 20
+                  {name.length} / {MAX_NICKNAME_LENGTH}
                 </span>
               </div>
             </div>

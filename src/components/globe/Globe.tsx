@@ -81,6 +81,8 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       selectedClusterData,
       snapZoomTo,
       currentPattern,
+      // topCountry는 초기화 이후 필요한 경우 다른 컴포넌트에서 사용 가능
+      topCountryCities,
       handleZoomChange: globalHandleZoomChange,
       handleClusterSelect: globalHandleClusterSelect,
       resetGlobe,
@@ -112,12 +114,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           resetGlobe();
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("Selection stack changed:", {
-            stackLength: newStack.length,
-            newSelectedData: newSelectedData?.length || 0,
-          });
-        }
       },
       [globalHandleClusterSelect, resetGlobe],
     );
@@ -365,21 +361,6 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
                   autoFitCamera.altitude,
                 );
 
-                // 개발 환경에서 디버깅 정보 출력
-                if (process.env.NODE_ENV === "development") {
-                  console.log("Auto-fit camera calculation:", {
-                    clusterName: clusterData.name,
-                    cityCount: clusterItems.length,
-                    boundingBox: autoFitCamera.boundingBox,
-                    targetPosition: {
-                      lat: autoFitCamera.lat,
-                      lng: autoFitCamera.lng,
-                      altitude: autoFitCamera.altitude,
-                    },
-                    animationDuration,
-                  });
-                }
-
                 // 부드러운 카메라 이동
                 globeRef.current.pointOfView(
                   {
@@ -482,8 +463,24 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
 
       const trySetupControls = () => {
         if (globeRef.current && !globeLoading) {
-          // 초기 시점 설정
-          globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
+          // 초기 앵커링: Top 1 국가로 카메라 포커싱
+          let initialLat = 0;
+          let initialLng = 0;
+
+          if (topCountryCities && topCountryCities.length > 0) {
+            // Top 1 국가의 중심 좌표 계산
+            const centerLat = topCountryCities.reduce((sum, city) => sum + city.lat, 0) / topCountryCities.length;
+            const centerLng = topCountryCities.reduce((sum, city) => sum + city.lng, 0) / topCountryCities.length;
+
+            initialLat = centerLat;
+            initialLng = centerLng;
+          }
+
+          // 카메라 초기화
+          globeRef.current.pointOfView(
+            { lat: initialLat, lng: initialLng, altitude: GLOBE_CONFIG.INITIAL_ALTITUDE },
+            ANIMATION_DURATION.INITIAL_SETUP,
+          );
 
           // 줌 제한 설정
           try {
@@ -496,7 +493,9 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
               return; // 성공, 더 이상 시도하지 않음
             }
           } catch (error) {
-            console.error("Error accessing controls:", error);
+            if (process.env.NODE_ENV === "development") {
+              console.error("Error accessing controls:", error);
+            }
           }
         }
 
@@ -529,7 +528,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           clearTimeout(timer);
         });
       };
-    }, [globeLoading]);
+    }, [globeLoading, topCountryCities]);
 
     if (globeLoading) {
       return <div></div>;

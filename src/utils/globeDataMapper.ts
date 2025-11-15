@@ -28,6 +28,15 @@ export const mapGlobeDataToTravelPatterns = (
 
   // 모든 지역의 도시들을 하나로 합치기
   const allCities: CountryData[] = [];
+  // 국가별 도시 정보 집계 (city_count 계산용)
+  // TODO: 백엔드에서 도시별 updatedAt이 추가되면 countryStats에도 updatedAt 포함시켜야 함
+  const countryStats = new Map<
+    string,
+    {
+      cityCount: number;
+    }
+  >();
+
   let colorIndex = 0;
 
   for (const region of globeData.regions) {
@@ -37,6 +46,15 @@ export const mapGlobeDataToTravelPatterns = (
       const countryName = getCountryName(countryCode);
       const thumbnailUrl = cityThumbnails?.[cityId];
       const thumbnails = cityThumbnailsArray?.[cityId];
+
+      // 국가별 도시 수 집계
+      if (!countryStats.has(countryCode)) {
+        countryStats.set(countryCode, { cityCount: 0 });
+      }
+      const stats = countryStats.get(countryCode);
+      if (stats) {
+        stats.cityCount += 1;
+      }
 
       allCities.push({
         id: countryCode,
@@ -55,12 +73,28 @@ export const mapGlobeDataToTravelPatterns = (
     colorIndex++;
   }
 
+  // 국가별로 city_count를 추가
+  // NOTE: updatedAt은 백엔드에서 도시별 기록 시간이 제공될 때까지 설정하지 않음
+  // 현재 각 도시의 updatedAt이 없으므로, 동률 처리 시 updatedAt 기준이 적용되지 않음
+  const countriesWithStats = allCities.map((city) => {
+    const countryCode = city.id;
+    const countryInfo = countryStats.get(countryCode);
+
+    return {
+      ...city,
+      cityCount: countryInfo?.cityCount || 1,
+      // TODO: 백엔드에서 GlobeCity에 updatedAt 필드가 추가되면
+      // 여기서 "국가별 최신 updatedAt"을 계산하여 설정해야 함
+      // 예: updatedAt: city.updatedAt || new Date().toISOString()
+    };
+  });
+
   // 하나의 패턴으로 반환
   return [
     {
       title: "나의 여행 기록",
       subtitle: `${globeData.cityCount}개 도시, ${globeData.countryCount}개 국가`,
-      countries: allCities,
+      countries: countriesWithStats,
     },
   ];
 };

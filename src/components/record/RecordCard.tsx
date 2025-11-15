@@ -13,8 +13,6 @@ type RecordCardProps = {
   id: string;
   images: string[];
   imageMetadata?: ImageMetadataFromDiary[];
-  date?: string;
-  location?: string;
   userName: string;
   userAvatar?: string;
   description?: string;
@@ -46,8 +44,6 @@ export const RecordCard = ({
   id,
   images,
   imageMetadata,
-  date,
-  location,
   userName,
   userAvatar,
   description,
@@ -63,8 +59,22 @@ export const RecordCard = ({
   // 현재 이미지의 메타데이터 가져오기
   const currentMetadata = imageMetadata?.[currentImageIndex];
   const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : undefined;
-  const currentDate = formatTakenMonth(currentMetadata?.takenMonth) || date;
-  const currentLocation = currentMetadata?.placeName || location;
+  const currentDate = formatTakenMonth(currentMetadata?.takenMonth);
+
+  /**
+   * 기존 데이터에 좌표 형식("37.4850, 127.0178")으로 저장된 placeName 검증
+   * 새 데이터는 ImageMetadata에서 자동으로 reverse geocoding 처리됨
+   */
+  const isCoordinateFormat = (str: string | null | undefined): boolean => {
+    if (!str) return false;
+    return /^[\d.,\s]+$/.test(str.trim());
+  };
+
+  // placeName이 있고 좌표 형식이 아닐 때만 표시, 없으면 undefined (도시명 fallback 사용 안함)
+  const currentLocation =
+    currentMetadata?.placeName && !isCoordinateFormat(currentMetadata.placeName)
+      ? currentMetadata.placeName
+      : undefined;
 
   return (
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>

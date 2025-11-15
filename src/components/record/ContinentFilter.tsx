@@ -44,7 +44,7 @@ export function ContinentFilter({
             >
               {continent}
             </span>
-            {!isDisabled && (
+            {!isDisabled && continent !== "전체" && (
               <span
                 className={`${
                   isSelected

@@ -41,12 +41,11 @@ export const MetadataChip = ({
 
   const baseClasses = "inline-flex items-center gap-2 bg-[#000000]/40 pl-2 pr-2.5 py-1.5 rounded-lg";
   const textClasses = isPlaceholder ? "text-[#FFFFFF80]" : "text-white";
-  const interactiveClasses = onClick ? "cursor-pointer hover:bg-[#000000]/50 transition-colors" : "";
 
   if (onClick && onRemove) {
     return (
       <div className={`${baseClasses} relative`}>
-        <button onClick={onClick} className={`${interactiveClasses} flex items-center gap-2`} type="button">
+        <button onClick={onClick} className="flex items-center gap-2" type="button">
           {/* Left Icon */}
           <div className="flex-shrink-0">{renderIcon()}</div>
 
@@ -57,7 +56,7 @@ export const MetadataChip = ({
         {/* Right X Icon */}
         <button
           onClick={handleRemoveChip}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 flex-shrink-0 hover:opacity-70 transition-opacity"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 flex-shrink-0"
           aria-label="Remove MetadataChip"
           type="button"
         >
@@ -69,7 +68,7 @@ export const MetadataChip = ({
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={`${baseClasses} ${interactiveClasses}`} type="button">
+      <button onClick={onClick} className={baseClasses} type="button">
         {/* Left Icon */}
         <div className="flex-shrink-0">{renderIcon()}</div>
 
@@ -91,7 +90,7 @@ export const MetadataChip = ({
       {onRemove && (
         <button
           onClick={handleRemoveChip}
-          className="flex-shrink-0 ml-auto hover:opacity-70 transition-opacity"
+          className="flex-shrink-0 ml-auto"
           aria-label="Remove MetadataChip"
           type="button"
         >

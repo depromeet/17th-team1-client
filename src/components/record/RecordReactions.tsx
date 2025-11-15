@@ -364,7 +364,10 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           }}
         />
 
-        <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
+        <div
+          ref={reactionsContainerRef}
+          className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2 pl-0"
+        >
           {reactions.map(({ code, glyph, count }, index) => (
             <motion.button
               key={`${code}-${glyph}-${index}`}

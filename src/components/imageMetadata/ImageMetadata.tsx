@@ -15,6 +15,7 @@ import {
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
+import { reverseGeocode } from "@/utils/geocoding";
 import { Header } from "../common/Header";
 import { ImageCarousel } from "./ImageCarousel";
 import { LoadingOverlay } from "./LoadingOverlay";
@@ -77,52 +78,74 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         setDiaryText(diary.text ?? "");
 
         const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
-        const mappedMetadata = diary.photos.map((photo, index) => {
-          const takenMonth = normalizeTakenMonth(
-            typeof photo.takenMonth === "string"
-              ? photo.takenMonth
-              : photo.takenMonth
-                ? { year: photo.takenMonth.year, monthValue: photo.takenMonth.monthValue }
-                : null,
-          );
 
-          const hasLat = typeof photo.lat === "number" && Number.isFinite(photo.lat);
-          const hasLng = typeof photo.lng === "number" && Number.isFinite(photo.lng);
-          const location =
-            (hasLat || hasLng || photo.placeName) && (photo.placeName || (hasLat && hasLng))
-              ? {
-                  latitude: hasLat ? photo.lat : undefined,
-                  longitude: hasLng ? photo.lng : undefined,
-                  altitude: undefined,
-                  address: photo.placeName ?? undefined,
-                  nearbyPlaces: photo.placeName ? [photo.placeName, photo.placeName] : undefined,
-                }
-              : undefined;
+        // 기존 사진 데이터를 변환하면서 좌표 형식 placeName은 reverse geocoding 실행
+        const mappedMetadata = await Promise.all(
+          diary.photos.map(async (photo, index) => {
+            const takenMonth = normalizeTakenMonth(
+              typeof photo.takenMonth === "string"
+                ? photo.takenMonth
+                : photo.takenMonth
+                  ? { year: photo.takenMonth.year, monthValue: photo.takenMonth.monthValue }
+                  : null,
+            );
 
-          return {
-            id: `existing-${photo.photoId}-${index}`,
-            fileName: photo.photoCode.split("/").pop() ?? `photo-${photo.photoId}`,
-            fileSize: 0,
-            fileType: "image/jpeg",
-            imagePreview: `${baseUrl}${photo.photoCode}`,
-            dimensions:
-              photo.width && photo.height
+            const hasLat = typeof photo.lat === "number" && Number.isFinite(photo.lat);
+            const hasLng = typeof photo.lng === "number" && Number.isFinite(photo.lng);
+
+            /**
+             * 기존 데이터에 좌표 형식("37.4850, 127.0178")으로 저장된 placeName 검증
+             * 좌표 형식이면 즉시 reverse geocoding으로 실제 주소 가져오기
+             */
+            const isCoordinateFormat = (str: string | null | undefined): boolean => {
+              if (!str) return false;
+              return /^[\d.,\s]+$/.test(str.trim());
+            };
+
+            let placeName = photo.placeName && !isCoordinateFormat(photo.placeName) ? photo.placeName : null;
+
+            // placeName이 좌표 형식이면 즉시 reverse geocoding 실행
+            if (!placeName && hasLat && hasLng) {
+              const geocodedName = await reverseGeocode(photo.lat, photo.lng);
+              placeName = geocodedName;
+            }
+
+            const location =
+              hasLat || hasLng || placeName
                 ? {
-                    width: photo.width,
-                    height: photo.height,
+                    latitude: hasLat ? photo.lat : undefined,
+                    longitude: hasLng ? photo.lng : undefined,
+                    altitude: undefined,
+                    address: placeName ?? undefined,
+                    nearbyPlaces: placeName ? [placeName, placeName] : undefined,
                   }
-                : undefined,
-            location,
-            timestamp: undefined,
-            tag: photo.tag ?? "NONE",
-            status: "completed" as const,
-            selectedTag: photo.tag && photo.tag !== "NONE" ? photo.tag : null,
-            customDate: takenMonth,
-            photoId: photo.photoId,
-            photoCode: photo.photoCode,
-            isExisting: true,
-          };
-        });
+                : undefined;
+
+            return {
+              id: `existing-${photo.photoId}-${index}`,
+              fileName: photo.photoCode.split("/").pop() ?? `photo-${photo.photoId}`,
+              fileSize: 0,
+              fileType: "image/jpeg",
+              imagePreview: `${baseUrl}${photo.photoCode}`,
+              dimensions:
+                photo.width && photo.height
+                  ? {
+                      width: photo.width,
+                      height: photo.height,
+                    }
+                  : undefined,
+              location,
+              timestamp: undefined,
+              tag: photo.tag ?? "NONE",
+              status: "completed" as const,
+              selectedTag: photo.tag && photo.tag !== "NONE" ? photo.tag : null,
+              customDate: takenMonth,
+              photoId: photo.photoId,
+              photoCode: photo.photoCode,
+              isExisting: true,
+            };
+          }),
+        );
 
         setMetadataList(mappedMetadata);
       } catch (error) {
@@ -341,19 +364,43 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
             }
 
             if ((metadata as UploadMetadata & { originalPhotoId?: number }).originalPhotoId) {
-              await deleteDiaryPhoto(diaryId, (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId);
+              await deleteDiaryPhoto(
+                diaryId,
+                (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId,
+              );
             }
 
-            // 저장 버튼을 눌렀을 때만 다이어리-사진 매핑 API를 호출한다.
-            // (업로드 직후에는 호출하지 않아 서버에서 3장 제한에 걸리지 않도록 함)
             const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
             const width = dimensions?.width ?? 1;
             const height = dimensions?.height ?? 1;
-            const takenMonthValue = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
+            const takenMonthValue =
+              customDate !== null && customDate !== undefined
+                ? customDate
+                : customDate === null
+                  ? null
+                  : (toYearMonth(timestamp) ?? fallbackMonth);
             const normalizedTag = selectedTag ?? tag ?? "NONE";
             const latitude = location?.latitude;
             const longitude = location?.longitude;
-            const placeName = location?.address;
+
+            // 좌표 형식 검증 함수
+            const isCoordinateFormat = (str: string | null | undefined): boolean => {
+              if (!str) return false;
+              return /^[\d.,\s]+$/.test(str.trim());
+            };
+
+            // placeName 결정 로직
+            let placeName = location?.address;
+
+            if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
+              const geocodedName = await reverseGeocode(latitude, longitude);
+              placeName = geocodedName ?? undefined;
+            }
+
+            const finalPlaceName =
+              placeName && typeof placeName === "string" && placeName.trim() && !isCoordinateFormat(placeName)
+                ? placeName.trim()
+                : undefined;
 
             const payload = {
               photoCode: metadata.photoCode,
@@ -363,7 +410,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
               height,
               takenMonth: takenMonthValue,
               tag: normalizedTag,
-              placeName,
+              ...(finalPlaceName && { placeName: finalPlaceName }),
             };
 
             const createdPhoto = await addDiaryPhoto(diaryId, payload);
@@ -372,16 +419,16 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
               (createdPhoto as { data?: { photoId?: number } })?.data?.photoId;
 
             if (!resolvedPhotoId) {
-              // 응답 포맷이 다르거나 photoId가 늦게 반영되는 경우에는 상세 정보를 다시 불러와 보정한다.
-              console.warn("addDiaryPhoto 응답에서 photoId를 찾지 못했습니다. 상세 정보를 재조회합니다.", createdPhoto);
+              console.warn("⚠️  photoId를 응답에서 찾지 못함 → 다이어리 재조회");
               try {
                 const latestDiary = await getDiaryDetail(diaryId);
                 const matchedPhoto = latestDiary.photos.find((photo) => photo.photoCode === metadata.photoCode);
                 if (matchedPhoto?.photoId) {
                   resolvedPhotoId = matchedPhoto.photoId;
+                  console.log(`✅ 재조회 성공 → photoId: ${resolvedPhotoId}`);
                 }
               } catch (fetchError) {
-                console.error("사진 ID를 확인하기 위해 다이어리 정보를 재조회하는 데 실패했습니다.", fetchError);
+                console.error("❌ 재조회 실패:", fetchError);
               }
             }
 
@@ -408,32 +455,56 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         }
       }
 
-      const photos = currentMetadataList.map((metadata) => {
-        if (!metadata.photoCode) {
-          throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
-        }
+      const photos = await Promise.all(
+        currentMetadataList.map(async (metadata) => {
+          if (!metadata.photoCode) {
+            throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
+          }
 
-        const { location, dimensions, customDate, timestamp, selectedTag, tag, photoId } = metadata;
-        const width = dimensions?.width ?? 0;
-        const height = dimensions?.height ?? 0;
-        const takenMonth = customDate ?? toYearMonth(timestamp) ?? fallbackMonth;
-        const normalizedTag = selectedTag ?? tag ?? "NONE";
-        const latitude = location?.latitude;
-        const longitude = location?.longitude;
-        const placeName = location?.address;
+          const { location, dimensions, customDate, timestamp, selectedTag, tag, photoId } = metadata;
+          const width = dimensions?.width ?? 0;
+          const height = dimensions?.height ?? 0;
+          const takenMonth =
+            customDate !== null && customDate !== undefined
+              ? customDate
+              : customDate === null
+                ? null
+                : (toYearMonth(timestamp) ?? fallbackMonth);
+          const normalizedTag = selectedTag ?? tag ?? "NONE";
+          const latitude = location?.latitude;
+          const longitude = location?.longitude;
 
-        return {
-          photoId,
-          photoCode: metadata.photoCode,
-          lat: latitude,
-          lng: longitude,
-          width,
-          height,
-          takenMonth,
-          tag: normalizedTag,
-          placeName,
-        };
-      });
+          // 좌표 형식 검증 함수
+          const isCoordinateFormat = (str: string | null | undefined): boolean => {
+            if (!str) return false;
+            return /^[\d.,\s]+$/.test(str.trim());
+          };
+
+          let placeName = location?.address;
+
+          if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
+            const geocodedName = await reverseGeocode(latitude, longitude);
+            placeName = geocodedName ?? undefined;
+          }
+
+          const finalPlaceName =
+            placeName && typeof placeName === "string" && placeName.trim() && !isCoordinateFormat(placeName)
+              ? placeName.trim()
+              : undefined;
+
+          return {
+            photoId,
+            photoCode: metadata.photoCode,
+            lat: latitude,
+            lng: longitude,
+            width,
+            height,
+            takenMonth,
+            tag: normalizedTag,
+            ...(finalPlaceName && { placeName: finalPlaceName }),
+          };
+        }),
+      );
 
       const validCityId = cityId as number;
       const payload = {

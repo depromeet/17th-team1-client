@@ -261,7 +261,7 @@ const clusterLocations = (
       };
 
       // 지리적 거리 임계값 (1500km 정도)
-      const GEO_DISTANCE_THRESHOLD = 1500;
+      const GEO_DISTANCE_THRESHOLD = 3000;
 
       for (const cluster of overlappingClusters) {
         if (processedInSubCluster.has(cluster.id)) {

@@ -356,6 +356,14 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           <AddEmojiIcon />
         </button>
 
+        {/* 그라디언트 오버레이 - 좌측 페이드 효과 */}
+        <div
+          className="absolute left-[68px] top-0 bottom-0 w-20 pointer-events-none z-10"
+          style={{
+            background: "linear-gradient(90deg, #001326 0%, rgba(0, 19, 38, 0) 81.63%)",
+          }}
+        />
+
         <div ref={reactionsContainerRef} className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2">
           {reactions.map(({ code, glyph, count }, index) => (
             <motion.button

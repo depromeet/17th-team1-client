@@ -162,29 +162,37 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
       z-index: 5;
       pointer-events: none;
     `,
+    // 외부 wrapper - 그라디언트 border 역할
+    labelWrapper: `
+      position: absolute;
+      z-index: ${20 + index};
+      top: ${offsetY}px;
+      left: ${offsetX}px;
+      transform: translate(-50%, -50%);
+      padding: 1.5px;
+      border-radius: 50px;
+      background: radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%);
+      pointer-events: auto;
+      cursor: pointer;
+    `,
+    // 내부 label - 실제 콘텐츠
     label: `
       display: inline-flex;
       padding: 12px 16px;
       align-items: center;
       gap: 5px;
-      border-radius: 50px;
-      background: rgba(255, 255, 255, 0.20);
+      border-radius: 48.5px;
+      background: rgba(31, 74, 105);
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #FFF;
       font-size: 16px;
       font-style: normal;
       font-weight: 500;
-      line-height: 128%;
+      line-height: 1.5;
+      letter-spacing: -0.32px;
       font-feature-settings: 'liga' off, 'clig' off;
-      cursor: pointer;
       user-select: none;
-      pointer-events: auto;
-      position: absolute;
-      z-index: ${20 + index};
-      top: ${offsetY}px;
-      left: ${offsetX}px;
-      transform: translate(-50%, -50%);
       white-space: nowrap;
     `,
   };
@@ -242,7 +250,7 @@ export const createCountryClusterStyles = (
       gap: 5px;
       border-radius: 50px;
       border: 1px solid #b3daff;
-      background: rgba(31, 74, 105, 0.5);
+      background: rgba(31, 74, 105, 0.1);
       box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(10px);
       color: #FFF;

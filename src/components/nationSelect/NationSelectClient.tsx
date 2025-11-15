@@ -60,16 +60,9 @@ export const NationSelectClient = ({
 
     try {
       await createMemberTravels(selectedCityList);
-      const { uuid } = getAuthInfo();
-
-      if (uuid) {
-        router.push(`/globe/${uuid}`);
-      } else {
-        console.error("UUID가 없습니다.");
-        router.push("/error?type=401");
-      }
+      router.push("/globe");
     } catch (error) {
-      console.error("여행 기록 생성 실패:", error);
+      console.error("Failed to create member travels:", error);
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
     }
   };

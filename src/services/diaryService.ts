@@ -28,6 +28,15 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
   const defaultProfileImage = "/assets/default-profile.png";
   const userAvatar = profileImageUrl ? baseUrl + profileImageUrl : defaultProfileImage;
 
+  const imageMetadata = photos.map(({ photoCode, takenMonth, placeName, tag }) => {
+    return {
+      url: baseUrl + photoCode,
+      takenMonth,
+      placeName,
+      tag,
+    };
+  });
+
   return {
     id: String(diaryId),
     cityId,
@@ -38,12 +47,7 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
     lng,
     description: text,
     images: photos.map(({ photoCode }) => baseUrl + photoCode),
-    imageMetadata: photos.map(({ photoCode, takenMonth, placeName, tag }) => ({
-      url: baseUrl + photoCode,
-      takenMonth,
-      placeName,
-      tag,
-    })),
+    imageMetadata,
     reactions: emojis.map(({ code, glyph, count }) => ({
       code,
       glyph,

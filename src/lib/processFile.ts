@@ -1,5 +1,6 @@
 import exifr from "exifr";
 import type { ImageMetadata } from "@/types/imageMetadata";
+import { reverseGeocode } from "@/utils/geocoding";
 
 // 서버 API로 근처 장소 가져오기
 async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
@@ -10,18 +11,6 @@ async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
   } catch {
     return [];
   }
-}
-
-// 서버 API로 역지오코딩(주소) 가져오기
-async function getAddress(lat: number, lng: number): Promise<string> {
-  try {
-    const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
-    const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      return data.results[0].formatted_address;
-    }
-  } catch {}
-  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
 // 이미지 실제 크기 측정
@@ -127,13 +116,17 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
       // 백엔드 API로 주소, 장소 정보 요청 (키 노출 X)
       const lat = exifData.latitude as number;
       const lng = exifData.longitude as number;
-      const [nearbyPlaces, address] = await Promise.all([getNearbyPlaces(lat, lng), getAddress(lat, lng)]);
+      const [nearbyPlaces, placeName] = await Promise.all([
+        getNearbyPlaces(lat, lng),
+        reverseGeocode(lat, lng)
+      ]);
+      const address = placeName || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       extracted.location = {
         latitude: lat,
         longitude: lng,
         altitude: exifData.altitude as number,
         address,
-        nearbyPlaces: [address, ...nearbyPlaces],
+        nearbyPlaces: address ? [address, ...nearbyPlaces] : nearbyPlaces,
       };
     }
     if (exifData.DateTimeOriginal) extracted.timestamp = new Date(exifData.DateTimeOriginal as string).toISOString();

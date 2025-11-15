@@ -1,84 +1,39 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { GooglePlaceDetailsResponse, GooglePlacesNearbyResponse, PlaceWithDistance } from "@/types/googlePlaces";
 
+/**
+ * Places API Nearby Search
+ * 좌표 주변의 장소명(POI)을 검색합니다.
+ *
+ * @example GET /api/places?lat=37.4850&lng=127.0178&radius=50
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const latStr = searchParams.get("lat");
-  const lngStr = searchParams.get("lng");
+  const lat = searchParams.get("lat");
+  const lng = searchParams.get("lng");
+  const radius = searchParams.get("radius") || "100"; // 기본 반경 100m
 
-  if (!latStr || !lngStr) {
+  if (!lat || !lng) {
     return NextResponse.json({ error: "lat/lng required" }, { status: 400 });
-  }
-  const lat = Number(latStr);
-  const lng = Number(lngStr);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return NextResponse.json({ error: "lat/lng must be numbers" }, { status: 400 });
   }
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`,
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko`,
     );
-    const data: GooglePlacesNearbyResponse = await response.json();
+    const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      // 거리 계산 함수
-      const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-        const R = 6371e3;
-        const φ1 = (lat1 * Math.PI) / 180;
-        const φ2 = (lat2 * Math.PI) / 180;
-        const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-        const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-        const a =
-          Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c;
-      };
-
-      // 거리 포함 데이터 가공
-      const placesWithDistance: PlaceWithDistance[] = data.results.map((place) => {
-        const actualDistance = calculateDistance(lat, lng, place.geometry.location.lat, place.geometry.location.lng);
-        return {
-          ...place,
-          actualDistance: Math.round(actualDistance),
-        };
-      });
-
-      // 가까운 5개 장소 뽑기
-      const sortedPlaces = placesWithDistance.sort((a, b) => a.actualDistance - b.actualDistance).slice(0, 5);
-
-      // 상세 정보 병렬 호출
-      const placeDetails = (
-        await Promise.all(
-          sortedPlaces.map(async (place) => {
-            const detailsResponse = await fetch(
-              `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,types,rating,user_ratings_total&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`,
-            );
-            const detailsData: GooglePlaceDetailsResponse = await detailsResponse.json();
-            if (detailsData.result) {
-              return {
-                name: detailsData.result.name,
-                distance: place.actualDistance,
-                rating: detailsData.result.rating,
-                types: detailsData.result.types,
-              };
-            }
-            return null;
-          }),
-        )
-      ).filter(Boolean);
-
-      return NextResponse.json({
-        places: placeDetails.map((p) => p?.name),
-        address: sortedPlaces[0]?.vicinity || `${lat}, ${lng}`,
-      });
+    if (data.status === "ZERO_RESULTS" || !data.results || data.results.length === 0) {
+      return NextResponse.json({ results: [] });
     }
 
-    return NextResponse.json({ places: [], address: null });
+    if (data.status !== "OK") {
+      console.error("Places API error:", data.status, data.error_message);
+      return NextResponse.json({ error: `Places API error: ${data.status}` }, { status: 500 });
+    }
+
+    return NextResponse.json({ results: data.results });
   } catch (error) {
-    console.error("Places API 에러:", error);
-    return NextResponse.json({ error: "장소 검색 실패" }, { status: 500 });
+    console.error("Places API request failed:", error);
+    return NextResponse.json({ error: "Places search failed" }, { status: 500 });
   }
 }

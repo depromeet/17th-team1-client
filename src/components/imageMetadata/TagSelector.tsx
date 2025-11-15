@@ -37,14 +37,15 @@ export const TagSelector = ({
       <button
         onClick={() => !selectedTag && setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 bg-surface-secondary border border-[#0A1C2F] px-2.5 py-2 text-xs font-medium text-white cursor-pointer",
-          isOpen ? "rounded-t-xl" : "rounded-xl",
+          "flex items-center gap-2 bg-surface-secondary border border-[#243246] px-3 py-2 text-xs font-medium text-white cursor-pointer",
+          isOpen ? "rounded-t-lg border-b-0" : "rounded-lg",
+          selectedTag && "w-[63px]",
         )}
         type="button"
       >
         <span>{selectedTag ? TAG_LABELS[selectedTag] : placeholder}</span>
         {selectedTag ? (
-          <CloseIcon width={6} height={6} onClick={handleRemove} className="text-surface-inversethirdly" />
+          <CloseIcon width={8} height={8} onClick={handleRemove} className="text-surface-inversethirdly" />
         ) : isOpen ? (
           <ChevronUpIcon width={12} height={12} />
         ) : (
@@ -53,17 +54,22 @@ export const TagSelector = ({
       </button>
 
       {isOpen && !selectedTag && (
-        <div className="absolute left-0 top-full z-50 w-full rounded-b-xl bg-surface-secondary/50">
-          {IMAGE_TAGS.map((tag) => (
-            <button
-              type="button"
-              key={tag}
-              onClick={() => handleSelect(tag)}
-              className={cn("w-full px-4 py-2.5 text-left text-xs text-white transition-colors cursor-pointer")}
-            >
-              {TAG_LABELS[tag]}
-            </button>
-          ))}
+        <div className="absolute left-0 top-full z-50 w-full mt-[-1px]">
+          <div className="bg-[#112036] border border-[#243246] rounded-b-lg overflow-hidden">
+            {IMAGE_TAGS.map((tag, index) => (
+              <button
+                type="button"
+                key={tag}
+                onClick={() => handleSelect(tag)}
+                className={cn(
+                  "w-full px-3 py-2 text-left text-xs font-medium text-white cursor-pointer",
+                  index !== IMAGE_TAGS.length - 1 && "border-b border-[#243246]",
+                )}
+              >
+                {TAG_LABELS[tag]}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

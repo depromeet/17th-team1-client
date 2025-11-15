@@ -38,6 +38,7 @@ type UploadMetadata = ImageMetadata & {
   photoCode?: string;
   isExisting?: boolean;
   originalImageUrl?: string;
+  originalIndex?: number;
 };
 
 const normalizeTakenMonth = (value: string | { year: number; monthValue: number } | null | undefined) => {
@@ -89,8 +90,12 @@ export const ImageMetadataComponent = ({
         const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
 
         // 기존 사진 데이터를 변환하면서 좌표 형식 placeName은 reverse geocoding 실행
+        // 서버에서 받은 photos를 photoId 순서대로 정렬하여 원래 순서 유지
+        // photoId가 작을수록 먼저 업로드된 사진이므로, photoId로 정렬
+        const sortedPhotos = [...diary.photos].sort((a, b) => a.photoId - b.photoId);
+
         const mappedMetadata = await Promise.all(
-          diary.photos.map(async (photo, index) => {
+          sortedPhotos.map(async (photo, index) => {
             const takenMonth = normalizeTakenMonth(
               typeof photo.takenMonth === "string"
                 ? photo.takenMonth
@@ -152,6 +157,7 @@ export const ImageMetadataComponent = ({
               photoId: photo.photoId,
               photoCode: photo.photoCode,
               isExisting: true,
+              originalIndex: index,
             };
           }),
         );
@@ -218,7 +224,8 @@ export const ImageMetadataComponent = ({
 
         const uploadedResults = await Promise.all(uploadPromises);
         // 서버에는 아직 등록하지 않고, S3 업로드 결과를 이용해 로컬 상태만 갱신한다.
-        const mappedMetadata = uploadedResults.map(({ metadata, photoCode }) => {
+        const currentLength = metadataList.length;
+        const mappedMetadata = uploadedResults.map(({ metadata, photoCode }, index) => {
           const selectedTag = metadata.tag && metadata.tag !== "NONE" ? metadata.tag : null;
           const baseTakenMonth = toYearMonth(metadata.timestamp);
 
@@ -229,10 +236,21 @@ export const ImageMetadataComponent = ({
             photoCode,
             photoId: undefined,
             isExisting: false,
+            originalIndex: currentLength + index, // 원래 순서 저장
           };
         });
 
-        setMetadataList((prev) => (prev.length > 0 ? [...prev, ...mappedMetadata] : mappedMetadata));
+        setMetadataList((prev) => {
+          if (prev.length > 0) {
+            // 기존 항목들도 originalIndex가 없으면 추가
+            const updatedPrev = prev.map((item, idx) => ({
+              ...item,
+              originalIndex: item.originalIndex ?? idx,
+            }));
+            return [...updatedPrev, ...mappedMetadata];
+          }
+          return mappedMetadata;
+        });
       } catch (error) {
         alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
       } finally {
@@ -240,7 +258,7 @@ export const ImageMetadataComponent = ({
         setIsProcessing(false);
       }
     },
-    [metadataCount],
+    [metadataCount, metadataList.length],
   );
 
   const handleRemove = async (id: string) => {

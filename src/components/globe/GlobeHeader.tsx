@@ -23,8 +23,10 @@ export const GlobeHeader = ({ isZoomed, travelInsight, cityCount = 0, countryCou
       <div
         style={{
           background: "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
+          letterSpacing: "-0.26px",
+          lineHeight: "1.5",
         }}
-        className={`inline-flex items-center rounded-full px-4 py-2 text-xs font-bold mb-3 bg-surface-inverseprimary text-text-inverseprimary transition-all duration-500 delay-100 ${
+        className={`inline-flex items-center rounded-lg px-3 py-1 text-[13px] font-bold mb-3 text-[#001326] transition-all duration-500 delay-100 ${
           isZoomed ? "opacity-0 scale-95" : "opacity-100 scale-100"
         }`}
       >

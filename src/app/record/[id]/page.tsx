@@ -62,6 +62,10 @@ const RecordDetailPage = () => {
     initialIndex: initialScrollIndex,
   });
 
+  // 편집 후 돌아왔을 때 마지막 기록이면 스크롤 힌트를 띄우지 않음
+  const isLastRecord = currentIndex === countryRecords.length - 1;
+  const shouldShowScrollHint = showScrollHint && !isLastRecord;
+
   // 스크롤 발생 시 힌트 숨김 상태로 변경
   const handleScroll = (index: number) => {
     if (index !== currentIndex) {
@@ -236,7 +240,7 @@ const RecordDetailPage = () => {
             description={description}
             reactions={reactions}
             isOwner={isOwner}
-            showScrollHint={showScrollHint}
+            showScrollHint={shouldShowScrollHint}
           />
         </div>
       </HeadlessToastProvider>
@@ -260,7 +264,7 @@ const RecordDetailPage = () => {
         </div>
 
         {/* 스크롤 힌트 */}
-        <RecordScrollHint show={showScrollHint} />
+        <RecordScrollHint show={shouldShowScrollHint} />
 
         {/* 스크롤 컨테이너 */}
         <RecordScrollContainer
@@ -282,7 +286,7 @@ const RecordDetailPage = () => {
                   description={description}
                   reactions={reactions}
                   isOwner={isOwner}
-                  showScrollHint={showScrollHint && index === currentIndex}
+                  showScrollHint={shouldShowScrollHint && index === currentIndex}
                 />
               );
             },

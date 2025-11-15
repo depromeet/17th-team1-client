@@ -22,6 +22,7 @@ type RecordScrollItem = {
 type UseRecordScrollParams = {
   countryRecords: RecordScrollItem[];
   shouldShowHint?: boolean;
+  initialIndex?: number;
 };
 
 type UseRecordScrollReturn = {
@@ -37,14 +38,15 @@ type UseRecordScrollReturn = {
 export const useRecordScroll = ({
   countryRecords,
   shouldShowHint = true,
+  initialIndex = 0,
 }: UseRecordScrollParams): UseRecordScrollReturn => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: countryRecords 변경 시 인덱스 리셋
+  // biome-ignore lint/correctness/useExhaustiveDependencies: countryRecords 변경 시 initialIndex로 설정
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [countryRecords]);
+    setCurrentIndex(initialIndex);
+  }, [countryRecords, initialIndex]);
 
   // 현재 기록
   const currentRecord = countryRecords[currentIndex] || null;

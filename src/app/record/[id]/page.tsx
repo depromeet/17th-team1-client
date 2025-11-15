@@ -46,6 +46,10 @@ const RecordDetailPage = () => {
   const { uuid: cookieUuid } = getAuthInfo();
   const isOwner = queryUuid !== null && cookieUuid !== null && queryUuid === cookieUuid;
 
+  // URL에서 스크롤 인덱스 읽기
+  const scrollIndexParam = searchParams.get("scrollIndex");
+  const initialScrollIndex = scrollIndexParam ? Number(scrollIndexParam) : 0;
+
   // 페이지 진입 시 cityId 유효성 검사
   useEffect(() => {
     if (!cityId || Number.isNaN(cityId) || cityId <= 0) {
@@ -57,11 +61,12 @@ const RecordDetailPage = () => {
   const { currentRecord, currentIndex, hasNext, hasPrevious, showScrollHint, onScroll } = useRecordScroll({
     countryRecords,
     shouldShowHint: hasShownScrollHint,
+    initialIndex: initialScrollIndex,
   });
 
   // 스크롤 발생 시 힌트 숨김 상태로 변경
   const handleScroll = (index: number) => {
-    if (index > 0) {
+    if (index !== currentIndex) {
       setHasShownScrollHint(false);
     }
     onScroll(index);
@@ -169,6 +174,10 @@ const RecordDetailPage = () => {
     params.set("cityId", String(cityId));
     params.set("country", country);
     params.set("city", city);
+    params.set("scrollIndex", String(currentIndex));
+    if (queryUuid) {
+      params.set("uuid", queryUuid);
+    }
     router.push(`/image-metadata?${params.toString()}`);
   };
 
@@ -283,7 +292,7 @@ const RecordDetailPage = () => {
                   description={description}
                   reactions={reactions}
                   isOwner={isOwner}
-                  showScrollHint={showScrollHint && index === 0}
+                  showScrollHint={showScrollHint && index === currentIndex}
                 />
               );
             },

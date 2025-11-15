@@ -31,7 +31,7 @@ export default async function EditSelectPage({ searchParams }: EditSelectPagePro
       }
     }
 
-    const initialCities = await fetchCities({ limit: 20 });
+    const initialCities = await fetchCities({ limit: 53 });
     const params = await searchParams;
     return (
       <EditSelectClient

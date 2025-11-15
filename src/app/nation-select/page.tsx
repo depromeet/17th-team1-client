@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NationSelectPage() {
   try {
-    const initialCities = await fetchCities({ limit: 20 });
+    const initialCities = await fetchCities({ limit: 53 });
     return <NationSelectClient initialCities={initialCities} />;
   } catch (error) {
     console.error("Failed to fetch initial cities:", error);

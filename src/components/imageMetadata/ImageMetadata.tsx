@@ -26,6 +26,8 @@ type ImageMetadataProps = {
   diaryId?: number;
   initialCity?: string;
   initialCountry?: string;
+  scrollIndex?: number;
+  uuid?: string;
 };
 
 type UploadMetadata = ImageMetadata & {
@@ -48,7 +50,14 @@ const normalizeTakenMonth = (value: string | { year: number; monthValue: number 
   return `${year}${String(monthValue).padStart(2, "0")}`;
 };
 
-export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCountry }: ImageMetadataProps) => {
+export const ImageMetadataComponent = ({
+  cityId,
+  diaryId,
+  initialCity,
+  initialCountry,
+  scrollIndex,
+  uuid,
+}: ImageMetadataProps) => {
   const router = useRouter();
   const [metadataList, setMetadataList] = useState<UploadMetadata[]>([]);
   const [diaryText, setDiaryText] = useState("");
@@ -341,7 +350,10 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
             }
 
             if ((metadata as UploadMetadata & { originalPhotoId?: number }).originalPhotoId) {
-              await deleteDiaryPhoto(diaryId, (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId);
+              await deleteDiaryPhoto(
+                diaryId,
+                (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId,
+              );
             }
 
             // 저장 버튼을 눌렀을 때만 다이어리-사진 매핑 API를 호출한다.
@@ -448,8 +460,16 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
         await createDiary(payload);
       }
 
-      const { uuid } = getAuthInfo();
-      const nextPath = uuid ? `/record/${validCityId}?uuid=${uuid}` : `/record/${validCityId}`;
+      const finalUuid = uuid || getAuthInfo().uuid;
+      const params = new URLSearchParams();
+      if (finalUuid) {
+        params.set("uuid", finalUuid);
+      }
+      if (typeof scrollIndex === "number") {
+        params.set("scrollIndex", String(scrollIndex));
+      }
+      const queryString = params.toString();
+      const nextPath = queryString ? `/record/${validCityId}?${queryString}` : `/record/${validCityId}`;
 
       router.push(nextPath);
     } catch (error) {

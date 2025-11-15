@@ -55,10 +55,10 @@ await apiDelete("/globe/123", token);
 import { fetchCities } from "@/services/cityService";
 
 // 클라이언트에서 사용
-const cities = await fetchCities({ limit: 20, offset: 0 });
+const cities = await fetchCities({ limit: 53, offset: 0 });
 
 // SSR에서 사용
-const initialCities = await fetchCities({ limit: 20 });
+const initialCities = await fetchCities({ limit: 53 });
 ```
 
 ### 인증 서비스

@@ -34,6 +34,7 @@ type UploadMetadata = ImageMetadata & {
   photoId?: number;
   photoCode?: string;
   isExisting?: boolean;
+  originalImageUrl?: string;
 };
 
 const normalizeTakenMonth = (value: string | { year: number; monthValue: number } | null | undefined) => {
@@ -231,8 +232,38 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
     setMetadataList((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleImageUpdate = (id: string, croppedImage: string) => {
-    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, imagePreview: croppedImage } : item)));
+  const handleImageUpdate = async (id: string, croppedImageBlobUrl: string) => {
+    const targetMetadata = metadataList.find((item) => item.id === id);
+    if (!targetMetadata) return;
+
+    try {
+      const blob = await fetch(croppedImageBlobUrl).then((res) => res.blob());
+      const croppedFile = new File([blob], targetMetadata.fileName, { type: "image/jpeg" });
+
+      const newPhotoCode = await uploadTravelPhoto(croppedFile);
+
+      const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
+      const newImageUrl = `${baseUrl}${newPhotoCode}`;
+
+      setMetadataList((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                imagePreview: newImageUrl,
+                photoCode: newPhotoCode,
+                originalPhotoId: item.photoId,
+                photoId: undefined,
+                isExisting: false,
+                originalImageUrl: item.originalImageUrl || item.imagePreview,
+              }
+            : item,
+        ),
+      );
+    } catch (error) {
+      alert("크롭된 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
+      throw error;
+    }
   };
 
   const handleTagChange = (id: string, tag: ImageTag | null) => {
@@ -309,6 +340,10 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
               throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
             }
 
+            if ((metadata as UploadMetadata & { originalPhotoId?: number }).originalPhotoId) {
+              await deleteDiaryPhoto(diaryId, (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId);
+            }
+
             // 저장 버튼을 눌렀을 때만 다이어리-사진 매핑 API를 호출한다.
             // (업로드 직후에는 호출하지 않아 서버에서 3장 제한에 걸리지 않도록 함)
             const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
@@ -365,6 +400,7 @@ export const ImageMetadataComponent = ({ cityId, diaryId, initialCity, initialCo
               ...item,
               photoId: created.photoId,
               isExisting: true,
+              originalPhotoId: undefined,
             };
           });
 

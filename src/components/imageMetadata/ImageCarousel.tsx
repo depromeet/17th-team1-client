@@ -15,6 +15,7 @@ import { TagSelector } from "./TagSelector";
 type ExtendedImageMetadata = ImageMetadata & {
   selectedTag?: ImageTag | null;
   customDate?: string | null;
+  originalImageUrl?: string;
 };
 
 type ImageCarouselProps = {
@@ -22,7 +23,7 @@ type ImageCarouselProps = {
   onRemove: (id: string) => void | Promise<void>;
   onTagChange?: (tag: ImageTag | null) => void;
   onDateChange?: (yearMonth: string | null) => void;
-  onImageUpdate?: (id: string, croppedImage: string) => void;
+  onImageUpdate?: (id: string, croppedImage: string) => void | Promise<void>;
   onLocationChange?: (location: LocationSelection | null) => void;
   isProcessing?: boolean;
 };
@@ -43,7 +44,7 @@ export const ImageCarousel = ({
   const [isDateSelectModalOpen, setIsDateSelectModalOpen] = useState(false);
   const [isLocationSelectModalOpen, setIsLocationSelectModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-  const [originalImage] = useState(image.imagePreview);
+  const [isCropUploading, setIsCropUploading] = useState(false);
   const [currentImage, setCurrentImage] = useState(image.imagePreview);
   const [customDate, setCustomDate] = useState<string | null>(image.customDate ?? toYearMonth(image.timestamp));
   const [customLocation, setCustomLocation] = useState<string | null>(
@@ -67,6 +68,10 @@ export const ImageCarousel = ({
     setCustomLocation(image.location?.nearbyPlaces?.[1] || image.location?.address || null);
   }, [image.location?.address, image.location?.nearbyPlaces]);
 
+  useEffect(() => {
+    setCurrentImage(image.imagePreview);
+  }, [image.imagePreview]);
+
   const handleTagSelect = (tag: ImageTag) => {
     setSelectedTag(tag);
     onTagChange?.(tag);
@@ -88,9 +93,13 @@ export const ImageCarousel = ({
     onDateChange?.(null);
   };
 
-  const handleSaveCroppedImage = (croppedImage: string) => {
-    setCurrentImage(croppedImage);
-    onImageUpdate?.(image.id, croppedImage);
+  const handleSaveCroppedImage = async (croppedImage: string) => {
+    setIsCropUploading(true);
+    try {
+      await onImageUpdate?.(image.id, croppedImage);
+    } finally {
+      setIsCropUploading(false);
+    }
   };
 
   const handleConfirmLocation = (location: LocationSelection) => {
@@ -147,8 +156,14 @@ export const ImageCarousel = ({
           className="w-full h-full bg-black relative cursor-pointer overflow-hidden"
           onClick={() => setIsCropModalOpen(true)}
           aria-label="이미지 편집"
+          disabled={isCropUploading}
         >
           <Image src={currentImage} alt={shown.fileName} fill sizes="251px" className="object-cover" unoptimized />
+          {isCropUploading && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <div className="text-white text-sm">업로드 중...</div>
+            </div>
+          )}
         </button>
       </div>
       <div className="absolute top-3 left-3">
@@ -200,7 +215,7 @@ export const ImageCarousel = ({
       />
       {isCropModalOpen && (
         <ImageCropModal
-          image={originalImage}
+          image={image.originalImageUrl || currentImage}
           onClose={() => setIsCropModalOpen(false)}
           onSave={handleSaveCroppedImage}
         />

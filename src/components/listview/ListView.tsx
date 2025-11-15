@@ -216,7 +216,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                         key={`${group.countryCode}-${name}`}
                         type="button"
                         className="border rounded-[12px]"
-                        style={{ borderColor: "var(--color-border-absolutewhite--4)" }}
+                        style={{ borderColor: "var(--color-border-absolutewhite--8)" }}
                         onClick={handleCityClick}
                         disabled={!isClickable}
                       >

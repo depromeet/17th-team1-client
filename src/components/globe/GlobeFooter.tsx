@@ -93,7 +93,7 @@ export const GlobeFooter = ({
         />
         <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
           <ListIcon
-            className="w-8 h-8 transition-colors duration-200 ease-in-out"
+            className="w-6 h-6 transition-colors duration-200 ease-in-out"
             style={{ color: isListMode ? "var(--color-surface-primary)" : "white" }}
           />
         </span>

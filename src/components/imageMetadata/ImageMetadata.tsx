@@ -89,10 +89,43 @@ export const ImageMetadataComponent = ({
 
         const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
 
-        // 기존 사진 데이터를 변환하면서 좌표 형식 placeName은 reverse geocoding 실행
-        // 서버에서 받은 photos를 photoId 순서대로 정렬하여 원래 순서 유지
-        // photoId가 작을수록 먼저 업로드된 사진이므로, photoId로 정렬
-        const sortedPhotos = [...diary.photos].sort((a, b) => a.photoId - b.photoId);
+        // sessionStorage에서 저장된 순서 매핑 불러오기
+        const photoCodeToIndexMap = new Map<string, number>();
+        const savedOrder = sessionStorage.getItem(`diary-${diaryId}-photo-order`);
+        if (savedOrder) {
+          try {
+            const orderMapping = JSON.parse(savedOrder) as Record<string, number>;
+            Object.entries(orderMapping).forEach(([photoCode, index]) => {
+              photoCodeToIndexMap.set(photoCode, index);
+            });
+          } catch (e) {
+            // JSON 파싱 실패 시 무시
+          }
+        }
+
+        // 현재 metadataList에서도 originalIndex 정보 병합
+        metadataList.forEach((item) => {
+          if (item.photoCode && item.originalIndex !== undefined && !photoCodeToIndexMap.has(item.photoCode)) {
+            photoCodeToIndexMap.set(item.photoCode, item.originalIndex);
+          }
+        });
+
+        // 서버에서 받은 photos를 원래 순서대로 정렬
+        const sortedPhotos = [...diary.photos].sort((a, b) => {
+          const indexA = photoCodeToIndexMap.get(a.photoCode) ?? Number.MAX_SAFE_INTEGER;
+          const indexB = photoCodeToIndexMap.get(b.photoCode) ?? Number.MAX_SAFE_INTEGER;
+
+          // 둘 다 매핑에 있으면 originalIndex로 정렬
+          if (indexA !== Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER) {
+            return indexA - indexB;
+          }
+          // 둘 다 매핑에 없으면 photoId로 정렬 (새로 추가된 항목)
+          if (indexA === Number.MAX_SAFE_INTEGER && indexB === Number.MAX_SAFE_INTEGER) {
+            return a.photoId - b.photoId;
+          }
+          // 하나만 매핑에 있으면 매핑된 것을 앞에
+          return indexA === Number.MAX_SAFE_INTEGER ? 1 : -1;
+        });
 
         const mappedMetadata = await Promise.all(
           sortedPhotos.map(async (photo, index) => {
@@ -135,6 +168,9 @@ export const ImageMetadataComponent = ({
                   }
                 : undefined;
 
+            // photoCode로 원래 순서 복원, 없으면 현재 index 사용
+            const originalIndex = photoCodeToIndexMap.get(photo.photoCode) ?? index;
+
             return {
               id: `existing-${photo.photoId}-${index}`,
               fileName: photo.photoCode.split("/").pop() ?? `photo-${photo.photoId}`,
@@ -157,7 +193,7 @@ export const ImageMetadataComponent = ({
               photoId: photo.photoId,
               photoCode: photo.photoCode,
               isExisting: true,
-              originalIndex: index,
+              originalIndex,
             };
           }),
         );
@@ -375,6 +411,17 @@ export const ImageMetadataComponent = ({
     setIsProcessing(true);
 
     try {
+      // sessionStorage에 photoCode-originalIndex 매핑 저장 (재조회 시 순서 복원용)
+      if (isEditMode && typeof diaryId === "number") {
+        const orderMapping: Record<string, number> = {};
+        metadataList.forEach((item) => {
+          if (item.photoCode && item.originalIndex !== undefined) {
+            orderMapping[item.photoCode] = item.originalIndex;
+          }
+        });
+        sessionStorage.setItem(`diary-${diaryId}-photo-order`, JSON.stringify(orderMapping));
+      }
+
       const fallbackMonth = new Date().toISOString().slice(0, 7).replace("-", "");
 
       let currentMetadataList = metadataList;
@@ -482,8 +529,15 @@ export const ImageMetadataComponent = ({
         }
       }
 
+      // originalIndex 순서대로 정렬하여 서버에 저장 (순서 유지)
+      const sortedMetadataList = [...currentMetadataList].sort((a, b) => {
+        const indexA = a.originalIndex ?? Number.MAX_SAFE_INTEGER;
+        const indexB = b.originalIndex ?? Number.MAX_SAFE_INTEGER;
+        return indexA - indexB;
+      });
+
       const photos = await Promise.all(
-        currentMetadataList.map(async (metadata) => {
+        sortedMetadataList.map(async (metadata) => {
           if (!metadata.photoCode) {
             throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
           }

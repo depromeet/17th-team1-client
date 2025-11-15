@@ -28,9 +28,41 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
   const defaultProfileImage = "/assets/default-profile.png";
   const userAvatar = profileImageUrl ? baseUrl + profileImageUrl : defaultProfileImage;
 
-  // photos를 photoId 순서대로 정렬하여 원래 업로드 순서 유지
-  // photoId가 작을수록 먼저 업로드된 사진이므로, photoId로 정렬
-  const sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
+  // sessionStorage에서 저장된 사진 순서 매핑 로드
+  let sortedPhotos = [...photos];
+  if (typeof window !== "undefined") {
+    try {
+      const savedOrder = sessionStorage.getItem(`diary-${diaryId}-photo-order`);
+      if (savedOrder) {
+        const orderMapping = JSON.parse(savedOrder) as Record<string, number>;
+        // photoCode를 키로 하는 순서 매핑이 있으면 해당 순서대로 정렬
+        sortedPhotos = [...photos].sort((a, b) => {
+          const indexA = orderMapping[a.photoCode] ?? Number.MAX_SAFE_INTEGER;
+          const indexB = orderMapping[b.photoCode] ?? Number.MAX_SAFE_INTEGER;
+
+          // 둘 다 매핑에 있으면 매핑된 순서로 정렬
+          if (indexA !== Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER) {
+            return indexA - indexB;
+          }
+          // 둘 다 매핑에 없으면 photoId로 정렬 (원래 업로드 순서)
+          if (indexA === Number.MAX_SAFE_INTEGER && indexB === Number.MAX_SAFE_INTEGER) {
+            return a.photoId - b.photoId;
+          }
+          // 하나만 매핑에 있으면 매핑된 것을 앞에
+          return indexA === Number.MAX_SAFE_INTEGER ? 1 : -1;
+        });
+      } else {
+        // sessionStorage에 매핑이 없으면 photoId 순서로 정렬 (기본 동작)
+        sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
+      }
+    } catch (e) {
+      // sessionStorage 접근 실패 시 photoId로 정렬
+      sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
+    }
+  } else {
+    // 서버사이드에서는 photoId로 정렬 (sessionStorage 사용 불가)
+    sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
+  }
 
   const imageMetadata = sortedPhotos.map(({ photoCode, takenMonth, placeName, tag }) => {
     return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
 import { Header } from "../common/Header";
@@ -15,22 +15,61 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null);
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    let blobUrlToCleanup: string | null = null;
+
+    const loadImage = async () => {
+      try {
+        const blobUrl = await fetchImageAsBlob(image);
+        blobUrlToCleanup = blobUrl;
+        if (!cancelled) {
+          setImageBlobUrl(blobUrl);
+        }
+      } catch {
+        if (!cancelled) {
+          alert("이미지 로드에 실패했습니다.");
+          onClose();
+        }
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      cancelled = true;
+      if (blobUrlToCleanup) {
+        URL.revokeObjectURL(blobUrlToCleanup);
+      }
+    };
+  }, [image, onClose]);
+
   const createCroppedImage = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels || !imageBlobUrl) return;
 
     try {
-      const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+      const croppedImage = await getCroppedImg(imageBlobUrl, croppedAreaPixels);
       onSave(croppedImage);
       onClose();
     } catch (error) {
-      console.error("Failed to crop image:", error);
+      alert("이미지 크롭에 실패했습니다. 다시 시도해주세요.");
+      throw error;
     }
   };
+
+  if (!imageBlobUrl) {
+    return (
+      <div className="image-crop-modal fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="text-white text-sm">이미지 로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="image-crop-modal fixed inset-0 z-50 bg-black">
@@ -50,7 +89,7 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
         {/* Crop Area - Full screen */}
         <div className="relative w-full h-full">
           <Cropper
-            image={image}
+            image={imageBlobUrl}
             crop={crop}
             zoom={zoom}
             aspect={9 / 16}
@@ -72,14 +111,49 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
 };
 
 /**
+ * S3 이미지를 Blob URL로 변환합니다 (CORS 우회).
+ *
+ * @param {string} url - 원본 이미지 URL
+ * @returns {Promise<string>} Blob URL
+ */
+const fetchImageAsBlob = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url, {
+      mode: "cors",
+      credentials: "include",
+      cache: "force-cache",
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    }
+  } catch (error) {
+    // CORS 또는 네트워크 에러 발생 시 Next.js Image Proxy로 fallback
+    console.warn("Direct S3 fetch failed, falling back to Next.js proxy:", error);
+  }
+
+  // Fallback: Next.js Image Proxy 사용
+  const proxyUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=95`;
+  const proxyResponse = await fetch(proxyUrl);
+
+  if (!proxyResponse.ok) {
+    throw new Error("Failed to fetch image via proxy");
+  }
+
+  const blob = await proxyResponse.blob();
+  return URL.createObjectURL(blob);
+};
+
+/**
  * 이미지를 크롭하여 새로운 이미지를 생성합니다.
  *
- * @param {string} imageSrc - 원본 이미지 URL
+ * @param {string} imageBlobUrl - Blob URL 형태의 이미지 URL
  * @param {Area} pixelCrop - 크롭 영역 정보
- * @returns {Promise<string>} 크롭된 이미지의 base64 URL
+ * @returns {Promise<string>} 크롭된 이미지의 Blob URL
  */
-const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string> => {
-  const image = await createImage(imageSrc);
+const getCroppedImg = async (imageBlobUrl: string, pixelCrop: Area): Promise<string> => {
+  const image = await createImage(imageBlobUrl);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -123,7 +197,7 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string>
 /**
  * 이미지 URL로부터 HTMLImageElement를 생성합니다.
  *
- * @param {string} url - 이미지 URL
+ * @param {string} url - 이미지 URL (Blob URL)
  * @returns {Promise<HTMLImageElement>} 로드된 이미지 엘리먼트
  */
 const createImage = (url: string): Promise<HTMLImageElement> => {

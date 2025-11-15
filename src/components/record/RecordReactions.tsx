@@ -25,7 +25,6 @@ type FloatingEmoji = {
 type RecordReactionsProps = {
   recordId: string;
   initialReactions?: Reaction[];
-  onReactionUpdate?: (reactions: Reaction[]) => void;
   isOwner?: boolean;
 };
 
@@ -34,7 +33,6 @@ const MAX_EMPTY_SLOTS = 4;
 export const RecordReactions = ({
   recordId,
   initialReactions = [],
-  onReactionUpdate,
   isOwner = false,
 }: RecordReactionsProps) => {
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
@@ -176,7 +174,6 @@ export const RecordReactions = ({
     // 먼저 UI 업데이트 (낙관적 업데이트)
     setReactions((prev) => {
       const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
-      onReactionUpdate?.(updatedReactions);
       return updatedReactions;
     });
 
@@ -201,7 +198,6 @@ export const RecordReactions = ({
       // owner가 아닐 때만 롤백 처리
       setReactions((prev) => {
         const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
-        onReactionUpdate?.(rolledBackReactions);
         return rolledBackReactions;
       });
 
@@ -235,7 +231,6 @@ export const RecordReactions = ({
           const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
           const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
-          onReactionUpdate?.(newOrder);
           return newOrder;
         }
 
@@ -246,14 +241,51 @@ export const RecordReactions = ({
         };
 
         const newReactions = [newReaction, ...prev];
-        onReactionUpdate?.(newReactions);
         return newReactions;
       });
 
       setShowEmojiPicker(false);
     } catch (error) {
+      // "이미 등록된 이모지" 에러인 경우, 기존 이모지의 카운트를 +1
       const errorMessage = error instanceof Error ? error.message : "이모지 등록에 실패했습니다";
-      alert(errorMessage);
+      const isDuplicateError = errorMessage.includes("already") || errorMessage.includes("이미");
+
+      if (isDuplicateError) {
+        try {
+          // 이미 등록된 이모지이므로 pressEmoji를 호출하여 카운트 증가
+          await pressEmoji({
+            diaryId: recordId,
+            code,
+          });
+
+          // 성공 시 로컬 상태 업데이트
+          setReactions((prev) => {
+            const existingReaction = prev.find((r) => r.glyph === glyph);
+
+            if (existingReaction) {
+              const updatedReactions = prev.map((r) =>
+                r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r,
+              );
+
+              const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
+              const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
+              const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
+
+              return newOrder;
+            }
+
+            return prev;
+          });
+
+          setShowEmojiPicker(false);
+        } catch (pressError) {
+          const pressErrorMessage =
+            pressError instanceof Error ? pressError.message : "이모지 처리에 실패했습니다";
+          alert(pressErrorMessage);
+        }
+      } else {
+        alert(errorMessage);
+      }
     }
   };
 

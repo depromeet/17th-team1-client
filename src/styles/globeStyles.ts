@@ -166,9 +166,9 @@ export const createContinentClusterStyles = (index: number = 0, angleOffset: num
     labelWrapper: `
       position: absolute;
       z-index: ${20 + index};
-      top: ${offsetY}px;
-      left: ${offsetX}px;
-      transform: translate(-50%, -50%);
+      top: -3px;
+      left: ${angleOffset === 0 ? "10px" : "-10px"};
+      transform: translateY(-50%);
       padding: 1.5px;
       border-radius: 50px;
       background: radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%);

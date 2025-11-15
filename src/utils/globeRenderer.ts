@@ -5,8 +5,8 @@
  * - 도시 버블: 국기 + 도시명, 반투명 배경
  */
 
-// 우측 액션 버튼 SVG (8도 회전)
-const PLUS_BUTTON_SVG = `<svg width="37" height="44" viewBox="0 0 37 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+// 우측 액션 버튼 SVG - 국가 클러스터용 (그라디언트 border)
+const PLUS_BUTTON_SVG_COUNTRY = `<svg width="37" height="44" viewBox="0 0 37 44" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="6.84742" y="0.564721" width="29" height="39" rx="3.5" transform="rotate(8 6.84742 0.564721)" fill="#112036"/>
   <rect x="6.84742" y="0.564721" width="29" height="39" rx="3.5" transform="rotate(8 6.84742 0.564721)" stroke="url(#paint0_linear_269_4694)"/>
   <path d="M17.2129 26.6421L17.758 22.7633L13.8796 22.2182C13.4694 22.1605 13.1836 21.7813 13.2413 21.3711C13.299 20.961 13.6782 20.6752 14.0884 20.7328L17.9668 21.2779L18.5118 17.3995C18.5695 16.9893 18.9488 16.7036 19.3589 16.7612C19.7691 16.8188 20.0549 17.1981 19.9972 17.6082L19.4522 21.4866L23.331 22.0318C23.7411 22.0895 24.0269 22.4688 23.9693 22.8788C23.9117 23.289 23.5324 23.5747 23.1223 23.5172L19.2434 22.972L18.6983 26.8509C18.6405 27.261 18.2613 27.5469 17.8512 27.4892C17.4411 27.4315 17.1553 27.0522 17.2129 26.6421Z" fill="#4A5E6D"/>
@@ -16,6 +16,13 @@ const PLUS_BUTTON_SVG = `<svg width="37" height="44" viewBox="0 0 37 44" fill="n
       <stop offset="1" stop-color="#3C79B3"/>
     </linearGradient>
   </defs>
+</svg>`;
+
+// 우측 액션 버튼 SVG - 도시 클러스터용 (white border)
+const PLUS_BUTTON_SVG_CITY = `<svg width="37" height="44" viewBox="0 0 37 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6.84742" y="0.564721" width="29" height="39" rx="3.5" transform="rotate(8 6.84742 0.564721)" fill="#112036"/>
+  <rect x="6.84742" y="0.564721" width="29" height="39" rx="3.5" transform="rotate(8 6.84742 0.564721)" stroke="white"/>
+  <path d="M17.2129 26.6421L17.758 22.7633L13.8796 22.2182C13.4694 22.1605 13.1836 21.7813 13.2413 21.3711C13.299 20.961 13.6782 20.6752 14.0884 20.7328L17.9668 21.2779L18.5118 17.3995C18.5695 16.9893 18.9488 16.7036 19.3589 16.7612C19.7691 16.8188 20.0549 17.1981 19.9972 17.6082L19.4522 21.4866L23.331 22.0318C23.7411 22.0895 24.0269 22.4688 23.9693 22.8788C23.9117 23.289 23.5324 23.5747 23.1223 23.5172L19.2434 22.972L18.6983 26.8509C18.6405 27.261 18.2613 27.5469 17.8512 27.4892C17.4411 27.4315 17.1553 27.0522 17.2129 26.6421Z" fill="#4A5E6D"/>
 </svg>`;
 
 // 라벨 위치 계산 함수 (클릭 기반 시스템용)
@@ -143,7 +150,7 @@ export const createCityHTML = (
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
       <div style="${styles.actionButton(labelWidth / 2)}">
-        ${PLUS_BUTTON_SVG}
+        ${PLUS_BUTTON_SVG_CITY}
       </div>
     `;
   }
@@ -187,10 +194,6 @@ export const createContinentClusterHTML = (
   _flagEmoji: string,
 ) => {
   return `
-    <!-- 중심 dot -->
-    <div style="${styles.dot}"></div>
-    <!-- 단색 수평선 -->
-    <div style="${styles.horizontalLine}"></div>
     <!-- 외부 wrapper - 그라디언트 border -->
     <div style="${styles.labelWrapper}">
       <!-- 내부 label - 실제 콘텐츠 -->
@@ -276,7 +279,7 @@ export const createCountryClusterHTML = (
       </div>
       <!-- 우측 액션 버튼 (+ 아이콘) -->
       <div style="${styles.actionButton(labelWidth / 2)}">
-        ${PLUS_BUTTON_SVG}
+        ${PLUS_BUTTON_SVG_COUNTRY}
       </div>
     `;
   }

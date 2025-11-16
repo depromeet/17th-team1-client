@@ -185,7 +185,7 @@ export const GlobeFooter = ({
             {/* 홈으로 이동 버튼 */}
             <button
               type="button"
-              className="w-full flex items-center justify-center px-12 py-[17px] rounded-[1000px] transition-all hover:opacity-80 cursor-pointer"
+              className="w-full flex items-center justify-center px-12 py-[17px] rounded-2xl transition-all hover:opacity-80 cursor-pointer"
               style={{
                 background: "rgb(13, 12, 20) 100%)",
               }}

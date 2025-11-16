@@ -17,12 +17,12 @@ type ImageUploadButtonProps = {
 };
 
 const iconButtonStyles = cn(
-  "inline-flex justify-center items-center rounded-[16px] outline outline-gray-200 bg-white disabled:opacity-40 text-gray-700 font-medium",
+  "inline-flex justify-center items-center rounded-2xl outline outline-gray-200 bg-white disabled:opacity-40 text-gray-700 font-medium",
   "enabled:hover:bg-gray-50 enabled:hover:outline-gray-300 enabled:hover:text-gray-900 disabled:opacity-40",
 );
 
 export const buttonVariants = cva(
-  "inline-flex justify-center items-center rounded-[16px] disabled:opacity-40 cursor-pointer",
+  "inline-flex justify-center items-center rounded-2xl disabled:opacity-40 cursor-pointer",
   {
     variants: {
       variant: {
@@ -35,7 +35,7 @@ export const buttonVariants = cva(
         xs: "p-1 h-6 text-xs",
         sm: "px-[8px] py-[6px] h-[30px] text-xs",
         md: "px-[10px] py-[8px] h-[36px] text-sm",
-        lg: "px-[12px] py-[18px] h-[56px] text-lg font-bold rounded-[16px]",
+        lg: "px-[12px] py-[18px] h-[56px] text-lg font-bold rounded-2xl",
       },
     },
     defaultVariants: {

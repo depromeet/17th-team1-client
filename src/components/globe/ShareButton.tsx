@@ -98,7 +98,7 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
         type="button"
         onClick={handleShare}
         disabled={isLoading}
-        className="w-full flex items-center justify-center px-12 py-[17px] rounded-[1000px] bg-[#00d9ff] transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center px-12 py-[17px] rounded-2xl bg-[#00d9ff] transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={isShared ? "공유 완료" : isLoading ? "공유 중..." : "내 지구본 자랑하기"}
       >
         <p className="font-bold text-base text-black leading-[1.3]">{isShared ? "공유 완료!" : "내 지구본 자랑하기"}</p>

@@ -4,6 +4,7 @@ import type { EmojiClickData } from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
@@ -31,6 +32,7 @@ type RecordReactionsProps = {
 const MAX_EMPTY_SLOTS = 4;
 
 export const RecordReactions = ({ recordId, initialReactions = [], isOwner = false }: RecordReactionsProps) => {
+  const router = useRouter();
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -107,6 +109,21 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       window.visualViewport?.removeEventListener("resize", handleResize);
     };
   }, [showEmojiPicker]);
+
+  const handleErrorAlert = (errorMessage: string) => {
+    const is401Error =
+      errorMessage.includes("401") ||
+      errorMessage.toLowerCase().includes("unauthorized") ||
+      errorMessage.toLowerCase().includes("인증");
+
+    if (is401Error) {
+      if (window.confirm(errorMessage)) {
+        router.push("/error?type=401");
+      }
+    } else {
+      alert(errorMessage);
+    }
+  };
 
   const createFloatingEmojiWithRect = (emoji: string, rect: DOMRect) => {
     // SSR 환경에서 실행되지 않도록 확인
@@ -235,7 +252,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
 
       const errorMessage = error instanceof Error ? error.message : "이모지 누르기에 실패했습니다";
-      alert(errorMessage);
+      handleErrorAlert(errorMessage);
     }
   };
 
@@ -343,10 +360,10 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           setShowEmojiPicker(false);
         } catch (pressError) {
           const pressErrorMessage = pressError instanceof Error ? pressError.message : "이모지 처리에 실패했습니다";
-          alert(pressErrorMessage);
+          handleErrorAlert(pressErrorMessage);
         }
       } else {
-        alert(errorMessage);
+        handleErrorAlert(errorMessage);
       }
     }
   };

@@ -112,9 +112,16 @@ export const sortDiariesByCountryGrouping = <T extends { cityId: number; city: s
   const result: typeof diaries = [];
   const addedCountries = new Set<string>();
 
-  // 5-1. 선택한 국가 먼저 추가
+  // 5-1. 선택한 국가 먼저 추가 (선택한 도시를 첫 번째로)
   const selectedCountryDiaries = countryGroups.get(selectedCountry);
   if (selectedCountryDiaries) {
+    // 선택한 도시를 찾아서 맨 앞으로 이동
+    const selectedIndex = selectedCountryDiaries.findIndex((d) => d.cityId === selectedCityId);
+    if (selectedIndex > 0) {
+      // 선택한 도시를 맨 앞으로
+      const selectedDiaryItem = selectedCountryDiaries.splice(selectedIndex, 1)[0];
+      selectedCountryDiaries.unshift(selectedDiaryItem);
+    }
     result.push(...selectedCountryDiaries);
     addedCountries.add(selectedCountry);
   }

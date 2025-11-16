@@ -37,6 +37,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastToastTimeRef = useRef<number>(0);
@@ -72,6 +73,40 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       timersRef.current = [];
     };
   }, []);
+
+  // 키보드 높이 감지 (안드로이드 대응)
+  useEffect(() => {
+    if (!showEmojiPicker) {
+      setKeyboardHeight(0);
+      return;
+    }
+
+    // Visual Viewport API로 키보드 높이 감지
+    const handleResize = () => {
+      if (typeof window === "undefined" || !window.visualViewport) return;
+
+      const visualViewportHeight = window.visualViewport.height;
+      const windowHeight = window.innerHeight;
+      const calculatedKeyboardHeight = windowHeight - visualViewportHeight;
+
+      // 키보드가 실제로 나타났을 때만 업데이트 (50px 이상)
+      if (calculatedKeyboardHeight > 50) {
+        setKeyboardHeight(calculatedKeyboardHeight);
+      } else {
+        setKeyboardHeight(0);
+      }
+    };
+
+    // 피커가 열릴 때 약간의 딜레이 후 초기 높이 계산
+    const initialTimer = setTimeout(handleResize, 100);
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(initialTimer);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, [showEmojiPicker]);
 
   const createFloatingEmojiWithRect = (emoji: string, rect: DOMRect) => {
     // SSR 환경에서 실행되지 않도록 확인
@@ -460,7 +495,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
               <div
                 className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-[24px] bg-[#0E1724] overflow-hidden"
                 style={{
-                  paddingBottom: "env(safe-area-inset-bottom)",
+                  paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : "env(safe-area-inset-bottom)",
                 }}
               >
                 <EmojiPicker

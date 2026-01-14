@@ -38,7 +38,7 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
         {!isRegistered && (
           <div
             className={`inline-flex justify-center items-center rounded-md p-1 h-6 text-xs w-6 ${
-              isSelected ? "bg-transparent" : "bg-[#293949]"
+              isSelected ? "bg-transparent" : "bg-surface-button-gray"
             }`}
           >
             {isSelected ? (

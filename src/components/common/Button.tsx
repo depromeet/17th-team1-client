@@ -27,7 +27,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-blue-theme enabled:hover:bg-blue-200 text-black",
-        gray: "bg-[#293949] enabled:hover:bg-gray-1000 text-white",
+        gray: "bg-surface-button-gray enabled:hover:bg-gray-1000 text-white",
         black: "bg-[#0C0D15] enabled:hover:bg-gray-1000 text-white",
         disabled: "bg-[#243146] enabled:hover:bg-gray-800 text-text-thirdly",
       },
@@ -139,7 +139,7 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
             alt="업로드된 이미지"
             width={90}
             height={90}
-            className="flex aspect-square !w-full shrink-0 items-center gap-10 self-stretch rounded-md object-cover"
+            className="flex aspect-square w-full! shrink-0 items-center gap-10 self-stretch rounded-md object-cover"
           />
         ) : (
           <>

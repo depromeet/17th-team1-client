@@ -3,6 +3,7 @@
     "next/core-web-vitals",
     "next/typescript",
     "plugin:@tanstack/eslint-plugin-query/recommended",
+    "plugin:react-you-might-not-need-an-effect/legacy-recommended",
     "prettier"
   ],
   "rules": {
@@ -19,5 +20,5 @@
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-empty-object-type": "warn"
   },
-  "ignorePatterns": ["node_modules/", ".next/", "out/", "dist/"]
+  "ignorePatterns": ["node_modules/", ".next/", "out/", "dist/", "next-env.d.ts", "scripts/"]
 }

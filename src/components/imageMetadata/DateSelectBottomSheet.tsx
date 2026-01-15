@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { dateSelectSchema, DateSelectFormData, formatYearMonth, extractDigits } from "@/schemas/date";
 import { BaseInputBottomSheet } from "./BaseInputBottomSheet";
 
 type DateSelectBottomSheetProps = {
@@ -10,61 +13,67 @@ type DateSelectBottomSheetProps = {
 };
 
 export const DateSelectBottomSheet = ({ isOpen, onClose, onConfirm }: DateSelectBottomSheetProps) => {
-  const [rawInput, setRawInput] = useState("");
+  const {
+    watch,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { isValid },
+  } = useForm<DateSelectFormData>({
+    resolver: standardSchemaResolver(dateSelectSchema),
+    defaultValues: {
+      date: "",
+    },
+    mode: "onChange",
+  });
 
-  const formatDisplayValue = (digits: string) => {
-    if (digits.length === 0) return "";
-    if (digits.length <= 4) return digits;
-    return `${digits.slice(0, 4)}.${digits.slice(4, 6)}`;
-  };
+  const dateValue = watch("date");
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/[^\d]/g, "");
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const digits = extractDigits(event.target.value);
 
-    if (value.length <= 6) {
-      setRawInput(value);
-    }
-  };
+      if (digits.length <= 6) {
+        const formatted = formatYearMonth(digits);
+        setValue("date", formatted, { shouldValidate: true });
+      }
+    },
+    [setValue]
+  );
 
-  const dateInput = formatDisplayValue(rawInput);
-
-  const isValidDate = () => {
-    const dateRegex = /^\d{4}\.\d{2}$/;
-    if (!dateRegex.test(dateInput)) return false;
-
-    const [, month] = dateInput.split(".").map(Number);
-    if (month < 1 || month > 12) return false;
-
-    return true;
-  };
-
-  const handleConfirm = () => {
-    if (isValidDate()) {
-      onConfirm?.(dateInput);
+  const onSubmit = useCallback(
+    (data: DateSelectFormData) => {
+      onConfirm?.(data.date);
       onClose();
-      setRawInput("");
-    }
-  };
+      reset({ date: "" });
+    },
+    [onConfirm, onClose, reset]
+  );
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     onClose();
-    setRawInput("");
-  };
+    reset({ date: "" });
+  }, [onClose, reset]);
+
+  // 바텀시트가 열릴 때 폼 리셋
+  useEffect(() => {
+    if (isOpen) reset({ date: "" });
+  }, [isOpen, reset]);
 
   return (
     <BaseInputBottomSheet
       isOpen={isOpen}
       onClose={handleClose}
-      onConfirm={handleConfirm}
+      onConfirm={handleSubmit(onSubmit)}
       title="날짜 추가"
-      isValid={isValidDate()}
+      isValid={isValid}
     >
       <input
         type="text"
-        value={dateInput}
+        value={dateValue}
         onChange={handleInputChange}
         placeholder="YYYY.MM"
-        className="w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border-[1px] border-[#243246] focus:border-[#778A9B] rounded-2xl px-4 py-[14px] text-base transition-colors"
+        className="w-full bg-[#1B293E] outline-none text-white placeholder-text-thirdly border border-[#243246] focus:border-[#778A9B] rounded-2xl px-4 py-3.5 text-base transition-colors"
         inputMode="numeric"
       />
     </BaseInputBottomSheet>

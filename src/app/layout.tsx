@@ -7,7 +7,13 @@ export const metadata: Metadata = {
   title: "Globber(글로버) - 지구본 위에서, 나의 여행을 한눈에!",
   description: "지구본으로 완성하는 여행 기록 서비스",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", sizes: "96x96", type: "image/png" },
+    ],
+  },
+  verification: {
+    google: 'MdK2I7MZCVFYo8ETh4nNJGQY4V2rug-_9fkgw-G4H94',
   },
 };
 

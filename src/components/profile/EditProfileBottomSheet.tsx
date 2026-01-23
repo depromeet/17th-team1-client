@@ -1,8 +1,11 @@
 "use client";
 
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import heic2any from "heic2any";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import {
   BottomSheet,
@@ -13,6 +16,7 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
+import { editProfileSchema, EditProfileFormData, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {
@@ -30,69 +34,136 @@ export const EditProfileBottomSheet = ({
   initialImage,
   onSave,
 }: EditProfileBottomSheetProps) => {
-  const MAX_NICKNAME_LENGTH = 10;
-
   const nicknameId = useId();
-  const [name, setName] = useState(initialName);
-  const [image, setImage] = useState(initialImage);
-  const [selectedImageFile, setSelectedImageFile] = useState<File | undefined>();
+
+  // 사용자가 새로 선택한 이미지의 프리뷰 URL (선택하지 않았으면 null)
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasChanges = useMemo(
-    () => name !== initialName || selectedImageFile !== undefined,
-    [name, initialName, selectedImageFile],
+  const prevIsOpenRef = useRef(isOpen);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<EditProfileFormData>({
+    resolver: standardSchemaResolver(editProfileSchema),
+    defaultValues: {
+      nickname: initialName,
+      imageFile: undefined,
+    },
+    mode: "onChange",
+  });
+
+  // 바텀시트가 열릴 때 폼 리셋
+  // Note: 바텀시트가 열릴 때마다 깨끗한 상태로 초기화하는 것이 명확한 요구사항입니다.
+  // prop 변경에 반응하는 effect 패턴을 의도적으로 사용합니다.
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
+      reset({
+        nickname: initialName,
+        imageFile: undefined,
+      });
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change
+      setSelectedImagePreview(null);
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, initialName, reset]);
+
+  const nickname = watch("nickname");
+  const imageFile = watch("imageFile");
+  const hasChanges = isDirty || imageFile !== undefined;
+
+  // 표시할 이미지를 렌더링 시 직접 계산
+  const normalizedInitialImage = initialImage?.trim();
+  const displayImage = selectedImagePreview || normalizedInitialImage || "/assets/default-profile.png";
+
+  const handleImageChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const originalFile = e.target.files?.[0];
+      if (!originalFile) return;
+
+      let file = originalFile;
+
+      // HEIC 파일 감지 및 변환
+      const isHeic =
+        originalFile.type === "image/heic" ||
+        originalFile.type === "image/heif" ||
+        originalFile.name.toLowerCase().endsWith(".heic") ||
+        originalFile.name.toLowerCase().endsWith(".heif");
+
+      if (isHeic) {
+        try {
+          const convertedBlob = await heic2any({
+            blob: originalFile,
+            toType: "image/jpeg",
+            quality: 0.9,
+          });
+
+          // heic2any는 Blob 또는 Blob[]을 반환할 수 있음
+          const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+
+          // Blob을 File 객체로 변환
+          const fileName = originalFile.name.replace(/\.(heic|heif)$/i, ".jpg");
+          file = new File([blob], fileName, { type: "image/jpeg" });
+        } catch (error) {
+          console.error("HEIC 변환 실패:", error);
+          alert("HEIC 이미지를 변환하는데 실패했습니다. 다른 이미지를 선택해주세요.");
+          e.target.value = "";
+          return;
+        }
+      }
+
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
+        alert(validation.error);
+        e.target.value = "";
+
+        return;
+      }
+
+      // React Hook Form에 파일 설정
+      setValue("imageFile", file, { shouldDirty: true, shouldValidate: true });
+
+      // 로컬 프리뷰 표시
+      const input = e.target;
+      const reader = new FileReader();
+
+      reader.onerror = () => {
+        alert("이미지를 불러오는데 실패했습니다.");
+        setValue("imageFile", undefined, { shouldDirty: true, shouldValidate: true });
+        setSelectedImagePreview(null);
+        input.value = "";
+      };
+      reader.onload = event => {
+        const result = event.target?.result as string;
+        setSelectedImagePreview(result);
+      };
+
+      reader.readAsDataURL(file);
+    },
+    [setValue]
   );
 
-  const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // 파일 크기 제한 (예: 5MB)
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      alert("이미지 크기는 5MB 이하여야 합니다.");
-      return;
-    }
-
-    // 파일 타입 검증
-    if (!file.type.startsWith("image/")) {
-      alert("이미지 파일만 업로드 가능합니다.");
-      return;
-    }
-
-    // 파일 저장 (저장 버튼 클릭 시 업로드)
-    setSelectedImageFile(file);
-
-    // 로컬 프리뷰 표시
-    const reader = new FileReader();
-    reader.onerror = () => {
-      alert("이미지를 불러오는데 실패했습니다.");
-    };
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      setImage(result);
-    };
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      await onSave(name, selectedImageFile);
-      onOpenChange(false);
-    } catch (error) {
-      console.error("프로필 저장 실패:", error);
-      alert("프로필 저장에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [name, selectedImageFile, onSave, onOpenChange]);
-
-  useEffect(() => {
-    setName(initialName);
-    setImage(initialImage);
-    setSelectedImageFile(undefined);
-  }, [initialName, initialImage]);
+  const onSubmit = useCallback(
+    async (data: EditProfileFormData) => {
+      try {
+        setIsLoading(true);
+        await onSave(data.nickname, data.imageFile);
+        onOpenChange(false);
+      } catch (error) {
+        console.error("프로필 저장 실패:", error);
+        alert("프로필 저장에 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [onSave, onOpenChange]
+  );
 
   return (
     <BottomSheet open={isOpen} onOpenChange={onOpenChange}>
@@ -111,12 +182,12 @@ export const EditProfileBottomSheet = ({
           </BottomSheetTitle>
 
           <Button
-            onClick={handleSave}
-            disabled={isLoading || !hasChanges || name.length === 0}
+            onClick={handleSubmit(onSubmit)}
+            disabled={isLoading || !hasChanges || !nickname || nickname.length === 0}
             className={cn(
               "absolute right-4 top-1/2 -translate-y-1/2",
               "bg-transparent text-base font-bold px-2 py-1.5",
-              isLoading || !hasChanges || name.length === 0 ? "text-text-thirdly" : "text-blue-theme",
+              isLoading || !hasChanges || !nickname || nickname.length === 0 ? "text-text-thirdly" : "text-blue-theme"
             )}
             variant="primary"
           >
@@ -128,7 +199,7 @@ export const EditProfileBottomSheet = ({
           {/* 프로필 이미지 섹션 */}
           <div className="flex flex-col items-center gap-2.5">
             <div className="relative w-[120px] h-[120px] rounded-full overflow-hidden bg-surface-placeholder--16">
-              <Image src={image || "/assets/default-profile.png"} alt="프로필 이미지" fill className="object-cover" />
+              <Image src={displayImage} alt="프로필 이미지" fill className="object-cover" />
             </div>
 
             <label
@@ -136,7 +207,7 @@ export const EditProfileBottomSheet = ({
                 "text-xs font-medium underline transition-colors",
                 isLoading
                   ? "text-text-thirdly cursor-not-allowed"
-                  : "text-text-secondary cursor-pointer hover:text-text-primary",
+                  : "text-text-secondary cursor-pointer hover:text-text-primary"
               )}
             >
               {isLoading ? "저장 중..." : "이미지 변경"}
@@ -159,22 +230,17 @@ export const EditProfileBottomSheet = ({
               <input
                 id={nicknameId}
                 type="text"
-                value={name}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length <= MAX_NICKNAME_LENGTH) {
-                    setName(value);
-                  }
-                }}
-                maxLength={MAX_NICKNAME_LENGTH}
+                {...register("nickname")}
+                maxLength={PROFILE_VALIDATION.MAX_NICKNAME_LENGTH}
                 placeholder="닉네임을 입력하세요"
                 className={cn(
                   "w-full h-[50px] px-4 py-3.5",
-                  "rounded-2xl border border-[rgba(255,255,255,0.04)]",
-                  "bg-gradient-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)], bg-surface-thirdly",
+                  "rounded-2xl border",
+                  errors.nickname ? "border-red-500" : "border-[rgba(255,255,255,0.04)]",
+                  "bg-linear-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)] bg-surface-thirdly",
                   "text-base font-medium text-white",
                   "placeholder:text-text-thirdly",
-                  "outline-none focus:border-blue-theme transition-colors",
+                  "outline-none focus:border-blue-theme transition-colors"
                 )}
                 style={{
                   backgroundImage:
@@ -185,13 +251,17 @@ export const EditProfileBottomSheet = ({
                 <span
                   className={cn(
                     "text-xs font-medium transition-colors",
-                    name.length === MAX_NICKNAME_LENGTH ? "text-white" : "text-text-thirdly",
+                    (nickname?.length ?? 0) === PROFILE_VALIDATION.MAX_NICKNAME_LENGTH
+                      ? "text-white"
+                      : "text-text-thirdly"
                   )}
                 >
-                  {name.length} / {MAX_NICKNAME_LENGTH}
+                  {nickname?.length ?? 0} / {PROFILE_VALIDATION.MAX_NICKNAME_LENGTH}
                 </span>
               </div>
             </div>
+            {/* 에러 메시지 */}
+            {errors.nickname && <span className="text-xs text-red-500 mt-1">{errors.nickname.message}</span>}
           </div>
         </BottomSheetBody>
       </BottomSheetContent>

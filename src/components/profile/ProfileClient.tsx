@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import { EditProfileBottomSheet } from "@/components/profile/EditProfileBottomSheet";
@@ -12,6 +12,7 @@ import { SettingSection } from "@/components/profile/SettingSection";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
+import { ApiError } from "@/lib/apiClient";
 
 type ProfileClientProps = {
   initialProfile: ProfileData | null;
@@ -23,6 +24,13 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<ProfileData | null>(initialProfile);
+
+  // 프로필 데이터가 없으면 (토큰 만료 등) 에러 페이지로 리다이렉트
+  useEffect(() => {
+    if (initialProfile === null) {
+      router.replace("/error?type=401");
+    }
+  }, [initialProfile, router]);
 
   const handleLogoutConfirm = useCallback(async () => {
     try {
@@ -74,6 +82,12 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         setUserProfile(updatedProfile);
       } catch (error) {
         console.error("프로필 업데이트 실패", error);
+
+        // 401 에러인 경우 에러 페이지로 리다이렉트
+        if (error instanceof ApiError && error.status === 401) {
+          router.replace("/error?type=401");
+          return;
+        }
 
         alert("프로필 업데이트에 실패했습니다. 다시 시도해주세요.");
       } finally {

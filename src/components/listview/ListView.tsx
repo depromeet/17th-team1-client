@@ -204,11 +204,17 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                   {group.cities.map(({ cityId, name, hasRecords, thumbnails }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
-                    const isClickable = hasRecords && cityId;
+                    const countryName = name.includes(",") ? name.split(",").slice(1).join(",").trim() : group.countryName;
 
                     const handleCityClick = () => {
-                      const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
-                      router.push(path);
+                      if (hasRecords && cityId) {
+                        const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
+                        router.push(path);
+                      } else {
+                        const cityQuery = encodeURIComponent(cityName);
+                        const countryQuery = encodeURIComponent(countryName);
+                        router.push(`/image-metadata?cityId=${cityId}&city=${cityQuery}&country=${countryQuery}`);
+                      }
                     };
 
                     return (
@@ -217,7 +223,6 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                         type="button"
                         className="border rounded-[12px] border-none"
                         onClick={handleCityClick}
-                        disabled={!isClickable}
                       >
                         <div
                           className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
@@ -227,7 +232,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
-                            cursor: isClickable ? "pointer" : "default",
+                            cursor: "pointer",
                             border: "1px solid var(--color-border-absolutewhite--8)",
                           }}
                         >

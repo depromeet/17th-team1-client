@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
-import { createMemberTravels } from "@/services/memberService";
 import type { City } from "@/types/city";
 import { NationSelectFooter } from "./NationSelectFooter";
 import { PopularCitiesList } from "./PopularCitiesList";
+import { useCreateMemberTravelsMutation } from "@/hooks/mutation/useMemberMutation";
 
 type NationSelectClientProps = {
   initialCities: City[];
@@ -30,6 +30,7 @@ export const NationSelectClient = ({
   const router = useRouter();
   const registeredCityNamesSet = new Set(registeredCityNames);
 
+  const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
   const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
     useCitySearch();
 
@@ -38,15 +39,15 @@ export const NationSelectClient = ({
   const displayError = isSearchingMode ? searchError : null;
   const displayLoading = isSearchingMode ? isSearching : false;
 
-  const selectedCityIds = new Set(selectedCityList.map((city) => city.id));
+  const selectedCityIds = new Set(selectedCityList.map(city => city.id));
 
   const handleAddCity = (city: City) => {
     if (selectedCityIds.has(city.id)) return;
-    setSelectedCityList((prev) => [...prev, { ...city, selected: true }]);
+    setSelectedCityList(prev => [...prev, { ...city, selected: true }]);
   };
 
   const handleRemoveCity = (cityId: string) => {
-    setSelectedCityList((prev) => prev.filter((city) => city.id !== cityId));
+    setSelectedCityList(prev => prev.filter(city => city.id !== cityId));
   };
 
   const handleCreateGlobe = async () => {
@@ -58,7 +59,7 @@ export const NationSelectClient = ({
     }
 
     try {
-      await createMemberTravels(selectedCityList);
+      await createMemberTravels({ cities: selectedCityList });
       router.push("/globe");
     } catch (error) {
       console.error("Failed to create member travels:", error);
@@ -104,7 +105,7 @@ export const NationSelectClient = ({
                 <SearchInput
                   placeholder="도시/나라를 검색해주세요."
                   value={searchKeyword}
-                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onChange={e => handleSearchChange(e.target.value)}
                 />
               </div>
             )}
@@ -114,7 +115,7 @@ export const NationSelectClient = ({
                 <SearchInput
                   placeholder="도시/나라를 검색해주세요."
                   value={searchKeyword}
-                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onChange={e => handleSearchChange(e.target.value)}
                   className="[&>div]:h-[50px]"
                 />
               </div>

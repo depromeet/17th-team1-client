@@ -1,11 +1,11 @@
 import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
-import { City } from "@/types/city";
-import { CreateTravelRecordsResponse, DeleteTravelRecord, DeleteTravelRecordsResponse } from "@/types/member";
+import {
+  CreateMemberTravelsRequest,
+  CreateTravelRecordsResponse,
+  DeleteMemberTravelRequest,
+  DeleteTravelRecordsResponse,
+} from "@/types/member";
 import { useMutation } from "@tanstack/react-query";
-
-type CreateMemberTravelsRequest = {
-  cities: City[];
-};
 
 export const useCreateMemberTravelsMutation = () => {
   return useMutation<CreateTravelRecordsResponse, Error, CreateMemberTravelsRequest>({
@@ -13,11 +13,6 @@ export const useCreateMemberTravelsMutation = () => {
       return createMemberTravels(data.cities);
     },
   });
-};
-
-type DeleteMemberTravelRequest = {
-  travelRecord: DeleteTravelRecord;
-  token?: string;
 };
 
 export const useDeleteMemberTravelMutation = () => {

@@ -12,19 +12,16 @@ jobs:
       - name: Checkout organization repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - name: Push to fork repository
-        uses: cpina/github-action-push-to-another-repository@main
+      - name: Push to fork repository main branch
         env:
-          API_TOKEN_GITHUB: ${{ secrets.VERCEL_DEPLOY }}
-        with:
-          source-directory: .
-          destination-github-username: yuminnnnni
-          destination-repository-name: 17th-team1-client
-          user-email: ${{ secrets.VERCEL_DEPLOY_EMAIL }}
-          user-name: github-actions[bot]
-          commit-message: ${{ github.event.commits[0].message }}
-          target-branch: main
-          create-target-branch-if-needed: true
+          GITHUB_TOKEN: ${{ secrets.VERCEL_DEPLOY }}
+          FORK_REPO: yuminnnnni/17th-team1-client
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "${{ secrets.VERCEL_DEPLOY_EMAIL }}"
+
+          git remote add fork https://x-access-token:${GITHUB_TOKEN}@github.com/${FORK_REPO}.git
+
+          git push fork HEAD:main --force

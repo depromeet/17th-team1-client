@@ -4,14 +4,14 @@ import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useState } from "react";
 import { processSingleFile } from "@/lib/processFile";
+import { getDiaryDetail } from "@/services/diaryService";
 import {
-  addDiaryPhoto,
-  createDiary,
-  deleteDiaryPhoto,
-  getDiaryDetail,
-  updateDiary,
-  uploadTravelPhoto,
-} from "@/services/diaryService";
+  useAddDiaryPhotoMutation,
+  useCreateDiaryMutation,
+  useDeleteDiaryPhotoMutation,
+  useUpdateDiaryMutation,
+  useUploadTravelPhotoMutation,
+} from "@/hooks/mutation/useDiaryMutations";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
@@ -70,6 +70,11 @@ export const ImageMetadataComponent = ({
   const metadataCount = metadataList.length;
   const isCityIdValid = typeof cityId === "number" && Number.isFinite(cityId) && cityId > 0;
   const isEditMode = typeof diaryId === "number" && Number.isFinite(diaryId);
+  const { mutateAsync: uploadTravelPhoto } = useUploadTravelPhotoMutation();
+  const { mutateAsync: deleteDiaryPhoto } = useDeleteDiaryPhotoMutation();
+  const { mutateAsync: addDiaryPhoto } = useAddDiaryPhotoMutation();
+  const { mutateAsync: updateDiary } = useUpdateDiaryMutation();
+  const { mutateAsync: createDiary } = useCreateDiaryMutation();
 
   const handleBack = () => {
     router.back();
@@ -104,7 +109,7 @@ export const ImageMetadataComponent = ({
         }
 
         // 현재 metadataList에서도 originalIndex 정보 병합
-        metadataList.forEach((item) => {
+        metadataList.forEach(item => {
           if (item.photoCode && item.originalIndex !== undefined && !photoCodeToIndexMap.has(item.photoCode)) {
             photoCodeToIndexMap.set(item.photoCode, item.originalIndex);
           }
@@ -134,7 +139,7 @@ export const ImageMetadataComponent = ({
                 ? photo.takenMonth
                 : photo.takenMonth
                   ? { year: photo.takenMonth.year, monthValue: photo.takenMonth.monthValue }
-                  : null,
+                  : null
             );
 
             const hasLat = typeof photo.lat === "number" && Number.isFinite(photo.lat);
@@ -195,7 +200,7 @@ export const ImageMetadataComponent = ({
               isExisting: true,
               originalIndex,
             };
-          }),
+          })
         );
 
         setMetadataList(mappedMetadata);
@@ -236,10 +241,10 @@ export const ImageMetadataComponent = ({
           const f = files[i];
           if (f.type.startsWith("image/")) {
             tasks.push(
-              processSingleFile(f).then((metadata) => ({
+              processSingleFile(f).then(metadata => ({
                 metadata,
                 file: f,
-              })),
+              }))
             );
           }
         }
@@ -247,15 +252,15 @@ export const ImageMetadataComponent = ({
         const settled = await Promise.allSettled(tasks);
         const results = settled
           .filter((r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; file: File }> => r.status === "fulfilled")
-          .map((r) => r.value);
+          .map(r => r.value);
 
         if (results.length === 0) return;
 
         const uploadPromises = results.map(({ metadata, file }) =>
-          uploadTravelPhoto(file).then((photoCode) => ({
+          uploadTravelPhoto({ file }).then(photoCode => ({
             photoCode,
             metadata,
-          })),
+          }))
         );
 
         const uploadedResults = await Promise.all(uploadPromises);
@@ -276,7 +281,7 @@ export const ImageMetadataComponent = ({
           };
         });
 
-        setMetadataList((prev) => {
+        setMetadataList(prev => {
           if (prev.length > 0) {
             // 기존 항목들도 originalIndex가 없으면 추가
             const updatedPrev = prev.map((item, idx) => ({
@@ -294,17 +299,17 @@ export const ImageMetadataComponent = ({
         setIsProcessing(false);
       }
     },
-    [metadataCount, metadataList.length],
+    [metadataCount, metadataList.length]
   );
 
   const handleRemove = async (id: string) => {
-    const target = metadataList.find((item) => item.id === id);
+    const target = metadataList.find(item => item.id === id);
     if (!target) return;
 
     if (target.photoId && isEditMode && typeof diaryId === "number") {
       try {
         setDeletingPhotoId(id);
-        await deleteDiaryPhoto(diaryId, target.photoId);
+        await deleteDiaryPhoto({ diaryId, photoId: target.photoId });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "사진 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
@@ -315,24 +320,24 @@ export const ImageMetadataComponent = ({
       }
     }
 
-    setMetadataList((prev) => prev.filter((item) => item.id !== id));
+    setMetadataList(prev => prev.filter(item => item.id !== id));
   };
 
   const handleImageUpdate = async (id: string, croppedImageBlobUrl: string) => {
-    const targetMetadata = metadataList.find((item) => item.id === id);
+    const targetMetadata = metadataList.find(item => item.id === id);
     if (!targetMetadata) return;
 
     try {
-      const blob = await fetch(croppedImageBlobUrl).then((res) => res.blob());
+      const blob = await fetch(croppedImageBlobUrl).then(res => res.blob());
       const croppedFile = new File([blob], targetMetadata.fileName, { type: "image/jpeg" });
 
-      const newPhotoCode = await uploadTravelPhoto(croppedFile);
+      const newPhotoCode = await uploadTravelPhoto({ file: croppedFile });
 
       const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
       const newImageUrl = `${baseUrl}${newPhotoCode}`;
 
-      setMetadataList((prev) =>
-        prev.map((item) =>
+      setMetadataList(prev =>
+        prev.map(item =>
           item.id === id
             ? {
                 ...item,
@@ -343,8 +348,8 @@ export const ImageMetadataComponent = ({
                 isExisting: false,
                 originalImageUrl: item.originalImageUrl || item.imagePreview,
               }
-            : item,
-        ),
+            : item
+        )
       );
     } catch (error) {
       alert("크롭된 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
@@ -353,25 +358,25 @@ export const ImageMetadataComponent = ({
   };
 
   const handleTagChange = (id: string, tag: ImageTag | null) => {
-    setMetadataList((prev) =>
-      prev.map((item) => {
+    setMetadataList(prev =>
+      prev.map(item => {
         if (item.id !== id) return item;
         return {
           ...item,
           selectedTag: tag,
           tag: tag ?? "NONE",
         };
-      }),
+      })
     );
   };
 
   const handleDateChange = (id: string, yearMonth: string | null) => {
-    setMetadataList((prev) => prev.map((item) => (item.id === id ? { ...item, customDate: yearMonth } : item)));
+    setMetadataList(prev => prev.map(item => (item.id === id ? { ...item, customDate: yearMonth } : item)));
   };
 
   const handleLocationChange = (id: string, location: LocationSelection | null) => {
-    setMetadataList((prev) =>
-      prev.map((item) => {
+    setMetadataList(prev =>
+      prev.map(item => {
         if (item.id !== id) return item;
         if (!location) {
           return { ...item, location: undefined };
@@ -380,7 +385,7 @@ export const ImageMetadataComponent = ({
         const displayName = location.name || location.address || "";
         const formattedAddress = location.address || location.name || "";
         const uniquePlaces = [formattedAddress, displayName].filter(
-          (value, index, array): value is string => Boolean(value) && array.indexOf(value) === index,
+          (value, index, array): value is string => Boolean(value) && array.indexOf(value) === index
         );
 
         return {
@@ -393,7 +398,7 @@ export const ImageMetadataComponent = ({
             nearbyPlaces: uniquePlaces.length > 0 ? uniquePlaces : undefined,
           },
         };
-      }),
+      })
     );
   };
 
@@ -414,7 +419,7 @@ export const ImageMetadataComponent = ({
       // sessionStorage에 photoCode-originalIndex 매핑 저장 (재조회 시 순서 복원용)
       if (isEditMode && typeof diaryId === "number") {
         const orderMapping: Record<string, number> = {};
-        metadataList.forEach((item) => {
+        metadataList.forEach(item => {
           if (item.photoCode && item.originalIndex !== undefined) {
             orderMapping[item.photoCode] = item.originalIndex;
           }
@@ -427,7 +432,7 @@ export const ImageMetadataComponent = ({
       let currentMetadataList = metadataList;
 
       if (isEditMode && typeof diaryId === "number") {
-        const withoutPhotoId = metadataList.filter((item) => item.photoId == null);
+        const withoutPhotoId = metadataList.filter(item => item.photoId == null);
 
         if (withoutPhotoId.length > 0) {
           const createdPhotos: { targetId: string; photoId: number }[] = [];
@@ -438,10 +443,10 @@ export const ImageMetadataComponent = ({
             }
 
             if ((metadata as UploadMetadata & { originalPhotoId?: number }).originalPhotoId) {
-              await deleteDiaryPhoto(
+              await deleteDiaryPhoto({
                 diaryId,
-                (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId,
-              );
+                photoId: (metadata as UploadMetadata & { originalPhotoId: number }).originalPhotoId,
+              });
             }
 
             const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
@@ -487,7 +492,7 @@ export const ImageMetadataComponent = ({
               ...(finalPlaceName && { placeName: finalPlaceName }),
             };
 
-            const createdPhoto = await addDiaryPhoto(diaryId, payload);
+            const createdPhoto = await addDiaryPhoto({ diaryId, photo: payload });
             let resolvedPhotoId =
               (createdPhoto as { photoId?: number })?.photoId ??
               (createdPhoto as { data?: { photoId?: number } })?.data?.photoId;
@@ -496,7 +501,7 @@ export const ImageMetadataComponent = ({
               console.warn("⚠️  photoId를 응답에서 찾지 못함 → 다이어리 재조회");
               try {
                 const latestDiary = await getDiaryDetail(diaryId);
-                const matchedPhoto = latestDiary.photos.find((photo) => photo.photoCode === metadata.photoCode);
+                const matchedPhoto = latestDiary.photos.find(photo => photo.photoCode === metadata.photoCode);
                 if (matchedPhoto?.photoId) {
                   resolvedPhotoId = matchedPhoto.photoId;
                   console.log(`✅ 재조회 성공 → photoId: ${resolvedPhotoId}`);
@@ -514,8 +519,8 @@ export const ImageMetadataComponent = ({
           }
 
           // 새로 생성된 photoId를 로컬 상태에도 반영해 이후 updateDiary 요청에서 재사용한다.
-          currentMetadataList = metadataList.map((item) => {
-            const created = createdPhotos.find((c) => c.targetId === item.id);
+          currentMetadataList = metadataList.map(item => {
+            const created = createdPhotos.find(c => c.targetId === item.id);
             if (!created) return item;
             return {
               ...item,
@@ -537,7 +542,7 @@ export const ImageMetadataComponent = ({
       });
 
       const photos = await Promise.all(
-        sortedMetadataList.map(async (metadata) => {
+        sortedMetadataList.map(async metadata => {
           if (!metadata.photoCode) {
             throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
           }
@@ -584,7 +589,7 @@ export const ImageMetadataComponent = ({
             tag: normalizedTag,
             ...(finalPlaceName && { placeName: finalPlaceName }),
           };
-        }),
+        })
       );
 
       const validCityId = cityId as number;
@@ -595,9 +600,9 @@ export const ImageMetadataComponent = ({
       };
 
       if (isEditMode && typeof diaryId === "number") {
-        await updateDiary(diaryId, payload);
+        await updateDiary({ diaryId, params: payload });
       } else {
-        await createDiary(payload);
+        await createDiary({ params: payload });
       }
 
       const finalUuid = uuid || getAuthInfo().uuid;
@@ -683,16 +688,16 @@ export const ImageMetadataComponent = ({
             </label>
           </div>
         )}
-        {metadataList.map((metadata) => (
+        {metadataList.map(metadata => (
           <div key={metadata.id} className="flex-shrink-0">
             <ImageCarousel
               image={metadata}
               onRemove={handleRemove}
               isProcessing={deletingPhotoId === metadata.id}
               onImageUpdate={handleImageUpdate}
-              onTagChange={(tag) => handleTagChange(metadata.id, tag)}
-              onDateChange={(yearMonth) => handleDateChange(metadata.id, yearMonth)}
-              onLocationChange={(location) => handleLocationChange(metadata.id, location)}
+              onTagChange={tag => handleTagChange(metadata.id, tag)}
+              onDateChange={yearMonth => handleDateChange(metadata.id, yearMonth)}
+              onLocationChange={location => handleLocationChange(metadata.id, location)}
             />
           </div>
         ))}

@@ -24,4 +24,8 @@ jobs:
 
           git remote add fork https://x-access-token:${GITHUB_TOKEN}@github.com/${FORK_REPO}.git
 
-          git push fork HEAD:main --force
+          # Try regular push first
+          git push fork HEAD:main || {
+            echo "Regular push failed, trying force push"
+            git push fork HEAD:main --force
+          }

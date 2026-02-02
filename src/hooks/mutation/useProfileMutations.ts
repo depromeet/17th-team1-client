@@ -23,7 +23,7 @@ export const useUploadAndUpdateProfileMutation = () => {
 };
 
 export const useWithdrawMemberMutation = () => {
-  return useMutation<void, Error, WithdrawMemberRequest>({
-    mutationFn: ({ token }) => withdrawMember(token),
+  return useMutation<void, Error, WithdrawMemberRequest | void>({
+    mutationFn: request => withdrawMember(request?.token),
   });
 };

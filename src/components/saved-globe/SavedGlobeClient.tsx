@@ -6,7 +6,8 @@ import BookmarkIcon from "@/assets/icons/bookmark.svg";
 import BookmarkFilledIcon from "@/assets/icons/bookmark-filled.svg";
 import { Dropdown } from "@/components/common/Dropdown";
 import { Header } from "@/components/common/Header";
-import { addBookmark, getBookmarks, removeBookmark } from "@/services/bookmarkService";
+import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@/hooks/mutation/useBookmarkMutations";
+import { getBookmarks } from "@/services/bookmarkService";
 import type { BookmarkUser } from "@/types/bookmark";
 import { getAuthInfo } from "@/utils/cookies";
 
@@ -98,7 +99,7 @@ const GlobeList = ({
       <div className="flex items-center justify-end px-4 pt-5 pb-5 shrink-0">
         <Dropdown
           value={sortOption}
-          onValueChange={(value) => onSortChange(value as SortOption)}
+          onValueChange={value => onSortChange(value as SortOption)}
           options={[
             { label: "최신순", value: "latest" },
             { label: "가나다순", value: "alphabetical" },
@@ -116,7 +117,7 @@ const GlobeList = ({
             tabIndex={0}
             className="w-full px-5 py-3 flex items-center justify-between rounded-2xl bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => onGlobeClick(uuid)}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
                 e.preventDefault();
                 onGlobeClick(uuid);
@@ -143,7 +144,7 @@ const GlobeList = ({
             {/* Bookmark Button */}
             <button
               type="button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onSaveToggle(memberId);
               }}
@@ -167,6 +168,8 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
   const [sortOption, setSortOption] = useState<SortOption>("latest");
   const [error, setError] = useState<string | null>(initialError);
   const { uuid } = getAuthInfo();
+  const { mutateAsync: addBookmark } = useAddBookmarkMutation();
+  const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
   const loadBookmarks = useCallback(async () => {
     try {
@@ -187,19 +190,19 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
     async (memberId: number) => {
       try {
         setIsLoading(true);
-        const bookmark = bookmarks.find((g) => g.memberId === memberId);
+        const bookmark = bookmarks.find(g => g.memberId === memberId);
         if (!bookmark) {
           setIsLoading(false);
           return;
         }
 
         if (bookmark.bookmarked) {
-          await removeBookmark(memberId);
+          await removeBookmark({ targetMemberId: memberId });
         } else {
-          await addBookmark(memberId);
+          await addBookmark({ targetMemberId: memberId });
         }
 
-        setBookmarks((prev) => prev.map((g) => (g.memberId === memberId ? { ...g, bookmarked: !g.bookmarked } : g)));
+        setBookmarks(prev => prev.map(g => (g.memberId === memberId ? { ...g, bookmarked: !g.bookmarked } : g)));
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "북마크 상태 변경에 실패했습니다";
         setError(errorMessage);
@@ -207,7 +210,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
         setIsLoading(false);
       }
     },
-    [bookmarks],
+    [bookmarks]
   );
 
   const handleGlobeCardClick = (uuid: string) => {

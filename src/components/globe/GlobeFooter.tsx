@@ -7,7 +7,7 @@ import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
 import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
-import { addBookmark, removeBookmark } from "@/services/bookmarkService";
+import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@/hooks/mutation/useBookmarkMutations";
 import { cn } from "@/utils/cn";
 import { getAuthInfo } from "@/utils/cookies";
 import { ShareButton } from "./ShareButton";
@@ -56,6 +56,8 @@ export const GlobeFooter = ({
   const [visualViewMode, setVisualViewMode] = useState<"globe" | "list">(viewMode);
   const router = useRouter();
   const toggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { mutateAsync: addBookmark } = useAddBookmarkMutation();
+  const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
   const handleToggleViewMode = useCallback(() => {
     const nextMode = visualViewMode === "list" ? "globe" : "list";
@@ -88,7 +90,7 @@ export const GlobeFooter = ({
         <span
           className={cn(
             "absolute left-2 top-1/2 z-0 w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] -translate-y-1/2",
-            isListMode ? "translate-x-0" : "translate-x-[52px]",
+            isListMode ? "translate-x-0" : "translate-x-[52px]"
           )}
         />
         <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
@@ -109,14 +111,14 @@ export const GlobeFooter = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDescriptionIndex((prevIndex) => getRandomDescriptionIndex(prevIndex));
+      setDescriptionIndex(prevIndex => getRandomDescriptionIndex(prevIndex));
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    setVisualViewMode((current) => (current === viewMode ? current : viewMode));
+    setVisualViewMode(current => (current === viewMode ? current : viewMode));
   }, [viewMode]);
 
   // 부모에서 북마크 상태가 업데이트되면 로컬 상태도 동기화
@@ -144,10 +146,10 @@ export const GlobeFooter = ({
 
     try {
       if (isBookmarked) {
-        await removeBookmark(memberId);
+        await removeBookmark({ targetMemberId: memberId });
         setToastMessage("저장이 해제되었습니다.");
       } else {
-        await addBookmark(memberId);
+        await addBookmark({ targetMemberId: memberId });
         setToastMessage("저장되었습니다.");
       }
       setToastOpen(true);

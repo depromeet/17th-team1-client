@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { HeadlessToast } from "@/components/common/Toast";
 import { usePressEmojiMutation, useRegisterEmojiMutation } from "@/hooks/mutation/useEmojiMutations";
+import { useOwnerToast } from "@/hooks/useOwnerToast";
 import type { Emoji } from "@/types/emoji";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -39,12 +40,9 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
+  const { showToast, toastMessage, setShowToast, showOwnerToast } = useOwnerToast();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastToastTimeRef = useRef<number>(0);
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const reactionsContainerRef = useRef<HTMLDivElement>(null);
@@ -67,9 +65,6 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
-      }
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
       }
       timersRef.current.forEach(timer => {
         clearTimeout(timer);
@@ -196,29 +191,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
     // owner일 때: Toast 표시
     if (isOwner) {
-      const now = Date.now();
-      const timeSinceLastToast = now - lastToastTimeRef.current;
-
-      // 1.5초(1500ms) 이내 연속 클릭: Toast 재노출 X (중복 방지)
-      if (timeSinceLastToast < 1500) {
-        return;
-      }
-
-      // 1.5초 이후 재클릭: Toast 재노출
-      lastToastTimeRef.current = now;
-      setToastMessage("친구들만 이모지를 눌러줄 수 있어요!");
-      setShowToast(true);
-
-      // 기존 타이머 정리
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
-
-      // 1.5초 후 Toast 자동 닫기
-      toastTimerRef.current = setTimeout(() => {
-        setShowToast(false);
-      }, 1500);
-
+      showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
       return;
     }
 
@@ -305,21 +278,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       if (isDuplicateError) {
         // owner일 때: Toast 표시
         if (isOwner) {
-          const now = Date.now();
-          lastToastTimeRef.current = now;
-          setToastMessage("이미 등록된 이모지입니다.");
-          setShowToast(true);
-
-          // 기존 타이머 정리
-          if (toastTimerRef.current) {
-            clearTimeout(toastTimerRef.current);
-          }
-
-          // 1.5초 후 Toast 자동 닫기
-          toastTimerRef.current = setTimeout(() => {
-            setShowToast(false);
-          }, 1500);
-
+          showOwnerToast("이미 등록된 이모지입니다.");
           setShowEmojiPicker(false);
           return;
         }
@@ -371,6 +330,10 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   };
 
   const handleAddEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isOwner) {
+      showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
+      return;
+    }
     e.stopPropagation();
     setShowEmojiPicker(true);
   };

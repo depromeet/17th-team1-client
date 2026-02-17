@@ -9,8 +9,8 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
-import { logout } from "@/services/authService";
-import { uploadAndUpdateProfile } from "@/services/profileService";
+import { useLogoutMutation } from "@/hooks/mutation/useAuthMutations";
+import { useUploadAndUpdateProfileMutation } from "@/hooks/mutation/useProfileMutations";
 import type { ProfileData } from "@/types/member";
 import { ApiError } from "@/lib/apiClient";
 
@@ -20,7 +20,6 @@ type ProfileClientProps = {
 
 export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<ProfileData | null>(initialProfile);
@@ -34,10 +33,8 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
   const handleLogoutConfirm = useCallback(async () => {
     try {
-      setIsLoading(true);
-
       // 서버에 로그아웃 요청 및 클라이언트 쿠키 삭제
-      await logout();
+      await logoutAsync();
 
       // 다이얼로그 닫기
       setIsLogoutDialogOpen(false);
@@ -51,10 +48,8 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
       setIsLogoutDialogOpen(false);
       // [TODO]: error fallback 페이지로 이동
-    } finally {
-      setIsLoading(false);
     }
-  }, [router]);
+  }, [logoutAsync, router]);
 
   const handleLogoutClick = useCallback(() => {
     setIsLogoutDialogOpen(true);
@@ -67,10 +62,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   const handleSaveProfile = useCallback(
     async (nickname: string, imageFile?: File) => {
       try {
-        setIsLoading(true);
-
         if (!userProfile) {
-          setIsLoading(false);
           setIsEditProfileOpen(false);
 
           alert("프로필 정보를 불러올 수 없습니다.");
@@ -78,7 +70,11 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         }
 
         // 이미지가 있으면 함께 업로드, 없으면 닉네임만 업데이트
-        const updatedProfile = await uploadAndUpdateProfile(nickname, userProfile.memberId, imageFile);
+        const updatedProfile = await updateProfile({
+          nickname,
+          memberId: userProfile.memberId,
+          imageFile,
+        });
         setUserProfile(updatedProfile);
       } catch (error) {
         console.error("프로필 업데이트 실패", error);
@@ -90,11 +86,9 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         }
 
         alert("프로필 업데이트에 실패했습니다. 다시 시도해주세요.");
-      } finally {
-        setIsLoading(false);
       }
     },
-    [userProfile],
+    [updateProfile, userProfile]
   );
 
   const handleTermsClick = useCallback(() => {
@@ -109,8 +103,8 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-        <div className="max-w-[512px] mx-auto w-full">
+      <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+        <div className="max-w-lg mx-auto w-full">
           <Header
             variant="navy"
             leftIcon="back"

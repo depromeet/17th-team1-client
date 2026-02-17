@@ -1,3 +1,4 @@
+import { City } from "@/types/city";
 import type { ApiResponse } from "@/types/api";
 
 // 멤버 ID 조회 응답
@@ -20,6 +21,11 @@ export interface DeleteTravelRecord {
   lng: number;
 }
 
+export interface DeleteMemberTravelRequest {
+  travelRecord: DeleteTravelRecord;
+  token?: string;
+}
+
 // 여행 기록 삭제 API 응답
 export interface DeleteTravelRecordsResponse {
   status: string;
@@ -30,6 +36,10 @@ export interface DeleteTravelRecordsResponse {
 export interface CreateTravelRecordsData {
   recordsCreated: number;
   message: string;
+}
+
+export interface CreateMemberTravelsRequest {
+  cities: City[];
 }
 
 export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {}
@@ -107,6 +117,11 @@ export interface S3UploadUrlParams {
   contentType: string;
 }
 
+export interface GetS3UploadUrlRequest {
+  uploadData: S3UploadUrlParams;
+  token?: string;
+}
+
 // S3 업로드 URL 응답 데이터
 export interface S3UploadUrlData {
   presignedUrl: string;
@@ -114,3 +129,14 @@ export interface S3UploadUrlData {
 }
 
 export interface S3UploadUrlResponse extends ApiResponse<S3UploadUrlData> {}
+
+export interface UploadAndUpdateProfileRequest {
+  nickname: string;
+  memberId: number;
+  imageFile?: File;
+  token?: string;
+}
+
+export interface WithdrawMemberRequest {
+  token?: string;
+}

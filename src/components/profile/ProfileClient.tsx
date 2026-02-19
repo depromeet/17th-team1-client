@@ -94,7 +94,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
         setIsLoading(false);
       }
     },
-    [userProfile]
+    [userProfile, router]
   );
 
   const handleTermsClick = useCallback(() => {

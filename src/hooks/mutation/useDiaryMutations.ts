@@ -3,13 +3,10 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
   AddDiaryPhotoRequest,
-  CreateDiaryParams,
-  CreateDiaryPhotoParams,
   CreateDiaryRequest,
   DeleteDiaryPhotoRequest,
   DeleteDiaryRequest,
   DiaryPhoto,
-  UpdateDiaryParams,
   UpdateDiaryRequest,
   UploadTravelPhotoRequest,
 } from "@/types/diary";

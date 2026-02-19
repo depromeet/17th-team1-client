@@ -18,7 +18,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
     const stepDuration = duration / totalSteps; // 각 단계당 시간
 
     const interval = setInterval(() => {
-      setProgress((prev) => {
+      setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsCompleted(true);
@@ -51,7 +51,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
           >
             {/* Globe Image */}
             <div className="relative w-full h-full rounded-full overflow-hidden">
-              {/* biome-ignore lint/performance/noImgElement: Loading screen visual, optimization not needed */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
             </div>
           </div>

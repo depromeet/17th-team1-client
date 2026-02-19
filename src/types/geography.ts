@@ -21,6 +21,7 @@ export type PointOfView = {
 
 // GeoJSON Feature 타입
 export type GeoJSONFeature = {
+  id?: string | number;
   properties: {
     NAME?: string;
     ISO_A2?: string;

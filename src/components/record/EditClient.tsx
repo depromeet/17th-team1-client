@@ -276,9 +276,6 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     const minLoadingDuration = 1300; // 최소 1.3초
 
     try {
-      // 추가된 도시들과 삭제된 도시들 찾기
-      const baseIds = new Set(base.map(c => c.id));
-
       // 추가된 도시들 (current에 있지만 base에 없거나 isNew인 것)
       const addedCities = current.filter(c => !baseIds.has(c.id) || c.isNew);
 

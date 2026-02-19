@@ -14,10 +14,8 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        {children}
-        <Toaster />
-      </ErrorBoundary>
+      <Toaster />
+      <ErrorBoundary>{children}</ErrorBoundary>
     </QueryClientProvider>
   );
 };

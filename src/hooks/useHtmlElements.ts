@@ -45,7 +45,7 @@ export const useHtmlElements = ({
     // 전환 간 깜빡임 방지를 위한 단계 기반 렌더링
     if (effectivePhase === "city") {
       if (selectedClusterData && selectedClusterData.length > 0) {
-        return selectedClusterData.map((country) => ({
+        return selectedClusterData.map(country => ({
           ...country,
           items: [country],
           count: 1,
@@ -65,11 +65,12 @@ export const useHtmlElements = ({
       return clusteredData;
     }
 
-    return currentPatternCountries.map((country) => ({
+    return currentPatternCountries.map(country => ({
       ...country,
       items: [country],
       count: 1,
     }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isAnimating,
     displayPhase,

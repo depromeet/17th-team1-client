@@ -9,6 +9,11 @@ export type AddCityVariables = {
   token: string;
 };
 
+export type DeleteCityVariables = {
+  request: DeleteCityRequest;
+  token: string;
+};
+
 export const useAddCityMutation = () => {
   return useMutation<AddCityResponse, Error, AddCityVariables>({
     mutationFn: ({ request, token }) => addCity(request, token),
@@ -16,7 +21,7 @@ export const useAddCityMutation = () => {
 };
 
 export const useDeleteCityMutation = () => {
-  return useMutation<DeleteCityResponse, Error, DeleteCityRequest>({
-    mutationFn: ({ cityId, token }) => deleteCity(cityId, token),
+  return useMutation<DeleteCityResponse, Error, DeleteCityVariables>({
+    mutationFn: ({ request, token }) => deleteCity(request.cityId, token),
   });
 };

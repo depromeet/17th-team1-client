@@ -59,7 +59,6 @@ export interface AddCityResponse {
 // 도시 삭제 API 요청 타입
 export type DeleteCityRequest = {
   cityId: number;
-  token: string;
 };
 
 // 도시 삭제 API 응답 타입

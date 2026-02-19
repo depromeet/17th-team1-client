@@ -3,6 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/config/env";
 import { getMemberId } from "@/services/memberService";
 
+const ALLOWED_HOSTS = ["globber.world", "www.globber.world"];
+
 /**
  * 프록시/로드 밸런서 환경에서 올바른 origin을 가져옵니다.
  * X-Forwarded-Host와 X-Forwarded-Proto 헤더를 우선 확인하고,
@@ -11,16 +13,15 @@ import { getMemberId } from "@/services/memberService";
 function getOrigin(request: NextRequest): string {
   const forwardedHost = request.headers.get("x-forwarded-host");
   const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  
-  if (forwardedHost) {
+
+  if (forwardedHost && ALLOWED_HOSTS.some(h => forwardedHost === h || forwardedHost.endsWith(`.${h}`)))
     return `${forwardedProto}://${forwardedHost}`;
-  }
-  
+
   // 환경 변수가 있으면 사용
   if (env.REDIRECT_ORIGIN) {
     return env.REDIRECT_ORIGIN;
   }
-  
+
   // 마지막 fallback으로 request.url 사용
   const url = new URL(request.url);
   return `${url.protocol}//${url.host}`;
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
   const accessToken = searchParams.get("accessToken");
   const firstLogin = searchParams.get("firstLogin");
   const uuid = searchParams.get("uuid");
-  
+
   const origin = getOrigin(request);
 
   if (!accessToken) {

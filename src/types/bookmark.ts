@@ -20,7 +20,7 @@ export interface BookmarkUser {
 /**
  * 북마크 목록 조회 API 응답
  */
-export interface BookmarkListResponse extends ApiResponse<BookmarkUser[]> {}
+export type BookmarkListResponse = ApiResponse<BookmarkUser[]>;
 
 export type AddBookmarkRequest = {
   targetMemberId: number;

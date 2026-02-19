@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     path: "/",
     maxAge: maxAgeSeconds,
     httpOnly: false,
-    ...(isLocalDev ? {} : env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
+    ...(isLocalDev ? {} : { domain: env.COOKIE_DOMAIN }),
   };
 
   try {

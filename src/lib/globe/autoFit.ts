@@ -3,19 +3,8 @@
  * 나라 클러스터 클릭 시 해당 국가의 모든 도시들이 화면에 fit되도록 계산
  */
 
+import { haversineDistance } from "./calculations";
 import type { CountryData } from "@/types/travelPatterns";
-
-// 두 지점 간의 거리를 계산하는 함수 (구면 거리)
-export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-  const R = 6371; // 지구 반지름 (km)
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
 
 // 지점들의 경계 박스를 계산하는 함수
 export const calculateBoundingBox = (cities: CountryData[]) => {
@@ -184,7 +173,7 @@ export const calculateAnimationDuration = (
   targetAltitude: number,
 ): number => {
   // 거리 기반으로 애니메이션 시간 계산
-  const distance = calculateDistance(currentLat, currentLng, targetLat, targetLng);
+  const distance = haversineDistance(currentLat, currentLng, targetLat, targetLng);
   const altitudeDiff = Math.abs(currentAltitude - targetAltitude);
 
   // 거리에 따른 시간 계산 (더 자연스럽게)

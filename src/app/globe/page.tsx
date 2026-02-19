@@ -33,6 +33,11 @@ const GlobeContent = () => {
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
     useGlobeState(travelPatterns);
 
+  const hasBackButton = isZoomed || selectedClusterData !== null;
+
+  // 로딩 완료 콜백
+  const handleLoadingComplete = () => setIsLoading(false);
+
   // 로그인한 사용자의 데이터 로드
   useEffect(() => {
     const loadData = async () => {
@@ -60,11 +65,6 @@ const GlobeContent = () => {
 
     loadData();
   }, []);
-
-  const hasBackButton = isZoomed || selectedClusterData !== null;
-
-  // 로딩 완료 콜백
-  const handleLoadingComplete = () => setIsLoading(false);
 
   // 로딩 중이거나 데이터가 없는 경우
   if (isLoading) return <GlobeLoading onComplete={handleLoadingComplete} />;

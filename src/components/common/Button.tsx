@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useId, useRef, useState } from "react";
 import ReturnIcon from "@/assets/icons/return.svg";
 import { EMOJI_LIST } from "@/constants/emoji";
-import { ZOOM_LEVELS } from "@/constants/zoomLevels";
+import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import useImage from "@/hooks/useImage";
 import type { BackButtonProps } from "@/types/button";
 import { cn } from "@/utils/cn";

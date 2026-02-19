@@ -1,15 +1,8 @@
-import { COLORS, ISO_CODE_MAP, LABEL_OFFSET } from "@/constants/globe";
+import { COLORS, ISO_CODE_MAP } from "@/constants/globeConfig";
 
 // ISO 코드 변환 유틸리티
 export const getISOCode = (countryId: string): string => {
   return ISO_CODE_MAP[countryId] || countryId;
-};
-
-// 점선 각도 및 길이 계산 (이미지 디자인에 맞춰 짧은 고정 길이)
-export const calculateDottedLine = (offsetX: number = LABEL_OFFSET.X, offsetY: number = LABEL_OFFSET.Y) => {
-  const lineLength = 20; // 고정된 짧은 라인 길이 (기존: 전체 거리 계산)
-  const angle = (Math.atan2(offsetY, offsetX) * 180) / Math.PI;
-  return { lineLength, angle };
 };
 
 // 폴리곤 색상 계산
@@ -18,7 +11,7 @@ export const getPolygonColor = (
   feature: any,
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   countries: any[],
-  getISOCode: (id: string) => string,
+  getISOCode: (id: string) => string
 ) => {
   const isoCode = feature.id;
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
@@ -33,7 +26,7 @@ export const getPolygonColor = (
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
   const cityCount = countries.filter((c: any) => getISOCode(c.id) === countryCode).length;
 
-  // Globe Leveling Color 기준 (기획 문서 참조)
+  // Globe Leveling Color 기준
   if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상 도시: Blue 0 (#67E8FF)
   if (cityCount >= 5) return COLORS.GLOBE_LV2; // 5개 이상 도시: Blue 100 (#00CAED)
   return COLORS.GLOBE_LV1; // 1개 이상 도시: Blue 200 (#0084B0)

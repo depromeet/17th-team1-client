@@ -20,11 +20,9 @@ const REGION_COLORS = [
 export const mapGlobeDataToTravelPatterns = (
   globeData: GlobeData,
   cityThumbnails?: Record<number, string>,
-  cityThumbnailsArray?: Record<number, string[]>,
+  cityThumbnailsArray?: Record<number, string[]>
 ): TravelPattern[] => {
-  if (!globeData.regions || globeData.regions.length === 0) {
-    return [];
-  }
+  if (!globeData.regions || globeData.regions.length === 0) return [];
 
   // 모든 지역의 도시들을 하나로 합치기
   const allCities: CountryData[] = [];
@@ -76,7 +74,7 @@ export const mapGlobeDataToTravelPatterns = (
   // 국가별로 city_count를 추가
   // NOTE: updatedAt은 백엔드에서 도시별 기록 시간이 제공될 때까지 설정하지 않음
   // 현재 각 도시의 updatedAt이 없으므로, 동률 처리 시 updatedAt 기준이 적용되지 않음
-  const countriesWithStats = allCities.map((city) => {
+  const countriesWithStats = allCities.map(city => {
     const countryCode = city.id;
     const countryInfo = countryStats.get(countryCode);
 

@@ -59,7 +59,7 @@ export const ISO_CODE_MAP: { [key: string]: string } = worldCountries.reduce<{ [
 
 // 외부 리소스 URL
 export const EXTERNAL_URLS = {
-  // 세계 지도 GeoJSON 데이터 URL
-  WORLD_GEOJSON: "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
+  // 세계 지도 GeoJSON 데이터 URL (로컬 번들, public/data/world.geojson)
+  WORLD_GEOJSON: "/data/world.geojson",
   NIGHT_SKY_IMAGE: "//unpkg.com/three-globe/example/img/night-sky.png", // 배경 별하늘 이미지 URL
 } as const;

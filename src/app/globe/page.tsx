@@ -22,6 +22,7 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 
 const GlobeContent = () => {
   const globeRef = useRef<GlobeRef | null>(null);
+
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [travelInsight, setTravelInsight] = useState<string>("");
@@ -38,17 +39,15 @@ const GlobeContent = () => {
       try {
         const { uuid, memberId } = getAuthInfo();
 
-        if (!uuid || !memberId) {
-          return;
-        }
+        if (!uuid || !memberId) return;
 
         const globeResponse = await getGlobeData(uuid);
         const insightResponse = await getTravelInsight(parseInt(memberId, 10));
 
         if (globeResponse?.data) {
           const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
-          setTravelPatterns(mappedPatterns);
 
+          setTravelPatterns(mappedPatterns);
           setCityCount(globeResponse.data.cityCount);
           setCountryCount(globeResponse.data.countryCount);
         }
@@ -65,16 +64,12 @@ const GlobeContent = () => {
   const hasBackButton = isZoomed || selectedClusterData !== null;
 
   // 로딩 완료 콜백
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
+  const handleLoadingComplete = () => setIsLoading(false);
 
   // 로딩 중이거나 데이터가 없는 경우
-  if (isLoading) {
-    return <GlobeLoading onComplete={handleLoadingComplete} />;
-  }
+  if (isLoading) return <GlobeLoading onComplete={handleLoadingComplete} />;
 
-  if (travelPatterns.length === 0) {
+  if (travelPatterns.length === 0)
     return (
       <div className="w-full h-dvh flex items-center justify-center">
         <div className="text-white text-xl text-center">
@@ -83,7 +78,6 @@ const GlobeContent = () => {
         </div>
       </div>
     );
-  }
 
   return (
     <div className="w-full overflow-hidden text-text-primary relative flex flex-col h-dvh">

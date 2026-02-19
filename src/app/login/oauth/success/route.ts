@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   if (!accessToken) {
     console.error("URL에서 accessToken을 찾을 수 없습니다.");
-    return NextResponse.redirect(new URL("/login", env.REDIRECT_ORIGIN));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const cleanToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     path: "/",
     maxAge: maxAgeSeconds,
     httpOnly: false,
-    ...(isLocalDev ? {} : { domain: env.COOKIE_DOMAIN }),
+    ...(isLocalDev ? {} : env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   };
 
   try {
@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   } catch (error) {
     console.error("멤버 ID 조회 중 오류:", error);
@@ -62,10 +62,10 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 }

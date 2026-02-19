@@ -33,9 +33,8 @@ const VIEW_MODE_TOGGLE_DELAY_MS = 220;
 
 const getRandomDescriptionIndex = (currentIndex: number): number => {
   let nextIndex = Math.floor(Math.random() * DESCRIPTIONS.length);
-  while (nextIndex === currentIndex) {
-    nextIndex = Math.floor(Math.random() * DESCRIPTIONS.length);
-  }
+  while (nextIndex === currentIndex) nextIndex = Math.floor(Math.random() * DESCRIPTIONS.length);
+
   return nextIndex;
 };
 
@@ -49,15 +48,15 @@ export const GlobeFooter = ({
   isBookmarked: initialIsBookmarked = false,
   onBookmarkChange,
 }: GlobeFooterProps) => {
+  const router = useRouter();
+
+  const toggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [descriptionIndex, setDescriptionIndex] = useState(() => Math.floor(Math.random() * DESCRIPTIONS.length));
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [visualViewMode, setVisualViewMode] = useState<"globe" | "list">(viewMode);
-  const router = useRouter();
-  const toggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { mutateAsync: addBookmark } = useAddBookmarkMutation();
-  const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
   const handleToggleViewMode = useCallback(() => {
     const nextMode = visualViewMode === "list" ? "globe" : "list";
@@ -65,16 +64,16 @@ export const GlobeFooter = ({
     setVisualViewMode(nextMode);
 
     if (!onViewModeChange) return;
-
-    if (toggleTimeoutRef.current) {
-      clearTimeout(toggleTimeoutRef.current);
-    }
+    if (toggleTimeoutRef.current) clearTimeout(toggleTimeoutRef.current);
 
     toggleTimeoutRef.current = setTimeout(() => {
       onViewModeChange(nextMode);
       toggleTimeoutRef.current = null;
     }, VIEW_MODE_TOGGLE_DELAY_MS);
   }, [onViewModeChange, visualViewMode]);
+
+  const { mutateAsync: addBookmark } = useAddBookmarkMutation();
+  const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
   const renderViewToggle = () => {
     const isListMode = visualViewMode === "list";
@@ -83,26 +82,30 @@ export const GlobeFooter = ({
       <button
         type="button"
         onClick={handleToggleViewMode}
-        className="relative flex items-center gap-2 h-[60px] px-2 py-[6px] rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-[var(--color-surface-placeholder--8)] overflow-hidden cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        className="relative flex items-center gap-2 h-[60px] px-2 py-1.5 rounded-[50px] bg-opacity-10 backdrop-blur-sm bg-(--color-surface-placeholder--8) overflow-hidden cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
         aria-label={`현재 ${isListMode ? "리스트" : "글로브"} 보기`}
         aria-pressed={!isListMode}
       >
         <span
           className={cn(
-            "absolute left-2 top-1/2 z-0 w-[44px] h-[44px] rounded-[50px] bg-[var(--color-surface-inverseprimary)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] -translate-y-1/2",
+            "absolute left-2 top-1/2 z-0 size-11 rounded-[50px] bg-(--color-surface-inverseprimary) transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] -translate-y-1/2",
             isListMode ? "translate-x-0" : "translate-x-[52px]"
           )}
         />
-        <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
+        <span className="relative z-10 flex items-center justify-center size-11 rounded-[50px] transition-colors pointer-events-none">
           <ListIcon
-            className="w-6 h-6 transition-colors duration-200 ease-in-out"
-            style={{ color: isListMode ? "var(--color-surface-primary)" : "white" }}
+            className={cn(
+              "w-6 h-6 transition-colors duration-200 ease-in-out",
+              isListMode ? "text-(--color-surface-primary)" : "text-white"
+            )}
           />
         </span>
-        <span className="relative z-10 flex items-center justify-center size-[44px] rounded-[50px] transition-colors pointer-events-none">
+        <span className="relative z-10 flex items-center justify-center size-11 rounded-[50px] transition-colors pointer-events-none">
           <GlobeIcon
-            className="w-8 h-8 transition-colors duration-200 ease-in-out"
-            style={{ color: isListMode ? "white" : "var(--color-surface-primary)" }}
+            className={cn(
+              "w-8 h-8 transition-colors duration-200 ease-in-out",
+              isListMode ? "text-white" : "text-(--color-surface-primary)"
+            )}
           />
         </span>
       </button>
@@ -164,9 +167,10 @@ export const GlobeFooter = ({
     <HeadlessToastProvider>
       <div
         aria-hidden={isZoomed}
-        className={`transition-opacity duration-500 w-full max-w-[512px] mx-auto flex flex-col items-center justify-center pt-10 relative ${
+        className={cn(
+          "transition-opacity duration-500 w-full max-w-lg mx-auto flex flex-col items-center justify-center pt-10 relative",
           isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
+        )}
       >
         {/* Toast */}
         <HeadlessToast
@@ -180,7 +184,7 @@ export const GlobeFooter = ({
         </HeadlessToast>
         {/* 첫 지구본: 자랑하기/홈 버튼 */}
         {isFirstGlobe ? (
-          <div className="w-full max-w-[512px] flex flex-col gap-3">
+          <div className="w-full max-w-lg flex flex-col gap-3">
             {/* 내 지구본 자랑하기 버튼 */}
             <ShareButton isFirstGlobe={true} />
 
@@ -206,13 +210,10 @@ export const GlobeFooter = ({
           <>
             {/* 설명 문구 - 지구본 뷰일 때만 표시 (내 지구본일 때만) */}
             {viewMode === "globe" && isMyGlobe && (
-              <div className="mb-10 text-center min-h-[28px]">
+              <div className="mb-10 text-center min-h-7">
                 <p
                   key={descriptionIndex}
-                  className="text-sm font-medium text-text-secondary"
-                  style={{
-                    animation: "slideInFromTop 0.5s ease-out",
-                  }}
+                  className="text-sm font-medium text-text-secondary animate-[slideInFromTop_0.5s_ease-out]"
                 >
                   {DESCRIPTIONS[descriptionIndex]}
                 </p>
@@ -232,7 +233,7 @@ export const GlobeFooter = ({
                 {/* 기록/도시 추가 버튼 */}
                 <button
                   type="button"
-                  className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] transition-all hover:opacity-80 cursor-pointer"
+                  className="flex items-center justify-center p-2.5 rounded-[500px] size-14 transition-all hover:opacity-80 cursor-pointer"
                   style={{
                     background:
                       "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
@@ -240,7 +241,7 @@ export const GlobeFooter = ({
                   aria-label="새 항목 추가"
                   onClick={() => router.push("/record")}
                 >
-                  <PlusIcon className="w-8 h-8" style={{ color: "var(--color-surface-primary)" }} />
+                  <PlusIcon className="w-8 h-8 text-(--color-surface-primary)" />
                 </button>
               </div>
             ) : (

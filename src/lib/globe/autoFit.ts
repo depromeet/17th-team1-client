@@ -3,19 +3,8 @@
  * 나라 클러스터 클릭 시 해당 국가의 모든 도시들이 화면에 fit되도록 계산
  */
 
+import { haversineDistance } from "./calculations";
 import type { CountryData } from "@/types/travelPatterns";
-
-// 두 지점 간의 거리를 계산하는 함수 (구면 거리)
-export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-  const R = 6371; // 지구 반지름 (km)
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
 
 // 지점들의 경계 박스를 계산하는 함수
 export const calculateBoundingBox = (cities: CountryData[]) => {
@@ -49,7 +38,7 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
   if (lngRange > 180) {
     // 경도가 180도를 넘어가는 경우 (예: 일본-미국 서부)
     // 더 짧은 경로를 찾기 위해 음수 경도를 양수로 변환
-    const adjustedCities = cities.map((city) => ({
+    const adjustedCities = cities.map(city => ({
       ...city,
       adjustedLng: city.lng < 0 ? city.lng + 360 : city.lng,
     }));
@@ -71,7 +60,14 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
   }
 
   const centerLat = (minLat + maxLat) / 2;
-  const centerLng = (minLng + maxLng) / 2;
+  // 경도 wraparound를 고려한 중심 계산
+  let centerLng: number;
+  if (minLng > maxLng) {
+    // wraparound 케이스: minLng이 maxLng보다 큰 경우
+    centerLng = (minLng + maxLng + 360) / 2;
+    if (centerLng > 180) centerLng -= 360;
+  } else centerLng = (minLng + maxLng) / 2;
+
   const latRange = maxLat - minLat;
   const finalLngRange = Math.abs(maxLng - minLng);
 
@@ -91,7 +87,7 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
 export const calculateOptimalZoom = (
   boundingBox: ReturnType<typeof calculateBoundingBox>,
   _viewportWidth: number = 512,
-  _viewportHeight: number = 512,
+  _viewportHeight: number = 512
 ): number => {
   const { latRange, lngRange } = boundingBox;
 
@@ -181,10 +177,10 @@ export const calculateAnimationDuration = (
   currentAltitude: number,
   targetLat: number,
   targetLng: number,
-  targetAltitude: number,
+  targetAltitude: number
 ): number => {
   // 거리 기반으로 애니메이션 시간 계산
-  const distance = calculateDistance(currentLat, currentLng, targetLat, targetLng);
+  const distance = haversineDistance(currentLat, currentLng, targetLat, targetLng);
   const altitudeDiff = Math.abs(currentAltitude - targetAltitude);
 
   // 거리에 따른 시간 계산 (더 자연스럽게)
@@ -209,7 +205,7 @@ export const calculateAnimationDuration = (
     durationFromDistance = 800;
   }
 
-  // 고도 변화에 따른 시간 귑가
+  // 고도 변화에 따른 시간 추가
   const altitudeTime = Math.min(altitudeDiff * 600, 800); // 최대 0.8초 추가
 
   // 최종 시간 계산

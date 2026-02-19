@@ -1,15 +1,19 @@
+/**
+ * @file globeConfig.ts
+ * @description Globe 컴포넌트 렌더러 설정 상수 모음
+ * @responsibility Globe 시각화에 필요한 정적 설정값 제공
+ *                 (줌 레벨 임계값은 clusteringConstants.ts 참조)
+ */
+
 import worldCountries from "world-countries";
 
-// Globe 설정 상수
+// Globe 렌더러 설정 상수
+// 줌 레벨 관련 값(INITIAL_ALTITUDE, MAX_ZOOM 등)은 clusteringConstants.ts의 ZOOM_LEVELS.DEFAULT 참조
 export const GLOBE_CONFIG = {
   WIDTH: 600, // 지구본 컴포넌트 너비 (px)
   HEIGHT: 800, // 지구본 컴포넌트 높이 (px)
-  INITIAL_ALTITUDE: 7, // 초기 카메라 고도 (지구 반지름 배수) - ZOOM_LEVELS.DEFAULT와 동일
   MIN_ZOOM: 0.01, // 최소 줌 레벨
-  MAX_ZOOM: 7, // 최대 줌 레벨 - ZOOM_LEVELS.DEFAULT와 동일
-  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준) - ZOOM_LEVELS.CLUSTERING.CLOSE와 동일
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
-  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이) - ZOOM_LEVELS.CLUSTERING.DETAILED와 동일
   MIN_DISTANCE: 110, // 최소 카메라 거리 (Globe.gl 단위 기준)
   MAX_DISTANCE: 500, // 최대 카메라 거리 (Globe.gl 단위 기준)
   ATMOSPHERE_ALTITUDE: 0, // 대기권 두께 (지구 반지름 배수)
@@ -59,7 +63,13 @@ export const ISO_CODE_MAP: { [key: string]: string } = worldCountries.reduce<{ [
 
 // 외부 리소스 URL
 export const EXTERNAL_URLS = {
-  // 세계 지도 GeoJSON 데이터 URL
-  WORLD_GEOJSON: "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
+  // 세계 지도 GeoJSON 데이터 URL (로컬 번들, public/data/world.geojson)
+  WORLD_GEOJSON: "/data/world.geojson",
   NIGHT_SKY_IMAGE: "//unpkg.com/three-globe/example/img/night-sky.png", // 배경 별하늘 이미지 URL
+} as const;
+
+// 브라우저 뷰포트 기본값 (SSR 폴백용) — Globe.tsx에서 window 접근 불가 시 사용
+export const VIEWPORT_DEFAULTS = {
+  WIDTH: 600, // SSR 시 기본 너비
+  HEIGHT: 800, // SSR 시 기본 높이
 } as const;

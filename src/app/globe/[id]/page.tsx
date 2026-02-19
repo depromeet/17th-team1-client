@@ -8,6 +8,7 @@ import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
+import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import ListView from "@/components/listview/ListView";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getBookmarks } from "@/services/bookmarkService";
@@ -25,9 +26,11 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 
 const GlobePage = () => {
   const router = useRouter();
+
   const { id: urlUuid } = useParams<{ id: string }>();
-  const { uuid: cookieUuid } = getAuthInfo();
+
   const globeRef = useRef<GlobeRef | null>(null);
+
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [travelInsight, setTravelInsight] = useState<string>("");
   const [cityCount, setCityCount] = useState<number>(0);
@@ -39,6 +42,7 @@ const GlobePage = () => {
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
   const [countryThumbnails, setCountryThumbnails] = useState<Record<string, string>>({});
   const [fromSavedGlobe, setFromSavedGlobe] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -47,9 +51,7 @@ const GlobePage = () => {
   // 이전 경로 확인 (sessionStorage 사용)
   useEffect(() => {
     const fromPage = sessionStorage.getItem("fromSavedGlobe");
-    if (fromPage === "true") {
-      setFromSavedGlobe(true);
-    }
+    if (fromPage === "true") setFromSavedGlobe(true);
   }, []);
 
   // Variables
@@ -59,7 +61,7 @@ const GlobePage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { uuid: myUuid, memberId } = getAuthInfo();
+        const { uuid: myUuid } = getAuthInfo();
         if (!urlUuid) {
           router.push("/error?type=404");
           return;
@@ -73,9 +75,7 @@ const GlobePage = () => {
         const globeResponse = await getGlobeData(urlUuid, undefined, false);
         let insightResponse: string | undefined;
 
-        if (globeResponse?.data?.memberId) {
-          insightResponse = await getTravelInsight(globeResponse.data.memberId, false);
-        }
+        if (globeResponse?.data?.memberId) insightResponse = await getTravelInsight(globeResponse.data.memberId, false);
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
         const diaryData = await getDiariesList(urlUuid);
@@ -108,9 +108,8 @@ const GlobePage = () => {
             // 북마크 상태 확인
             try {
               const bookmarks = await getBookmarks();
-              const isAlreadyBookmarked = bookmarks.some(
-                (bookmark) => bookmark.memberId === globeResponse.data.memberId,
-              );
+              const isAlreadyBookmarked = bookmarks.some(({ memberId }) => memberId === globeResponse.data.memberId);
+
               setIsBookmarked(isAlreadyBookmarked);
             } catch {
               // 북마크 목록 조회 실패 시 기본값 유지
@@ -118,8 +117,11 @@ const GlobePage = () => {
           }
         }
         setTravelInsight(insightResponse || "");
-      } catch {
+      } catch (err) {
         // TODO: 에러 처리 로직 추가
+        console.error("Globe data load failed:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -129,21 +131,13 @@ const GlobePage = () => {
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
 
-  if (travelPatterns.length === 0) {
-    return (
-      <div></div>
-      // <div className="w-full h-dvh flex items-center justify-center">
-      //   <div className="text-white text-xl text-center">
-      //     <div>🌍 여행 데이터가 없습니다</div>
-      //     <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
-      //   </div>
-      // </div>
-    );
-  }
+  if (isLoading) return <GlobeLoading onComplete={() => {}} />;
+
+  if (travelPatterns.length === 0) return null;
 
   return (
     <div className="overflow-hidden text-text-primary relative flex flex-col h-dvh">
-      <div className="max-w-[512px] mx-auto w-full relative z-20">
+      <div className="max-w-lg mx-auto w-full relative z-20">
         <Header
           title={`${nickname}님의 지구본`}
           variant="navy"
@@ -224,7 +218,7 @@ const GlobePage = () => {
 
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
           <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
-            <div className="max-w-[512px] w-full h-full mt-4">
+            <div className="max-w-lg w-full h-full mt-4">
               <ListView travelPatterns={travelPatterns} uuid={urlUuid} />
             </div>
           </div>

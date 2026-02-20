@@ -1,4 +1,6 @@
 import { COLORS, ISO_CODE_MAP } from "@/constants/globeConfig";
+import type { GeoJSONFeature } from "@/types/geography";
+import type { CountryData } from "@/types/travelPatterns";
 
 // ISO 코드 변환 유틸리티
 export const getISOCode = (countryId: string): string => {
@@ -7,15 +9,12 @@ export const getISOCode = (countryId: string): string => {
 
 // 폴리곤 색상 계산
 export const getPolygonColor = (
-  // biome-ignore lint/suspicious/noExplicitAny: GeoJSON feature type
-  feature: any,
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
-  countries: any[],
+  feature: GeoJSONFeature,
+  countries: CountryData[],
   getISOCode: (id: string) => string
 ) => {
   const isoCode = feature.id;
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
-  const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
+  const countryData = countries.find(c => getISOCode(c.id) === String(isoCode));
 
   // 여행 데이터가 없는 국가는 비활성 색상
   if (!countryData) return COLORS.INACTIVE_POLYGON;
@@ -23,8 +22,7 @@ export const getPolygonColor = (
   // 여행 데이터가 있는 국가는 globe 레벨 색상 적용
   // 해당 국가의 도시 수 계산
   const countryCode = getISOCode(countryData.id);
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
-  const cityCount = countries.filter((c: any) => getISOCode(c.id) === countryCode).length;
+  const cityCount = countries.filter(c => getISOCode(c.id) === countryCode).length;
 
   // Globe Leveling Color 기준
   if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상 도시: Blue 0 (#67E8FF)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import type { City } from "@/types/city";
@@ -28,29 +28,40 @@ export const NationSelectClient = ({
 }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
-  const registeredCityNamesSet = new Set(registeredCityNames);
 
   const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
   const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
     useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
-  const displayCities = isSearchingMode ? searchResults : initialCities;
+  
+  const displayCities = useMemo(() => 
+    isSearchingMode ? searchResults : initialCities
+  , [isSearchingMode, searchResults, initialCities]);
+
   const displayError = isSearchingMode ? searchError : null;
   const displayLoading = isSearchingMode ? isSearching : false;
 
-  const selectedCityIds = new Set(selectedCityList.map(city => city.id));
+  const selectedCityIds = useMemo(() => 
+    new Set(selectedCityList.map(city => city.id))
+  , [selectedCityList]);
 
-  const handleAddCity = (city: City) => {
-    if (selectedCityIds.has(city.id)) return;
-    setSelectedCityList(prev => [...prev, { ...city, selected: true }]);
-  };
+  const registeredCityNamesSet = useMemo(() => 
+    new Set(registeredCityNames)
+  , [registeredCityNames]);
 
-  const handleRemoveCity = (cityId: string) => {
+  const handleAddCity = useCallback((city: City) => {
+    setSelectedCityList(prev => {
+      if (prev.some(c => c.id === city.id)) return prev;
+      return [...prev, { ...city, selected: true }];
+    });
+  }, []);
+
+  const handleRemoveCity = useCallback((cityId: string) => {
     setSelectedCityList(prev => prev.filter(city => city.id !== cityId));
-  };
+  }, []);
 
-  const handleCreateGlobe = async () => {
+  const handleCreateGlobe = useCallback(async () => {
     if (selectedCityList.length === 0) return;
 
     if (mode === "edit-add" && onComplete) {
@@ -65,14 +76,14 @@ export const NationSelectClient = ({
       console.error("Failed to create member travels:", error);
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
     }
-  };
+  }, [selectedCityList, mode, onComplete, createMemberTravels, router]);
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearchKeyword(value);
     if (value.trim().length === 0) {
       clearSearch();
     }
-  };
+  }, [setSearchKeyword, clearSearch]);
 
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
@@ -159,3 +170,4 @@ export const NationSelectClient = ({
     </main>
   );
 };
+

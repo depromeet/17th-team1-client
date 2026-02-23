@@ -149,7 +149,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
     };
 
     return (
-      <Comp className={cn(headerVariants({ variant }), "relative ", className)} ref={ref} {...props}>
+      <Comp className={cn(headerVariants({ variant }), "relative", className)} ref={ref} {...props}>
         {/* 왼쪽 버튼 영역 */}
         <div className="flex items-center justify-start min-w-0 flex-1">{renderLeftIcon()}</div>
 

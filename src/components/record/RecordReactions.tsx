@@ -331,6 +331,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
   const handleAddEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isOwner) {
+      e.stopPropagation();
       showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
       return;
     }

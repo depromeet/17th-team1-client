@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { memo, useId } from "react";
 import type { City } from "@/types/city";
 import { CityItem } from "./CityItem";
 
@@ -15,7 +15,7 @@ type PopularCitiesListProps = {
   hasSearched?: boolean;
 };
 
-export const PopularCitiesList = ({
+export const PopularCitiesList = memo(({
   cities,
   selectedCityIds,
   registeredCityNames = new Set(),
@@ -89,4 +89,7 @@ export const PopularCitiesList = ({
       ))}
     </div>
   );
-};
+});
+
+PopularCitiesList.displayName = "PopularCitiesList";
+

@@ -23,11 +23,7 @@ type GlobeFooterProps = {
   onBookmarkChange?: (isBookmarked: boolean) => void;
 };
 
-const DESCRIPTIONS = [
-  "다녀온 도시가 많을수록 나라 색이 밝아져요.",
-  "클러스터 마커는 확대하면 도시별로 풀려요.",
-  "+ 버튼을 눌러 새로운 여행을 기록해보세요.",
-];
+const DESCRIPTIONS = ["다녀온 도시가 많을수록 나라 색이 밝아져요.", "+ 버튼을 눌러 새로운 여행을 기록해보세요."];
 
 const VIEW_MODE_TOGGLE_DELAY_MS = 220;
 

@@ -14,7 +14,7 @@ import {
 import { Header } from "@/components/common/Header";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
 import { getCountryName } from "@/constants/countryMapping";
-import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
+import { useCreateMemberTravelsMutation, useDeleteMemberTravelMutation } from "@/hooks/mutation/useMemberMutation";
 import type { City } from "@/types/city";
 import type { CreateTravelRecordsResponse } from "@/types/member";
 import { getAuthInfo } from "@/utils/cookies";
@@ -46,11 +46,13 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const searchParams = useSearchParams();
 
   const [current, setCurrent] = useState(cities);
-  const base = useMemo(() => cities.filter((c) => !c.isNew), [cities]);
+  const base = useMemo(() => cities.filter(c => !c.isNew), [cities]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showCannotDeleteModal, setShowCannotDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
+  const { mutateAsync: deleteMemberTravel } = useDeleteMemberTravelMutation();
 
   // 삭제된 도시 정보 저장 (삭제 시점의 도시 정보를 저장)
   const [deletedCitiesInfo, setDeletedCitiesInfo] = useState<
@@ -84,9 +86,9 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   // 전달받은 삭제된 도시 정보를 deletedCitiesInfo에 저장
   useEffect(() => {
     if (deletedCities.length > 0) {
-      setDeletedCitiesInfo((prev) => {
+      setDeletedCitiesInfo(prev => {
         const updated = new Map(prev);
-        deletedCities.forEach((city) => {
+        deletedCities.forEach(city => {
           updated.set(city.id, city);
         });
         return updated;
@@ -96,10 +98,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   // cities prop이 처음 로드될 때 삭제된 도시가 아닌 기존 도시들을 deletedCitiesInfo에 저장 (필요시)
   useEffect(() => {
-    const existingCities = cities.filter((c) => !c.isNew && !removedIds.has(c.id));
-    setDeletedCitiesInfo((prev) => {
+    const existingCities = cities.filter(c => !c.isNew && !removedIds.has(c.id));
+    setDeletedCitiesInfo(prev => {
       const updated = new Map(prev);
-      existingCities.forEach((city) => {
+      existingCities.forEach(city => {
         if (!updated.has(city.id)) {
           updated.set(city.id, city);
         }
@@ -111,15 +113,15 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   // cities prop이 변경될 때 current state 업데이트 (하지만 삭제된 도시는 제외)
   useEffect(() => {
     // 삭제된 도시를 제외한 도시들만 current에 유지
-    const filteredCities = cities.filter((c) => !removedIds.has(c.id));
+    const filteredCities = cities.filter(c => !removedIds.has(c.id));
 
     // 기존 current에서 삭제된 도시 제거하고 새 도시 추가
-    setCurrent((prev) => {
-      const prevIds = new Set(prev.map((c) => c.id));
-      const newCities = filteredCities.filter((c) => !prevIds.has(c.id));
+    setCurrent(prev => {
+      const prevIds = new Set(prev.map(c => c.id));
+      const newCities = filteredCities.filter(c => !prevIds.has(c.id));
 
       // 삭제된 도시 제거
-      const updated = prev.filter((c) => !removedIds.has(c.id));
+      const updated = prev.filter(c => !removedIds.has(c.id));
 
       // 새 도시 추가
       return [...newCities, ...updated];
@@ -143,14 +145,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     router.push("/record");
   };
 
-  const baseIds = useMemo(() => new Set(base.map((c) => c.id)), [base]);
-  const currentIds = useMemo(() => new Set(current.map((c) => c.id)), [current]);
+  const baseIds = useMemo(() => new Set(base.map(c => c.id)), [base]);
+  const currentIds = useMemo(() => new Set(current.map(c => c.id)), [current]);
   const isChanged = useMemo(() => {
     // 삭제된 도시가 있으면 변경된 것
     if (removedIds.size > 0) return true;
 
     // 추가된 도시가 있으면 변경된 것
-    if (current.some((c) => c.isNew)) return true;
+    if (current.some(c => c.isNew)) return true;
 
     // 개수나 ID가 다르면 변경된 것
     if (current.length !== base.length) return true;
@@ -170,12 +172,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
     if (isNew) {
       // 새로 추가한 도시 삭제 - current에서 제거하고 URL도 업데이트
-      const updatedCurrent = current.filter((c) => c.id !== cityId);
+      const updatedCurrent = current.filter(c => c.id !== cityId);
       setCurrent(updatedCurrent);
 
       // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
       const remainingNewCities = updatedCurrent
-        .filter((c) => c.isNew)
+        .filter(c => c.isNew)
         .map(({ id, name, countryCode, lat, lng }) => {
           const countryName = getCountryName(countryCode);
           return { id, name, country: countryName, countryCode, lat, lng };
@@ -207,18 +209,18 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const handleConfirmDelete = () => {
     if (!confirmId) return;
 
-    const cityToDelete = current.find((c) => c.id === confirmId);
+    const cityToDelete = current.find(c => c.id === confirmId);
     if (!cityToDelete) return;
 
     // 삭제된 도시 정보 저장 (저장 시 서버에 전송하기 위해)
-    setDeletedCitiesInfo((prev) => {
+    setDeletedCitiesInfo(prev => {
       const updated = new Map(prev);
       updated.set(confirmId, cityToDelete);
       return updated;
     });
 
     // 현재 목록에서 제거
-    const updatedCurrent = current.filter((c) => c.id !== confirmId);
+    const updatedCurrent = current.filter(c => c.id !== confirmId);
     setCurrent(updatedCurrent);
     setConfirmId(null);
 
@@ -230,7 +232,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
     // 현재 남아있는 새로 추가한 도시들로 added 파라미터 업데이트
     const remainingNewCities = updatedCurrent
-      .filter((c) => c.isNew)
+      .filter(c => c.isNew)
       .map(({ id, name, countryCode, lat, lng }) => {
         const countryName = getCountryName(countryCode);
         return { id, name, country: countryName, countryCode, lat, lng };
@@ -274,22 +276,19 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     const minLoadingDuration = 1300; // 최소 1.3초
 
     try {
-      // 추가된 도시들과 삭제된 도시들 찾기
-      const baseIds = new Set(base.map((c) => c.id));
-
       // 추가된 도시들 (current에 있지만 base에 없거나 isNew인 것)
-      const addedCities = current.filter((c) => !baseIds.has(c.id) || c.isNew);
+      const addedCities = current.filter(c => !baseIds.has(c.id) || c.isNew);
 
       // 삭제된 도시들 (removedIds에 있는 ID들에 해당하는 삭제된 도시 정보 찾기)
       const deletedCities = Array.from(removedIds)
-        .map((id) => deletedCitiesInfo.get(id))
+        .map(id => deletedCitiesInfo.get(id))
         .filter((city): city is NonNullable<typeof city> => city !== undefined);
 
       console.log(`[Save] 추가할 도시:`, addedCities);
       console.log(`[Save] 삭제할 도시:`, deletedCities);
 
       // 추가된 도시들을 City 타입으로 변환 (배열로 한번에 전송)
-      const citiesToAdd: City[] = addedCities.map((city) => ({
+      const citiesToAdd: City[] = addedCities.map(city => ({
         id: city.id,
         name: city.name,
         country: getCountryName(city.countryCode),
@@ -300,7 +299,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       }));
 
       // 삭제된 도시들을 DeleteTravelRecord 타입으로 변환
-      const deletePromises = deletedCities.map((city) => {
+      const deletePromises = deletedCities.map(city => {
         const deleteRecord = {
           countryCode: city.countryCode,
           cityName: city.name,
@@ -308,14 +307,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
           lng: city.lng,
         };
         console.log(`[Save] 도시 삭제 요청:`, deleteRecord);
-        return deleteMemberTravel(deleteRecord, token);
+        return deleteMemberTravel({ travelRecord: deleteRecord, token });
       });
 
       // 추가 요청 (배열로 한번에 전송)
       let addPromise: Promise<CreateTravelRecordsResponse> | null = null;
       if (citiesToAdd.length > 0) {
         console.log(`[Save] 도시 추가 요청:`, citiesToAdd);
-        addPromise = createMemberTravels(citiesToAdd);
+        addPromise = createMemberTravels({ cities: citiesToAdd });
       }
 
       console.log(`[Save] 총 ${citiesToAdd.length}개 추가, ${deletePromises.length}개 삭제 요청 시작`);
@@ -334,7 +333,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
 
       if (remainingTime > 0) {
-        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
       setIsSaving(false);
@@ -348,7 +347,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       const remainingTime = Math.max(0, minLoadingDuration - elapsedTime);
 
       if (remainingTime > 0) {
-        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
       setIsSaving(false);
@@ -358,7 +357,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
   const handleAddClick = () => {
     // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
-    const newCities = current.filter((c) => c.isNew);
+    const newCities = current.filter(c => c.isNew);
     const removedParam =
       Array.from(removedIds).length > 0 ? encodeURIComponent(JSON.stringify(Array.from(removedIds))) : null;
 

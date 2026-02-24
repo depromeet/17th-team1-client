@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -47,8 +48,8 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
   const groupedCountries = useMemo(() => {
     const groups: Map<string, GroupedByCountry> = new Map();
 
-    travelPatterns.forEach((pattern) => {
-      pattern.countries.forEach((country) => {
+    travelPatterns.forEach(pattern => {
+      pattern.countries.forEach(country => {
         if (!groups.has(country.id)) {
           groups.set(country.id, {
             countryCode: country.id,
@@ -78,7 +79,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
     // 대륙으로 필터링
     if (selectedContinent !== "전체") {
-      result = result.filter((group) => group.continent === selectedContinent);
+      result = result.filter(group => group.continent === selectedContinent);
     }
 
     return result;
@@ -97,8 +98,8 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
     };
 
     const allGrouped: Map<string, GroupedByCountry> = new Map();
-    travelPatterns.forEach((pattern) => {
-      pattern.countries.forEach((country) => {
+    travelPatterns.forEach(pattern => {
+      pattern.countries.forEach(country => {
         if (!allGrouped.has(country.id)) {
           allGrouped.set(country.id, {
             countryCode: country.id,
@@ -112,7 +113,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
     });
 
     counts.전체 = allGrouped.size;
-    allGrouped.forEach((group) => {
+    allGrouped.forEach(group => {
       if (group.continent in counts) {
         counts[group.continent as KoreanContinent]++;
       }
@@ -123,8 +124,8 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
   // 여행 기록이 있는 대륙을 앞에, 없는 대륙을 뒤에 배치 (원래 순서 유지)
   const sortedContinents = useMemo(() => {
-    const withRecords = CONTINENTS.filter((continent) => continentCounts[continent] > 0);
-    const withoutRecords = CONTINENTS.filter((continent) => continentCounts[continent] === 0);
+    const withRecords = CONTINENTS.filter(continent => continentCounts[continent] > 0);
+    const withoutRecords = CONTINENTS.filter(continent => continentCounts[continent] === 0);
     return [...withRecords, ...withoutRecords];
   }, [continentCounts]);
 
@@ -147,7 +148,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
           </button>
 
           {/* 대륙 탭 */}
-          {sortedContinents.map((continent) => {
+          {sortedContinents.map(continent => {
             const isDisabled = continentCounts[continent] === 0;
             return (
               <button
@@ -172,7 +173,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
         {/* 국가 목록 */}
         <div className="flex-1 flex flex-col gap-0 items-start p-4 w-full overflow-y-auto scrollbar-hide">
-          {groupedCountries.map((group) => (
+          {groupedCountries.map(group => (
             <div
               key={group.countryCode}
               className="w-full border-b pt-4 pb-5"
@@ -204,11 +205,19 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                   {group.cities.map(({ cityId, name, hasRecords, thumbnails }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
-                    const isClickable = hasRecords && cityId;
+                    const countryName = name.includes(",")
+                      ? name.split(",").slice(1).join(",").trim()
+                      : group.countryName;
 
                     const handleCityClick = () => {
-                      const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
-                      router.push(path);
+                      if (hasRecords && cityId) {
+                        const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
+                        router.push(path);
+                      } else {
+                        const params = new URLSearchParams({ city: cityName, country: countryName });
+                        if (cityId != null) params.set("cityId", String(cityId));
+                        router.push(`/image-metadata?${params.toString()}`);
+                      }
                     };
 
                     return (
@@ -217,7 +226,6 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                         type="button"
                         className="border rounded-[12px] border-none"
                         onClick={handleCityClick}
-                        disabled={!isClickable}
                       >
                         <div
                           className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
@@ -227,7 +235,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
-                            cursor: isClickable ? "pointer" : "default",
+                            cursor: "pointer",
                             border: "1px solid var(--color-border-absolutewhite--8)",
                           }}
                         >
@@ -243,9 +251,11 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                   className="border border-white rounded-[4px] shrink-0 overflow-hidden"
                                   style={{ width: "24px", height: "24px" }}
                                 >
-                                  <img
+                                  <Image
                                     src={thumbnails[0]}
                                     alt={cityName}
+                                    width={24}
+                                    height={24}
                                     className="w-full h-full object-cover rounded-[4px]"
                                   />
                                 </div>
@@ -263,9 +273,11 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                       marginRight: "-8px",
                                     }}
                                   >
-                                    <img
+                                    <Image
                                       src={thumbnails[1]}
                                       alt={`${cityName} 이전`}
+                                      width={24}
+                                      height={24}
                                       className="w-full h-full object-cover rounded-[4px]"
                                     />
                                   </div>
@@ -279,9 +291,11 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                       zIndex: 2,
                                     }}
                                   >
-                                    <img
+                                    <Image
                                       src={thumbnails[0]}
                                       alt={`${cityName} 최신`}
+                                      width={24}
+                                      height={24}
                                       className="w-full h-full object-cover rounded-[4px]"
                                     />
                                   </div>

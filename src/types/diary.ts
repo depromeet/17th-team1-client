@@ -161,6 +161,11 @@ export type CreateDiaryPhotoParams = {
   placeName?: string;
 };
 
+export type CreateDiaryRequest = {
+  params: CreateDiaryParams;
+  token?: string;
+};
+
 export type CreateDiaryParams = {
   cityId: number;
   text?: string;
@@ -171,4 +176,32 @@ export type UpdateDiaryParams = {
   cityId: number;
   text?: string;
   photos: CreateDiaryPhotoParams[];
+};
+
+export type UpdateDiaryRequest = {
+  diaryId: string | number;
+  params: UpdateDiaryParams;
+  token?: string;
+};
+
+export type UploadTravelPhotoRequest = {
+  file: File;
+  token?: string;
+};
+
+export type DeleteDiaryRequest = {
+  diaryId: string | number;
+  token?: string;
+};
+
+export type DeleteDiaryPhotoRequest = {
+  diaryId: string | number;
+  photoId: number;
+  token?: string;
+};
+
+export type AddDiaryPhotoRequest = {
+  diaryId: string | number;
+  photo: CreateDiaryPhotoParams;
+  token?: string;
 };

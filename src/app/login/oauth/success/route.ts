@@ -3,15 +3,41 @@ import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/config/env";
 import { getMemberId } from "@/services/memberService";
 
+const ALLOWED_HOSTS = ["globber.world", "www.globber.world"];
+
+/**
+ * 프록시/로드 밸런서 환경에서 올바른 origin을 가져옵니다.
+ * X-Forwarded-Host와 X-Forwarded-Proto 헤더를 우선 확인하고,
+ * 없으면 환경 변수나 request.url을 사용합니다.
+ */
+function getOrigin(request: NextRequest): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+
+  if (forwardedHost && ALLOWED_HOSTS.some(h => forwardedHost === h || forwardedHost.endsWith(`.${h}`)))
+    return `${forwardedProto}://${forwardedHost}`;
+
+  // 환경 변수가 있으면 사용
+  if (env.REDIRECT_ORIGIN) {
+    return env.REDIRECT_ORIGIN;
+  }
+
+  // 마지막 fallback으로 request.url 사용
+  const url = new URL(request.url);
+  return `${url.protocol}//${url.host}`;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const accessToken = searchParams.get("accessToken");
   const firstLogin = searchParams.get("firstLogin");
   const uuid = searchParams.get("uuid");
 
+  const origin = getOrigin(request);
+
   if (!accessToken) {
     console.error("URL에서 accessToken을 찾을 수 없습니다.");
-    return NextResponse.redirect(new URL("/login", env.REDIRECT_ORIGIN));
+    return NextResponse.redirect(new URL("/login", origin));
   }
 
   const cleanToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
@@ -26,7 +52,7 @@ export async function GET(request: NextRequest) {
     path: "/",
     maxAge: maxAgeSeconds,
     httpOnly: false,
-    ...(isLocalDev ? {} : { domain: env.COOKIE_DOMAIN }),
+    ...(isLocalDev ? {} : env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   };
 
   try {
@@ -46,10 +72,10 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/nation-select", origin));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/", origin));
     }
   } catch (error) {
     console.error("멤버 ID 조회 중 오류:", error);
@@ -62,10 +88,10 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/nation-select", origin));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
+      return NextResponse.redirect(new URL("/", origin));
     }
   }
 }

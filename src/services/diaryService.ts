@@ -13,6 +13,7 @@ import type {
   UpdateDiaryParams,
 } from "@/types/diary";
 import { getAuthInfo } from "@/utils/cookies";
+import { logger } from "@/utils/logger";
 import { getS3UploadUrl } from "./profileService";
 
 /**
@@ -55,7 +56,7 @@ const transformDiaryData = (data: DiaryData): DiaryDetail => {
         // sessionStorage에 매핑이 없으면 photoId 순서로 정렬 (기본 동작)
         sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
       }
-    } catch (e) {
+    } catch {
       // sessionStorage 접근 실패 시 photoId로 정렬
       sortedPhotos = [...photos].sort((a, b) => a.photoId - b.photoId);
     }
@@ -131,7 +132,7 @@ export const uploadTravelPhoto = async (file: File, token?: string): Promise<str
       fileName: file.name,
       contentType: file.type,
     },
-    authToken,
+    authToken
   );
 
   const uploadResponse = await fetch(presignedUrl, {
@@ -208,6 +209,7 @@ export const getDiaryDetail = async (diaryId: string | number, token?: string): 
     const response = await apiGet<DiaryDetailResponse>(`/api/v1/diaries/${diaryId}`, undefined, authToken);
     return response.data;
   } catch (error) {
+    logger.error("[getDiaryDetail] 실패:", error);
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -231,10 +233,11 @@ export const getDiariesByUuid = async (uuid: string, token?: string): Promise<Di
   try {
     const response = await apiGet<DiariesByUuidResponse>(`/api/v1/diaries?uuid=${uuid}`, {}, token);
     // 각 DiaryResponse의 diaries 배열을 순회하며 변환
-    return response.data.diaryResponses.flatMap((diaryResponse) =>
-      diaryResponse.diaries.map((diaryData) => transformDiaryData(diaryData)),
+    return response.data.diaryResponses.flatMap(diaryResponse =>
+      diaryResponse.diaries.map(diaryData => transformDiaryData(diaryData))
     );
   } catch (error) {
+    logger.error("[getDiariesByUuid] 실패:", error);
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -266,6 +269,7 @@ export const deleteDiary = async (diaryId: string | number, token?: string): Pro
   try {
     await apiDelete(`/api/v1/diaries/${diaryId}`, undefined, authToken);
   } catch (error) {
+    logger.error("[deleteDiary] 실패:", error);
     throw new Error("여행 기록 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -297,6 +301,7 @@ export const deleteDiaryPhoto = async (diaryId: string | number, photoId: number
   try {
     await apiDelete(`/api/v1/diaries/photo/${diaryId}/${photoId}`, undefined, authToken);
   } catch (error) {
+    logger.error("[deleteDiaryPhoto] 실패:", error);
     throw new Error("여행 기록 사진 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -316,7 +321,7 @@ export const deleteDiaryPhoto = async (diaryId: string | number, photoId: number
 export const addDiaryPhoto = async (
   diaryId: string | number,
   photo: CreateDiaryPhotoParams,
-  token?: string,
+  token?: string
 ): Promise<DiaryPhoto> => {
   let authToken = token;
 
@@ -333,6 +338,7 @@ export const addDiaryPhoto = async (
     const response = await apiPost<DiaryPhotoResponse>(`/api/v1/diaries/photo/${diaryId}`, photo, authToken);
     return response.data;
   } catch (error) {
+    logger.error("[addDiaryPhoto] 실패:", error);
     throw new Error("여행 기록 사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -359,7 +365,7 @@ export const getDiariesList = async (uuid: string) => {
 
     return response.data.diaryResponses;
   } catch (error) {
-    console.error("여행기록 조회에 실패했습니다.", error);
+    logger.error("여행기록 조회에 실패했습니다.", error);
     return [];
   }
 };
@@ -383,7 +389,7 @@ export const getDiariesList = async (uuid: string) => {
 export const updateDiary = async (
   diaryId: string | number,
   params: UpdateDiaryParams,
-  token?: string,
+  token?: string
 ): Promise<void> => {
   let authToken = token;
 
@@ -399,6 +405,7 @@ export const updateDiary = async (
   try {
     await apiPut(`/api/v1/diaries/${diaryId}`, params, authToken);
   } catch (error) {
+    logger.error("[updateDiary] 실패:", error);
     throw new Error("여행 기록 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

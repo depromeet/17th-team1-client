@@ -9,7 +9,8 @@ import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
 import { RecordScrollContainer } from "@/components/record/RecordScrollContainer";
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
-import { deleteDiary, getDiariesByUuid } from "@/services/diaryService";
+import { useDeleteDiaryMutation } from "@/hooks/mutation/useDiaryMutations";
+import { getDiariesByUuid } from "@/services/diaryService";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
@@ -36,6 +37,7 @@ const RecordDetailPage = () => {
   const [countryRecords, setCountryRecords] = useState<RecordData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
+  const { mutateAsync: deleteDiary } = useDeleteDiaryMutation();
 
   const cityId = typeof params.id === "string" ? Number(params.id) : 0;
 
@@ -97,7 +99,7 @@ const RecordDetailPage = () => {
         }
 
         // 선택한 도시가 있는지 확인
-        const selectedDiary = diaries.find((diary) => diary.cityId === cityId);
+        const selectedDiary = diaries.find(diary => diary.cityId === cityId);
         if (!selectedDiary) {
           if (isMounted) {
             setError("해당 도시의 여행 기록을 찾을 수 없습니다");
@@ -133,7 +135,7 @@ const RecordDetailPage = () => {
             userAvatar,
             description,
             reactions,
-          }),
+          })
         );
 
         if (isMounted) {
@@ -163,8 +165,7 @@ const RecordDetailPage = () => {
   };
 
   if (!currentRecord) return null;
-  const { city, country, id, images, imageMetadata, userName, userAvatar, description, reactions } =
-    currentRecord;
+  const { city, country, id, images, imageMetadata, userName, userAvatar, description, reactions } = currentRecord;
 
   const handleEdit = () => {
     const params = new URLSearchParams();
@@ -186,7 +187,7 @@ const RecordDetailPage = () => {
 
     if (confirmed) {
       try {
-        await deleteDiary(id);
+        await deleteDiary({ diaryId: id });
         router.push("/");
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "기록 삭제 중 오류가 발생했습니다";
@@ -273,24 +274,22 @@ const RecordDetailPage = () => {
           hasNext={hasNext}
           hasPrevious={hasPrevious}
         >
-          {countryRecords.map(
-            ({ id, images, imageMetadata, userName, userAvatar, description, reactions }, index) => {
-              return (
-                <RecordCard
-                  key={`${id}-${index}`}
-                  id={id}
-                  images={images}
-                  imageMetadata={imageMetadata}
-                  userName={userName}
-                  userAvatar={userAvatar}
-                  description={description}
-                  reactions={reactions}
-                  isOwner={isOwner}
-                  showScrollHint={shouldShowScrollHint && index === currentIndex}
-                />
-              );
-            },
-          )}
+          {countryRecords.map(({ id, images, imageMetadata, userName, userAvatar, description, reactions }, index) => {
+            return (
+              <RecordCard
+                key={`${id}-${index}`}
+                id={id}
+                images={images}
+                imageMetadata={imageMetadata}
+                userName={userName}
+                userAvatar={userAvatar}
+                description={description}
+                reactions={reactions}
+                isOwner={isOwner}
+                showScrollHint={shouldShowScrollHint && index === currentIndex}
+              />
+            );
+          })}
         </RecordScrollContainer>
       </div>
     </HeadlessToastProvider>

@@ -1,7 +1,8 @@
+import type { City } from "@/types/city";
 import type { ApiResponse } from "@/types/api";
 
 // 멤버 ID 조회 응답
-export interface MemberIdResponse extends ApiResponse<number> {}
+export type MemberIdResponse = ApiResponse<number>;
 
 // 여행 기록 생성 API
 export interface TravelRecord {
@@ -20,6 +21,11 @@ export interface DeleteTravelRecord {
   lng: number;
 }
 
+export interface DeleteMemberTravelRequest {
+  travelRecord: DeleteTravelRecord;
+  token?: string;
+}
+
 // 여행 기록 삭제 API 응답
 export interface DeleteTravelRecordsResponse {
   status: string;
@@ -32,7 +38,11 @@ export interface CreateTravelRecordsData {
   message: string;
 }
 
-export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {}
+export interface CreateMemberTravelsRequest {
+  cities: City[];
+}
+
+export type CreateTravelRecordsResponse = ApiResponse<CreateTravelRecordsData>;
 
 // 지구본 조회 API 응답
 export interface GlobeData {
@@ -57,14 +67,14 @@ export interface GlobeCity {
   countryCode: string;
 }
 
-export interface GlobeResponse extends ApiResponse<GlobeData> {}
+export type GlobeResponse = ApiResponse<GlobeData>;
 
 // AI 인사이트 응답
 export interface TravelInsightData {
   title: string;
 }
 
-export interface TravelInsightResponse extends ApiResponse<TravelInsightData> {}
+export type TravelInsightResponse = ApiResponse<TravelInsightData>;
 
 // 멤버 여행 데이터 조회 응답
 export interface MemberTravelCity {
@@ -85,7 +95,7 @@ export interface MemberTravelsData {
   travels: MemberTravel[];
 }
 
-export interface MemberTravelsResponse extends ApiResponse<MemberTravelsData> {}
+export type MemberTravelsResponse = ApiResponse<MemberTravelsData>;
 
 // 프로필 정보 타입
 export interface ProfileData {
@@ -97,7 +107,7 @@ export interface ProfileData {
 }
 
 // 프로필 조회 API 응답
-export interface ProfileResponse extends ApiResponse<ProfileData> {}
+export type ProfileResponse = ApiResponse<ProfileData>;
 
 // S3 업로드 URL 요청 데이터
 export interface S3UploadUrlParams {
@@ -107,10 +117,26 @@ export interface S3UploadUrlParams {
   contentType: string;
 }
 
+export interface GetS3UploadUrlRequest {
+  uploadData: S3UploadUrlParams;
+  token?: string;
+}
+
 // S3 업로드 URL 응답 데이터
 export interface S3UploadUrlData {
   presignedUrl: string;
   s3Key: string;
 }
 
-export interface S3UploadUrlResponse extends ApiResponse<S3UploadUrlData> {}
+export type S3UploadUrlResponse = ApiResponse<S3UploadUrlData>;
+
+export interface UploadAndUpdateProfileRequest {
+  nickname: string;
+  memberId: number;
+  imageFile?: File;
+  token?: string;
+}
+
+export interface WithdrawMemberRequest {
+  token?: string;
+}

@@ -39,6 +39,7 @@ type GlobeProps = {
   currentGlobeIndex: number;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
+  onInteractionStart?: () => void;
   disableCityClick?: boolean;
   countryThumbnails?: Record<string, string>;
   isMyGlobe?: boolean;
@@ -58,6 +59,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
       currentGlobeIndex: _,
       onClusterSelect,
       onZoomChange,
+      onInteractionStart,
       disableCityClick,
       countryThumbnails,
       isMyGlobe = true,
@@ -70,6 +72,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
 
     const globeRef = useRef<GlobeInstance | null>(null);
     const isGlobeInitializedRef = useRef(false);
+    const hasInteractedRef = useRef(false);
 
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
@@ -345,6 +348,10 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           // 초기 카메라 애니메이션 완료 후에만 외부로 알림 (중간값 노이즈 제거)
           // isZoomed는 updateZoomLevel 이후 다음 렌더에서 반영되므로 직접 계산해서 전달
           if (isGlobeInitializedRef.current) {
+            if (!hasInteractedRef.current) {
+              hasInteractedRef.current = true;
+              onInteractionStart?.();
+            }
             const outVal = newZoom < ZOOM_LEVELS.ZOOM_THRESHOLD ? newZoom : ZOOM_LEVELS.DEFAULT;
             onZoomChange?.(outVal);
           }
@@ -355,7 +362,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           handleGlobeRotation(pov.lat, pov.lng);
         }
       },
-      [updateZoomLevel, handleZoomChange, snapZoomTo, onZoomChange, handleGlobeRotation]
+      [updateZoomLevel, handleZoomChange, snapZoomTo, onZoomChange, onInteractionStart, handleGlobeRotation]
     );
 
     // 국가 데이터 로드

@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
 import { sendGAEvent } from "@next/third-parties/google";
+import { useEffect, useRef, useState } from "react";
 
 import type { LoadingProps } from "@/types/components";
 

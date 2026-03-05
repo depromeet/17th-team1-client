@@ -6,6 +6,7 @@ import { sendGAEvent } from "@next/third-parties/google";
 
 import ShareIcon from "@/assets/icons/share.svg";
 import { getAuthInfo } from "@/utils/cookies";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type ShareButtonProps = {
   /**

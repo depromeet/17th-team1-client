@@ -16,7 +16,7 @@ const inputVariants = cva(
     defaultVariants: {
       isDark: false,
     },
-  },
+  }
 );
 
 const iconStyles = "absolute top-1/2 left-3 -translate-y-1/2 text-gray-500";
@@ -57,11 +57,11 @@ export const SearchInput = ({ className, value, onChange, backgroundColor, ...pr
       <div
         className={cn(
           "border border-surface-placeholder--4 rounded-2xl px-4 py-3.5 flex items-center gap-3",
-          !backgroundColor && "bg-surface-thirdly",
+          !backgroundColor && "bg-surface-thirdly"
         )}
         style={{ backgroundColor: backgroundColor || undefined }}
       >
-        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+        <div className="w-6 h-6 shrink-0 flex items-center justify-center">
           {isFocused || hasValue ? (
             <SearchbarActiveIcon className="w-6 h-6" />
           ) : (
@@ -78,7 +78,7 @@ export const SearchInput = ({ className, value, onChange, backgroundColor, ...pr
           {...props}
         />
         {hasValue && (
-          <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+          <div className="w-6 h-6 shrink-0 flex items-center justify-center">
             <button
               type="button"
               onClick={handleClear}

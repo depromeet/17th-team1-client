@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const { nickname, countryCount, cityCount } = globeResponse.data;
+    const { nickname } = globeResponse.data;
     const shareUrl = `https://www.globber.world/globe/${uuid}`;
 
     // 닉네임이 있으면 사용, 없으면 기본값

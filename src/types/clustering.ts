@@ -1,17 +1,8 @@
 // 클러스터링 관련 타입 정의
-export interface CountryData {
-  id: string;
-  name: string;
-  flag: string;
-  lat: number;
-  lng: number;
-  color: string;
-  cityId?: number; // API에서 제공하는 도시 ID
-  hasRecords?: boolean; // 해당 국가 내 1개 이상의 도시 기록 여부
-  thumbnailUrl?: string; // 가장 최근에 기록된 사진 (대표 이미지)
-}
+import type { GlobeInstance } from "globe.gl";
+import type { CountryData } from "@/types/travelPatterns";
 
-export interface ClusterData {
+export type ClusterData = {
   id: string;
   name: string;
   flag: string;
@@ -24,28 +15,26 @@ export interface ClusterData {
   isExpanded?: boolean;
   hasRecords?: boolean; // 해당 클러스터에 여행 기록이 있는지 여부
   thumbnailUrl?: string; // 클러스터의 대표 썸네일
-}
+};
 
-export interface ClusteringState {
+export type ClusteringState = {
   mode: "country" | "city" | "continent";
   expandedCountry: string | null;
   selectedCluster: string | null;
   clusteredData: ClusterData[];
-  isZoomed: boolean;
   lastInteraction: number;
   clickBasedExpansion: boolean;
   rotationPosition: { lat: number; lng: number };
   lastSignificantRotation: number;
   isZoomAnimating: boolean; // 줌 애니메이션 중인지 여부
-}
+};
 
-import type { GlobeInstance } from "globe.gl";
-
-export interface UseClusteringProps {
+export type UseClusteringProps = {
   countries: CountryData[];
   zoomLevel: number;
   selectedClusterData?: CountryData[];
   globeRef: React.RefObject<GlobeInstance | null>;
-  onSelectionStackChange?: (newStack: (CountryData[] | null)[]) => void;
   countryThumbnails?: Record<string, string>;
-}
+  onSelectedDataChange: (data: CountryData[] | null) => void;
+  onSnapZoomChange: (zoom: number | null) => void;
+};

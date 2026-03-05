@@ -103,7 +103,7 @@ export const ImageMetadataComponent = ({
             Object.entries(orderMapping).forEach(([photoCode, index]) => {
               photoCodeToIndexMap.set(photoCode, index);
             });
-          } catch (e) {
+          } catch {
             // JSON 파싱 실패 시 무시
           }
         }
@@ -221,6 +221,7 @@ export const ImageMetadataComponent = ({
     return () => {
       isCancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diaryId, isEditMode, router]);
 
   const handleFileUpload = useCallback(
@@ -299,7 +300,7 @@ export const ImageMetadataComponent = ({
         setIsProcessing(false);
       }
     },
-    [metadataCount, metadataList.length]
+    [metadataCount, metadataList.length, uploadTravelPhoto]
   );
 
   const handleRemove = async (id: string) => {

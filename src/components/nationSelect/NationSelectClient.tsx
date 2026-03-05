@@ -1,7 +1,8 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SearchInput } from "@/components/common/Input";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import type { City } from "@/types/city";
@@ -41,13 +42,40 @@ export const NationSelectClient = ({
 
   const selectedCityIds = new Set(selectedCityList.map(city => city.id));
 
+  useEffect(() => {
+    if (mode !== "default") return;
+    sendGAEvent("event", "onboarding_placeselect_view", {
+      flow: "onboarding",
+      screen: "placeselect",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleAddCity = (city: City) => {
     if (selectedCityIds.has(city.id)) return;
     setSelectedCityList(prev => [...prev, { ...city, selected: true }]);
+    if (mode === "default") {
+      sendGAEvent("event", "place_add", {
+        flow: "onboarding",
+        screen: "placeselect",
+        click_code: isSearchingMode ? "onboarding.placeselect.search.result.add" : "onboarding.placeselect.popular.add",
+        selected_count: selectedCityList.length + 1,
+      });
+    }
   };
 
   const handleRemoveCity = (cityId: string) => {
     setSelectedCityList(prev => prev.filter(city => city.id !== cityId));
+    if (mode === "default") {
+      sendGAEvent("event", "place_remove", {
+        flow: "onboarding",
+        screen: "placeselect",
+        click_code: isSearchingMode
+          ? "onboarding.placeselect.search.result.remove"
+          : "onboarding.placeselect.popular.remove",
+        selected_count: selectedCityList.length - 1,
+      });
+    }
   };
 
   const handleCreateGlobe = async () => {
@@ -58,14 +86,55 @@ export const NationSelectClient = ({
       return;
     }
 
+    if (mode === "default")
+      sendGAEvent("event", "globe_generate_click", {
+        flow: "onboarding",
+        screen: "placeselect",
+        click_code: "onboarding.placeselect.cta.generate",
+        selected_count: selectedCityList.length,
+      });
+
     try {
       await createMemberTravels({ cities: selectedCityList });
-      router.push("/globe");
+
+      if (mode === "default")
+        sendGAEvent("event", "globe_generate_complete", {
+          flow: "onboarding",
+          screen: "loading",
+          selected_count: selectedCityList.length,
+        });
+
+      router.push(`/globe?count=${selectedCityList.length}`);
     } catch (error) {
       console.error("Failed to create member travels:", error);
+
+      if (mode === "default")
+        sendGAEvent("event", "globe_generate_fail", {
+          flow: "onboarding",
+          screen: "loading",
+          selected_count: selectedCityList.length,
+        });
+
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
+  const hasTrackedSearch = useRef(false);
+
+  useEffect(() => {
+    if (!isSearchingMode) {
+      hasTrackedSearch.current = false;
+      return;
+    }
+    if (hasSearched && !hasTrackedSearch.current && mode === "default") {
+      hasTrackedSearch.current = true;
+      sendGAEvent("event", "place_search", {
+        flow: "onboarding",
+        screen: "placeselect",
+        click_code: "onboarding.placeselect.search.input",
+      });
+    }
+  }, [hasSearched, isSearchingMode, mode]);
 
   const handleSearchChange = (value: string) => {
     setSearchKeyword(value);
@@ -74,13 +143,22 @@ export const NationSelectClient = ({
     }
   };
 
+  const handleSearchBlur = () => {
+    if (searchKeyword.trim().length === 0 || mode !== "default") return;
+    sendGAEvent("event", "place_search_submit", {
+      flow: "onboarding",
+      screen: "placeselect",
+      click_code: "onboarding.placeselect.search.submit",
+    });
+  };
+
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
+      <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
         {customHeader && customHeader}
 
         {!customHeader && (
-          <div className="max-w-[512px] mx-auto w-full shrink-0">
+          <div className="max-w-lg mx-auto w-full shrink-0">
             <header
               className="w-full px-4 pt-10 pb-[30px] bg-surface-secondary relative"
               style={{
@@ -99,9 +177,9 @@ export const NationSelectClient = ({
         )}
 
         <div className="flex-1 overflow-y-auto scrollbar-hide px-4 flex justify-center">
-          <div className="w-full max-w-[512px]">
+          <div className="w-full max-w-lg">
             {!customHeader && (
-              <div className="mb-8">
+              <div className="mb-8" onBlur={handleSearchBlur}>
                 <SearchInput
                   placeholder="도시/나라를 검색해주세요."
                   value={searchKeyword}
@@ -111,7 +189,7 @@ export const NationSelectClient = ({
             )}
 
             {customHeader && (
-              <div className="mb-8">
+              <div className="mb-8" onBlur={handleSearchBlur}>
                 <SearchInput
                   placeholder="도시/나라를 검색해주세요."
                   value={searchKeyword}
@@ -129,7 +207,7 @@ export const NationSelectClient = ({
               {displayError && (
                 <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
                   {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
-                  <div className="mt-1 text-xs text-text-thirdly break-words">
+                  <div className="mt-1 text-xs text-text-thirdly wrap-break-word">
                     {typeof displayError === "string" ? displayError : String(displayError)}
                   </div>
                 </div>

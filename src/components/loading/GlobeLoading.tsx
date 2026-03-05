@@ -1,13 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
+import { useEffect, useRef, useState } from "react";
 import type { LoadingProps } from "@/types/components";
 
-type GlobeLoadingProps = LoadingProps;
+type GlobeLoadingProps = LoadingProps & {
+  selectedCount?: number;
+};
 
-export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps) => {
+export const GlobeLoading = ({ duration = 3000, onComplete, selectedCount }: GlobeLoadingProps) => {
+  const isCompletedRef = useRef(false);
+
   const [progress, setProgress] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
+
+  useEffect(() => {
+    if (selectedCount === undefined) return;
+    sendGAEvent("event", "globe_generate_start", {
+      flow: "onboarding",
+      screen: "loading",
+      selected_count: selectedCount,
+    });
+
+    return () => {
+      // isCompletedRef는 DOM 노드 ref가 아닌 값 추적용 ref이므로, cleanup 시점의 최신값을 읽는 것이 의도적임
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (isCompletedRef.current) return;
+
+      sendGAEvent("event", "onboarding_loading_exit", {
+        flow: "onboarding",
+        screen: "loading",
+        selected_count: selectedCount,
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!duration) return;
@@ -18,9 +45,10 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
     const stepDuration = duration / totalSteps; // 각 단계당 시간
 
     const interval = setInterval(() => {
-      setProgress((prev) => {
+      setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
+          isCompletedRef.current = true;
           setIsCompleted(true);
 
           // 1초 후에 완료 콜백 실행
@@ -37,10 +65,10 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
     return () => clearInterval(interval);
   }, [onComplete, duration]);
   return (
-    <div className="w-full h-dvh relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
+    <div className="w-full h-dvh relative overflow-hidden bg-linear-to-b from-[#001d39] to-[#0d0c14]">
       {/* Globe Background - Centered */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-full max-w-[512px] aspect-square">
+        <div className="relative w-full max-w-lg aspect-square">
           {/* Globe Container with radial gradient background */}
           <div
             className="absolute inset-0 rounded-full"
@@ -51,7 +79,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps)
           >
             {/* Globe Image */}
             <div className="relative w-full h-full rounded-full overflow-hidden">
-              {/* biome-ignore lint/performance/noImgElement: Loading screen visual, optimization not needed */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
             </div>
           </div>

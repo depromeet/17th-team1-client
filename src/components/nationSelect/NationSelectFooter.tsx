@@ -19,7 +19,7 @@ export const NationSelectFooter = ({
 
   return (
     <div className="sticky bottom-0 flex justify-center">
-      <div className="bg-surface-thirdly w-full max-w-[512px] px-4 py-6">
+      <div className="bg-surface-thirdly w-full max-w-lg px-4 py-6">
         <SelectedCities selectedCities={selectedCities} onRemoveCity={onRemoveCity} />
 
         <Button

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Chip } from "@/components/common/Chip";
 import type { City } from "@/types/city";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type SelectedCitiesProps = {
   selectedCities: City[];
@@ -26,7 +27,22 @@ export const SelectedCities = ({ selectedCities, onRemoveCity }: SelectedCitiesP
       <p className="text-text-thirdly text-xs mb-3 font-bold">{selectedCities.length}개 도시 방문</p>
       <div ref={scrollContainerRef} className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
         {selectedCities.map(({ id, flag, name, country }) => (
-          <Chip key={id} variant="gray" size="md" removable onRemove={() => onRemoveCity(id)} className="flex-shrink-0">
+          <Chip
+            key={id}
+            variant="gray"
+            size="md"
+            removable
+            onRemove={() => {
+              onRemoveCity(id);
+              sendGAEvent("event", "place_remove", {
+                flow: "onboarding",
+                screen: "placeselect",
+                click_code: "onboarding.placeselect.selected.remove",
+                selected_count: selectedCities.length - 1,
+              });
+            }}
+            className="shrink-0"
+          >
             {flag} {name}, {country}
           </Chip>
         ))}

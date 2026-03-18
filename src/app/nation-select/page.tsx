@@ -1,7 +1,7 @@
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
 import { fetchCities } from "@/services/cityService";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400; // 60 * 60 * 24 (24 hours)
 
 export default async function NationSelectPage() {
   try {

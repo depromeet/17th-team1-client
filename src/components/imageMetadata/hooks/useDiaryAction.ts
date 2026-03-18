@@ -10,7 +10,7 @@ import {
 } from "@/hooks/mutation/useDiaryMutations";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
-import { reverseGeocode } from "@/utils/geocoding";
+import { reverseGeocode, isCoordinateFormat } from "@/utils/geocoding";
 import type { UploadMetadata } from "./useImageMetadata";
 
 interface UseDiaryActionProps {
@@ -25,6 +25,48 @@ interface UseDiaryActionProps {
   isProcessing: boolean;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+const buildPhotoPayload = async (metadata: UploadMetadata, fallbackMonth: string, defaultDimension: number = 0) => {
+  if (!metadata.photoCode) {
+    throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
+  }
+
+  const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
+  const width = dimensions?.width ?? defaultDimension;
+  const height = dimensions?.height ?? defaultDimension;
+  const takenMonth =
+    customDate !== null && customDate !== undefined
+      ? customDate
+      : customDate === null
+        ? null
+        : (toYearMonth(timestamp) ?? fallbackMonth);
+  const normalizedTag = selectedTag ?? tag ?? "NONE";
+  const latitude = location?.latitude;
+  const longitude = location?.longitude;
+
+  let placeName = location?.address;
+
+  if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
+    const geocodedName = await reverseGeocode(latitude, longitude);
+    placeName = geocodedName ?? undefined;
+  }
+
+  const finalPlaceName =
+    placeName && typeof placeName === "string" && placeName.trim() && !isCoordinateFormat(placeName)
+      ? placeName.trim()
+      : undefined;
+
+  return {
+    photoCode: metadata.photoCode,
+    lat: latitude,
+    lng: longitude,
+    width,
+    height,
+    takenMonth,
+    tag: normalizedTag,
+    ...(finalPlaceName && { placeName: finalPlaceName }),
+  };
+};
 
 export const useDiaryAction = ({
   cityId,
@@ -81,10 +123,6 @@ export const useDiaryAction = ({
           const createdPhotos: { targetId: string; photoId: number }[] = [];
 
           for (const metadata of withoutPhotoId) {
-            if (!metadata.photoCode) {
-              throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
-            }
-
             if (metadata.originalPhotoId) {
               await deleteDiaryPhoto({
                 diaryId,
@@ -92,50 +130,10 @@ export const useDiaryAction = ({
               });
             }
 
-            const { location, dimensions, customDate, timestamp, selectedTag, tag } = metadata;
-            const width = dimensions?.width ?? 1;
-            const height = dimensions?.height ?? 1;
-            const takenMonthValue =
-              customDate !== null && customDate !== undefined
-                ? customDate
-                : customDate === null
-                  ? null
-                  : (toYearMonth(timestamp) ?? fallbackMonth);
-            const normalizedTag = selectedTag ?? tag ?? "NONE";
-            const latitude = location?.latitude;
-            const longitude = location?.longitude;
-
-            const isCoordinateFormat = (str: string | null | undefined): boolean => {
-              if (!str) return false;
-              return /^[\d.,\s]+$/.test(str.trim());
-            };
-
-            let placeName = location?.address;
-
-            if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
-              const geocodedName = await reverseGeocode(latitude, longitude);
-              placeName = geocodedName ?? undefined;
-            }
-
-            const finalPlaceName =
-              placeName && typeof placeName === "string" && placeName.trim() && !isCoordinateFormat(placeName)
-                ? placeName.trim()
-                : undefined;
-
-            const payload = {
-              photoCode: metadata.photoCode,
-              lat: latitude,
-              lng: longitude,
-              width,
-              height,
-              takenMonth: takenMonthValue,
-              tag: normalizedTag,
-              ...(finalPlaceName && { placeName: finalPlaceName }),
-            };
+            const payload = await buildPhotoPayload(metadata, fallbackMonth, 1);
 
             const createdPhoto = await addDiaryPhoto({ diaryId, photo: payload });
-            let resolvedPhotoId =
-              (createdPhoto as any)?.photoId ?? (createdPhoto as any)?.data?.photoId;
+            let resolvedPhotoId = createdPhoto.photoId;
 
             if (!resolvedPhotoId) {
               console.warn("⚠️  photoId를 응답에서 찾지 못함 → 다이어리 재조회");
@@ -181,50 +179,11 @@ export const useDiaryAction = ({
 
       const photos = await Promise.all(
         sortedMetadataList.map(async metadata => {
-          if (!metadata.photoCode) {
-            throw new Error("사진 정보가 없습니다. 다시 시도해주세요.");
-          }
-
-          const { location, dimensions, customDate, timestamp, selectedTag, tag, photoId } = metadata;
-          const width = dimensions?.width ?? 0;
-          const height = dimensions?.height ?? 0;
-          const takenMonth =
-            customDate !== null && customDate !== undefined
-              ? customDate
-              : customDate === null
-                ? null
-                : (toYearMonth(timestamp) ?? fallbackMonth);
-          const normalizedTag = selectedTag ?? tag ?? "NONE";
-          const latitude = location?.latitude;
-          const longitude = location?.longitude;
-
-          const isCoordinateFormat = (str: string | null | undefined): boolean => {
-            if (!str) return false;
-            return /^[\d.,\s]+$/.test(str.trim());
-          };
-
-          let placeName = location?.address;
-
-          if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
-            const geocodedName = await reverseGeocode(latitude, longitude);
-            placeName = geocodedName ?? undefined;
-          }
-
-          const finalPlaceName =
-            placeName && typeof placeName === "string" && placeName.trim() && !isCoordinateFormat(placeName)
-              ? placeName.trim()
-              : undefined;
+          const payload = await buildPhotoPayload(metadata, fallbackMonth, 0);
 
           return {
-            photoId,
-            photoCode: metadata.photoCode,
-            lat: latitude,
-            lng: longitude,
-            width,
-            height,
-            takenMonth,
-            tag: normalizedTag,
-            ...(finalPlaceName && { placeName: finalPlaceName }),
+            photoId: metadata.photoId,
+            ...payload,
           };
         })
       );

@@ -11,7 +11,7 @@ import {
 } from "@/hooks/mutation/useDiaryMutations";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { toYearMonth } from "@/utils/dateUtils";
-import { reverseGeocode } from "@/utils/geocoding";
+import { reverseGeocode, isCoordinateFormat } from "@/utils/geocoding";
 import type { LocationSelection } from "../LocationSelectBottomSheet";
 
 export type UploadMetadata = ImageMetadata & {
@@ -108,11 +108,6 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
 
             const hasLat = typeof photo.lat === "number" && Number.isFinite(photo.lat);
             const hasLng = typeof photo.lng === "number" && Number.isFinite(photo.lng);
-
-            const isCoordinateFormat = (str: string | null | undefined): boolean => {
-              if (!str) return false;
-              return /^[\d.,\s]+$/.test(str.trim());
-            };
 
             let placeName = photo.placeName && !isCoordinateFormat(photo.placeName) ? photo.placeName : null;
 

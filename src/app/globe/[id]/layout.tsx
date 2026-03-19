@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { getGlobeData } from "@/services/memberService";
 
 type Props = {

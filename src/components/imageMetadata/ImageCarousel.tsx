@@ -1,9 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { formatYearMonth, toYearMonth } from "@/utils/dateUtils";
+
 import { CircleCloseButton } from "./CircleCloseButton";
 import { DateSelectBottomSheet } from "./DateSelectBottomSheet";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
@@ -38,7 +40,7 @@ export const ImageCarousel = ({
   isProcessing = false,
 }: ImageCarouselProps) => {
   const [selectedTag, setSelectedTag] = useState<ImageTag | null>(
-    image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null),
+    image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null)
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDateSelectModalOpen, setIsDateSelectModalOpen] = useState(false);
@@ -48,7 +50,7 @@ export const ImageCarousel = ({
   const [currentImage, setCurrentImage] = useState(image.imagePreview);
   const [customDate, setCustomDate] = useState<string | null>(image.customDate ?? toYearMonth(image.timestamp));
   const [customLocation, setCustomLocation] = useState<string | null>(
-    image.location?.nearbyPlaces?.[1] || image.location?.address || null,
+    image.location?.nearbyPlaces?.[1] || image.location?.address || null
   );
 
   const baseDate = toYearMonth(image.timestamp);

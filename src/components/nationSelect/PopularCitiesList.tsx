@@ -1,7 +1,9 @@
 "use client";
 
 import { useId } from "react";
+
 import type { City } from "@/types/city";
+
 import { CityItem } from "./CityItem";
 
 type PopularCitiesListProps = {

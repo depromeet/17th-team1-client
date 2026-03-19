@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 
@@ -67,7 +68,7 @@ export const useRecordScroll = ({
         }
       }
     },
-    [countryRecords.length, showScrollHint],
+    [countryRecords.length, showScrollHint]
   );
 
   // 힌트 수동 숨김

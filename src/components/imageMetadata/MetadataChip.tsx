@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+
 import { CalendarIcon, CloseIcon, MapPinIcon } from "@/assets/icons";
 
 interface MetadataChipProps {

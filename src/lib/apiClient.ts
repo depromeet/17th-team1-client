@@ -12,7 +12,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public endpoint: string,
+    public endpoint: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -64,7 +64,7 @@ export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   token?: string,
-  options?: { skipGlobalErrorHandling?: boolean },
+  options?: { skipGlobalErrorHandling?: boolean }
 ): Promise<T> => {
   try {
     const searchParams = new URLSearchParams();
@@ -159,7 +159,7 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
 export const apiPostWithHeaders = async <T>(
   endpoint: string,
   data?: unknown,
-  token?: string,
+  token?: string
 ): Promise<{ data: T; headers: Headers }> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;

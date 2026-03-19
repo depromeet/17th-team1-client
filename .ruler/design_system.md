@@ -1,4 +1,5 @@
 # 자세한 예시/배경 설명은 src/docs/detailed-rules.md를 참고하세요.
+
 # Globber 디자인 시스템 핵심 규칙
 
 1. 색상, 간격, 형태는 반드시 Tailwind 토큰/유틸리티 클래스 사용 (임의 값 최소화)
@@ -9,12 +10,12 @@
 
 ## 색상 토큰
 
-| 역할 | 클래스 | 용도 |
-| --- | --- | --- |
-| **브랜드** | `bg-blue-theme`, `text-blue-theme` | 주요 액션, 강조 |
-| **배경** | `bg-surface-primary`, `bg-surface-secondary`, `bg-surface-button-gray` | 페이지/카드/버튼 배경 |
-| **텍스트** | `text-text-primary`, `text-text-secondary` | 본문, 보조 텍스트 |
-| **상태** | `text-gray-400`, `text-gray-700` | 비활성/활성 상태 |
+| 역할       | 클래스                                                                 | 용도                  |
+| ---------- | ---------------------------------------------------------------------- | --------------------- |
+| **브랜드** | `bg-blue-theme`, `text-blue-theme`                                     | 주요 액션, 강조       |
+| **배경**   | `bg-surface-primary`, `bg-surface-secondary`, `bg-surface-button-gray` | 페이지/카드/버튼 배경 |
+| **텍스트** | `text-text-primary`, `text-text-secondary`                             | 본문, 보조 텍스트     |
+| **상태**   | `text-gray-400`, `text-gray-700`                                       | 비활성/활성 상태      |
 
 ## 간격 규칙
 
@@ -24,11 +25,11 @@
 
 ## 형태 규칙
 
-| 요소 | 클래스 | 값 |
-| --- | --- | --- |
-| **버튼 둥글기** | `rounded-2xl` | 16px |
+| 요소            | 클래스                     | 값         |
+| --------------- | -------------------------- | ---------- |
+| **버튼 둥글기** | `rounded-2xl`              | 16px       |
 | **카드 둥글기** | `rounded-lg`, `rounded-xl` | 12px, 16px |
-| **입력 둥글기** | `rounded-md`, `rounded-lg` | 8px, 12px |
+| **입력 둥글기** | `rounded-md`, `rounded-lg` | 8px, 12px  |
 
 ## CVA 사용 패턴
 
@@ -52,6 +53,6 @@ export const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  },
+  }
 );
 ```

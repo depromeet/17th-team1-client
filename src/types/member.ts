@@ -1,5 +1,5 @@
-import type { City } from "@/types/city";
 import type { ApiResponse } from "@/types/api";
+import type { City } from "@/types/city";
 
 // 멤버 ID 조회 응답
 export type MemberIdResponse = ApiResponse<number>;

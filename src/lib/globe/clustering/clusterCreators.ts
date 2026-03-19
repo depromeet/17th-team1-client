@@ -5,8 +5,8 @@
  */
 
 import { getCountryName } from "@/constants/countryMapping";
-import type { CountryData } from "@/types/travelPatterns";
 import type { ClusterData } from "@/types/clustering";
+import type { CountryData } from "@/types/travelPatterns";
 
 /**
  * 국가별 클러스터 생성

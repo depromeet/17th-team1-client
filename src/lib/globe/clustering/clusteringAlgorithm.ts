@@ -4,17 +4,20 @@
  * @responsibility 줌 레벨과 모드에 따른 동적 클러스터링 로직 제공
  */
 
-import type { GlobeInstance } from "globe.gl";
 import type React from "react";
-import { getContinent } from "@/constants/countryMapping";
+
+import type { GlobeInstance } from "globe.gl";
+
 import {
   EFFECTIVE_WIDTH_RATIO,
   GEO_DISTANCE_THRESHOLD,
   OVERLAP_THRESHOLD_RATIO,
 } from "@/constants/clusteringConstants";
-import type { CountryData } from "@/types/travelPatterns";
-import type { ClusterData } from "@/types/clustering";
+import { getContinent } from "@/constants/countryMapping";
 import { estimateBubbleWidth, haversineDistance } from "@/lib/globe/calculations";
+import type { ClusterData } from "@/types/clustering";
+import type { CountryData } from "@/types/travelPatterns";
+
 import { createCountryClusters, createIndividualCityClusters } from "./clusterCreators";
 
 /**

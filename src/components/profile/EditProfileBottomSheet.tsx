@@ -1,11 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import Image from "next/image";
+
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import heic2any from "heic2any";
 import { X } from "lucide-react";
-import Image from "next/image";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
 
 import {
   BottomSheet,
@@ -16,7 +17,7 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
-import { editProfileSchema, EditProfileFormData, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
+import { EditProfileFormData, editProfileSchema, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {

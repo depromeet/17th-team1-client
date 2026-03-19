@@ -15,7 +15,7 @@ export function ContinentFilter({
 }: ContinentFilterProps) {
   return (
     <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
-      {continents.map((continent) => {
+      {continents.map(continent => {
         const count = continentStats[continent];
         const isSelected = selectedContinent === continent;
         const isDisabled = count === 0;

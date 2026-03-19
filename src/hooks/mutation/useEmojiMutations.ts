@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+
 import { pressEmoji, registerEmoji } from "@/services/emojiService";
 import type { PressEmojiParams, PressEmojiResponse, RegisterEmojiParams, RegisterEmojiResponse } from "@/types/emoji";
 

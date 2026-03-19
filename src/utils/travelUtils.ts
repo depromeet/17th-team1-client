@@ -4,7 +4,7 @@ import type { RecordResponse } from "@/types/record";
 
 // City 타입을 TravelRecord로 변환하는 함수
 export const convertCitiesToTravelRecords = (cities: City[]): TravelRecord[] => {
-  return cities.map((city) => ({
+  return cities.map(city => ({
     countryName: city.country,
     cityName: city.name,
     lat: city.lat,
@@ -16,7 +16,7 @@ export const convertCitiesToTravelRecords = (cities: City[]): TravelRecord[] => 
 // MemberTravelsResponse를 RecordResponse로 변환하는 함수
 export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravelsResponse): RecordResponse => {
   // 모든 여행의 도시들을 평탄화
-  const allCities = memberTravels.data.travels.flatMap((travel) => travel.cities);
+  const allCities = memberTravels.data.travels.flatMap(travel => travel.cities);
 
   // 국가별로 그룹화 (countryName과 countryCode를 저장)
   const citiesByCountry = allCities.reduce(
@@ -48,7 +48,7 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
           countryCode: string;
         }>;
       }
-    >,
+    >
   );
 
   // regions 배열로 변환 (국가별로 정렬)
@@ -66,7 +66,7 @@ export const convertMemberTravelsToRecordResponse = (memberTravels: MemberTravel
   const cityCount = allCities.length;
 
   // 전체 국가 수 계산 (고유한 countryCode 수)
-  const countryCount = new Set(allCities.map((city) => city.countryCode)).size;
+  const countryCount = new Set(allCities.map(city => city.countryCode)).size;
 
   return {
     status: memberTravels.status,

@@ -1,10 +1,13 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Loader2 } from "lucide-react";
+
 import { SearchInput } from "@/components/common/Input";
 import { useGoogleMapsScript } from "@/hooks/useGoogleMapsScript";
 import { cn } from "@/utils/cn";
+
 import { BaseInputBottomSheet } from "./BaseInputBottomSheet";
 
 export type LocationSelection = {
@@ -146,7 +149,7 @@ export const LocationSelectBottomSheet = ({
             setPredictions([]);
             setErrorMessage("장소를 검색하는 중 문제가 발생했습니다.");
           }
-        },
+        }
       );
     }, 300);
 
@@ -293,7 +296,7 @@ export const LocationSelectBottomSheet = ({
 
               {!isSearching && predictions.length > 0 && (
                 <ul className="flex flex-col gap-3">
-                  {predictions.map((prediction) => {
+                  {predictions.map(prediction => {
                     const isSelected = prediction.place_id === (activePlaceId ?? selectedLocation?.placeId ?? null);
                     const mainText = prediction.structured_formatting?.main_text || prediction.description || "";
                     const secondaryText =
@@ -307,7 +310,7 @@ export const LocationSelectBottomSheet = ({
                             "w-full rounded-2xl border text-left transition-colors cursor-pointer flex flex-col items-start gap-1 px-5 py-[15px]",
                             isSelected
                               ? "border-[#00D9FF] bg-transparent hover:border-[#00D9FF]"
-                              : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]",
+                              : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]"
                           )}
                         >
                           <div className="text-base font-bold text-white truncate w-full">{mainText}</div>

@@ -4,7 +4,6 @@
  * @responsibility 거리 계산, 텍스트/버블 너비 계산, 회전 감지 등 순수 계산 함수 제공
  */
 
-import type { ClusterData } from "@/types/clustering";
 import {
   BUBBLE_FLAG_WIDTH,
   BUBBLE_GAP,
@@ -17,6 +16,7 @@ import {
   EARTH_RADIUS_KM,
   ROTATION_THRESHOLD,
 } from "@/constants/clusteringConstants";
+import type { ClusterData } from "@/types/clustering";
 
 // ============================================
 // 텍스트 너비 계산

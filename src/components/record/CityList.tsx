@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+
 import { ICEditIcon } from "@/assets/icons";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import type { RecordResponse } from "@/types/record";
@@ -15,13 +16,13 @@ export function CityList({ filteredRegions }: CityListProps) {
 
   return (
     <div className="flex flex-col gap-[30px] px-4 pb-8">
-      {filteredRegions.map((region) => (
+      {filteredRegions.map(region => (
         <div key={`${region.regionName}-${region.cities[0]?.countryCode || ""}`} className="flex flex-col gap-3">
           <div className="text-white text-base font-medium">
             {getCountryFlagByCode(region.cities[0]?.countryCode)} {region.regionName}
           </div>
           <div className="flex flex-col gap-2">
-            {region.cities.map((city) => (
+            {region.cities.map(city => (
               <div
                 key={`${region.regionName}-${city.name}-${city.lat}-${city.lng}`}
                 className="self-stretch pl-5 pr-4 py-3 bg-surface-placeholder--4 rounded-2xl inline-flex justify-between items-center overflow-hidden"

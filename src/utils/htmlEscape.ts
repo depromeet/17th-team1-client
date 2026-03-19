@@ -19,5 +19,4 @@ const ESCAPE_MAP: Record<string, string> = {
  * @param value - 이스케이프할 문자열
  * @returns 이스케이프된 문자열
  */
-export const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"']/g, (char) => ESCAPE_MAP[char] ?? char);
+export const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, char => ESCAPE_MAP[char] ?? char);

@@ -58,7 +58,7 @@ export const ISO_CODE_MAP: { [key: string]: string } = worldCountries.reduce<{ [
     acc[code] = code; // ISO 코드를 그대로 매핑
     return acc;
   },
-  {},
+  {}
 );
 
 // 외부 리소스 URL

@@ -1,5 +1,6 @@
 import { Button } from "@/components/common/Button";
 import type { City } from "@/types/city";
+
 import { SelectedCities } from "./SelectedCities";
 
 type NationSelectFooterProps = {

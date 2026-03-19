@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko`,
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko`
     );
     const data = await response.json();
 

@@ -1,5 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "@/utils/cn";
 
 export const popupVariants = cva("relative z-50 flex flex-col rounded-lg transition-all duration-300 transform-gpu", {

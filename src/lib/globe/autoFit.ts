@@ -3,8 +3,9 @@
  * 나라 클러스터 클릭 시 해당 국가의 모든 도시들이 화면에 fit되도록 계산
  */
 
-import { haversineDistance } from "./calculations";
 import type { CountryData } from "@/types/travelPatterns";
+
+import { haversineDistance } from "./calculations";
 
 // 지점들의 경계 박스를 계산하는 함수
 export const calculateBoundingBox = (cities: CountryData[]) => {
@@ -84,9 +85,7 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
 };
 
 // 경계 박스에 맞는 최적의 줌 레벨을 계산하는 함수
-export const calculateOptimalZoom = (
-  boundingBox: ReturnType<typeof calculateBoundingBox>
-): number => {
+export const calculateOptimalZoom = (boundingBox: ReturnType<typeof calculateBoundingBox>): number => {
   const { latRange, lngRange } = boundingBox;
 
   if (latRange === 0 && lngRange === 0) {

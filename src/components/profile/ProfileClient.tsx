@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import { EditProfileBottomSheet } from "@/components/profile/EditProfileBottomSheet";
@@ -9,10 +10,10 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
+import { ApiError } from "@/lib/apiClient";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
-import { ApiError } from "@/lib/apiClient";
 
 type ProfileClientProps = {
   initialProfile: ProfileData | null;

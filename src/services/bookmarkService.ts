@@ -1,4 +1,4 @@
-import { ApiError, apiDelete, apiGet, apiPost, apiPostWithHeaders } from "@/lib/apiClient";
+import { apiDelete, ApiError, apiGet, apiPost, apiPostWithHeaders } from "@/lib/apiClient";
 import type { BookmarkListResponse, BookmarkUser } from "@/types/bookmark";
 import { clearAllCookies, getAuthInfo } from "@/utils/cookies";
 
@@ -42,7 +42,7 @@ export const getBookmarks = async (token?: string, useToken = true): Promise<Boo
       `/api/v1/bookmarks`,
       {},
       authToken,
-      { skipGlobalErrorHandling: true }, // 401 에러 시 자동 리다이렉트 방지
+      { skipGlobalErrorHandling: true } // 401 에러 시 자동 리다이렉트 방지
     );
     return data.data;
   } catch (error) {

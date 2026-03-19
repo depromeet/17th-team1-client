@@ -5,6 +5,7 @@
  */
 
 import type React from "react";
+
 import {
   AUTO_CLUSTER_DELAY,
   CONTINENT_MODE_ZOOM_MULTIPLIER,
@@ -13,8 +14,9 @@ import {
   ZOOM_ANIMATION_DURATION,
   ZOOM_LEVELS,
 } from "@/constants/clusteringConstants";
-import type { CountryData } from "@/types/travelPatterns";
 import type { ClusterData, ClusteringState } from "@/types/clustering";
+import type { CountryData } from "@/types/travelPatterns";
+
 import { isSignificantRotation } from "./calculations";
 
 /**
@@ -243,7 +245,8 @@ export const createZoomChangeHandler = (
     if (rounded > refs.prevZoomRef.current + ZOOM_LEVELS.THRESHOLDS.ZOOM_DETECTION && zoomStack.length > 0) {
       const last = zoomStack[zoomStack.length - 1];
       const currentSelectionStack = refs.selectionStackRef.current;
-      const newSelectionStack = currentSelectionStack.length === 0 ? currentSelectionStack : currentSelectionStack.slice(0, -1);
+      const newSelectionStack =
+        currentSelectionStack.length === 0 ? currentSelectionStack : currentSelectionStack.slice(0, -1);
       const parent = newSelectionStack.length > 0 ? newSelectionStack[newSelectionStack.length - 1] : null;
 
       onSnapZoomChange(last);

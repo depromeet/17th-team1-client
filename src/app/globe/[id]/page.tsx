@@ -1,14 +1,14 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+
 import { BackButton } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
-import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import ListView from "@/components/listview/ListView";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { getBookmarks } from "@/services/bookmarkService";

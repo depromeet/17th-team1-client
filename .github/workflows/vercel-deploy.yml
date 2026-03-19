@@ -2,7 +2,7 @@ name: Sync to Fork Repository for Vercel
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
 
 jobs:
   sync-to-fork:

@@ -1,8 +1,9 @@
 "use client";
 
-import useEmblaCarousel from "embla-carousel-react";
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+
+import useEmblaCarousel from "embla-carousel-react";
 
 type RecordImageCarouselProps = {
   images: string[];
@@ -53,7 +54,7 @@ export const RecordImageCarousel = ({ images, onImageChange, userInfoHeight = 0 
         emblaApi.scrollTo(index);
       }
     },
-    [emblaApi],
+    [emblaApi]
   );
 
   // 피치 줌 처리 (터치 제스처)

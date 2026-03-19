@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  useAddDiaryPhotoMutation,
-  useDeleteDiaryPhotoMutation,
-  useUploadTravelPhotoMutation,
-} from "@/hooks/mutation/useDiaryMutations";
+import { useUploadTravelPhotoMutation } from "@/hooks/mutation/useDiaryMutations";
 import { processSingleFile } from "@/lib/processFile";
 import { getDiaryDetail } from "@/services/diaryService";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
@@ -49,12 +45,10 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
   const [diaryText, setDiaryText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
-  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+  const [pendingDeletePhotoIds, setPendingDeletePhotoIds] = useState<number[]>([]);
   const fileUploadId = useId();
 
   const { mutateAsync: uploadTravelPhoto } = useUploadTravelPhotoMutation();
-  const { mutateAsync: deleteDiaryPhoto } = useDeleteDiaryPhotoMutation();
-  const { mutateAsync: addDiaryPhoto } = useAddDiaryPhotoMutation();
 
   const metadataCount = metadataList.length;
 
@@ -75,14 +69,10 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
         const photoCodeToIndexMap = new Map<string, number>();
         const savedOrder = sessionStorage.getItem(`diary-${diaryId}-photo-order`);
         if (savedOrder) {
-          try {
-            const orderMapping = JSON.parse(savedOrder) as Record<string, number>;
-            Object.entries(orderMapping).forEach(([photoCode, index]) => {
-              photoCodeToIndexMap.set(photoCode, index);
-            });
-          } catch (e) {
-            // Ignore parse errors
-          }
+          const orderMapping = JSON.parse(savedOrder) as Record<string, number>;
+          Object.entries(orderMapping).forEach(([photoCode, index]) => {
+            photoCodeToIndexMap.set(photoCode, index);
+          });
         }
 
         const sortedPhotos = [...diary.photos].sort((a, b) => {
@@ -114,8 +104,12 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
             let placeName = photo.placeName && !isCoordinateFormat(photo.placeName) ? photo.placeName : null;
 
             if (!placeName && hasLat && hasLng) {
-              const geocodedName = await reverseGeocode(photo.lat, photo.lng);
-              placeName = geocodedName;
+              try {
+                const geocodedName = await reverseGeocode(photo.lat, photo.lng);
+                placeName = geocodedName;
+              } catch {
+                // Geocoding failure should not block diary loading
+              }
             }
 
             const location =
@@ -255,22 +249,12 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
     [metadataCount, metadataList.length, uploadTravelPhoto]
   );
 
-  const handleRemove = async (id: string) => {
+  const handleRemove = (id: string) => {
     const target = metadataList.find(item => item.id === id);
     if (!target) return;
 
-    if (target.photoId && isEditMode && typeof diaryId === "number") {
-      try {
-        setDeletingPhotoId(id);
-        await deleteDiaryPhoto({ diaryId, photoId: target.photoId });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "사진 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-        alert(errorMessage);
-        throw error;
-      } finally {
-        setDeletingPhotoId(null);
-      }
+    if (target.photoId && isEditMode) {
+      setPendingDeletePhotoIds(prev => [...prev, target.photoId!]);
     }
 
     setMetadataList(prev => prev.filter(item => item.id !== id));
@@ -363,7 +347,7 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
     isProcessing,
     setIsProcessing,
     isInitialLoading,
-    deletingPhotoId,
+    pendingDeletePhotoIds,
     fileUploadId,
     metadataCount,
     handleFileUpload,

@@ -26,6 +26,7 @@ interface UseDiaryActionProps {
   diaryText: string;
   isProcessing: boolean;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  pendingDeletePhotoIds: number[];
 }
 
 const buildPhotoPayload = async (metadata: UploadMetadata, fallbackMonth: string, defaultDimension: number = 0) => {
@@ -48,9 +49,13 @@ const buildPhotoPayload = async (metadata: UploadMetadata, fallbackMonth: string
 
   let placeName = location?.address;
 
-  if ((!placeName || isCoordinateFormat(placeName)) && latitude && longitude) {
-    const geocodedName = await reverseGeocode(latitude, longitude);
-    placeName = geocodedName ?? undefined;
+  if ((!placeName || isCoordinateFormat(placeName)) && Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    try {
+      const geocodedName = await reverseGeocode(latitude!, longitude!);
+      placeName = geocodedName ?? undefined;
+    } catch {
+      // Geocoding failure should not block saving
+    }
   }
 
   const finalPlaceName =
@@ -81,6 +86,7 @@ export const useDiaryAction = ({
   diaryText,
   isProcessing,
   setIsProcessing,
+  pendingDeletePhotoIds,
 }: UseDiaryActionProps) => {
   const router = useRouter();
   const { mutateAsync: deleteDiaryPhoto } = useDeleteDiaryPhotoMutation();
@@ -119,22 +125,26 @@ export const useDiaryAction = ({
       let currentMetadataList = metadataList;
 
       if (isEditMode && typeof diaryId === "number") {
+        for (const photoId of pendingDeletePhotoIds) {
+          await deleteDiaryPhoto({ diaryId, photoId });
+        }
+
         const withoutPhotoId = metadataList.filter(item => item.photoId == null);
 
         if (withoutPhotoId.length > 0) {
           const createdPhotos: { targetId: string; photoId: number }[] = [];
 
           for (const metadata of withoutPhotoId) {
+            const payload = await buildPhotoPayload(metadata, fallbackMonth, 1);
+
+            const createdPhoto = await addDiaryPhoto({ diaryId, photo: payload });
+
             if (metadata.originalPhotoId) {
               await deleteDiaryPhoto({
                 diaryId,
                 photoId: metadata.originalPhotoId,
               });
             }
-
-            const payload = await buildPhotoPayload(metadata, fallbackMonth, 1);
-
-            const createdPhoto = await addDiaryPhoto({ diaryId, photo: payload });
             let resolvedPhotoId = createdPhoto.photoId;
 
             if (!resolvedPhotoId) {

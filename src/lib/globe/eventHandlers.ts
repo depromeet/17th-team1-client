@@ -50,6 +50,9 @@ export const createClusterTransitionHandler = (
 
     // 대륙 클러스터 클릭 시
     if (clusterType === "continent_cluster") {
+      // 클러스터에 속한 국가 ID 추출 → continent_cluster 재병합 방지용
+      const countryIds = new Set(items.map(item => item.id));
+
       setState(prev => ({
         ...prev,
         mode: "country",
@@ -57,11 +60,10 @@ export const createClusterTransitionHandler = (
         selectedCluster: null,
         clickBasedExpansion: false,
         lastInteraction: Date.now(),
+        expandedContinentCountryIds: countryIds,
       }));
 
       setZoomStack(prev => [...prev, currentZoomRef.current]);
-      setSelectionStack(stack => [...stack, selectedClusterData || null]);
-      onSelectedDataChange(items);
 
       return items;
     }
@@ -127,7 +129,8 @@ export const createGlobeRotationHandler = (
   setLastRotation: React.Dispatch<React.SetStateAction<{ lat: number; lng: number }>>,
   refs: GlobeRotationRefs,
   onSelectionStackChange?: (newStack: (CountryData[] | null)[]) => void,
-  rotationTimerRef?: React.MutableRefObject<NodeJS.Timeout | null>
+  rotationTimerRef?: React.MutableRefObject<NodeJS.Timeout | null>,
+  setZoomStack?: React.Dispatch<React.SetStateAction<number[]>>
 ) => {
   return (lat: number, lng: number) => {
     const { modeRef, selectedClusterRef, lastRotationRef, isZoomAnimatingRef } = refs;
@@ -148,7 +151,7 @@ export const createGlobeRotationHandler = (
         if (rotationTimerRef?.current) clearTimeout(rotationTimerRef.current);
 
         const timer = setTimeout(() => {
-          // 모드를 국가로 변경
+          // 모드를 국가로 변경, 대륙 클러스터 확장 상태도 초기화
           setState(prev => ({
             ...prev,
             mode: "country",
@@ -156,15 +159,20 @@ export const createGlobeRotationHandler = (
             selectedCluster: null,
             clickBasedExpansion: false,
             lastInteraction: Date.now(),
+            expandedContinentCountryIds: new Set(),
           }));
 
           // 선택 스택 되돌리기
           setSelectionStack(stack => {
             const newStack = stack.length === 0 ? stack : stack.slice(0, -1);
-
             if (onSelectionStackChange) onSelectionStackChange(newStack);
             return newStack;
           });
+
+          // zoomStack도 selectionStack과 함께 pop하여 동기화 (급격한 zoom out 방지)
+          if (setZoomStack) {
+            setZoomStack(s => (s.length === 0 ? s : s.slice(0, -1)));
+          }
         }, AUTO_CLUSTER_DELAY);
 
         if (rotationTimerRef) rotationTimerRef.current = timer;
@@ -232,6 +240,7 @@ export const createZoomChangeHandler = (
         expandedCountry: null,
         selectedCluster: null,
         clickBasedExpansion: false,
+        expandedContinentCountryIds: new Set(),
       }));
       setZoomStack([]);
       setSelectionStack([]);
@@ -249,6 +258,8 @@ export const createZoomChangeHandler = (
         currentSelectionStack.length === 0 ? currentSelectionStack : currentSelectionStack.slice(0, -1);
       const parent = newSelectionStack.length > 0 ? newSelectionStack[newSelectionStack.length - 1] : null;
 
+      // 줌아웃으로 상위 단계 복귀 시 대륙 클러스터 확장 상태 초기화
+      setState(prev => ({ ...prev, expandedContinentCountryIds: new Set() }));
       onSnapZoomChange(last);
       onSelectedDataChange(parent);
       setZoomStack(s => s.slice(0, -1));

@@ -6,10 +6,6 @@ import { useSearchParams } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
 
-import { useSearchParams } from "next/navigation";
-
-import { sendGAEvent } from "@next/third-parties/google";
-
 import { BackButton } from "@/components/common/Button";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";

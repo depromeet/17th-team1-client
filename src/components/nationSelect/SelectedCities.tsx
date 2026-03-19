@@ -4,7 +4,6 @@ import { sendGAEvent } from "@next/third-parties/google";
 
 import { Chip } from "@/components/common/Chip";
 import type { City } from "@/types/city";
-import { sendGAEvent } from "@next/third-parties/google";
 
 type SelectedCitiesProps = {
   selectedCities: City[];

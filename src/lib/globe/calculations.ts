@@ -17,6 +17,9 @@ import {
   ROTATION_THRESHOLD,
 } from "@/constants/clusteringConstants";
 import type { ClusterData } from "@/types/clustering";
+
+// ============================================
+// 텍스트 너비 계산
 // ============================================
 
 /**

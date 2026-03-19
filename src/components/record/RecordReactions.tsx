@@ -46,6 +46,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
     return [...reactionsWithAdjustedCount].sort((a, b) => b.count - a.count);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const baseReactions = useMemo(() => buildInitialReactions(initialReactions), [initialReactions, isOwner]);
   const [localReactions, setLocalReactions] = useState<Reaction[] | null>(null);
   const reactions = localReactions ?? baseReactions;
@@ -477,7 +478,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
                 aria-label="이모지 피커 닫기"
               />
               <div
-                className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-[24px] bg-[#0E1724] overflow-hidden"
+                className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-3xl bg-[#0E1724] overflow-hidden"
                 style={{
                   paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : "env(safe-area-inset-bottom)",
                 }}

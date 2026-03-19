@@ -15,7 +15,6 @@ import { cn } from "@/utils/cn";
 import { getAuthInfo } from "@/utils/cookies";
 
 import { ShareButton } from "./ShareButton";
-import { sendGAEvent } from "@next/third-parties/google";
 
 type GlobeFooterProps = {
   isZoomed: boolean;

@@ -6,7 +6,7 @@ import * as React from "react";
 import { BackIcon, DotIcon, MenuIcon, PeopleIcon, XIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
-export const headerVariants = cva("flex items-center justify-between w-full px-4 py-3 min-h-[60px]", {
+export const headerVariants = cva("flex items-center justify-between w-full px-4 pb-3 pt-5 min-h-[60px]", {
   variants: {
     variant: {
       dark: "bg-black",
@@ -50,7 +50,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
       rightButtonDisabled = false,
       ...props
     },
-    ref,
+    ref
   ) => {
     const Comp = asChild ? Slot : "header";
 
@@ -177,7 +177,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
                   ? "text-text-thirdly cursor-not-allowed"
                   : rightButtonVariant === "white"
                     ? "text-white cursor-pointer"
-                    : "text-state-focused cursor-pointer",
+                    : "text-state-focused cursor-pointer"
               )}
               aria-label="Right action"
             >
@@ -187,7 +187,7 @@ export const Header = React.forwardRef<HTMLElement, HeaderProps>(
         </div>
       </Comp>
     );
-  },
+  }
 );
 
 Header.displayName = "Header";

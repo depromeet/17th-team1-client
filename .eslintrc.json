@@ -3,7 +3,6 @@
     "next/core-web-vitals",
     "next/typescript",
     "plugin:@tanstack/eslint-plugin-query/recommended",
-    "plugin:react-you-might-not-need-an-effect/legacy-recommended",
     "prettier"
   ],
   "rules": {

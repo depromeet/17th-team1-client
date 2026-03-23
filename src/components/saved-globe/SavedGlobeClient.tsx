@@ -61,7 +61,7 @@ const EmptyState = () => {
         <div className="relative w-[289.695px] h-[289.695px] flex items-center justify-center">
           {/* Globe Image */}
           <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
-            {/* biome-ignore lint/performance/noImgElement: Empty state visual, optimization not needed */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/globe-empty.png" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
           </div>
         </div>
@@ -130,7 +130,7 @@ const GlobeList = ({
               {/* Profile Image */}
               <div className="w-11 h-11 rounded-full bg-[rgba(255,255,255,0.1)] shrink-0 overflow-hidden">
                 {profileImageUrl ? (
-                  // biome-ignore lint/performance/noImgElement: Profile image placeholder, optimization not needed
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={profileImageUrl} alt={nickname} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-linear-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
@@ -210,7 +210,7 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
         setIsLoading(false);
       }
     },
-    [bookmarks]
+    [bookmarks, addBookmark, removeBookmark]
   );
 
   const handleGlobeCardClick = (uuid: string) => {

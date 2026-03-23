@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/common/Button";
 import type { City } from "@/types/city";
 import { SelectedCities } from "./SelectedCities";
@@ -9,7 +10,7 @@ type NationSelectFooterProps = {
   buttonLabel?: string;
 };
 
-export const NationSelectFooter = ({
+export const NationSelectFooter = memo(({
   selectedCities,
   onRemoveCity,
   onCreateGlobe,
@@ -19,7 +20,7 @@ export const NationSelectFooter = ({
 
   return (
     <div className="sticky bottom-0 flex justify-center">
-      <div className="bg-surface-thirdly w-full max-w-[512px] px-4 py-6">
+      <div className="bg-surface-thirdly w-full max-w-lg px-4 py-6">
         <SelectedCities selectedCities={selectedCities} onRemoveCity={onRemoveCity} />
 
         <Button
@@ -34,4 +35,7 @@ export const NationSelectFooter = ({
       </div>
     </div>
   );
-};
+});
+
+NationSelectFooter.displayName = "NationSelectFooter";
+

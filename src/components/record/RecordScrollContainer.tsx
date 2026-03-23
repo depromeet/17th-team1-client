@@ -170,7 +170,7 @@ export const RecordScrollContainer = ({
     <div
       role="region"
       aria-label="Record scroll container"
-      ref={(node) => {
+      ref={node => {
         containerRef.current = node;
         if (swipeHandlers.ref) {
           (swipeHandlers.ref as (node: HTMLDivElement | null) => void)(node);

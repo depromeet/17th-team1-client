@@ -1,9 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";

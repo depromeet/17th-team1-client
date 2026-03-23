@@ -59,20 +59,21 @@ export const reverseGeocode = async (latitude: number, longitude: number): Promi
     const firstResult = geocodeData.results[0];
 
     if (firstResult?.address_components) {
-      console.log("📋 address_components:", firstResult.address_components.map((c: { types: string[]; long_name: string }) => ({
-        name: c.long_name,
-        types: c.types
-      })));
+      console.log(
+        "📋 address_components:",
+        firstResult.address_components.map((c: { types: string[]; long_name: string }) => ({
+          name: c.long_name,
+          types: c.types,
+        }))
+      );
 
       // premise (건물명), establishment, point_of_interest 순서로 우선순위 검색
-      const placeComponent = firstResult.address_components.find((component: {
-        types: string[];
-        long_name: string;
-      }) =>
-        component.types.includes("premise") ||
-        component.types.includes("establishment") ||
-        component.types.includes("point_of_interest") ||
-        component.types.includes("subpremise")
+      const placeComponent = firstResult.address_components.find(
+        (component: { types: string[]; long_name: string }) =>
+          component.types.includes("premise") ||
+          component.types.includes("establishment") ||
+          component.types.includes("point_of_interest") ||
+          component.types.includes("subpremise")
       );
 
       if (placeComponent?.long_name) {
@@ -106,7 +107,7 @@ export const reverseGeocode = async (latitude: number, longitude: number): Promi
  * @returns (string | null)[] - 각 좌표에 대응하는 장소명 배열
  */
 export const reverseGeocodeMultiple = async (
-  coordinates: { latitude: number; longitude: number }[],
+  coordinates: { latitude: number; longitude: number }[]
 ): Promise<(string | null)[]> => {
   return Promise.all(coordinates.map(({ latitude, longitude }) => reverseGeocode(latitude, longitude)));
 };

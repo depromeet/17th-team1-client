@@ -1,5 +1,7 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
 import {
   CreateMemberTravelsRequest,
@@ -7,7 +9,6 @@ import {
   DeleteMemberTravelRequest,
   DeleteTravelRecordsResponse,
 } from "@/types/member";
-import { useMutation } from "@tanstack/react-query";
 
 export const useCreateMemberTravelsMutation = () => {
   return useMutation<CreateTravelRecordsResponse, Error, CreateMemberTravelsRequest>({

@@ -26,8 +26,8 @@ export const calculateContinentStats = (regions: RecordRegion[]): Record<Contine
   stats.전체 = regions.reduce((total, region) => total + region.cities.length, 0);
 
   // 대륙별 도시 수 계산
-  regions.forEach((region) => {
-    region.cities.forEach((city) => {
+  regions.forEach(region => {
+    region.cities.forEach(city => {
       const continent = getContinentFromCountryCode(city.countryCode);
       if (continent in stats) {
         stats[continent] = (stats[continent] || 0) + 1;
@@ -44,16 +44,16 @@ export const filterRegionsByContinent = (regions: RecordRegion[], selectedContin
   }
 
   return regions
-    .map((region) => ({
+    .map(region => ({
       ...region,
-      cities: region.cities.filter((city) => getContinentFromCountryCode(city.countryCode) === selectedContinent),
+      cities: region.cities.filter(city => getContinentFromCountryCode(city.countryCode) === selectedContinent),
       cityCount: 0, // 필터링 후 다시 계산
     }))
-    .map((region) => ({
+    .map(region => ({
       ...region,
       cityCount: region.cities.length,
     }))
-    .filter((region) => region.cities.length > 0);
+    .filter(region => region.cities.length > 0);
 };
 
 export const sortContinentsByCount = (continentStats: Record<Continent, number>): Continent[] => {
@@ -77,10 +77,10 @@ export const sortContinentsByCount = (continentStats: Record<Continent, number>)
  */
 export const sortDiariesByCountryGrouping = <T extends { cityId: number; city: string; country: string }>(
   diaries: T[],
-  selectedCityId: number,
+  selectedCityId: number
 ): T[] => {
   // 1. 선택한 도시 찾기
-  const selectedDiary = diaries.find((diary) => diary.cityId === selectedCityId);
+  const selectedDiary = diaries.find(diary => diary.cityId === selectedCityId);
   if (!selectedDiary) {
     return diaries;
   }
@@ -116,7 +116,7 @@ export const sortDiariesByCountryGrouping = <T extends { cityId: number; city: s
   const selectedCountryDiaries = countryGroups.get(selectedCountry);
   if (selectedCountryDiaries) {
     // 선택한 도시를 찾아서 맨 앞으로 이동
-    const selectedIndex = selectedCountryDiaries.findIndex((d) => d.cityId === selectedCityId);
+    const selectedIndex = selectedCountryDiaries.findIndex(d => d.cityId === selectedCityId);
     if (selectedIndex > 0) {
       // 선택한 도시를 맨 앞으로
       const selectedDiaryItem = selectedCountryDiaries.splice(selectedIndex, 1)[0];

@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+
 import type { Continent, RecordResponse } from "@/types/record";
 import { calculateContinentStats, filterRegionsByContinent, sortContinentsByCount } from "@/utils/recordUtils";
+
 import { CityList } from "./CityList";
 import { ContinentFilter } from "./ContinentFilter";
 import { RecordHeaderText } from "./RecordHeaderText";

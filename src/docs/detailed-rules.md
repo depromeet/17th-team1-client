@@ -2,65 +2,65 @@
 
 ## 1. 일반 규칙
 
-| 카테고리 | 규칙 |
-| --- | --- |
-| **언어** | **규칙 1.1**: 사용자와의 모든 상호작용은 **한국어**로 해야 합니다. |
-| | **규칙 1.2**: 코드 주석, 문서, 커밋 메시지는 **영어**로 작성해야 합니다. |
-| **Git 커밋** | **규칙 1.3**: `git commit` 또는 `git push` 명령을 **절대 자동으로 실행하지 않습니다**. |
-| | **규칙 1.4**: 사용자가 명시적으로 요청할 때만 파일을 스테이징합니다. |
-| **파일 시스템** | **규칙 1.5**: **기존 파일 수정**을 항상 우선시합니다. 새 파일 생성은 최소화합니다. |
-| | **규칙 1.6**: `.md`, `README` 등 문서 파일을 **절대 미리 생성하지 않습니다**. |
-| | **규칙 1.7**: Windows 파일 경로는 **백슬래시(`\`)**를 사용해야 합니다. |
+| 카테고리        | 규칙                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------- |
+| **언어**        | **규칙 1.1**: 사용자와의 모든 상호작용은 **한국어**로 해야 합니다.                     |
+|                 | **규칙 1.2**: 코드 주석, 문서, 커밋 메시지는 **영어**로 작성해야 합니다.               |
+| **Git 커밋**    | **규칙 1.3**: `git commit` 또는 `git push` 명령을 **절대 자동으로 실행하지 않습니다**. |
+|                 | **규칙 1.4**: 사용자가 명시적으로 요청할 때만 파일을 스테이징합니다.                   |
+| **파일 시스템** | **규칙 1.5**: **기존 파일 수정**을 항상 우선시합니다. 새 파일 생성은 최소화합니다.     |
+|                 | **규칙 1.6**: `.md`, `README` 등 문서 파일을 **절대 미리 생성하지 않습니다**.          |
+|                 | **규칙 1.7**: Windows 파일 경로는 **백슬래시(`\`)**를 사용해야 합니다.                 |
 
 ## 2. 코드 스타일 규칙
 
 ### **규칙 2.1: TypeScript**
 
-| 항목 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
-| **타입 선언** | `type User = { ... };` | `interface User { ... }` |
-| **`any` 사용** | `const data: KnownType = ...` | `const data: any = ...` |
-| **함수** | `const App = () => { ... }` | `function App() { ... }` |
-| **반환 타입** | `const getNum = () => 1;` (추론 활용) | 불필요한 반환 타입 명시 |
+| 항목           | ✅ 허용 (Good)                        | ❌ 금지 (Bad)            |
+| -------------- | ------------------------------------- | ------------------------ |
+| **타입 선언**  | `type User = { ... };`                | `interface User { ... }` |
+| **`any` 사용** | `const data: KnownType = ...`         | `const data: any = ...`  |
+| **함수**       | `const App = () => { ... }`           | `function App() { ... }` |
+| **반환 타입**  | `const getNum = () => 1;` (추론 활용) | 불필요한 반환 타입 명시  |
 
 ### **규칙 2.2: React**
 
-| 항목 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
-| **컴포넌트** | `const MyComponent = () => { ... }` | `function MyComponent() { ... }` |
-| **지시어** | `'use client';` (파일 최상단) | 클라이언트 컴포넌트에서 지시어 누락 |
-| **반복** | `items.map(item => <div key={item.id} />)` | `items.map((item, index) => <div key={index} />)` |
+| 항목         | ✅ 허용 (Good)                                       | ❌ 금지 (Bad)                                              |
+| ------------ | ---------------------------------------------------- | ---------------------------------------------------------- |
+| **컴포넌트** | `const MyComponent = () => { ... }`                  | `function MyComponent() { ... }`                           |
+| **지시어**   | `'use client';` (파일 최상단)                        | 클라이언트 컴포넌트에서 지시어 누락                        |
+| **반복**     | `items.map(item => <div key={item.id} />)`           | `items.map((item, index) => <div key={index} />)`          |
 | **구조분해** | `const Component = ({ id, name }: Props) => { ... }` | `const Component = (props: Props) => { ... props.id ... }` |
 
 ### **규칙 2.3: 네이밍**
 
-| 타입 | 컨벤션 | 예시 |
-| --- | --- | --- |
-| **컴포넌트/타입** | `PascalCase` | `GlobeHeader`, `DiaryDetail` |
-| **함수/변수** | `camelCase` | `handleZoomChange`, `isZoomed` |
-| **상수** | `UPPER_SNAKE_CASE` | `ZOOM_LEVELS`, `API_BASE_URL` |
-| **폴더** | `kebab-case` | `image-metadata`, `nation-select` |
-| **파일 (컴포넌트)** | `PascalCase` | `GlobeHeader.tsx`, `RecordCard.tsx` |
-| **파일 (유틸)** | `camelCase` | `globeUtils.ts`, `dateUtils.ts` |
+| 타입                | 컨벤션             | 예시                                |
+| ------------------- | ------------------ | ----------------------------------- |
+| **컴포넌트/타입**   | `PascalCase`       | `GlobeHeader`, `DiaryDetail`        |
+| **함수/변수**       | `camelCase`        | `handleZoomChange`, `isZoomed`      |
+| **상수**            | `UPPER_SNAKE_CASE` | `ZOOM_LEVELS`, `API_BASE_URL`       |
+| **폴더**            | `kebab-case`       | `image-metadata`, `nation-select`   |
+| **파일 (컴포넌트)** | `PascalCase`       | `GlobeHeader.tsx`, `RecordCard.tsx` |
+| **파일 (유틸)**     | `camelCase`        | `globeUtils.ts`, `dateUtils.ts`     |
 
 ### **규칙 2.4: Import 경로**
 
-| 상황 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
+| 상황             | ✅ 허용 (Good)                  | ❌ 금지 (Bad)                              |
+| ---------------- | ------------------------------- | ------------------------------------------ |
 | **같은 폴더 내** | `import A from './ComponentA';` | `import A from '@/components/ComponentA';` |
-| **다른 폴더** | `import cn from '@/utils/cn';` | `import cn from '../../utils/cn';` |
+| **다른 폴더**    | `import cn from '@/utils/cn';`  | `import cn from '../../utils/cn';`         |
 
 ## 3. 아키텍처 및 품질 규칙
 
-| 카테고리 | 규칙 |
-| --- | --- |
-| **추상화** | **규칙 3.1**: 3번 이상 반복되는 코드가 나타나기 전까지 추상화하지 않습니다. |
-| **유효성 검사** | **규칙 3.2**: 데이터 유효성 검사는 시스템 경계(API 응답, 사용자 입력)에서만 수행합니다. |
+| 카테고리          | 규칙                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| **추상화**        | **규칙 3.1**: 3번 이상 반복되는 코드가 나타나기 전까지 추상화하지 않습니다.                                |
+| **유효성 검사**   | **규칙 3.2**: 데이터 유효성 검사는 시스템 경계(API 응답, 사용자 입력)에서만 수행합니다.                    |
 | **불필요한 코드** | **규칙 3.3**: 사용되지 않는 변수, 함수, import 구문은 즉시 제거합니다. 주석 처리된 코드를 남기지 않습니다. |
-| **성능** | **규칙 3.4**: `Early return` 패턴을 사용하여 불필요한 연산을 줄입니다. |
-| **코드 품질** | **규칙 3.5**: `const` 사용을 `let`보다 우선시하며, `var`는 절대 사용하지 않습니다. |
-| | **규칙 3.6**: 옵셔널 체이닝(`?.`)과 nullish 병합(`??`)을 적극적으로 사용합니다. |
-| | **규칙 3.7**: 모든 컴포넌트는 셀프 클로징 (`<Component />`)을 원칙으로 합니다. |
+| **성능**          | **규칙 3.4**: `Early return` 패턴을 사용하여 불필요한 연산을 줄입니다.                                     |
+| **코드 품질**     | **규칙 3.5**: `const` 사용을 `let`보다 우선시하며, `var`는 절대 사용하지 않습니다.                         |
+|                   | **규칙 3.6**: 옵셔널 체이닝(`?.`)과 nullish 병합(`??`)을 적극적으로 사용합니다.                            |
+|                   | **규칙 3.7**: 모든 컴포넌트는 셀프 클로징 (`<Component />`)을 원칙으로 합니다.                             |
 
 ---
 
@@ -125,7 +125,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public endpoint: string,
+    public endpoint: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -158,12 +158,12 @@ export const getDiaryDetail = async (...): Promise<DiaryData> => {
 
 **규칙 4.2**: 타입 네이밍 패턴을 준수합니다.
 
-| 용도 | 패턴 | 예시 |
-| --- | --- | --- |
-| **요청 파라미터** | `[Name]Params` | `CreateDiaryParams`, `UpdateDiaryParams` |
-| **API 응답 래퍼** | `[Name]Response` | `DiaryDetailResponse`, `DiariesListResponse` |
-| **실제 데이터** | `[Name]Data` | `DiaryData`, `CityData` |
-| **클라이언트용 변환** | `[Name]Detail` | `DiaryDetail`, `CityDetail` |
+| 용도                  | 패턴             | 예시                                         |
+| --------------------- | ---------------- | -------------------------------------------- |
+| **요청 파라미터**     | `[Name]Params`   | `CreateDiaryParams`, `UpdateDiaryParams`     |
+| **API 응답 래퍼**     | `[Name]Response` | `DiaryDetailResponse`, `DiariesListResponse` |
+| **실제 데이터**       | `[Name]Data`     | `DiaryData`, `CityData`                      |
+| **클라이언트용 변환** | `[Name]Detail`   | `DiaryDetail`, `CityDetail`                  |
 
 ---
 
@@ -271,14 +271,14 @@ return {
 
 **규칙 1.1**: 모든 색상은 Tailwind 토큰을 사용합니다.
 
-| 역할 | 클래스 | 용도 |
-| --- | --- | --- |
-| **브랜드 주색** | `bg-blue-theme`, `text-blue-theme` | CTA 버튼, 강조 요소 |
-| **배경 (기본)** | `bg-surface-primary` | 페이지 배경 |
-| **배경 (보조)** | `bg-surface-secondary` | 카드, 모달 배경 |
-| **텍스트 (기본)** | `text-text-primary` | 본문 텍스트 |
-| **텍스트 (보조)** | `text-text-secondary`, `text-text-thirdly` | 캡션, 힌트 |
-| **비활성** | `text-gray-400`, `opacity-40` | 비활성화된 요소 |
+| 역할              | 클래스                                     | 용도                |
+| ----------------- | ------------------------------------------ | ------------------- |
+| **브랜드 주색**   | `bg-blue-theme`, `text-blue-theme`         | CTA 버튼, 강조 요소 |
+| **배경 (기본)**   | `bg-surface-primary`                       | 페이지 배경         |
+| **배경 (보조)**   | `bg-surface-secondary`                     | 카드, 모달 배경     |
+| **텍스트 (기본)** | `text-text-primary`                        | 본문 텍스트         |
+| **텍스트 (보조)** | `text-text-secondary`, `text-text-thirdly` | 캡션, 힌트          |
+| **비활성**        | `text-gray-400`, `opacity-40`              | 비활성화된 요소     |
 
 ## 2. 컴포넌트 변형 (CVA)
 
@@ -306,7 +306,7 @@ export const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  },
+  }
 );
 ```
 
@@ -340,25 +340,27 @@ export const buttonVariants = cva(
 
 **규칙 1.1**: Tailwind 표준 클래스를 우선 사용합니다.
 
-| 항목 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
-| **크기** | `w-36`, `h-20` | `w-[36px]`, `h-[20px]` |
-| **패딩/마진** | `p-4`, `m-2`, `gap-8` | `p-[16px]`, `m-[8px]` |
-| **색상 (토큰 있을 때)** | `bg-gray-800`, `text-white` | `bg-[#1f2937]` |
-| **둥글기** | `rounded-lg`, `rounded-2xl` | `rounded-[12px]` |
-| **그림자** | `shadow-lg` | `shadow-[0_0_10px_rgba(0,0,0,0.1)]` |
+| 항목                    | ✅ 허용 (Good)              | ❌ 금지 (Bad)                       |
+| ----------------------- | --------------------------- | ----------------------------------- |
+| **크기**                | `w-36`, `h-20`              | `w-[36px]`, `h-[20px]`              |
+| **패딩/마진**           | `p-4`, `m-2`, `gap-8`       | `p-[16px]`, `m-[8px]`               |
+| **색상 (토큰 있을 때)** | `bg-gray-800`, `text-white` | `bg-[#1f2937]`                      |
+| **둥글기**              | `rounded-lg`, `rounded-2xl` | `rounded-[12px]`                    |
+| **그림자**              | `shadow-lg`                 | `shadow-[0_0_10px_rgba(0,0,0,0.1)]` |
 
 ## 2. 임의 값 허용 케이스
 
 **규칙 2.1**: 다음 경우에만 임의 값 `[]` 사용이 허용됩니다.
 
 1. **디자인 명세의 정확한 값이 필요한 경우**
+
    ```typescript
    // 디자인에서 정확히 293949 색상을 요구
    <div className="bg-[#293940]" />
    ```
 
 2. **Tailwind에 사전 정의되지 않은 값**
+
    ```typescript
    // 512px는 Tailwind 기본값에 없음
    <div className="max-w-[523px]" />
@@ -415,15 +417,15 @@ src/
 
 ## 2. 주요 규칙
 
-| 경로 | 규칙 |
-| --- | --- |
-| `components/common/` | 2개 이상 페이지에서 사용되는 UI만 |
-| `components/[feature]/` | 특정 기능에 종속된 컴포넌트 |
-| `services/` | 모든 API 호출, `lib/apiClient.ts` 사용 필수 |
-| `hooks/` | 복잡한 상태 로직만, 단순 로직은 컴포넌트 내부 |
-| `types/` | 4개 이상 속성 시 별도 파일로 분리 |
-| `constants/` | 매직 넘버 금지, 상수 파일로 분리 |
-| `config/env.ts` | 모든 환경변수 중앙 관리 |
+| 경로                    | 규칙                                          |
+| ----------------------- | --------------------------------------------- |
+| `components/common/`    | 2개 이상 페이지에서 사용되는 UI만             |
+| `components/[feature]/` | 특정 기능에 종속된 컴포넌트                   |
+| `services/`             | 모든 API 호출, `lib/apiClient.ts` 사용 필수   |
+| `hooks/`                | 복잡한 상태 로직만, 단순 로직은 컴포넌트 내부 |
+| `types/`                | 4개 이상 속성 시 별도 파일로 분리             |
+| `constants/`            | 매직 넘버 금지, 상수 파일로 분리              |
+| `config/env.ts`         | 모든 환경변수 중앙 관리                       |
 
 ---
 
@@ -547,7 +549,7 @@ Globe.displayName = "Globe";
   - 불필요한 리렌더링이 없는가?
 - **[ ] 보안 규칙**:
   - API 경계에서 데이터 유효성 검사를 수행하는가?
-  - 환경변수가 올바른 패턴(NEXT_PUBLIC_ 등)으로 사용되었는가?
+  - 환경변수가 올바른 패턴(NEXT*PUBLIC* 등)으로 사용되었는가?
   - 인증이 필요한 페이지가 미들웨어로 보호되고 있는가?
 
 ## 3. UI 및 접근성

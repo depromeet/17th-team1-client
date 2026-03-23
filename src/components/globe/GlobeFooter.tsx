@@ -1,7 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { BookmarkFilledIcon, BookmarkIcon } from "@/assets/icons";
 import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
@@ -10,8 +13,8 @@ import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast"
 import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@/hooks/mutation/useBookmarkMutations";
 import { cn } from "@/utils/cn";
 import { getAuthInfo } from "@/utils/cookies";
+
 import { ShareButton } from "./ShareButton";
-import { sendGAEvent } from "@next/third-parties/google";
 
 type GlobeFooterProps = {
   isZoomed: boolean;

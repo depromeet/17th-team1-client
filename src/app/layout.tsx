@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+
 import { GoogleAnalytics } from "@next/third-parties/google";
+
 import { ClientLayout } from "@/components/common/ClientLayout";
+
 import "./globals.css";
 
 export const metadata: Metadata = {

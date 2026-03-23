@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
+
 import { Header } from "../common/Header";
 
 type ImageCropModalProps = {
@@ -180,7 +181,7 @@ const getCroppedImg = async (imageBlobUrl: string, pixelCrop: Area): Promise<str
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (blob) => {
+      blob => {
         if (!blob) {
           reject(new Error("Canvas is empty"));
           return;
@@ -189,7 +190,7 @@ const getCroppedImg = async (imageBlobUrl: string, pixelCrop: Area): Promise<str
         resolve(fileUrl);
       },
       OUTPUT_MIME_TYPE,
-      OUTPUT_QUALITY,
+      OUTPUT_QUALITY
     );
   });
 };
@@ -204,7 +205,7 @@ const createImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve(image));
-    image.addEventListener("error", (error) => reject(error));
+    image.addEventListener("error", error => reject(error));
     image.src = url;
   });
 };

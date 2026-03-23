@@ -20,7 +20,7 @@ type DiaryThumbnails = {
  * // countryThumbnails: { "KR": "https://...photoCode1.jpg", "JP": "https://...photoCode2.jpg" }
  */
 export const getDiaryThumbnails = (
-  diaryData: DiariesListResponse["data"]["diaryResponses"] | null,
+  diaryData: DiariesListResponse["data"]["diaryResponses"] | null
 ): DiaryThumbnails => {
   if (!diaryData || !Array.isArray(diaryData)) {
     return {

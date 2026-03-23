@@ -1,4 +1,5 @@
 import exifr from "exifr";
+
 import type { ImageMetadata } from "@/types/imageMetadata";
 import { reverseGeocode } from "@/utils/geocoding";
 
@@ -116,10 +117,7 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
       // 백엔드 API로 주소, 장소 정보 요청 (키 노출 X)
       const lat = exifData.latitude as number;
       const lng = exifData.longitude as number;
-      const [nearbyPlaces, placeName] = await Promise.all([
-        getNearbyPlaces(lat, lng),
-        reverseGeocode(lat, lng)
-      ]);
+      const [nearbyPlaces, placeName] = await Promise.all([getNearbyPlaces(lat, lng), reverseGeocode(lat, lng)]);
       const address = placeName || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       extracted.location = {
         latitude: lat,

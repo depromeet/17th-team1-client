@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
 import { Header } from "../common/Header";
+import { CityErrorFallback } from "./CityErrorFallback";
+import { useDiaryAction } from "./hooks/useDiaryAction";
+import { useImageMetadata } from "./hooks/useImageMetadata";
+import { ImageUploadSection } from "./ImageUploadSection";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { MemoryTextarea } from "./MemoryTextarea";
-import { useImageMetadata } from "./hooks/useImageMetadata";
-import { useDiaryAction } from "./hooks/useDiaryAction";
-import { CityErrorFallback } from "./CityErrorFallback";
-import { ImageUploadSection } from "./ImageUploadSection";
 
 type ImageMetadataProps = {
   cityId?: number;
@@ -70,12 +71,7 @@ export const ImageMetadataComponent = ({
   };
 
   if (!isCityIdValid) {
-    return (
-      <CityErrorFallback
-        onBack={handleBack}
-        onNavigateToCitySelection={handleNavigateToCitySelection}
-      />
-    );
+    return <CityErrorFallback onBack={handleBack} onNavigateToCitySelection={handleNavigateToCitySelection} />;
   }
 
   const locationTitle = [initialCity, initialCountry].filter(Boolean).join(", ");
@@ -94,7 +90,6 @@ export const ImageMetadataComponent = ({
         rightButtonDisabled={!hasImages || isProcessing || isInitialLoading || !isCityIdValid}
         onRightClick={handleSave}
       />
-      
       <ImageUploadSection
         metadataList={metadataList}
         fileUploadId={fileUploadId}

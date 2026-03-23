@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
-import { filterValidImageUrls } from "@/utils/imageValidation";
 import { isCoordinateFormat } from "@/utils/geocoding";
+import { filterValidImageUrls } from "@/utils/imageValidation";
+
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";
@@ -23,7 +25,7 @@ type RecordCardProps = {
 };
 
 const formatTakenMonth = (
-  takenMonth: string | { year: number; month: string; monthValue: number; leapYear: boolean } | null | undefined,
+  takenMonth: string | { year: number; month: string; monthValue: number; leapYear: boolean } | null | undefined
 ): string | undefined => {
   if (!takenMonth) return undefined;
   if (typeof takenMonth === "string") {
@@ -81,7 +83,7 @@ export const RecordCard = ({
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
       <div
         className="relative min-h-0 flex-1 w-full"
-        onTouchStart={(e) => {
+        onTouchStart={e => {
           // 이미지 캐러셀 내부에서는 수평 스와이프만 허용
           const target = e.target as HTMLElement;
           if (target.closest(".swiper") || target.closest("[data-carousel]")) {
@@ -130,19 +132,19 @@ export const RecordCard = ({
       <div
         className={`px-4 pr-0 shrink-0 relative z-20 ${showScrollHint ? "pb-[calc(20px+49px+16px)]" : "pb-[30px]"}`}
         data-emoji-reactions
-        onTouchStart={(e) => {
+        onTouchStart={e => {
           e.stopPropagation();
         }}
-        onTouchMove={(e) => {
+        onTouchMove={e => {
           e.stopPropagation();
         }}
-        onTouchEnd={(e) => {
+        onTouchEnd={e => {
           e.stopPropagation();
         }}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.stopPropagation();
         }}
-        onWheel={(e) => {
+        onWheel={e => {
           e.stopPropagation();
         }}
       >

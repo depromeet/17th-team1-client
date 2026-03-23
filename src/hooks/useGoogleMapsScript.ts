@@ -29,7 +29,7 @@ export const useGoogleMapsScript = ({
   const handleReady = useCallback(() => {
     setStatus("ready");
     setError(null);
-    resolveHandlersRef.current.forEach((handler) => {
+    resolveHandlersRef.current.forEach(handler => {
       handler();
     });
     resolveHandlersRef.current = [];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+
 import { addBookmark, removeBookmark } from "@/services/bookmarkService";
 import { AddBookmarkRequest, RemoveBookmarkRequest } from "@/types/bookmark";
 

@@ -1,27 +1,27 @@
 "use client";
 
-import type { GlobeInstance } from "globe.gl";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+
+import type { GlobeInstance } from "globe.gl";
+
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG, VIEWPORT_DEFAULTS } from "@/constants/globeConfig";
 import { type ClusterData, useClustering } from "@/hooks/useClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
-import type { GeoJSONFeature, PointOfView } from "@/types/geography";
-import type { TravelPattern } from "@/types/travelPatterns";
 import { calculateAnimationDuration, calculateAutoFitCamera } from "@/lib/globe/autoFit";
 import { createCityClickHandler, createClusterDOMClickHandler } from "@/lib/globe/eventHandlers";
 import { createGlobeImageUrl } from "@/lib/globe/imageGenerator";
 import {
   calculateLabelPosition,
-  createCityHTML,
-  createContinentClusterHTML,
-  createCountryClusterHTML,
   type CityStyles,
   type ContinentClusterStyles,
   type CountryClusterStyles,
+  createCityHTML,
+  createContinentClusterHTML,
+  createCountryClusterHTML,
 } from "@/lib/globe/labelRenderer";
 import {
   createContinentClusterStyles,
@@ -29,6 +29,8 @@ import {
   createSingleLabelStyles,
 } from "@/lib/globe/labelStyles";
 import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/lib/globe/polygonRenderer";
+import type { GeoJSONFeature, PointOfView } from "@/types/geography";
+import type { TravelPattern } from "@/types/travelPatterns";
 
 const GlobeComponent = dynamic(() => import("react-globe.gl"), {
   ssr: false,

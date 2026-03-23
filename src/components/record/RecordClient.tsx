@@ -1,10 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Header } from "@/components/common/Header";
 import type { Continent, RecordResponse } from "@/types/record";
 import { getAuthInfo } from "@/utils/cookies";
+
 import { RecordContent } from "./RecordContent";
 
 interface RecordClientProps {

@@ -1,14 +1,17 @@
 "use client";
 
-import { sendGAEvent } from "@next/third-parties/google";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { SearchInput } from "@/components/common/Input";
+import { useCreateMemberTravelsMutation } from "@/hooks/mutation/useMemberMutation";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import type { City } from "@/types/city";
+
 import { NationSelectFooter } from "./NationSelectFooter";
 import { PopularCitiesList } from "./PopularCitiesList";
-import { useCreateMemberTravelsMutation } from "@/hooks/mutation/useMemberMutation";
 
 type NationSelectClientProps = {
   initialCities: City[];

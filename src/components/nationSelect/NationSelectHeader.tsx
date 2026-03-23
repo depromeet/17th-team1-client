@@ -15,7 +15,7 @@ export const NationSelectHeader = ({ searchValue, onSearchChange }: NationSelect
       <SearchInput
         placeholder="도시/나라를 검색해주세요."
         value={searchValue}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={e => onSearchChange(e.target.value)}
       />
     </div>
   );

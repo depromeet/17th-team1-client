@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+
 import { RecordClient } from "@/components/record/RecordClient";
 import { getMemberTravels } from "@/services/memberService";
 import type { RecordResponse } from "@/types/record";

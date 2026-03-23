@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogActions, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { cn } from "@/utils/cn";
@@ -27,7 +28,7 @@ export const WithdrawalDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = 
       <DialogContent
         className={cn(
           "!w-[300px] !max-w-[300px] bg-[#1c2d45] border-0 rounded-2xl p-0 gap-0",
-          "shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]",
+          "shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]"
         )}
         ariaDescription="회원탈퇴 확인 모달"
       >
@@ -71,7 +72,7 @@ export const WithdrawalDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = 
               "flex flex-1 rounded-2xl h-[45px] px-5 py-3 justify-center items-center",
               "bg-surface-placeholder--8",
               "text-white text-[14px] font-bold leading-[1.5]",
-              "hover:bg-surface-placeholder--16 transition-colors",
+              "hover:bg-surface-placeholder--16 transition-colors"
             )}
           >
             취소
@@ -83,7 +84,7 @@ export const WithdrawalDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = 
               "flex flex-1 rounded-2xl h-[45px] px-5 py-3 justify-center items-center",
               "!bg-state-warning",
               "text-white text-[14px] font-bold leading-[1.5]",
-              "hover:!bg-[#ff5a3a] transition-colors disabled:opacity-70",
+              "hover:!bg-[#ff5a3a] transition-colors disabled:opacity-70"
             )}
           >
             {isLoading ? "탈퇴 중..." : "삭제"}

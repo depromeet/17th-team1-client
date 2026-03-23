@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
 import { Header } from "@/components/common/Header";
 
 export default function TermsPage() {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import type { AddCityRequest, AddCityResponse, DeleteCityRequest, DeleteCityResponse } from "@/types/city";
+
 import { addCity, deleteCity } from "@/services/cityService";
+import type { AddCityRequest, AddCityResponse, DeleteCityRequest, DeleteCityResponse } from "@/types/city";
 
 export type AddCityVariables = {
   request: AddCityRequest;

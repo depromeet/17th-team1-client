@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { getMemberTravels } from "@/services/memberService";
 import type { MemberTravelsResponse } from "@/types/member";
 import { handleServerError } from "@/utils/serverErrorHandler";

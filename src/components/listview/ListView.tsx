@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
 
 import { getContinent, getCountryName } from "@/constants/countryMapping";
 import type { KoreanContinent } from "@/types/geography";

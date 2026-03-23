@@ -5,9 +5,10 @@
  */
 
 import type { ClusterData } from "@/types/clustering";
-import type { createContinentClusterStyles, createCountryClusterStyles, createSingleLabelStyles } from "./labelStyles";
-import { calculateCityLabelWidth, calculateCountryLabelWidth } from "./calculations";
 import { escapeHtml } from "@/utils/htmlEscape";
+
+import { calculateCityLabelWidth, calculateCountryLabelWidth } from "./calculations";
+import type { createContinentClusterStyles, createCountryClusterStyles, createSingleLabelStyles } from "./labelStyles";
 
 export type CityStyles = ReturnType<typeof createSingleLabelStyles>;
 export type ContinentClusterStyles = ReturnType<typeof createContinentClusterStyles>;

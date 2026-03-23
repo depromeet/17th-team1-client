@@ -1,0 +1,2 @@
+echo "💅 Lint & Format 검사 중 (staged files)..."
+pnpm exec lint-staged

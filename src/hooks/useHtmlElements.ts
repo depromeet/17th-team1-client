@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+
 import type { ClusterData } from "@/types/globe";
 import type { CountryData } from "@/types/travelPatterns";
 

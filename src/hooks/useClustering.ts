@@ -17,14 +17,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CountryData } from "@/types/travelPatterns";
-import type { ClusterData, ClusteringState, UseClusteringProps } from "@/types/clustering";
+
 import { clusterLocations } from "@/lib/globe/clustering/clusteringAlgorithm";
 import {
   createClusterTransitionHandler,
   createGlobeRotationHandler,
   createZoomChangeHandler,
 } from "@/lib/globe/eventHandlers";
+import type { ClusterData, ClusteringState, UseClusteringProps } from "@/types/clustering";
+import type { CountryData } from "@/types/travelPatterns";
 
 /**
  * 클러스터링 훅

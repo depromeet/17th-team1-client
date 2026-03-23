@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@/assets/icons";
 import { IMAGE_TAGS, type ImageTag, TAG_LABELS } from "@/types/imageMetadata";
 import { cn } from "@/utils/cn";
@@ -39,7 +40,7 @@ export const TagSelector = ({
         className={cn(
           "flex items-center gap-2 bg-surface-secondary border border-[#243246] px-3 py-2 text-xs font-medium text-white cursor-pointer",
           isOpen ? "rounded-t-lg border-b-0" : "rounded-lg",
-          selectedTag && "w-[63px]",
+          selectedTag && "w-[63px]"
         )}
         type="button"
       >
@@ -63,7 +64,7 @@ export const TagSelector = ({
                 onClick={() => handleSelect(tag)}
                 className={cn(
                   "w-full px-3 py-2 text-left text-xs font-medium text-white cursor-pointer",
-                  index !== IMAGE_TAGS.length - 1 && "border-b border-[#243246]",
+                  index !== IMAGE_TAGS.length - 1 && "border-b border-[#243246]"
                 )}
               >
                 {TAG_LABELS[tag]}

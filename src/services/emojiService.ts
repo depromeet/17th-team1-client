@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+
 import { ApiError, apiPost } from "@/lib/apiClient";
 import type { PressEmojiParams, PressEmojiResponse, RegisterEmojiParams, RegisterEmojiResponse } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
@@ -27,7 +28,7 @@ export const registerEmoji = async (params: RegisterEmojiParams): Promise<Regist
     const response = await apiPost<RegisterEmojiResponse>(
       `/api/v1/diaries/${params.diaryId}/emojis/register?code=${params.code}&glyph=${encodeURIComponent(params.glyph)}`,
       undefined,
-      token,
+      token
     );
     return response;
   } catch (error) {
@@ -63,7 +64,7 @@ export const pressEmoji = async (params: PressEmojiParams): Promise<PressEmojiRe
     const response = await apiPost<PressEmojiResponse>(
       `/api/v1/diaries/${params.diaryId}/emojis/press?code=${params.code}`,
       undefined,
-      token,
+      token
     );
     return response;
   } catch (error) {

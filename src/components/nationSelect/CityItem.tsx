@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AddIcon, CloseIcon } from "@/assets/icons";
 import type { City } from "@/types/city";
 
@@ -10,7 +11,7 @@ type CityItemProps = {
   showDivider?: boolean;
 };
 
-export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemove, showDivider }: CityItemProps) => {
+export const CityItem = memo(({ city, isSelected, isRegistered = false, onAdd, onRemove, showDivider }: CityItemProps) => {
   const handleClick = () => {
     if (isRegistered) return; // 이미 등록된 도시는 클릭 불가
     if (isSelected) {
@@ -52,4 +53,7 @@ export const CityItem = ({ city, isSelected, isRegistered = false, onAdd, onRemo
       {showDivider && <div className="border-b border-surface-placeholder--8" />}
     </div>
   );
-};
+});
+
+CityItem.displayName = "CityItem";
+

@@ -29,27 +29,18 @@ export const NationSelectClient = ({
 }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
   const router = useRouter();
+  const registeredCityNamesSet = new Set(registeredCityNames);
 
   const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
   const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
     useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
-  
-  const displayCities = useMemo(() => 
-    isSearchingMode ? searchResults : initialCities
-  , [isSearchingMode, searchResults, initialCities]);
-
+  const displayCities = isSearchingMode ? searchResults : initialCities;
   const displayError = isSearchingMode ? searchError : null;
   const displayLoading = isSearchingMode ? isSearching : false;
 
-  const selectedCityIds = useMemo(() => 
-    new Set(selectedCityList.map(city => city.id))
-  , [selectedCityList]);
-
-  const registeredCityNamesSet = useMemo(() => 
-    new Set(registeredCityNames)
-  , [registeredCityNames]);
+  const selectedCityIds = new Set(selectedCityList.map(city => city.id));
 
   useEffect(() => {
     if (mode !== "default") return;
@@ -73,7 +64,7 @@ export const NationSelectClient = ({
     }
   };
 
-  const handleRemoveCity = useCallback((cityId: string) => {
+  const handleRemoveCity = (cityId: string) => {
     setSelectedCityList(prev => prev.filter(city => city.id !== cityId));
     if (mode === "default") {
       sendGAEvent("event", "place_remove", {
@@ -87,7 +78,7 @@ export const NationSelectClient = ({
     }
   };
 
-  const handleCreateGlobe = useCallback(async () => {
+  const handleCreateGlobe = async () => {
     if (selectedCityList.length === 0) return;
 
     if (mode === "edit-add" && onComplete) {
@@ -126,7 +117,7 @@ export const NationSelectClient = ({
 
       alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
     }
-  }, [selectedCityList, mode, onComplete, createMemberTravels, router]);
+  };
 
   const hasTrackedSearch = useRef(false);
 
@@ -150,7 +141,7 @@ export const NationSelectClient = ({
     if (value.trim().length === 0) {
       clearSearch();
     }
-  }, [setSearchKeyword, clearSearch]);
+  };
 
   const handleSearchBlur = () => {
     if (searchKeyword.trim().length === 0 || mode !== "default") return;
@@ -246,4 +237,3 @@ export const NationSelectClient = ({
     </main>
   );
 };
-

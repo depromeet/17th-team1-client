@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 import { filterValidImageUrls } from "@/utils/imageValidation";
-
+import { isCoordinateFormat } from "@/utils/geocoding";
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";
@@ -71,15 +71,6 @@ export const RecordCard = ({
   const currentMetadata = imageMetadata?.[currentImageIndex];
   const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : undefined;
   const currentDate = formatTakenMonth(currentMetadata?.takenMonth);
-
-  /**
-   * 기존 데이터에 좌표 형식("37.4850, 127.0178")으로 저장된 placeName 검증
-   * 새 데이터는 ImageMetadata에서 자동으로 reverse geocoding 처리됨
-   */
-  const isCoordinateFormat = (str: string | null | undefined): boolean => {
-    if (!str) return false;
-    return /^[\d.,\s]+$/.test(str.trim());
-  };
 
   // placeName이 있고 좌표 형식이 아닐 때만 표시, 없으면 undefined (도시명 fallback 사용 안함)
   const currentLocation =

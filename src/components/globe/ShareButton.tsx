@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import ShareIcon from "@/assets/icons/share.svg";
 import { getAuthInfo } from "@/utils/cookies";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type ShareButtonProps = {
   /**
@@ -52,9 +53,16 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
   }, [shareUrl]);
 
   const handleShare = useCallback(async () => {
+    if (isFirstGlobe)
+      sendGAEvent("event", "globeresult_share_click", {
+        flow: "onboarding",
+        screen: "globeresult",
+        click_code: "onboarding.globeresult.cta.share",
+      });
+
     // 모바일 기기 감지
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      typeof navigator !== "undefined" ? navigator.userAgent : "",
+      typeof navigator !== "undefined" ? navigator.userAgent : ""
     );
 
     // PC 또는 Web Share API 미지원: 클립보드 복사
@@ -84,7 +92,7 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
     } finally {
       setIsLoading(false);
     }
-  }, [isSupported, shareUrl, copyToClipboard]);
+  }, [isFirstGlobe, isSupported, shareUrl, copyToClipboard]);
 
   // Custom Hooks / Lifecycle Hooks
   useEffect(() => {
@@ -112,7 +120,7 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
       type="button"
       onClick={handleShare}
       disabled={isLoading}
-      className="flex items-center justify-center p-[10px] rounded-[500px] size-[56px] bg-surface-placeholder--8 transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center justify-center p-2.5 rounded-[500px] size-14 bg-surface-placeholder--8 transition-all hover:opacity-80 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       aria-label={isShared ? "공유 완료" : isLoading ? "공유 중..." : "공유하기"}
     >
       <ShareIcon className={`w-8 h-8 ${isLoading ? "animate-pulse" : ""}`} />

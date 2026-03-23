@@ -4,6 +4,10 @@ import dynamic from "next/dynamic";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
+import { useSearchParams } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { BackButton } from "@/components/common/Button";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
@@ -22,6 +26,8 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 
 const GlobeContent = () => {
   const globeRef = useRef<GlobeRef | null>(null);
+  const searchParams = useSearchParams();
+  const selectedCount = searchParams.get("count") ? Number(searchParams.get("count")) : undefined;
 
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,9 +38,31 @@ const GlobeContent = () => {
   const [hasClusterSelected, setHasClusterSelected] = useState(false);
 
   const hasBackButton = isZoomed || hasClusterSelected;
+  const hasViewedResultRef = useRef(false);
 
   // 로딩 완료 콜백
   const handleLoadingComplete = useCallback(() => setIsLoading(false), []);
+
+  useEffect(() => {
+    if (isLoading || travelPatterns.length === 0) return;
+    hasViewedResultRef.current = true;
+    sendGAEvent("event", "onboarding_globeresult_view", {
+      flow: "onboarding",
+      screen: "globeresult",
+    });
+  }, [isLoading, travelPatterns.length]);
+
+  useEffect(() => {
+    if (selectedCount === undefined) return;
+    return () => {
+      if (hasViewedResultRef.current)
+        sendGAEvent("event", "onboarding_globeresult_exit", {
+          flow: "onboarding",
+          screen: "globeresult",
+        });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 로그인한 사용자의 데이터 로드
   useEffect(() => {
@@ -68,7 +96,7 @@ const GlobeContent = () => {
   }, []);
 
   // 로딩 중이거나 데이터가 없는 경우
-  if (isLoading) return <GlobeLoading onComplete={handleLoadingComplete} />;
+  if (isLoading) return <GlobeLoading onComplete={handleLoadingComplete} selectedCount={selectedCount} />;
 
   if (travelPatterns.length === 0)
     return (
@@ -103,6 +131,12 @@ const GlobeContent = () => {
               const zoomed = zoom < ZOOM_LEVELS.ZOOM_THRESHOLD;
               setIsZoomed(zoomed);
               if (!zoomed) setHasClusterSelected(false);
+            }}
+            onInteractionStart={() => {
+              sendGAEvent("event", "globe_interaction_start", {
+                flow: "onboarding",
+                screen: "globeresult",
+              });
             }}
             onClusterSelect={() => setHasClusterSelected(true)}
             disableCityClick={true}

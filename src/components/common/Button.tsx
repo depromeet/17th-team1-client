@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useId, useRef, useState } from "react";
 import ReturnIcon from "@/assets/icons/return.svg";
 import { EMOJI_LIST } from "@/constants/emoji";
-import { ZOOM_LEVELS } from "@/constants/zoomLevels";
+import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import useImage from "@/hooks/useImage";
 import type { BackButtonProps } from "@/types/button";
 import { cn } from "@/utils/cn";
@@ -18,7 +18,7 @@ type ImageUploadButtonProps = {
 
 const iconButtonStyles = cn(
   "inline-flex justify-center items-center rounded-2xl outline outline-gray-200 bg-white disabled:opacity-40 text-gray-700 font-medium",
-  "enabled:hover:bg-gray-50 enabled:hover:outline-gray-300 enabled:hover:text-gray-900 disabled:opacity-40",
+  "enabled:hover:bg-gray-50 enabled:hover:outline-gray-300 enabled:hover:text-gray-900 disabled:opacity-40"
 );
 
 export const buttonVariants = cva(
@@ -42,7 +42,7 @@ export const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  },
+  }
 );
 
 export const iconButtonVariants = cva(iconButtonStyles, {
@@ -127,7 +127,7 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
           "relative flex w-full shrink-0 flex-col justify-center gap-4 rounded-[30px] border border-dashed border-gray-200 bg-white outline-none disabled:bg-gray-100",
           !disabled && "hover:border-gray-300 hover:bg-gray-50",
           uploadedImage ? "items-start gap-10 p-0" : "aspect-square items-center gap-4 p-16",
-          className,
+          className
         )}
         onClick={handleClick}
         disabled={disabled}
@@ -163,11 +163,11 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
           onClick={handleRemoveClick}
           className={cn(
             "absolute top-8 right-8 inline-flex aspect-square items-center rounded-full bg-[rgba(255,255,255,0.70)] p-2 text-gray-500 cursor-pointer",
-            disabled ? "text-gray-400 cursor-not-allowed" : "hover:text-gray-600",
+            disabled ? "text-gray-400 cursor-not-allowed" : "hover:text-gray-600"
           )}
           type="button"
           tabIndex={disabled ? -1 : 0}
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               handleRemoveClick(e);
@@ -210,7 +210,7 @@ export const EmojiUploadButton = ({ disabled = false, className }: ImageUploadBu
         className={cn(
           "relative w-20 h-20 rounded-full border-2 border-dashed border-gray-400 bg-gray-800 outline-none disabled:opacity-40 flex items-center justify-center group",
           !disabled && "hover:border-gray-300 hover:bg-gray-700",
-          className,
+          className
         )}
         aria-label={selectedEmoji ? `이모지 업로드 버튼 (선택된 이모지: ${selectedEmoji})` : "이모지 업로드 버튼"}
         aria-expanded={isOpen}
@@ -227,14 +227,14 @@ export const EmojiUploadButton = ({ disabled = false, className }: ImageUploadBu
 
       {selectedEmoji && (
         <button
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             handleRemove();
           }}
           className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
           type="button"
           tabIndex={disabled ? -1 : 0}
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               e.stopPropagation();
@@ -269,7 +269,7 @@ export const EmojiUploadButton = ({ disabled = false, className }: ImageUploadBu
           </div>
 
           <div className="grid grid-cols-10 gap-2 max-h-48 overflow-y-auto">
-            {EMOJI_LIST.map((emoji) => (
+            {EMOJI_LIST.map(emoji => (
               <button
                 key={emoji}
                 onClick={() => handleEmojiSelect(emoji)}
@@ -289,22 +289,14 @@ export const EmojiUploadButton = ({ disabled = false, className }: ImageUploadBu
 
 export const BackButton = ({ isZoomed, globeRef, onReset }: BackButtonProps) => {
   const handleBackClick = () => {
-    // Globe ref를 통해 직접 카메라 이동
     if (globeRef.current?.globeRef?.current) {
+      // 스택/클러스터링 상태를 먼저 초기화하여 줌아웃 애니메이션 중 스냅 트리거 방지
+      globeRef.current.resetGlobe?.();
+      // 카메라 줌아웃 애니메이션
       globeRef.current.globeRef.current.pointOfView({ altitude: ZOOM_LEVELS.DEFAULT }, 1000);
-
-      // 애니메이션 완료 후 상태 업데이트 및 클러스터링 초기화
-      setTimeout(() => {
-        // Globe ref의 resetGlobe 메서드 호출 (클러스터링 포함한 모든 상태 초기화)
-        if (globeRef.current?.resetGlobe) {
-          globeRef.current.resetGlobe();
-        } else {
-          // fallback - ref의 resetGlobe가 없는 경우 기존 onReset 사용
-          onReset();
-        }
-      }, 1100); // 애니메이션 시간보다 약간 더 긴 시간
+      // 애니메이션 완료 후 페이지 UI 상태 초기화
+      setTimeout(onReset, 1000);
     } else {
-      // fallback - ref가 없는 경우 즉시 상태 업데이트
       onReset();
     }
   };

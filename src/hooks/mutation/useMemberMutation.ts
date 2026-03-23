@@ -1,3 +1,5 @@
+"use client";
+
 import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
 import {
   CreateMemberTravelsRequest,
@@ -9,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 
 export const useCreateMemberTravelsMutation = () => {
   return useMutation<CreateTravelRecordsResponse, Error, CreateMemberTravelsRequest>({
-    mutationFn: (data: CreateMemberTravelsRequest) => {
+    mutationFn: data => {
       return createMemberTravels(data.cities);
     },
   });

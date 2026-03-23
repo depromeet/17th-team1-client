@@ -1,8 +1,8 @@
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import type { ApiResponse } from "@/types/api";
 
 // 멤버 ID 조회 응답
-export interface MemberIdResponse extends ApiResponse<number> {}
+export type MemberIdResponse = ApiResponse<number>;
 
 // 여행 기록 생성 API
 export interface TravelRecord {
@@ -42,7 +42,7 @@ export interface CreateMemberTravelsRequest {
   cities: City[];
 }
 
-export interface CreateTravelRecordsResponse extends ApiResponse<CreateTravelRecordsData> {}
+export type CreateTravelRecordsResponse = ApiResponse<CreateTravelRecordsData>;
 
 // 지구본 조회 API 응답
 export interface GlobeData {
@@ -67,14 +67,14 @@ export interface GlobeCity {
   countryCode: string;
 }
 
-export interface GlobeResponse extends ApiResponse<GlobeData> {}
+export type GlobeResponse = ApiResponse<GlobeData>;
 
 // AI 인사이트 응답
 export interface TravelInsightData {
   title: string;
 }
 
-export interface TravelInsightResponse extends ApiResponse<TravelInsightData> {}
+export type TravelInsightResponse = ApiResponse<TravelInsightData>;
 
 // 멤버 여행 데이터 조회 응답
 export interface MemberTravelCity {
@@ -95,7 +95,7 @@ export interface MemberTravelsData {
   travels: MemberTravel[];
 }
 
-export interface MemberTravelsResponse extends ApiResponse<MemberTravelsData> {}
+export type MemberTravelsResponse = ApiResponse<MemberTravelsData>;
 
 // 프로필 정보 타입
 export interface ProfileData {
@@ -107,7 +107,7 @@ export interface ProfileData {
 }
 
 // 프로필 조회 API 응답
-export interface ProfileResponse extends ApiResponse<ProfileData> {}
+export type ProfileResponse = ApiResponse<ProfileData>;
 
 // S3 업로드 URL 요청 데이터
 export interface S3UploadUrlParams {
@@ -128,7 +128,7 @@ export interface S3UploadUrlData {
   s3Key: string;
 }
 
-export interface S3UploadUrlResponse extends ApiResponse<S3UploadUrlData> {}
+export type S3UploadUrlResponse = ApiResponse<S3UploadUrlData>;
 
 export interface UploadAndUpdateProfileRequest {
   nickname: string;

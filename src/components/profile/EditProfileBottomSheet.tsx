@@ -63,12 +63,10 @@ export const EditProfileBottomSheet = ({
   // prop 변경에 반응하는 effect 패턴을 의도적으로 사용합니다.
   useEffect(() => {
     if (isOpen && !prevIsOpenRef.current) {
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
       reset({
         nickname: initialName,
         imageFile: undefined,
       });
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change
       setSelectedImagePreview(null);
     }
     prevIsOpenRef.current = isOpen;

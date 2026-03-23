@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import type { EmojiClickData } from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
-
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { HeadlessToast } from "@/components/common/Toast";
 import { usePressEmojiMutation, useRegisterEmojiMutation } from "@/hooks/mutation/useEmojiMutations";
@@ -38,9 +37,18 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const router = useRouter();
   const { mutateAsync: pressEmoji } = usePressEmojiMutation();
   const { mutateAsync: registerEmoji } = useRegisterEmojiMutation();
-  const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
+  const buildInitialReactions = (sourceReactions: Reaction[]) => {
+    const reactionsWithAdjustedCount = sourceReactions.map(reaction => ({
+      ...reaction,
+      count: isOwner ? reaction.count : reaction.count + 1,
+    }));
+    return [...reactionsWithAdjustedCount].sort((a, b) => b.count - a.count);
+  };
+
+  const baseReactions = useMemo(() => buildInitialReactions(initialReactions), [initialReactions, isOwner]);
+  const [localReactions, setLocalReactions] = useState<Reaction[] | null>(null);
+  const reactions = localReactions ?? baseReactions;
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
   const { showToast, toastMessage, setShowToast, showOwnerToast } = useOwnerToast();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -48,19 +56,6 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const reactionsContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isInitialLoad) {
-      // 초기 로딩 시 서버 카운트 + 1로 설정
-      const reactionsWithIncreasedCount = initialReactions.map(reaction => ({
-        ...reaction,
-        count: reaction.count + 1,
-      }));
-      const sortedReactions = [...reactionsWithIncreasedCount].sort((a, b) => b.count - a.count);
-      setReactions(sortedReactions);
-      setIsInitialLoad(false);
-    }
-  }, [initialReactions, isInitialLoad]);
 
   // Cleanup: 컴포넌트 언마운트 시 모든 타이머 정리
   useEffect(() => {
@@ -199,8 +194,9 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
     // owner가 아닐 때만 카운트 증가 및 애니메이션
     // 먼저 UI 업데이트 (낙관적 업데이트)
-    setReactions(prev => {
-      const updatedReactions = prev.map(r => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
+    setLocalReactions(prev => {
+      const currentReactions = prev ?? baseReactions;
+      const updatedReactions = currentReactions.map(r => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
       return updatedReactions;
     });
 
@@ -223,8 +219,11 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
     } catch (error) {
       // owner가 아닐 때만 롤백 처리
-      setReactions(prev => {
-        const rolledBackReactions = prev.map(r => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+      setLocalReactions(prev => {
+        const currentReactions = prev ?? baseReactions;
+        const rolledBackReactions = currentReactions.map(r =>
+          r.code === reactionCode ? { ...r, count: r.count - 1 } : r
+        );
         return rolledBackReactions;
       });
 
@@ -245,12 +244,13 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
 
       // 성공 시 로컬 상태 업데이트
-      setReactions(prev => {
-        const existingReaction = prev.find(r => r.glyph === glyph);
+      setLocalReactions(prev => {
+        const currentReactions = prev ?? baseReactions;
+        const existingReaction = currentReactions.find(r => r.glyph === glyph);
 
-        // owner가 아닐 때만 카운트 증가
+        // owner가 아닐 때만 카운트 증가, owner는 카운트 0으로 추가
         if (existingReaction) {
-          const updatedReactions = prev.map(r =>
+          const updatedReactions = currentReactions.map(r =>
             r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r
           );
 
@@ -267,7 +267,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           count: isOwner ? 0 : 1,
         };
 
-        const newReactions = [newReaction, ...prev];
+        const newReactions = [newReaction, ...currentReactions];
         return newReactions;
       });
 
@@ -294,11 +294,14 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           });
 
           // 성공 시 로컬 상태 업데이트
-          setReactions(prev => {
-            const existingReaction = prev.find(r => r.glyph === glyph);
+          setLocalReactions(prev => {
+            const currentReactions = prev ?? baseReactions;
+            const existingReaction = currentReactions.find(r => r.glyph === glyph);
 
             if (existingReaction) {
-              const updatedReactions = prev.map(r => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
+              const updatedReactions = currentReactions.map(r =>
+                r.glyph === glyph ? { ...r, count: r.count + 1 } : r
+              );
 
               const clickedReaction = updatedReactions.find(r => r.glyph === glyph);
               const otherReactions = updatedReactions.filter(r => r.glyph !== glyph);
@@ -307,7 +310,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
               return newOrder;
             }
 
-            return prev;
+            return currentReactions;
           });
 
           // 애니메이션 실행 - 해당 이모지 버튼 찾기
@@ -332,11 +335,6 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   };
 
   const handleAddEmoji = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (isOwner) {
-      e.stopPropagation();
-      showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
-      return;
-    }
     e.stopPropagation();
     setShowEmojiPicker(true);
   };

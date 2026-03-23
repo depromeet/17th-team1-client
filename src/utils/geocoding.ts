@@ -110,3 +110,11 @@ export const reverseGeocodeMultiple = async (
 ): Promise<(string | null)[]> => {
   return Promise.all(coordinates.map(({ latitude, longitude }) => reverseGeocode(latitude, longitude)));
 };
+
+/**
+ * 문자열이 위도, 경도 좌표 형식으로만 이루어져 있는지 확인합니다.
+ */
+export const isCoordinateFormat = (str: string | null | undefined): boolean => {
+  if (!str) return false;
+  return /^[\d.,\s]+$/.test(str.trim());
+};

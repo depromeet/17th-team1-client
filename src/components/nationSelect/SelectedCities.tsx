@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { sendGAEvent } from "@next/third-parties/google";
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { Chip } from "@/components/common/Chip";
 import type { City } from "@/types/city";

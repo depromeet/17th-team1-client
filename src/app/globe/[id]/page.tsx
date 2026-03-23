@@ -10,6 +10,7 @@ import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
+import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";

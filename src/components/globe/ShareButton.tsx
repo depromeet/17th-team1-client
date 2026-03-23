@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { sendGAEvent } from "@next/third-parties/google";
+import { sendGAEvent } from "@next/third-parties/google";
 
 import ShareIcon from "@/assets/icons/share.svg";
 import { getAuthInfo } from "@/utils/cookies";

@@ -90,7 +90,6 @@ export const ImageMetadataComponent = ({
         rightButtonDisabled={!hasImages || isProcessing || isInitialLoading || !isCityIdValid}
         onRightClick={handleSave}
       />
-
       <ImageUploadSection
         metadataList={metadataList}
         fileUploadId={fileUploadId}

@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
-import { filterValidImageUrls } from "@/utils/imageValidation";
 import { isCoordinateFormat } from "@/utils/geocoding";
+import { filterValidImageUrls } from "@/utils/imageValidation";
+
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";

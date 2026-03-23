@@ -1,9 +1,11 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
-import { ImageCarousel } from "./ImageCarousel";
-import type { UploadMetadata } from "./hooks/useImageMetadata";
+
 import type { ImageTag } from "@/types/imageMetadata";
+
+import type { UploadMetadata } from "./hooks/useImageMetadata";
+import { ImageCarousel } from "./ImageCarousel";
 import type { LocationSelection } from "./LocationSelectBottomSheet";
 
 interface ImageUploadSectionProps {

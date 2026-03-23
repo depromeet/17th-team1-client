@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useId } from "react";
+
 import type { City } from "@/types/city";
 
 import { CityItem } from "./CityItem";

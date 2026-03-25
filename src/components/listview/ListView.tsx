@@ -214,7 +214,10 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                         const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
                         router.push(path);
                       } else {
-                        const params = new URLSearchParams({ city: cityName, country: countryName });
+                        const params = new URLSearchParams({
+                          city: cityName,
+                          country: countryName,
+                        });
                         if (cityId != null) params.set("cityId", String(cityId));
                         router.push(`/image-metadata?${params.toString()}`);
                       }
@@ -225,7 +228,6 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                         key={`${group.countryCode}-${name}`}
                         type="button"
                         className="border rounded-[12px] border-none"
-                        onClick={handleCityClick}
                       >
                         <div
                           className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
@@ -235,11 +237,16 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
-                            cursor: "pointer",
                             border: "1px solid var(--color-border-absolutewhite--8)",
                           }}
                         >
-                          <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
+                          <p
+                            className="font-medium text-white"
+                            style={{
+                              fontSize: "14px",
+                              letterSpacing: "-0.28px",
+                            }}
+                          >
                             {cityName}
                           </p>
                           {/* 여행기록이 있는 경우 썸네일 표시 */}

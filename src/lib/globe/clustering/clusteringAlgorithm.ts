@@ -47,7 +47,8 @@ export const clusterLocations = (
   globeRef: React.RefObject<GlobeInstance | null>,
   mode: "country" | "city" | "continent" = "country",
   expandedCountry: string | null = null,
-  countryThumbnails?: Record<string, string>
+  countryThumbnails?: Record<string, string>,
+  expandedContinentCountryIds?: ReadonlySet<string>
 ): ClusterData[] => {
   if (!locations || locations.length === 0) return [];
 
@@ -191,7 +192,13 @@ export const clusterLocations = (
           // 각 대륙 그룹을 대륙 클러스터로 변환
           // Map.forEach 콜백 순서: (value, key) — Array.forEach와 반대!
           continentGroups.forEach((group, continent) => {
-            if (group.length > 1) {
+            // 그룹 내 국가 중 하나라도 대륙 클러스터 확장 대상이면 개별 표시
+            const hasExpandedCountry =
+              expandedContinentCountryIds &&
+              expandedContinentCountryIds.size > 0 &&
+              group.some(({ items }) => expandedContinentCountryIds.has(items[0]?.id ?? ""));
+
+            if (group.length > 1 && !hasExpandedCountry) {
               // 2개 이상의 국가가 있으면 대륙 클러스터 생성
               const allItems = group.flatMap(({ items }) => items);
               const uniqueCountries = [...new Set(allItems.map(({ id }) => id))];
@@ -230,8 +237,8 @@ export const clusterLocations = (
 
               finalClusters.push(continentCluster);
             } else {
-              // 1개 국가만 있으면 그대로 유지
-              finalClusters.push(group[0]);
+              // 1개 국가만 있거나, 확장된 대륙 클러스터 소속 국가인 경우 개별 표시
+              for (const cluster of group) finalClusters.push(cluster);
             }
           });
         } else {

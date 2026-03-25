@@ -69,6 +69,7 @@ export const useClustering = ({
     rotationPosition: { lat: 0, lng: 0 },
     lastSignificantRotation: Date.now(),
     isZoomAnimating: false,
+    expandedContinentCountryIds: new Set(),
   });
 
   const [zoomStack, setZoomStack] = useState<number[]>([]);
@@ -83,6 +84,7 @@ export const useClustering = ({
     clickBasedExpansion,
     rotationPosition,
     lastSignificantRotation,
+    expandedContinentCountryIds,
   } = state;
 
   const modeRef = useRef<string>(mode);
@@ -117,14 +119,30 @@ export const useClustering = ({
 
       if (!dataToCluster || dataToCluster.length === 0) return [];
 
-      return clusterLocations(dataToCluster, globeRef, mode, expandedCountry, countryThumbnails);
+      return clusterLocations(
+        dataToCluster,
+        globeRef,
+        mode,
+        expandedCountry,
+        countryThumbnails,
+        expandedContinentCountryIds.size > 0 ? expandedContinentCountryIds : undefined
+      );
     } catch (error) {
       if (process.env.NODE_ENV === "development") console.error("Clustering calculation failed:", error);
 
       return [];
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- zoomLevel은 함수 본문에서 직접 참조되지 않지만, 내부의 globeRef.current.getScreenCoords()가 줌/카메라 상태에 따라 다른 화면 좌표를 반환하므로 줌 변경 시마다 재계산을 트리거하기 위해 필요
-  }, [countries, zoomLevel, selectedClusterData, mode, expandedCountry, globeRef, countryThumbnails]);
+  }, [
+    countries,
+    zoomLevel,
+    selectedClusterData,
+    mode,
+    expandedCountry,
+    globeRef,
+    countryThumbnails,
+    expandedContinentCountryIds,
+  ]);
 
   /**
    * 화면에 표시할 클러스터 아이템 (캐싱)
@@ -186,7 +204,8 @@ export const useClustering = ({
           const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
           onSelectedDataChange(parent);
         },
-        rotationTimerRef
+        rotationTimerRef,
+        setZoomStack
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onSelectedDataChange]
@@ -206,6 +225,7 @@ export const useClustering = ({
       rotationPosition: { lat: 0, lng: 0 },
       lastSignificantRotation: Date.now(),
       isZoomAnimating: false,
+      expandedContinentCountryIds: new Set(),
     }));
     setZoomStack([]);
     setSelectionStack([]);

@@ -39,7 +39,7 @@ export const ImageMetadataComponent = ({
     isProcessing,
     setIsProcessing,
     isInitialLoading,
-    deletingPhotoId,
+    pendingDeletePhotoIds,
     fileUploadId,
     handleFileUpload,
     handleRemove,
@@ -60,6 +60,7 @@ export const ImageMetadataComponent = ({
     diaryText,
     isProcessing,
     setIsProcessing,
+    pendingDeletePhotoIds,
   });
 
   const handleBack = () => {
@@ -80,7 +81,7 @@ export const ImageMetadataComponent = ({
 
   return (
     <div className="max-w-md mx-auto min-h-dvh bg-black text-white">
-      <LoadingOverlay show={isProcessing || isInitialLoading || Boolean(deletingPhotoId)} />
+      <LoadingOverlay show={isProcessing || isInitialLoading} />
       <Header
         title={headerTitle}
         variant="dark"
@@ -93,7 +94,6 @@ export const ImageMetadataComponent = ({
       <ImageUploadSection
         metadataList={metadataList}
         fileUploadId={fileUploadId}
-        deletingPhotoId={deletingPhotoId}
         handleRemove={handleRemove}
         handleImageUpdate={handleImageUpdate}
         handleTagChange={handleTagChange}

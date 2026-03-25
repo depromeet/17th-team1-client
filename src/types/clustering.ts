@@ -28,6 +28,8 @@ export type ClusteringState = {
   rotationPosition: { lat: number; lng: number };
   lastSignificantRotation: number;
   isZoomAnimating: boolean; // 줌 애니메이션 중인지 여부
+  // 대륙 클러스터 확장 시 개별 표시할 국가 ID 집합 (홍콩-마카오 등 근접 국가 대륙 클러스터 방지)
+  expandedContinentCountryIds: ReadonlySet<string>;
 };
 
 export type UseClusteringProps = {

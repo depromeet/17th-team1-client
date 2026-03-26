@@ -242,6 +242,7 @@ const RecordDetailPage = () => {
             reactions={reactions}
             isOwner={isOwner}
             showScrollHint={shouldShowScrollHint}
+            isFirstRecord={true}
           />
         </div>
       </HeadlessToastProvider>
@@ -287,6 +288,7 @@ const RecordDetailPage = () => {
                 reactions={reactions}
                 isOwner={isOwner}
                 showScrollHint={shouldShowScrollHint && index === currentIndex}
+                isFirstRecord={index === 0}
               />
             );
           })}

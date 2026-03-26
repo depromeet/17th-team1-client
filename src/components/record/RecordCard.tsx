@@ -22,6 +22,7 @@ type RecordCardProps = {
   reactions?: Emoji[];
   isOwner?: boolean;
   showScrollHint?: boolean;
+  isFirstRecord?: boolean;
 };
 
 const formatTakenMonth = (
@@ -53,6 +54,7 @@ export const RecordCard = ({
   reactions,
   isOwner = false,
   showScrollHint = false,
+  isFirstRecord = false,
 }: RecordCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [userInfoHeight, setUserInfoHeight] = useState(0);
@@ -95,6 +97,7 @@ export const RecordCard = ({
           images={validImages}
           onImageChange={setCurrentImageIndex}
           userInfoHeight={userInfoHeight}
+          isFirstRecord={isFirstRecord}
         />
 
         {/* 상단 그라데이션 오버레이 */}

@@ -9,13 +9,19 @@ type RecordImageCarouselProps = {
   images: string[];
   onImageChange?: (index: number) => void;
   userInfoHeight?: number;
+  isFirstRecord?: boolean;
 };
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 const RESET_DELAY_MS = 300;
 
-export const RecordImageCarousel = ({ images, onImageChange, userInfoHeight = 0 }: RecordImageCarouselProps) => {
+export const RecordImageCarousel = ({
+  images,
+  onImageChange,
+  userInfoHeight = 0,
+  isFirstRecord = false,
+}: RecordImageCarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scale, setScale] = useState(1);
@@ -137,7 +143,7 @@ export const RecordImageCarousel = ({ images, onImageChange, userInfoHeight = 0 
                 fill
                 className="object-cover pointer-events-none"
                 style={{ transform: `scale(${scale})` }}
-                priority={index === currentIndex}
+                priority={isFirstRecord && index === currentIndex}
                 draggable={false}
               />
             </div>

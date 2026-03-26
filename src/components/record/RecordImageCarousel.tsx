@@ -142,6 +142,7 @@ export const RecordImageCarousel = ({
                 alt={`Record image ${index + 1}`}
                 fill
                 quality={60}
+                sizes="(max-width: 512px) 100vw, 512px"
                 className="object-cover pointer-events-none"
                 style={{ transform: `scale(${scale})` }}
                 priority={isFirstRecord && index === currentIndex}

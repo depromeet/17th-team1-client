@@ -30,6 +30,7 @@ type ImageCarouselProps = {
   onImageUpdate?: (id: string, croppedImage: string) => void | Promise<void>;
   onLocationChange?: (location: LocationSelection | null) => void;
   isProcessing?: boolean;
+  photoIndex?: number;
 };
 
 export const ImageCarousel = ({
@@ -40,6 +41,7 @@ export const ImageCarousel = ({
   onImageUpdate,
   onLocationChange,
   isProcessing = false,
+  photoIndex = 0,
 }: ImageCarouselProps) => {
   const [selectedTag, setSelectedTag] = useState<ImageTag | null>(
     image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null)
@@ -262,6 +264,8 @@ export const ImageCarousel = ({
         isOpen={isDateSelectModalOpen}
         onClose={() => setIsDateSelectModalOpen(false)}
         onConfirm={handleConfirmDate}
+        photoIndex={photoIndex}
+        hasExistingDate={hasDate}
       />
       <LocationSelectBottomSheet
         isOpen={isLocationSelectModalOpen}

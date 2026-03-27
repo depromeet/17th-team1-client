@@ -204,7 +204,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     sendGAEvent("event", "cityedit_delete_trigger", {
       flow: "editor",
       screen: "cityedit",
-      click_code: "editor.placeedit.list.item.remove",
+      click_code: "editor.cityedit.list.item.remove",
       city_id: cityToRemove?.cityId ?? cityId,
       current_city_count: current.length,
     });
@@ -254,7 +254,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     sendGAEvent("event", "cityedit_delete_confirm", {
       flow: "editor",
       screen: "cityedit",
-      click_code: "editor.placeedit.delete.modal.confirm",
+      click_code: "editor.cityedit.delete.modal.confirm",
       city_id: cityToDelete.cityId ?? confirmId,
       previous_city_count: current.length,
       current_city_count: current.length - 1,
@@ -322,7 +322,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     sendGAEvent("event", "cityedit_save_click", {
       flow: "editor",
       screen: "cityedit",
-      click_code: "editor.placeedit.header.save",
+      click_code: "editor.cityedit.header.save",
       initial_city_count: initialCityCount.current,
       current_city_count: current.length,
     });
@@ -416,7 +416,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     sendGAEvent("event", "cityedit_add_entry_click", {
       flow: "editor",
       screen: "cityedit",
-      click_code: "editor.placeedit.add.entry",
+      click_code: "editor.cityedit.add.entry",
       current_city_count: current.length,
     });
 

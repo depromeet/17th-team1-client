@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
 
 type MemoryTextareaProps = {
@@ -12,6 +14,7 @@ type MemoryTextareaProps = {
 const MAX_LENGTH = 200;
 const TOAST_DURATION = 1500;
 const TOAST_COOLDOWN = 1500;
+const TEXT_MILESTONES = [50, 100, 150, 200];
 
 export const MemoryTextarea = ({
   value,
@@ -47,8 +50,18 @@ export const MemoryTextarea = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
+    const prevLength = value?.length ?? 0;
     if (newValue.length <= MAX_LENGTH) {
       onChange?.(newValue);
+      for (const milestone of TEXT_MILESTONES) {
+        if (prevLength < milestone && newValue.length >= milestone) {
+          sendGAEvent("event", "record_text_progress", {
+            flow: "editor",
+            screen: "record_edit",
+            text_length: milestone,
+          });
+        }
+      }
     } else {
       showToast();
     }

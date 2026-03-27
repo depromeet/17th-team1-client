@@ -272,12 +272,15 @@ export const ImageCarousel = ({
         onClose={() => setIsLocationSelectModalOpen(false)}
         onConfirm={handleConfirmLocation}
         initialLocation={initialLocationSelection}
+        photoIndex={photoIndex}
+        hasExistingLocation={hasLocation}
       />
       {isCropModalOpen && (
         <ImageCropModal
           image={image.originalImageUrl || currentImage}
           onClose={() => setIsCropModalOpen(false)}
           onSave={handleSaveCroppedImage}
+          photoIndex={photoIndex}
         />
       )}
     </div>

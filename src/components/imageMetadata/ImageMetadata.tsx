@@ -77,10 +77,18 @@ export const ImageMetadataComponent = ({
         photo_count: metadataListRef.current.length,
         text_length: diaryTextRef.current.length,
       });
+      if (saveStartedRef.current && !saveCompletedRef.current) {
+        sendGAEvent("event", "record_save_exit", {
+          flow: "editor",
+          screen: "record_save",
+          photo_count: savePhotoCountRef.current,
+          text_length: saveTextLengthRef.current,
+        });
+      }
     };
   }, []);
 
-  const { handleSave } = useDiaryAction({
+  const { handleSave, saveStartedRef, saveCompletedRef, savePhotoCountRef, saveTextLengthRef } = useDiaryAction({
     cityId,
     diaryId,
     isEditMode,

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { Loader2 } from "lucide-react";
 
 import { SearchInput } from "@/components/common/Input";
@@ -23,6 +24,8 @@ type LocationSelectBottomSheetProps = {
   onClose: () => void;
   onConfirm?: (location: LocationSelection) => void;
   initialLocation?: LocationSelection | null;
+  photoIndex?: number;
+  hasExistingLocation?: boolean;
 };
 
 export const LocationSelectBottomSheet = ({
@@ -30,6 +33,8 @@ export const LocationSelectBottomSheet = ({
   onClose,
   onConfirm,
   initialLocation,
+  photoIndex = 0,
+  hasExistingLocation = false,
 }: LocationSelectBottomSheetProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
@@ -54,6 +59,7 @@ export const LocationSelectBottomSheet = ({
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
   const placesContainerRef = useRef<HTMLDivElement | null>(null);
   const wasOpenRef = useRef(false);
+  const searchAttemptCountRef = useRef(0);
 
   const isInputDisabled = useMemo(() => !isReady || isLoading || !!scriptError, [isReady, isLoading, scriptError]);
 
@@ -92,6 +98,13 @@ export const LocationSelectBottomSheet = ({
 
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
+      searchAttemptCountRef.current = 0;
+      sendGAEvent("event", "record_meta_location_view", {
+        flow: "editor",
+        screen: "record_edit_meta_location",
+        photo_index: photoIndex,
+        has_value: hasExistingLocation,
+      });
       if (initialLocation) {
         setSelectedLocation(initialLocation);
         setActivePlaceId(initialLocation.placeId ?? null);
@@ -101,7 +114,7 @@ export const LocationSelectBottomSheet = ({
       }
     }
     wasOpenRef.current = isOpen;
-  }, [initialLocation, isOpen, resetState]);
+  }, [initialLocation, isOpen, resetState, photoIndex, hasExistingLocation]);
 
   useEffect(() => {
     if (!isOpen || !isReady) return;
@@ -222,6 +235,14 @@ export const LocationSelectBottomSheet = ({
     setSearchQuery(event.target.value);
     setSelectedLocation(null);
     setActivePlaceId(null);
+    searchAttemptCountRef.current += 1;
+    sendGAEvent("event", "record_meta_location_search", {
+      flow: "editor",
+      screen: "record_edit_meta_location",
+      click_code: "editor.record.edit.meta.location.search.input.change",
+      photo_index: photoIndex,
+      search_attempt_count: searchAttemptCountRef.current,
+    });
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -233,6 +254,13 @@ export const LocationSelectBottomSheet = ({
 
   const handleConfirm = () => {
     if (!selectedLocation) return;
+    sendGAEvent("event", "record_meta_location_confirm", {
+      flow: "editor",
+      screen: "record_edit_meta_location",
+      click_code: "editor.record.edit.meta.location.cta.confirm",
+      photo_index: photoIndex,
+      has_value: true,
+    });
     onConfirm?.(selectedLocation);
     handleClose();
   };

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { IconExclamationCircleMonoIcon } from "@/assets/icons";
 import {
@@ -53,6 +55,10 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showCannotDeleteModal, setShowCannotDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const initialCityCount = useRef(cities.length);
+  const hasSavedRef = useRef(false);
+  const isChangedRef = useRef(false);
   const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
   const { mutateAsync: deleteMemberTravel } = useDeleteMemberTravelMutation();
 
@@ -130,6 +136,28 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     });
   }, [cities, removedIds]);
 
+  // isChangedRef 동기화
+  useEffect(() => {
+    isChangedRef.current = isChanged;
+  }, [isChanged]);
+
+  // cityedit_view / cityedit_exit
+  useEffect(() => {
+    sendGAEvent("event", "cityedit_view", {
+      flow: "editor",
+      screen: "cityedit",
+    });
+
+    return () => {
+      sendGAEvent("event", "cityedit_exit", {
+        flow: "editor",
+        screen: "cityedit",
+        has_changed: isChangedRef.current,
+        has_saved: hasSavedRef.current,
+      });
+    };
+  }, []);
+
   // 브라우저 뒤로가기 감지
   useEffect(() => {
     const handlePopState = () => {
@@ -172,6 +200,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       return;
     }
 
+    const cityToRemove = current.find(c => c.id === cityId);
+    sendGAEvent("event", "cityedit_delete_trigger", {
+      flow: "editor",
+      screen: "cityedit",
+      city_id: cityToRemove?.cityId ?? cityId,
+      current_city_count: current.length,
+    });
+
     if (isNew) {
       // 새로 추가한 도시 삭제 - current에서 제거하고 URL도 업데이트
       const updatedCurrent = current.filter(c => c.id !== cityId);
@@ -213,6 +249,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
 
     const cityToDelete = current.find(c => c.id === confirmId);
     if (!cityToDelete) return;
+
+    sendGAEvent("event", "cityedit_delete_confirm", {
+      flow: "editor",
+      screen: "cityedit",
+      city_id: cityToDelete.cityId ?? confirmId,
+      previous_city_count: current.length,
+      current_city_count: current.length - 1,
+    });
 
     // 삭제된 도시 정보 저장 (저장 시 서버에 전송하기 위해)
     setDeletedCitiesInfo(prev => {
@@ -272,6 +316,14 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       router.push("/login");
       return;
     }
+
+    sendGAEvent("event", "cityedit_save_click", {
+      flow: "editor",
+      screen: "cityedit",
+      initial_city_count: initialCityCount.current,
+      current_city_count: current.length,
+    });
+    hasSavedRef.current = true;
 
     setIsSaving(true);
     const startTime = Date.now();
@@ -358,6 +410,12 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   };
 
   const handleAddClick = () => {
+    sendGAEvent("event", "cityedit_add_entry_click", {
+      flow: "editor",
+      screen: "cityedit",
+      current_city_count: current.length,
+    });
+
     // 현재 추가된 도시들(isNew: true)과 삭제된 도시 ID를 쿼리로 전달
     const newCities = current.filter(c => c.isNew);
     const removedParam =

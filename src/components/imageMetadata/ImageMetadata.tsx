@@ -64,6 +64,20 @@ export const ImageMetadataComponent = ({
     diaryTextRef.current = diaryText;
   }, [diaryText]);
 
+  const { handleSave, saveStartedRef, saveCompletedRef, savePhotoCountRef, saveTextLengthRef } = useDiaryAction({
+    cityId,
+    diaryId,
+    isEditMode,
+    uuid,
+    scrollIndex,
+    metadataList,
+    setMetadataList,
+    diaryText,
+    isProcessing,
+    setIsProcessing,
+    pendingDeletePhotoIds,
+  });
+
   useEffect(() => {
     sendGAEvent("event", "editor_record_edit_view", {
       flow: "editor",
@@ -86,21 +100,8 @@ export const ImageMetadataComponent = ({
         });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const { handleSave, saveStartedRef, saveCompletedRef, savePhotoCountRef, saveTextLengthRef } = useDiaryAction({
-    cityId,
-    diaryId,
-    isEditMode,
-    uuid,
-    scrollIndex,
-    metadataList,
-    setMetadataList,
-    diaryText,
-    isProcessing,
-    setIsProcessing,
-    pendingDeletePhotoIds,
-  });
 
   const handleBack = () => {
     router.back();

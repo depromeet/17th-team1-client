@@ -136,6 +136,24 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
     });
   }, [cities, removedIds]);
 
+  const baseIds = useMemo(() => new Set(base.map(c => c.id)), [base]);
+  const currentIds = useMemo(() => new Set(current.map(c => c.id)), [current]);
+  const isChanged = useMemo(() => {
+    // 삭제된 도시가 있으면 변경된 것
+    if (removedIds.size > 0) return true;
+
+    // 추가된 도시가 있으면 변경된 것
+    if (current.some(c => c.isNew)) return true;
+
+    // 개수나 ID가 다르면 변경된 것
+    if (current.length !== base.length) return true;
+    if (baseIds.size !== currentIds.size) return true;
+    for (const id of baseIds) {
+      if (!currentIds.has(id)) return true;
+    }
+    return false;
+  }, [base.length, baseIds, current, currentIds, removedIds.size]);
+
   // isChangedRef 동기화
   useEffect(() => {
     isChangedRef.current = isChanged;
@@ -174,24 +192,6 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
   const handleBack = () => {
     router.push("/record");
   };
-
-  const baseIds = useMemo(() => new Set(base.map(c => c.id)), [base]);
-  const currentIds = useMemo(() => new Set(current.map(c => c.id)), [current]);
-  const isChanged = useMemo(() => {
-    // 삭제된 도시가 있으면 변경된 것
-    if (removedIds.size > 0) return true;
-
-    // 추가된 도시가 있으면 변경된 것
-    if (current.some(c => c.isNew)) return true;
-
-    // 개수나 ID가 다르면 변경된 것
-    if (current.length !== base.length) return true;
-    if (baseIds.size !== currentIds.size) return true;
-    for (const id of baseIds) {
-      if (!currentIds.has(id)) return true;
-    }
-    return false;
-  }, [base.length, baseIds, current, currentIds, removedIds.size]);
 
   const handleRemove = (cityId: string, isNew?: boolean) => {
     // 마지막 1개 남은 도시를 삭제하려고 하는 경우

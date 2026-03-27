@@ -1,5 +1,7 @@
 import { useRouter } from "next/navigation";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { ICEditIcon } from "@/assets/icons";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import type { RecordResponse } from "@/types/record";
@@ -31,6 +33,11 @@ export function CityList({ filteredRegions }: CityListProps) {
                 <button
                   type="button"
                   onClick={() => {
+                    sendGAEvent("event", "record_edit_entry_click", {
+                      flow: "editor",
+                      screen: "record",
+                      click_code: "editor.record.city.item.record_entry",
+                    });
                     const cityParam = encodeURIComponent(city.name);
                     const countryParam = encodeURIComponent(region.regionName);
                     router.push(`/image-metadata?cityId=${city.cityId}&country=${countryParam}&city=${cityParam}`);

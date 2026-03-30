@@ -49,7 +49,7 @@ export default async function RecordDetailPage({
     serverError = "UUID가 필요합니다";
   } else {
     try {
-      const diaries = await getDiariesByUuid(queryUuid);
+      const diaries = await getDiariesByUuid(queryUuid, token);
 
       if (diaries.length === 0) {
         serverError = "여행 기록이 없습니다";

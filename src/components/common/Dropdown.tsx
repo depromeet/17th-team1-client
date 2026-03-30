@@ -34,6 +34,7 @@ export const VARIANT_STYLES = {
 type DropdownProps = {
   value?: string;
   onValueChange?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
   options: Array<{
     label: string;
     value: string;
@@ -50,6 +51,7 @@ type DropdownProps = {
 export const Dropdown = ({
   value,
   onValueChange,
+  onOpenChange,
   options,
   placeholder = "선택해주세요",
   className,
@@ -59,6 +61,11 @@ export const Dropdown = ({
   asMenu = false,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const handleItemClick = (option: { value: string; onClick?: () => void }) => {
     if (asMenu) {
@@ -73,7 +80,7 @@ export const Dropdown = ({
 
   if (asMenu) {
     return (
-      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={handleOpenChange}>
         <DropdownMenuPrimitive.Trigger asChild className={className}>
           {trigger}
         </DropdownMenuPrimitive.Trigger>
@@ -127,7 +134,7 @@ export const Dropdown = ({
   }
 
   return (
-    <SelectPrimitive.Root value={value} onValueChange={onValueChange} open={isOpen} onOpenChange={setIsOpen}>
+    <SelectPrimitive.Root value={value} onValueChange={onValueChange} open={isOpen} onOpenChange={handleOpenChange}>
       <SelectPrimitive.Trigger
         className={cn(
           "flex items-center gap-1 text-white text-base font-medium hover:opacity-80 transition-opacity cursor-pointer",

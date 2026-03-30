@@ -16,9 +16,13 @@ type ShareButtonProps = {
    * 첫 지구본 여부 (true일 경우 큰 버튼 스타일)
    */
   isFirstGlobe?: boolean;
+  /**
+   * home_share_click 이벤트의 screen 파라미터 (globe_main | list_main)
+   */
+  screen?: string;
 };
 
-export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => {
+export const ShareButton = ({ url, isFirstGlobe = false, screen }: ShareButtonProps) => {
   // React Hooks
   const [isShared, setIsShared] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +66,13 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
         click_code: "onboarding.globeresult.cta.share",
       });
 
+    if (screen)
+      sendGAEvent("event", "home_share_click", {
+        flow: "home",
+        screen,
+        click_code: "home.bottom.action.share",
+      });
+
     // 모바일 기기 감지
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       typeof navigator !== "undefined" ? navigator.userAgent : ""
@@ -94,7 +105,7 @@ export const ShareButton = ({ url, isFirstGlobe = false }: ShareButtonProps) => 
     } finally {
       setIsLoading(false);
     }
-  }, [isFirstGlobe, isSupported, shareUrl, copyToClipboard]);
+  }, [isFirstGlobe, screen, isSupported, shareUrl, copyToClipboard]);
 
   // Custom Hooks / Lifecycle Hooks
   useEffect(() => {

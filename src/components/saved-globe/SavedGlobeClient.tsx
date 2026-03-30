@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import BookmarkIcon from "@/assets/icons/bookmark.svg";
 import BookmarkFilledIcon from "@/assets/icons/bookmark-filled.svg";
@@ -83,6 +85,9 @@ const GlobeList = ({
   sortedGlobes,
   sortOption,
   onSortChange,
+  onSortDropdownOpen,
+  onSortSelect,
+  onItemSelect,
   onGlobeClick,
   onSaveToggle,
   isLoading,
@@ -90,6 +95,9 @@ const GlobeList = ({
   sortedGlobes: BookmarkUser[];
   sortOption: SortOption;
   onSortChange: (value: SortOption) => void;
+  onSortDropdownOpen: () => void;
+  onSortSelect: (value: SortOption) => void;
+  onItemSelect: (memberId: number, position: number, bookmarked: boolean) => void;
   onGlobeClick: (uuid: string) => void;
   onSaveToggle: (memberId: number) => void;
   isLoading: boolean;
@@ -100,7 +108,14 @@ const GlobeList = ({
       <div className="flex items-center justify-end px-4 pt-5 pb-5 shrink-0">
         <Dropdown
           value={sortOption}
-          onValueChange={value => onSortChange(value as SortOption)}
+          onValueChange={value => {
+            const sortValue = value as SortOption;
+            onSortSelect(sortValue);
+            onSortChange(sortValue);
+          }}
+          onOpenChange={open => {
+            if (open) onSortDropdownOpen();
+          }}
           options={[
             { label: "최신순", value: "latest" },
             { label: "가나다순", value: "alphabetical" },
@@ -110,17 +125,21 @@ const GlobeList = ({
 
       {/* Globe List */}
       <div className="px-4 flex flex-col gap-2 pb-4">
-        {sortedGlobes.map(({ memberId, uuid, nickname, profileImageUrl, bookmarked }) => (
+        {sortedGlobes.map(({ memberId, uuid, nickname, profileImageUrl, bookmarked }, index) => (
           // biome-ignore lint: Container with multiple buttons for different actions
           <div
             key={memberId}
             role="button"
             tabIndex={0}
             className="w-full px-5 py-3 flex items-center justify-between rounded-2xl bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onGlobeClick(uuid)}
+            onClick={() => {
+              onItemSelect(memberId, index, bookmarked);
+              onGlobeClick(uuid);
+            }}
             onKeyDown={e => {
               if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
                 e.preventDefault();
+                onItemSelect(memberId, index, bookmarked);
                 onGlobeClick(uuid);
               }
             }}
@@ -168,7 +187,10 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
   const [error, setError] = useState<string | null>(initialError);
-  const { uuid } = getAuthInfo();
+  useEffect(() => {
+    sendGAEvent("event", "home_friends_view", { flow: "home", screen: "friends" });
+  }, []);
+
   const { mutateAsync: addBookmark } = useAddBookmarkMutation();
   const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
@@ -229,24 +251,35 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
 
   const hasBookmarks = sortedBookmarks.length > 0;
 
+  const headerSection = (
+    <div className="max-w-lg mx-auto w-full">
+      <Header
+        variant="navy"
+        leftIcon="back"
+        onLeftClick={() => {
+          const { uuid } = getAuthInfo();
+          sendGAEvent("event", "home_friends_back_click", {
+            flow: "home",
+            screen: "friends",
+            click_code: "home.friends.header.back",
+          });
+          router.push(`/globe/${uuid}`);
+        }}
+        title="저장된 지구본"
+        style={{
+          backgroundColor: "transparent",
+          position: "relative",
+          zIndex: 20,
+        }}
+      />
+    </div>
+  );
+
   if (error) {
     return (
       <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-        <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-          <div className="max-w-[512px] mx-auto w-full">
-            <Header
-              variant="navy"
-              leftIcon="back"
-              onLeftClick={() => router.push(`/globe/${uuid}`)}
-              title="저장된 지구본"
-              style={{
-                backgroundColor: "transparent",
-                position: "relative",
-                zIndex: 20,
-              }}
-            />
-          </div>
-
+        <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+          {headerSection}
           <ErrorState error={error} onRetry={loadBookmarks} />
         </div>
       </main>
@@ -256,21 +289,8 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
   if (!hasBookmarks) {
     return (
       <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-        <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-          <div className="max-w-[512px] mx-auto w-full">
-            <Header
-              variant="navy"
-              leftIcon="back"
-              onLeftClick={() => router.push(`/globe/${uuid}`)}
-              title="저장된 지구본"
-              style={{
-                backgroundColor: "transparent",
-                position: "relative",
-                zIndex: 20,
-              }}
-            />
-          </div>
-
+        <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+          {headerSection}
           <EmptyState />
         </div>
       </main>
@@ -279,25 +299,38 @@ export const SavedGlobeClient = ({ initialBookmarks, initialError = null }: Save
 
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-        <div className="max-w-[512px] mx-auto w-full">
-          <Header
-            variant="navy"
-            leftIcon="back"
-            onLeftClick={() => router.push(`/globe/${uuid}`)}
-            title="저장된 지구본"
-            style={{
-              backgroundColor: "transparent",
-              position: "relative",
-              zIndex: 20,
-            }}
-          />
-        </div>
+      <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+        {headerSection}
 
         <GlobeList
           sortedGlobes={sortedBookmarks}
           sortOption={sortOption}
           onSortChange={setSortOption}
+          onSortDropdownOpen={() =>
+            sendGAEvent("event", "home_friends_sort_click", {
+              flow: "home",
+              screen: "friends",
+              click_code: "home.friends.sort",
+            })
+          }
+          onSortSelect={value =>
+            sendGAEvent("event", "home_friends_sort_select", {
+              flow: "home",
+              screen: "friends",
+              sort: value === "latest" ? "latest" : "alpha",
+              click_code: value === "latest" ? "home.friends.sort.latest" : "home.friends.sort.alpha",
+            })
+          }
+          onItemSelect={(memberId, position, hasBookmark) =>
+            sendGAEvent("event", "home_friends_item_select", {
+              flow: "home",
+              screen: "friends",
+              target_user_id: memberId,
+              position,
+              has_bookmark: hasBookmark,
+              click_code: "home.friends.item.select",
+            })
+          }
           onGlobeClick={handleGlobeCardClick}
           onSaveToggle={handleSaveToggle}
           isLoading={isLoading}

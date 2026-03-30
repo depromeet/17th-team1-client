@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { Header } from "@/components/common/Header";
 import { WithdrawalDialog } from "@/components/profile/WithdrawalDialog";
@@ -12,6 +14,10 @@ export default function WithdrawalPage() {
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const withdrawMemberMutation = useWithdrawMemberMutation();
+
+  useEffect(() => {
+    sendGAEvent("event", "menu_profile_withdraw_view", { flow: "menu", screen: "profile_withdraw" });
+  }, []);
 
   const handleWithdrawal = async () => {
     try {
@@ -31,8 +37,8 @@ export default function WithdrawalPage() {
 
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-        <div className="max-w-[512px] mx-auto w-full">
+      <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+        <div className="max-w-lg mx-auto w-full">
           <Header variant="navy" leftIcon="back" onLeftClick={() => router.back()} title="회원탈퇴" />
         </div>
 

@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { BackButton } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
-import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
@@ -48,6 +49,11 @@ const GlobePage = () => {
   // Globe UI 표시 상태 (Globe 이벤트로부터 동기화)
   const [isZoomed, setIsZoomed] = useState(false);
   const [hasClusterSelected, setHasClusterSelected] = useState(false);
+
+  useEffect(() => {
+    if (!isDataLoaded || !urlUuid) return;
+    sendGAEvent("event", "home_view", { flow: "home", screen: isMyGlobe ? "globe_main" : "globe_other" });
+  }, [isDataLoaded, isMyGlobe, urlUuid]);
 
   // 이전 경로 확인 (sessionStorage 사용)
   useEffect(() => {
@@ -153,14 +159,33 @@ const GlobePage = () => {
           variant="navy"
           {...(isMyGlobe && {
             leftIcon: "menu",
-            onLeftClick: () => router.push("/profile"),
+            onLeftClick: () => {
+              sendGAEvent("event", "home_menu_click", {
+                flow: "home",
+                screen: viewMode === "globe" ? "globe_main" : "list_main",
+                click_code: "home.header.menu",
+              });
+              router.push("/profile");
+            },
             rightIcon: "people",
-            onRightClick: () => router.push("/saved-globe"),
+            onRightClick: () => {
+              sendGAEvent("event", "home_friends_click", {
+                flow: "home",
+                screen: viewMode === "globe" ? "globe_main" : "list_main",
+                click_code: "home.header.friends",
+              });
+              router.push("/saved-globe");
+            },
           })}
           {...(!isMyGlobe &&
             fromSavedGlobe && {
               leftIcon: "back",
               onLeftClick: () => {
+                sendGAEvent("event", "home_back_click", {
+                  flow: "home",
+                  screen: viewMode === "globe" ? "globe_other" : "list_other",
+                  click_code: "home.other.header.back",
+                });
                 sessionStorage.removeItem("fromSavedGlobe");
                 router.push(`/saved-globe`);
               },
@@ -194,6 +219,12 @@ const GlobePage = () => {
                 if (!zoomed) setHasClusterSelected(false);
               }}
               onClusterSelect={() => setHasClusterSelected(true)}
+              onInteractionStart={() =>
+                sendGAEvent("event", "home_globe_interaction_start", {
+                  flow: "home",
+                  screen: isMyGlobe ? "globe_main" : "globe_other",
+                })
+              }
               countryThumbnails={countryThumbnails}
               isMyGlobe={isMyGlobe}
               uuid={urlUuid}
@@ -218,6 +249,11 @@ const GlobePage = () => {
             isZoomed={hasBackButton}
             globeRef={globeRef}
             onReset={() => {
+              sendGAEvent("event", "home_globe_view_reset", {
+                flow: "home",
+                screen: isMyGlobe ? "globe_main" : "globe_other",
+                click_code: isMyGlobe ? "home.globe.view.reset" : "home.other.globe.view.reset",
+              });
               setIsZoomed(false);
               setHasClusterSelected(false);
             }}
@@ -240,7 +276,7 @@ const GlobePage = () => {
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
           <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
             <div className="max-w-lg w-full h-full mt-4">
-              <ListView travelPatterns={travelPatterns} uuid={urlUuid} />
+              <ListView travelPatterns={travelPatterns} isMyGlobe={isMyGlobe} />
             </div>
           </div>
 

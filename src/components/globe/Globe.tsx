@@ -5,6 +5,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import type { GlobeInstance } from "globe.gl";
 
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
@@ -192,6 +193,22 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           const shouldDisableClick = !isMyGlobe && !cityHasRecords;
 
           if (!shouldDisableClick) {
+            el.addEventListener("click", () => {
+              if (cityHasRecords) {
+                sendGAEvent("event", "home_globe_city_detail", {
+                  flow: "home",
+                  screen: isMyGlobe ? "globe_main" : "globe_other",
+                  click_code: isMyGlobe ? "home.globe.city.detail" : "home.other.globe.city.detail",
+                });
+              } else {
+                sendGAEvent("event", "home_record_add", {
+                  flow: "home",
+                  screen: "globe_main",
+                  click_code: "home.globe.city.add",
+                  entry: "globe_city",
+                });
+              }
+            });
             const clickHandler = createCityClickHandler(
               clusterData.name,
               cityId,
@@ -210,6 +227,12 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           // clusteredData.find()는 배열 순서 변경 시 잘못된 클러스터를 반환할 수 있으므로
           // 클로저에 캡처된 clusterData를 직접 사용
           const clickHandler = createClusterDOMClickHandler(clusterData.id, () => {
+            sendGAEvent("event", "home_globe_continent_select", {
+              flow: "home",
+              screen: isMyGlobe ? "globe_main" : "globe_other",
+              click_code: isMyGlobe ? "home.globe.continent.select" : "home.other.globe.continent.select",
+            });
+
             const cluster = clusterData;
             if (cluster && handleClusterSelect && globeRef.current) {
               const clusterItems = handleClusterSelect(cluster);
@@ -277,6 +300,12 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           );
 
           const clickHandler = createClusterDOMClickHandler(clusterData.id, (clusterId: string) => {
+            sendGAEvent("event", "home_globe_country_select", {
+              flow: "home",
+              screen: isMyGlobe ? "globe_main" : "globe_other",
+              click_code: isMyGlobe ? "home.globe.country.select" : "home.other.globe.country.select",
+            });
+
             const cluster = (visibleItems as ClusterData[]).find(({ id }) => id === clusterId);
             if (cluster && handleClusterSelect) {
               const clusterItems = handleClusterSelect(cluster);

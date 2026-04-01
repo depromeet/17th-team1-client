@@ -78,7 +78,7 @@ export const useGoogleMapsScript = ({
     const script = document.createElement("script");
     script.id = SCRIPT_ID;
     const librariesParam = libraries.length > 0 ? `&libraries=${libraries.join(",")}` : "";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}${librariesParam}&language=${language}&region=${region}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}${librariesParam}&language=${language}&region=${region}&loading=async`;
     script.async = true;
     script.defer = true;
 

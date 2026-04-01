@@ -76,6 +76,7 @@ export const ImageMetadataComponent = ({
     isProcessing,
     setIsProcessing,
     pendingDeletePhotoIds,
+    hasSavedRef,
   });
 
   useEffect(() => {
@@ -127,7 +128,6 @@ export const ImageMetadataComponent = ({
       text_length: diaryText.length,
       has_metadata: hasMetadata,
     });
-    hasSavedRef.current = true;
     handleSave();
   };
 

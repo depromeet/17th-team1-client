@@ -326,7 +326,6 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
       initial_city_count: initialCityCount.current,
       current_city_count: current.length,
     });
-    hasSavedRef.current = true;
 
     setIsSaving(true);
     const startTime = Date.now();
@@ -382,6 +381,7 @@ export function EditClient({ cities, deletedCities = [] }: EditClientProps) {
         promises.push(addPromise);
       }
       await Promise.all(promises);
+      hasSavedRef.current = true;
 
       console.log(`[Save] 모든 요청 성공`);
 

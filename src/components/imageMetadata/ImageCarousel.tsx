@@ -155,7 +155,7 @@ export const ImageCarousel = ({
     sendGAEvent("event", "record_meta_location_change", {
       flow: "editor",
       screen: "record_edit",
-      click_code: "editor.record.edit.meta.location",
+      click_code: "editor.record.edit.meta.location.remove",
       location_before: customLocation || null,
       location_after: null,
       change_type: "remove",

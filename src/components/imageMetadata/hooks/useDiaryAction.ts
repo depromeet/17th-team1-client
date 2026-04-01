@@ -11,6 +11,7 @@ import {
   useDeleteDiaryPhotoMutation,
   useUpdateDiaryMutation,
 } from "@/hooks/mutation/useDiaryMutations";
+import { ApiError } from "@/lib/apiClient";
 import { getDiaryDetail } from "@/services/diaryService";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
@@ -30,6 +31,7 @@ interface UseDiaryActionProps {
   isProcessing: boolean;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
   pendingDeletePhotoIds: number[];
+  hasSavedRef?: React.MutableRefObject<boolean>;
 }
 
 const buildPhotoPayload = async (metadata: UploadMetadata, fallbackMonth: string, defaultDimension: number = 0) => {
@@ -90,6 +92,7 @@ export const useDiaryAction = ({
   isProcessing,
   setIsProcessing,
   pendingDeletePhotoIds,
+  hasSavedRef,
 }: UseDiaryActionProps) => {
   const router = useRouter();
   const { mutateAsync: deleteDiaryPhoto } = useDeleteDiaryPhotoMutation();
@@ -258,12 +261,12 @@ export const useDiaryAction = ({
         duration_ms: Date.now() - saveStartTime,
       });
       saveCompletedRef.current = true;
+      if (hasSavedRef) hasSavedRef.current = true;
 
       router.push(nextPath);
     } catch (error) {
       saveCompletedRef.current = true;
-      const httpError = error as Error & { status?: number; statusCode?: number; code?: string };
-      const errorCode = httpError.status?.toString() ?? httpError.statusCode?.toString() ?? httpError.code ?? "UNKNOWN";
+      const errorCode = error instanceof ApiError ? String(error.status) : "UNKNOWN";
       sendGAEvent("event", "record_save_fail", {
         flow: "editor",
         screen: "record_save",

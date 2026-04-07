@@ -12,6 +12,7 @@ const PUBLIC_PATHS: readonly string[] = [
   "/robots.txt",
   "/sitemap.xml",
   "/public",
+  "/icons",
   "/test",
 ];
 

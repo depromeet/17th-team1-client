@@ -12,7 +12,6 @@ export { default as EditIcon } from "./edit.svg";
 export { default as EmojiHintIcon } from "./emoji-hint.svg";
 export { default as GalleryIcon } from "./gallery.svg";
 export { default as GlobberHeaderIcon } from "./globber-header.svg";
-export { default as GlobberLoginIcon } from "./globber-login.svg";
 export { default as ICEditIcon } from "./ic_edit.svg";
 export { default as ICPlusIcon } from "./ic_plus.svg";
 export { default as SearchbarActiveIcon } from "./ic_searchbar_active.svg";
@@ -22,7 +21,6 @@ export { default as IconExclamationCircleMonoIcon } from "./icon-exclamation-cir
 export { default as KakaoIcon } from "./kakao.svg";
 export { default as KakaoLogoIcon } from "./kakaoLogo.svg";
 export { default as LoadingIcon } from "./loading.svg";
-export { default as LoginLogoIcon } from "./login-logo.svg";
 export { default as MapPinIcon } from "./map-pin.svg";
 export { default as MenuIcon } from "./menu.svg";
 export { default as PeopleIcon } from "./people.svg";

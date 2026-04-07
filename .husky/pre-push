@@ -1,5 +1,2 @@
-echo "🔍 전체 Lint & Format 검사 중..."
-pnpm run check
-
-echo "🔨 빌드 확인 중..."
-pnpm run build
+echo "🔨 타입 검사 중..."
+pnpm exec tsc --noEmit

@@ -61,6 +61,26 @@ export const GlobeFooter = ({
   const handleToggleViewMode = useCallback(() => {
     const nextMode = visualViewMode === "list" ? "globe" : "list";
 
+    sendGAEvent("event", "home_view_switch", {
+      flow: "home",
+      screen: isMyGlobe
+        ? visualViewMode === "globe"
+          ? "globe_main"
+          : "list_main"
+        : visualViewMode === "globe"
+          ? "globe_other"
+          : "list_other",
+      click_code: isMyGlobe
+        ? nextMode === "globe"
+          ? "home.bottom.view.globe"
+          : "home.bottom.view.list"
+        : nextMode === "globe"
+          ? "home.other.bottom.view.globe"
+          : "home.other.bottom.view.list",
+      from: visualViewMode,
+      to: nextMode,
+    });
+
     setVisualViewMode(nextMode);
 
     if (!onViewModeChange) return;
@@ -70,9 +90,15 @@ export const GlobeFooter = ({
       onViewModeChange(nextMode);
       toggleTimeoutRef.current = null;
     }, VIEW_MODE_TOGGLE_DELAY_MS);
-  }, [onViewModeChange, visualViewMode]);
+  }, [onViewModeChange, visualViewMode, isMyGlobe]);
 
-  const { mutateAsync: addBookmark } = useAddBookmarkMutation();
+  const { mutateAsync: addBookmark } = useAddBookmarkMutation(() =>
+    sendGAEvent("event", "auth_login_gate_view", {
+      flow: "home",
+      screen: viewMode === "globe" ? "globe_other" : "list_other",
+      source_event: "home_globe_bookmark_click",
+    })
+  );
   const { mutateAsync: removeBookmark } = useRemoveBookmarkMutation();
 
   const renderViewToggle = () => {
@@ -140,6 +166,12 @@ export const GlobeFooter = ({
   const handleBookmarkClick = async () => {
     if (!memberId) return;
 
+    sendGAEvent("event", "home_bookmark_click", {
+      flow: "home",
+      screen: viewMode === "globe" ? "globe_other" : "list_other",
+      click_code: "home.other.bottom.action.bookmark",
+    });
+
     const previousState = isBookmarked;
     const willBeBookmarked = !isBookmarked;
     setIsBookmarked(willBeBookmarked);
@@ -150,9 +182,19 @@ export const GlobeFooter = ({
     try {
       if (isBookmarked) {
         await removeBookmark({ targetMemberId: memberId });
+        sendGAEvent("event", "home_bookmark_remove", {
+          flow: "home",
+          screen: viewMode === "globe" ? "globe_other" : "list_other",
+          click_code: "home.other.bottom.action.bookmark",
+        });
         setToastMessage("저장이 해제되었습니다.");
       } else {
         await addBookmark({ targetMemberId: memberId });
+        sendGAEvent("event", "home_bookmark_add", {
+          flow: "home",
+          screen: viewMode === "globe" ? "globe_other" : "list_other",
+          click_code: "home.other.bottom.action.bookmark",
+        });
         setToastMessage("저장되었습니다.");
       }
       setToastOpen(true);
@@ -231,7 +273,7 @@ export const GlobeFooter = ({
               // 내 지구본: 공유 버튼, 토글, 플러스 버튼 (중앙 정렬)
               <div className="flex items-center justify-center gap-11">
                 {/* 공유 버튼 */}
-                <ShareButton />
+                <ShareButton screen={viewMode === "globe" ? "globe_main" : "list_main"} />
 
                 {/* 리스트 뷰/글로브 뷰 토글 */}
                 {renderViewToggle()}
@@ -245,7 +287,15 @@ export const GlobeFooter = ({
                       "radial-gradient(95.88% 89.71% at 17.16% 14.06%, #00D9FF 0%, #60E7FF 56.15%, #C6F6FF 100%)",
                   }}
                   aria-label="새 항목 추가"
-                  onClick={() => router.push("/record")}
+                  onClick={() => {
+                    sendGAEvent("event", "home_record_add", {
+                      flow: "home",
+                      screen: viewMode === "globe" ? "globe_main" : "list_main",
+                      click_code: "home.bottom.action.add",
+                      entry: "bottom_navigation",
+                    });
+                    router.push("/record");
+                  }}
                 >
                   <PlusIcon className="w-8 h-8 text-(--color-surface-primary)" />
                 </button>

@@ -69,7 +69,7 @@ export const getBookmarks = async (token?: string, useToken = true): Promise<Boo
  * @example
  * await addBookmark(123);
  */
-export const addBookmark = async (targetMemberId: number, useToken = true): Promise<void> => {
+export const addBookmark = async (targetMemberId: number, useToken = true, onLoginGate?: () => void): Promise<void> => {
   let authToken = "";
 
   if (useToken) {
@@ -79,7 +79,7 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
     // 토큰이 없으면 바로 토큰 없이 재호출
     if (!authToken) {
       clearAllCookies();
-      await addBookmark(targetMemberId, false);
+      await addBookmark(targetMemberId, false, onLoginGate);
       return;
     }
   }
@@ -90,7 +90,11 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
       const { headers } = await apiPostWithHeaders(`/api/v1/bookmarks`, { targetMemberId });
       const redirectUrl = headers.get("X-Redirect-URL");
       if (redirectUrl) {
-        window.location.href = redirectUrl;
+        try {
+          onLoginGate?.();
+        } finally {
+          window.location.href = redirectUrl;
+        }
       }
 
       throw Error; // '저장되었습니다' toast 메시지를 표시하지 않기위해 임의로 에러 발생시킴
@@ -102,7 +106,7 @@ export const addBookmark = async (targetMemberId: number, useToken = true): Prom
     // useToken이 false인 경우 (이미 재호출된 상태)에는 재호출하지 않음
     if (useToken && error instanceof ApiError && error.status === 401) {
       clearAllCookies();
-      await addBookmark(targetMemberId, false);
+      await addBookmark(targetMemberId, false, onLoginGate);
       return;
     }
     throw new Error("북마크를 추가하는데 실패했습니다. 잠시 후 다시 시도해주세요.");

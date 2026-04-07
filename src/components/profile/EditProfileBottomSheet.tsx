@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import Image from "next/image";
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { sendGAEvent } from "@next/third-parties/google";
 import heic2any from "heic2any";
 import { X } from "lucide-react";
 
@@ -150,6 +151,11 @@ export const EditProfileBottomSheet = ({
 
   const onSubmit = useCallback(
     async (data: EditProfileFormData) => {
+      sendGAEvent("event", "menu_profile_edit_save_click", {
+        flow: "menu",
+        screen: "profile_edit",
+        click_code: "menu.profile.edit.header.save",
+      });
       try {
         setIsLoading(true);
         await onSave(data.nickname, data.imageFile);
@@ -169,7 +175,14 @@ export const EditProfileBottomSheet = ({
       <BottomSheetContent className="h-[calc(100dvh-62px)] max-w-lg">
         <BottomSheetHeader className="w-full h-11 relative">
           <BottomSheetCloseButton
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              sendGAEvent("event", "menu_profile_edit_close_click", {
+                flow: "menu",
+                screen: "profile_edit",
+                click_code: "menu.profile.edit.header.close",
+              });
+              onOpenChange(false);
+            }}
             aria-label="닫기"
             className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6"
           >
@@ -208,6 +221,15 @@ export const EditProfileBottomSheet = ({
                   ? "text-text-thirdly cursor-not-allowed"
                   : "text-text-secondary cursor-pointer hover:text-text-primary"
               )}
+              onClick={() => {
+                if (isLoading) return;
+
+                sendGAEvent("event", "menu_profile_edit_photo_change_click", {
+                  flow: "menu",
+                  screen: "profile_edit",
+                  click_code: "menu.profile.edit.photo.change",
+                });
+              }}
             >
               {isLoading ? "저장 중..." : "이미지 변경"}
               <input

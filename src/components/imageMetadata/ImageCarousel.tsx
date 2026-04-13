@@ -153,20 +153,22 @@ export const ImageCarousel = ({
   return (
     <div className="relative select-none w-[251px] mx-auto">
       <div className="overflow-hidden rounded-xl border border-white/20" style={{ aspectRatio: "9 / 16" }}>
-        <button
-          type="button"
-          className="w-full h-full bg-black relative cursor-pointer overflow-hidden"
-          onClick={() => setIsCropModalOpen(true)}
-          aria-label="이미지 편집"
-          disabled={isCropUploading}
-        >
-          <Image src={currentImage} alt={shown.fileName} fill sizes="251px" className="object-cover" unoptimized />
+        <div className="w-full h-full bg-black relative overflow-hidden" aria-label="이미지 미리보기">
+          <Image
+            src={currentImage}
+            alt={shown.fileName}
+            fill
+            sizes="251px"
+            className="object-cover"
+            unoptimized
+            draggable={false}
+          />
           {isCropUploading && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <div className="text-white text-sm">업로드 중...</div>
             </div>
           )}
-        </button>
+        </div>
       </div>
       <div className="absolute top-3 left-3">
         <TagSelector selectedTag={selectedTag} onSelect={handleTagSelect} onRemove={handleTagRemove} />

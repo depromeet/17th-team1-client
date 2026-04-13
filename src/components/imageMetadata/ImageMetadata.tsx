@@ -47,6 +47,7 @@ export const ImageMetadataComponent = ({
     handleTagChange,
     handleDateChange,
     handleLocationChange,
+    handleReorder,
   } = useImageMetadata({ diaryId, isEditMode });
 
   const { handleSave } = useDiaryAction({
@@ -99,6 +100,7 @@ export const ImageMetadataComponent = ({
         handleTagChange={handleTagChange}
         handleDateChange={handleDateChange}
         handleLocationChange={handleLocationChange}
+        handleReorder={handleReorder}
       />
 
       <input

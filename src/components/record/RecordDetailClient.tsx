@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect,useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { HeadlessToastProvider } from "@/components/common/Toast";
@@ -45,7 +45,71 @@ const RecordDetailClient = ({
   initialScrollIndex,
 }: RecordDetailClientProps) => {
   const router = useRouter();
-  const [countryRecords] = useState<RecordData[]>(initialRecords);
+  const [countryRecords, setCountryRecords] = useState<RecordData[]>(initialRecords);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let hasChanges = false;
+    const reorderedRecords = initialRecords.map(record => {
+      const savedOrder = sessionStorage.getItem(`diary-${record.id}-photo-order`);
+      if (savedOrder) {
+        try {
+          const orderMapping = JSON.parse(savedOrder) as Record<string, number>;
+          const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
+
+          const newImages = [...record.images].sort((a, b) => {
+            const codeA = a.replace(baseUrl, "");
+            const codeB = b.replace(baseUrl, "");
+            const indexA = orderMapping[codeA] ?? Number.MAX_SAFE_INTEGER;
+            const indexB = orderMapping[codeB] ?? Number.MAX_SAFE_INTEGER;
+            if (indexA !== Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER) {
+              return indexA - indexB;
+            }
+            // fallback keeping existing relative order
+            const origA = record.images.indexOf(a);
+            const origB = record.images.indexOf(b);
+            const fallbackA = indexA === Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER ? 1 : 0;
+            const fallbackB = indexB === Number.MAX_SAFE_INTEGER && indexA !== Number.MAX_SAFE_INTEGER ? -1 : 0;
+            if (fallbackA !== 0 || fallbackB !== 0) return fallbackA || fallbackB;
+            return origA - origB;
+          });
+
+          const newMetadata = record.imageMetadata
+            ? [...record.imageMetadata].sort((a, b) => {
+                const codeA = a.url.replace(baseUrl, "");
+                const codeB = b.url.replace(baseUrl, "");
+                const indexA = orderMapping[codeA] ?? Number.MAX_SAFE_INTEGER;
+                const indexB = orderMapping[codeB] ?? Number.MAX_SAFE_INTEGER;
+                if (indexA !== Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER) {
+                  return indexA - indexB;
+                }
+                const origA = record.imageMetadata!.indexOf(a);
+                const origB = record.imageMetadata!.indexOf(b);
+                const fallbackA = indexA === Number.MAX_SAFE_INTEGER && indexB !== Number.MAX_SAFE_INTEGER ? 1 : 0;
+                const fallbackB = indexB === Number.MAX_SAFE_INTEGER && indexA !== Number.MAX_SAFE_INTEGER ? -1 : 0;
+                if (fallbackA !== 0 || fallbackB !== 0) return fallbackA || fallbackB;
+                return origA - origB;
+              })
+            : undefined;
+
+          // Check if order changed
+          const isChanged = newImages.some((img, idx) => img !== record.images[idx]);
+          if (isChanged) {
+            hasChanges = true;
+            return { ...record, images: newImages, imageMetadata: newMetadata };
+          }
+        } catch (e) {
+          return record;
+        }
+      }
+      return record;
+    });
+
+    if (hasChanges) {
+      setCountryRecords(reorderedRecords);
+    }
+  }, [initialRecords]);
   const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
   const { mutateAsync: deleteDiary } = useDeleteDiaryMutation();
 

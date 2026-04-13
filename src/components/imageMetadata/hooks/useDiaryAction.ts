@@ -207,10 +207,21 @@ export const useDiaryAction = ({
         photos,
       };
 
+      let finalDiaryId = diaryId;
       if (isEditMode && typeof diaryId === "number") {
         await updateDiary({ diaryId, params: payload });
       } else {
-        await createDiary({ params: payload });
+        finalDiaryId = await createDiary({ params: payload });
+      }
+
+      if (typeof finalDiaryId === "number") {
+        const orderMapping: Record<string, number> = {};
+        sortedMetadataList.forEach((item, index) => {
+          if (item.photoCode) {
+            orderMapping[item.photoCode] = index;
+          }
+        });
+        sessionStorage.setItem(`diary-${finalDiaryId}-photo-order`, JSON.stringify(orderMapping));
       }
 
       const finalUuid = uuid || getAuthInfo().uuid;

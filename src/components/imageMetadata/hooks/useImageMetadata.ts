@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { arrayMove } from "@dnd-kit/sortable";
+
 import { useUploadTravelPhotoMutation } from "@/hooks/mutation/useDiaryMutations";
 import { processSingleFile } from "@/lib/processFile";
 import { getDiaryDetail } from "@/services/diaryService";
@@ -339,6 +341,16 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
     );
   };
 
+  const handleReorder = useCallback((oldIndex: number, newIndex: number) => {
+    setMetadataList(items => {
+      const reordered = arrayMove(items, oldIndex, newIndex);
+      return reordered.map((item, index) => ({
+        ...item,
+        originalIndex: index,
+      }));
+    });
+  }, []);
+
   return {
     metadataList,
     setMetadataList,
@@ -356,5 +368,6 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
     handleTagChange,
     handleDateChange,
     handleLocationChange,
+    handleReorder,
   };
 };

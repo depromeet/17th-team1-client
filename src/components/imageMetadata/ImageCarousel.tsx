@@ -153,7 +153,11 @@ export const ImageCarousel = ({
   return (
     <div className="relative select-none w-[251px] mx-auto">
       <div className="overflow-hidden rounded-xl border border-white/20" style={{ aspectRatio: "9 / 16" }}>
-        <div className="w-full h-full bg-black relative overflow-hidden" aria-label="이미지 미리보기">
+        <div
+          className="w-full h-full bg-black relative overflow-hidden"
+          aria-label="이미지 미리보기"
+          onClick={() => setIsCropModalOpen(true)}
+        >
           <Image
             src={currentImage}
             alt={shown.fileName}

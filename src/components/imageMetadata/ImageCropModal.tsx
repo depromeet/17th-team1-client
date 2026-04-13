@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
 
@@ -64,16 +65,23 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
     }
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   if (!imageBlobUrl) {
-    return (
-      <div className="image-crop-modal fixed inset-0 z-50 bg-black flex items-center justify-center">
+    if (!mounted) return null;
+    return createPortal(
+      <div className="image-crop-modal fixed inset-0 z-[100] bg-black flex items-center justify-center">
         <div className="text-white text-sm">이미지 로딩 중...</div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
-    <div className="image-crop-modal fixed inset-0 z-50 bg-black">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="image-crop-modal fixed inset-0 z-[100] bg-black">
       <div className="max-w-md mx-auto w-full h-full relative">
         {/* Header - Absolute positioned */}
         <div className="absolute top-0 left-0 right-0 z-10">
@@ -88,7 +96,7 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
         </div>
 
         {/* Crop Area - Full screen */}
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full pb-[env(safe-area-inset-bottom)]">
           <Cropper
             image={imageBlobUrl}
             crop={crop}
@@ -107,7 +115,8 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

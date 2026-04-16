@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { HeadlessToastProvider } from "@/components/common/Toast";
@@ -50,7 +50,6 @@ const RecordDetailClient = ({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    let hasChanges = false;
     const reorderedRecords = initialRecords.map(record => {
       const savedOrder = sessionStorage.getItem(`diary-${record.id}-photo-order`);
       if (savedOrder) {
@@ -96,7 +95,6 @@ const RecordDetailClient = ({
           // Check if order changed
           const isChanged = newImages.some((img, idx) => img !== record.images[idx]);
           if (isChanged) {
-            hasChanges = true;
             return { ...record, images: newImages, imageMetadata: newMetadata };
           }
         } catch (e) {
@@ -105,10 +103,7 @@ const RecordDetailClient = ({
       }
       return record;
     });
-
-    if (hasChanges) {
-      setCountryRecords(reorderedRecords);
-    }
+    setCountryRecords(reorderedRecords);
   }, [initialRecords]);
   const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
   const { mutateAsync: deleteDiary } = useDeleteDiaryMutation();

@@ -62,7 +62,7 @@ export const ImageUploadSection = ({
           </button>
         </div>
       )}
-      {metadataList.map(metadata => (
+      {metadataList.map((metadata, index) => (
         <div key={metadata.id} className="shrink-0">
           <ImageCarousel
             image={metadata}
@@ -71,6 +71,7 @@ export const ImageUploadSection = ({
             onTagChange={tag => handleTagChange(metadata.id, tag)}
             onDateChange={yearMonth => handleDateChange(metadata.id, yearMonth)}
             onLocationChange={location => handleLocationChange(metadata.id, location)}
+            photoIndex={index}
           />
         </div>
       ))}

@@ -4,6 +4,7 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { DateSelectFormData, dateSelectSchema, extractDigits, formatYearMonth } from "@/schemas/date";
 
@@ -13,9 +14,17 @@ type DateSelectBottomSheetProps = {
   isOpen: boolean;
   onClose: () => void;
   onConfirm?: (date: string) => void;
+  photoIndex?: number;
+  hasExistingDate?: boolean;
 };
 
-export const DateSelectBottomSheet = ({ isOpen, onClose, onConfirm }: DateSelectBottomSheetProps) => {
+export const DateSelectBottomSheet = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  photoIndex = 0,
+  hasExistingDate = false,
+}: DateSelectBottomSheetProps) => {
   const {
     watch,
     setValue,
@@ -35,22 +44,49 @@ export const DateSelectBottomSheet = ({ isOpen, onClose, onConfirm }: DateSelect
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const digits = extractDigits(event.target.value);
+      const overLimit = digits.length > 6;
 
-      if (digits.length <= 6) {
+      if (!overLimit) {
         const formatted = formatYearMonth(digits);
         setValue("date", formatted, { shouldValidate: true });
+        sendGAEvent("event", "record_meta_date_input_change", {
+          flow: "editor",
+          screen: "record_edit_meta_date",
+          click_code: "editor.record.edit.meta.date.input.change",
+          photo_index: photoIndex,
+          input_length: formatted.length,
+          is_valid_format: /^\d{4}\.\d{2}$/.test(formatted),
+          over_limit_attempt: false,
+        });
+      } else {
+        sendGAEvent("event", "record_meta_date_input_change", {
+          flow: "editor",
+          screen: "record_edit_meta_date",
+          click_code: "editor.record.edit.meta.date.input.change",
+          photo_index: photoIndex,
+          input_length: dateValue.length,
+          is_valid_format: /^\d{4}\.\d{2}$/.test(dateValue),
+          over_limit_attempt: true,
+        });
       }
     },
-    [setValue]
+    [setValue, photoIndex, dateValue]
   );
 
   const onSubmit = useCallback(
     (data: DateSelectFormData) => {
+      sendGAEvent("event", "record_meta_date_confirm", {
+        flow: "editor",
+        screen: "record_edit_meta_date",
+        click_code: "editor.record.edit.meta.date.cta.confirm",
+        photo_index: photoIndex,
+        has_value: true,
+      });
       onConfirm?.(data.date);
       onClose();
       reset({ date: "" });
     },
-    [onConfirm, onClose, reset]
+    [onConfirm, onClose, reset, photoIndex]
   );
 
   const handleClose = useCallback(() => {
@@ -58,10 +94,18 @@ export const DateSelectBottomSheet = ({ isOpen, onClose, onConfirm }: DateSelect
     reset({ date: "" });
   }, [onClose, reset]);
 
-  // 바텀시트가 열릴 때 폼 리셋
+  // 바텀시트가 열릴 때 폼 리셋 + view 이벤트
   useEffect(() => {
-    if (isOpen) reset({ date: "" });
-  }, [isOpen, reset]);
+    if (isOpen) {
+      sendGAEvent("event", "record_meta_date_view", {
+        flow: "editor",
+        screen: "record_edit_meta_date",
+        photo_index: photoIndex,
+        has_value: hasExistingDate,
+      });
+      reset({ date: "" });
+    }
+  }, [isOpen, reset, photoIndex, hasExistingDate]);
 
   return (
     <BaseInputBottomSheet

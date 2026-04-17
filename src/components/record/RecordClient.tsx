@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { Header } from "@/components/common/Header";
 import type { Continent, RecordResponse } from "@/types/record";
@@ -16,6 +18,25 @@ interface RecordClientProps {
 export function RecordClient({ initialData }: RecordClientProps) {
   const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<Continent>("전체");
+  const hasViewedRef = useRef(false);
+
+  // editor_record_view / editor_record_exit
+  useEffect(() => {
+    hasViewedRef.current = true;
+    sendGAEvent("event", "editor_record_view", {
+      flow: "editor",
+      screen: "record",
+    });
+
+    return () => {
+      if (hasViewedRef.current) {
+        sendGAEvent("event", "editor_record_exit", {
+          flow: "editor",
+          screen: "record",
+        });
+      }
+    };
+  }, []);
 
   // 브라우저 뒤로가기 감지
   useEffect(() => {
@@ -41,6 +62,11 @@ export function RecordClient({ initialData }: RecordClientProps) {
   };
 
   const handleEditClick = () => {
+    sendGAEvent("event", "record_city_manage_entry", {
+      flow: "editor",
+      screen: "record",
+      click_code: "editor.record.header.city_edit",
+    });
     router.push("/record/edit");
   };
 

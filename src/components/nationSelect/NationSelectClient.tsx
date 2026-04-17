@@ -34,6 +34,11 @@ export const NationSelectClient = ({
   const router = useRouter();
   const registeredCityNamesSet = new Set(registeredCityNames);
 
+  const selectedCountRef = useRef(0);
+  useEffect(() => {
+    selectedCountRef.current = selectedCityList.length;
+  }, [selectedCityList]);
+
   const { mutateAsync: createMemberTravels } = useCreateMemberTravelsMutation();
   const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
     useCitySearch();
@@ -46,11 +51,24 @@ export const NationSelectClient = ({
   const selectedCityIds = new Set(selectedCityList.map(city => city.id));
 
   useEffect(() => {
-    if (mode !== "default") return;
-    sendGAEvent("event", "onboarding_placeselect_view", {
-      flow: "onboarding",
-      screen: "placeselect",
-    });
+    if (mode === "default") {
+      sendGAEvent("event", "onboarding_placeselect_view", {
+        flow: "onboarding",
+        screen: "placeselect",
+      });
+    } else if (mode === "edit-add") {
+      sendGAEvent("event", "editor_placeselect_view", {
+        flow: "editor",
+        screen: "cityadd",
+      });
+      return () => {
+        sendGAEvent("event", "editor_placeselect_exit", {
+          flow: "editor",
+          screen: "cityadd",
+          selected_count: selectedCountRef.current,
+        });
+      };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -64,10 +82,17 @@ export const NationSelectClient = ({
         click_code: isSearchingMode ? "onboarding.placeselect.search.result.add" : "onboarding.placeselect.popular.add",
         selected_count: selectedCityList.length + 1,
       });
+    } else if (mode === "edit-add") {
+      sendGAEvent("event", "placeselect_city_add", {
+        flow: "editor",
+        screen: "cityadd",
+        click_code: isSearchingMode ? "editor.placeselect.search.result.add" : "editor.placeselect.popular.add",
+        selected_count: selectedCityList.length + 1,
+      });
     }
   };
 
-  const handleRemoveCity = (cityId: string) => {
+  const handleRemoveCity = (cityId: string, source: "list" | "selected" = "list") => {
     setSelectedCityList(prev => prev.filter(city => city.id !== cityId));
     if (mode === "default") {
       sendGAEvent("event", "place_remove", {
@@ -78,6 +103,19 @@ export const NationSelectClient = ({
           : "onboarding.placeselect.popular.remove",
         selected_count: selectedCityList.length - 1,
       });
+    } else if (mode === "edit-add") {
+      const clickCode =
+        source === "selected"
+          ? "editor.placeselect.selected.remove"
+          : isSearchingMode
+            ? "editor.placeselect.search.result.remove"
+            : "editor.placeselect.popular.remove";
+      sendGAEvent("event", "placeselect_city_remove", {
+        flow: "editor",
+        screen: "cityadd",
+        click_code: clickCode,
+        selected_count: selectedCityList.length - 1,
+      });
     }
   };
 
@@ -85,6 +123,12 @@ export const NationSelectClient = ({
     if (selectedCityList.length === 0) return;
 
     if (mode === "edit-add" && onComplete) {
+      sendGAEvent("event", "placeselect_city_add_confirm_click", {
+        flow: "editor",
+        screen: "cityadd",
+        click_code: "editor.placeselect.cta.confirm",
+        selected_count: selectedCityList.length,
+      });
       onComplete(selectedCityList);
       return;
     }
@@ -129,13 +173,21 @@ export const NationSelectClient = ({
       hasTrackedSearch.current = false;
       return;
     }
-    if (hasSearched && !hasTrackedSearch.current && mode === "default") {
+    if (hasSearched && !hasTrackedSearch.current) {
       hasTrackedSearch.current = true;
-      sendGAEvent("event", "place_search", {
-        flow: "onboarding",
-        screen: "placeselect",
-        click_code: "onboarding.placeselect.search.input",
-      });
+      if (mode === "default") {
+        sendGAEvent("event", "place_search", {
+          flow: "onboarding",
+          screen: "placeselect",
+          click_code: "onboarding.placeselect.search.input",
+        });
+      } else if (mode === "edit-add") {
+        sendGAEvent("event", "placeselect_city_search", {
+          flow: "editor",
+          screen: "cityadd",
+          click_code: "editor.placeselect.search.input",
+        });
+      }
     }
   }, [hasSearched, isSearchingMode, mode]);
 
@@ -235,6 +287,7 @@ export const NationSelectClient = ({
           onRemoveCity={handleRemoveCity}
           onCreateGlobe={handleCreateGlobe}
           buttonLabel={buttonLabel}
+          mode={mode}
         />
       </div>
     </main>

@@ -7,10 +7,11 @@ import type { City } from "@/types/city";
 
 type SelectedCitiesProps = {
   selectedCities: City[];
-  onRemoveCity: (cityId: string) => void;
+  onRemoveCity: (cityId: string, source?: "list" | "selected") => void;
+  mode?: "default" | "edit-add";
 };
 
-export const SelectedCities = ({ selectedCities, onRemoveCity }: SelectedCitiesProps) => {
+export const SelectedCities = ({ selectedCities, onRemoveCity, mode }: SelectedCitiesProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,13 +36,17 @@ export const SelectedCities = ({ selectedCities, onRemoveCity }: SelectedCitiesP
             size="md"
             removable
             onRemove={() => {
-              onRemoveCity(id);
-              sendGAEvent("event", "place_remove", {
-                flow: "onboarding",
-                screen: "placeselect",
-                click_code: "onboarding.placeselect.selected.remove",
-                selected_count: selectedCities.length - 1,
-              });
+              if (mode === "edit-add") {
+                onRemoveCity(id, "selected");
+              } else {
+                onRemoveCity(id);
+                sendGAEvent("event", "place_remove", {
+                  flow: "onboarding",
+                  screen: "placeselect",
+                  click_code: "onboarding.placeselect.selected.remove",
+                  selected_count: selectedCities.length - 1,
+                });
+              }
             }}
             className="shrink-0"
           >

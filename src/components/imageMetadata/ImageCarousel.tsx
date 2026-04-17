@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { formatYearMonth, toYearMonth } from "@/utils/dateUtils";
 
@@ -28,6 +30,7 @@ type ImageCarouselProps = {
   onImageUpdate?: (id: string, croppedImage: string) => void | Promise<void>;
   onLocationChange?: (location: LocationSelection | null) => void;
   isProcessing?: boolean;
+  photoIndex?: number;
 };
 
 export const ImageCarousel = ({
@@ -38,6 +41,7 @@ export const ImageCarousel = ({
   onImageUpdate,
   onLocationChange,
   isProcessing = false,
+  photoIndex = 0,
 }: ImageCarouselProps) => {
   const [selectedTag, setSelectedTag] = useState<ImageTag | null>(
     image.selectedTag ?? (image.tag && image.tag !== "NONE" ? image.tag : null)
@@ -75,6 +79,12 @@ export const ImageCarousel = ({
   }, [image.imagePreview]);
 
   const handleTagSelect = (tag: ImageTag) => {
+    sendGAEvent("event", "record_tag_select", {
+      flow: "editor",
+      screen: "record_edit",
+      click_code: "editor.record.edit.tag.select",
+      tag_type: tag.toLowerCase(),
+    });
     setSelectedTag(tag);
     onTagChange?.(tag);
   };
@@ -84,13 +94,35 @@ export const ImageCarousel = ({
     onTagChange?.(null);
   };
 
+  const formatDateForGA = (yyyymm: string | null): string | null => {
+    if (!yyyymm) return null;
+    return `${yyyymm.slice(0, 4)}.${yyyymm.slice(4, 6)}`;
+  };
+
   const handleConfirmDate = (date: string) => {
     const normalized = date.replace(".", "");
+    const changeType = !customDate ? "add" : "update";
+    sendGAEvent("event", "record_meta_date_change", {
+      flow: "editor",
+      screen: "record_edit",
+      click_code: "editor.record.edit.meta.date.edit",
+      date_before: formatDateForGA(customDate),
+      date_after: formatDateForGA(normalized),
+      change_type: changeType,
+    });
     setCustomDate(normalized);
     onDateChange?.(normalized);
   };
 
   const handleDateClear = () => {
+    sendGAEvent("event", "record_meta_date_change", {
+      flow: "editor",
+      screen: "record_edit",
+      click_code: "editor.record.edit.meta.date.remove",
+      date_before: formatDateForGA(customDate),
+      date_after: null,
+      change_type: "remove",
+    });
     setCustomDate(null);
     onDateChange?.(null);
   };
@@ -106,11 +138,28 @@ export const ImageCarousel = ({
 
   const handleConfirmLocation = (location: LocationSelection) => {
     const displayName = location.name || location.address;
+    const changeType = !customLocation ? "add" : "update";
+    sendGAEvent("event", "record_meta_location_change", {
+      flow: "editor",
+      screen: "record_edit",
+      click_code: "editor.record.edit.meta.location.edit",
+      location_before: customLocation || null,
+      location_after: displayName || null,
+      change_type: changeType,
+    });
     setCustomLocation(displayName);
     onLocationChange?.(location);
   };
 
   const handleLocationClear = () => {
+    sendGAEvent("event", "record_meta_location_change", {
+      flow: "editor",
+      screen: "record_edit",
+      click_code: "editor.record.edit.meta.location.remove",
+      location_before: customLocation || null,
+      location_after: null,
+      change_type: "remove",
+    });
     setCustomLocation(null);
     onLocationChange?.(null);
   };
@@ -156,7 +205,14 @@ export const ImageCarousel = ({
         <button
           type="button"
           className="w-full h-full bg-black relative cursor-pointer overflow-hidden"
-          onClick={() => setIsCropModalOpen(true)}
+          onClick={() => {
+            sendGAEvent("event", "record_photo_ratio_entry", {
+              flow: "editor",
+              screen: "record_edit",
+              click_code: "editor.record.edit.photo.open_ratio",
+            });
+            setIsCropModalOpen(true);
+          }}
           aria-label="이미지 편집"
           disabled={isCropUploading}
         >
@@ -208,18 +264,23 @@ export const ImageCarousel = ({
         isOpen={isDateSelectModalOpen}
         onClose={() => setIsDateSelectModalOpen(false)}
         onConfirm={handleConfirmDate}
+        photoIndex={photoIndex}
+        hasExistingDate={hasDate}
       />
       <LocationSelectBottomSheet
         isOpen={isLocationSelectModalOpen}
         onClose={() => setIsLocationSelectModalOpen(false)}
         onConfirm={handleConfirmLocation}
         initialLocation={initialLocationSelection}
+        photoIndex={photoIndex}
+        hasExistingLocation={hasLocation}
       />
       {isCropModalOpen && (
         <ImageCropModal
           image={image.originalImageUrl || currentImage}
           onClose={() => setIsCropModalOpen(false)}
           onSave={handleSaveCroppedImage}
+          photoIndex={photoIndex}
         />
       )}
     </div>

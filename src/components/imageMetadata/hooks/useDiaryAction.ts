@@ -1,6 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import {
   useAddDiaryPhotoMutation,
@@ -8,6 +11,7 @@ import {
   useDeleteDiaryPhotoMutation,
   useUpdateDiaryMutation,
 } from "@/hooks/mutation/useDiaryMutations";
+import { ApiError } from "@/lib/apiClient";
 import { getDiaryDetail } from "@/services/diaryService";
 import { getAuthInfo } from "@/utils/cookies";
 import { toYearMonth } from "@/utils/dateUtils";
@@ -27,6 +31,7 @@ interface UseDiaryActionProps {
   isProcessing: boolean;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
   pendingDeletePhotoIds: number[];
+  hasSavedRef?: React.MutableRefObject<boolean>;
 }
 
 const buildPhotoPayload = async (metadata: UploadMetadata, fallbackMonth: string, defaultDimension: number = 0) => {
@@ -87,12 +92,18 @@ export const useDiaryAction = ({
   isProcessing,
   setIsProcessing,
   pendingDeletePhotoIds,
+  hasSavedRef,
 }: UseDiaryActionProps) => {
   const router = useRouter();
   const { mutateAsync: deleteDiaryPhoto } = useDeleteDiaryPhotoMutation();
   const { mutateAsync: addDiaryPhoto } = useAddDiaryPhotoMutation();
   const { mutateAsync: updateDiary } = useUpdateDiaryMutation();
   const { mutateAsync: createDiary } = useCreateDiaryMutation();
+
+  const saveStartedRef = useRef(false);
+  const saveCompletedRef = useRef(false);
+  const savePhotoCountRef = useRef(0);
+  const saveTextLengthRef = useRef(0);
 
   const isCityIdValid = typeof cityId === "number" && Number.isFinite(cityId) && cityId > 0;
 
@@ -106,6 +117,24 @@ export const useDiaryAction = ({
       alert("업로드된 이미지가 없습니다.");
       return;
     }
+
+    saveStartedRef.current = true;
+    saveCompletedRef.current = false;
+    savePhotoCountRef.current = metadataList.length;
+    saveTextLengthRef.current = diaryText.length;
+
+    const saveStartTime = Date.now();
+    const hasDate = metadataList.some(item => !!item.customDate);
+    const hasLocation = metadataList.some(item => !!(item.location?.address || item.location?.latitude));
+
+    sendGAEvent("event", "record_save_start", {
+      flow: "editor",
+      screen: "record_save",
+      photo_count: metadataList.length,
+      text_length: diaryText.length,
+      has_date: hasDate,
+      has_location: hasLocation,
+    });
 
     setIsProcessing(true);
 
@@ -224,12 +253,29 @@ export const useDiaryAction = ({
       const queryString = params.toString();
       const nextPath = queryString ? `/record/${validCityId}?${queryString}` : `/record/${validCityId}`;
 
+      sendGAEvent("event", "record_save_complete", {
+        flow: "editor",
+        screen: "record_save",
+        photo_count: metadataList.length,
+        text_length: diaryText.length,
+        duration_ms: Date.now() - saveStartTime,
+      });
+      saveCompletedRef.current = true;
+      if (hasSavedRef) hasSavedRef.current = true;
+
       router.push(nextPath);
     } catch (error) {
+      saveCompletedRef.current = true;
+      const errorCode = error instanceof ApiError ? String(error.status) : "UNKNOWN";
+      sendGAEvent("event", "record_save_fail", {
+        flow: "editor",
+        screen: "record_save",
+        error_code: errorCode,
+      });
       alert(error instanceof Error ? error.message : "여행기록 저장에 실패했습니다.");
       setIsProcessing(false);
     }
   };
 
-  return { handleSave };
+  return { handleSave, saveStartedRef, saveCompletedRef, savePhotoCountRef, saveTextLengthRef };
 };

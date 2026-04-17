@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
@@ -171,7 +171,7 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
           <Header
             variant="dark"
             leftIcon="close"
-            onLeftClick={handleClose}
+            onLeftClick={onClose}
             rightButtonTitle="완료"
             rightButtonVariant="white"
             onRightClick={createCroppedImage}

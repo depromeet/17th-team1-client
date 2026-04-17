@@ -139,6 +139,14 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     router.push("/withdrawal");
   }, [router]);
 
+  const handleFeedbackClick = useCallback(() => {
+    sendGAEvent("event", "menu_profile_feedback_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.feedback",
+    });
+  }, []);
+
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
       <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
@@ -177,6 +185,11 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
             {/* Usage Info Section */}
             <SettingSection title="이용 정보">
               <SettingItem label="약관 및 정책" onClick={handleTermsClick} />
+              <SettingItem
+                label="서비스 의견 보내기"
+                onClick={handleFeedbackClick}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=globber.official@gmail.com&su=${encodeURIComponent("[서비스 의견] ")}`}
+              />
               <SettingItem label="회원 탈퇴하기" onClick={handleWithdrawalClick} />
             </SettingSection>
           </div>

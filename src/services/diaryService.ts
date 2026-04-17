@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/apiClient";
+import { apiDelete, ApiError, apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import type {
   CreateDiaryParams,
   CreateDiaryPhotoParams,
@@ -211,6 +211,7 @@ export const getDiaryDetail = async (diaryId: string | number, token?: string): 
     return response.data;
   } catch (error) {
     logger.error("[getDiaryDetail] 실패:", error);
+    if (error instanceof ApiError) throw error;
     throw new Error("여행 기록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -303,6 +304,7 @@ export const deleteDiaryPhoto = async (diaryId: string | number, photoId: number
     await apiDelete(`/api/v1/diaries/photo/${diaryId}/${photoId}`, undefined, authToken);
   } catch (error) {
     logger.error("[deleteDiaryPhoto] 실패:", error);
+    if (error instanceof ApiError) throw error;
     throw new Error("여행 기록 사진 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -340,6 +342,7 @@ export const addDiaryPhoto = async (
     return response.data;
   } catch (error) {
     logger.error("[addDiaryPhoto] 실패:", error);
+    if (error instanceof ApiError) throw error;
     throw new Error("여행 기록 사진 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };
@@ -407,6 +410,7 @@ export const updateDiary = async (
     await apiPut(`/api/v1/diaries/${diaryId}`, params, authToken);
   } catch (error) {
     logger.error("[updateDiary] 실패:", error);
+    if (error instanceof ApiError) throw error;
     throw new Error("여행 기록 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

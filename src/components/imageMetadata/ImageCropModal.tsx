@@ -5,19 +5,44 @@ import { createPortal } from "react-dom";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { Header } from "../common/Header";
 
 type ImageCropModalProps = {
   image: string;
   onClose: () => void;
   onSave: (croppedImage: string) => void;
+  photoIndex?: number;
 };
 
-export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) => {
+export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: ImageCropModalProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null);
+
+  const interactionCountRef = useRef(0);
+  const interactionDurationRef = useRef(0);
+  const gestureStartTimeRef = useRef<number | null>(null);
+  const zoomChangedInGestureRef = useRef(false);
+  const gestureEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    sendGAEvent("event", "record_crop_view", {
+      flow: "editor",
+      screen: "record_edit_crop",
+      photo_index: photoIndex,
+    });
+  }, [photoIndex]);
+
+  useEffect(() => {
+    return () => {
+      if (gestureEndTimerRef.current) {
+        clearTimeout(gestureEndTimerRef.current);
+      }
+    };
+  }, []);
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -52,8 +77,66 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
     };
   }, [image, onClose]);
 
+  const handleGestureActivity = (isZoom: boolean) => {
+    const now = Date.now();
+
+    if (gestureStartTimeRef.current === null) {
+      gestureStartTimeRef.current = now;
+      zoomChangedInGestureRef.current = false;
+    }
+
+    if (isZoom) {
+      zoomChangedInGestureRef.current = true;
+    }
+
+    if (gestureEndTimerRef.current) {
+      clearTimeout(gestureEndTimerRef.current);
+    }
+
+    gestureEndTimerRef.current = setTimeout(() => {
+      const duration = Date.now() - (gestureStartTimeRef.current ?? now);
+      const gestureType = zoomChangedInGestureRef.current ? "zoom" : "drag";
+
+      interactionCountRef.current += 1;
+      interactionDurationRef.current += duration;
+
+      sendGAEvent("event", "record_crop_interaction", {
+        flow: "editor",
+        screen: "record_edit_crop",
+        click_code:
+          gestureType === "drag" ? "editor.record.edit.crop.gesture.move" : "editor.record.edit.crop.gesture.zoom",
+        photo_index: photoIndex,
+        gesture_type: gestureType,
+        interaction_count: interactionCountRef.current,
+        interaction_duration: interactionDurationRef.current,
+      });
+
+      gestureStartTimeRef.current = null;
+      gestureEndTimerRef.current = null;
+    }, 300);
+  };
+
+  const handleCropChange = (newCrop: { x: number; y: number }) => {
+    setCrop(newCrop);
+    handleGestureActivity(false);
+  };
+
+  const handleZoomChange = (newZoom: number) => {
+    setZoom(newZoom);
+    handleGestureActivity(true);
+  };
+
   const createCroppedImage = async () => {
     if (!croppedAreaPixels || !imageBlobUrl) return;
+
+    const modified = interactionCountRef.current > 0;
+    sendGAEvent("event", "record_crop_complete", {
+      flow: "editor",
+      screen: "record_edit_crop",
+      click_code: "editor.record.edit.crop.header.complete",
+      interaction_count: interactionCountRef.current,
+      modified,
+    });
 
     try {
       const croppedImage = await getCroppedImg(imageBlobUrl, croppedAreaPixels);
@@ -88,7 +171,7 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
           <Header
             variant="dark"
             leftIcon="close"
-            onLeftClick={onClose}
+            onLeftClick={handleClose}
             rightButtonTitle="완료"
             rightButtonVariant="white"
             onRightClick={createCroppedImage}
@@ -102,9 +185,9 @@ export const ImageCropModal = ({ image, onClose, onSave }: ImageCropModalProps) 
             crop={crop}
             zoom={zoom}
             aspect={9 / 16}
-            onCropChange={setCrop}
+            onCropChange={handleCropChange}
             onCropComplete={onCropComplete}
-            onZoomChange={setZoom}
+            onZoomChange={handleZoomChange}
             style={{
               containerStyle: {
                 width: "100%",

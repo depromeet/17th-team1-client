@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { arrayMove } from "@dnd-kit/sortable";
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { useUploadTravelPhotoMutation } from "@/hooks/mutation/useDiaryMutations";
 import { processSingleFile } from "@/lib/processFile";
@@ -241,6 +242,22 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           }
           return mappedMetadata;
         });
+
+        const newCount = metadataCount + mappedMetadata.length;
+        sendGAEvent("event", "record_photo_add", {
+          flow: "editor",
+          screen: "record_edit",
+          click_code: "editor.record.edit.photo.add",
+          photo_count: newCount,
+        });
+        if (newCount >= MAX_IMAGES) {
+          sendGAEvent("event", "record_photo_limit_reached", {
+            flow: "editor",
+            screen: "record_edit",
+            click_code: "editor.record.edit.photo.add",
+            photo_count: 3,
+          });
+        }
       } catch (error) {
         alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
       } finally {

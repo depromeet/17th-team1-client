@@ -63,8 +63,6 @@ export const createClusterTransitionHandler = (
         expandedContinentCountryIds: countryIds,
       }));
 
-      setZoomStack(prev => [...prev, currentZoomRef.current]);
-
       return items;
     }
 

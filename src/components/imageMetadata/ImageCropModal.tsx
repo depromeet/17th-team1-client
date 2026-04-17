@@ -75,7 +75,8 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
         URL.revokeObjectURL(blobUrlToCleanup);
       }
     };
-  }, [image, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [image]);
 
   const handleGestureActivity = (isZoom: boolean) => {
     const now = Date.now();
@@ -211,10 +212,19 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
  */
 const fetchImageAsBlob = async (url: string): Promise<string> => {
   try {
-    const response = await fetch(url, {
+    // S3 등 외부 요소를 fetch할 때 브라우저 디스크 캐시(<img> 태그가 로드한 CORS 헤더 없는 캐시)를
+    // 사용할 경우 CORS 에러가 발생할 수 있으므로, 캐시 우회를 위해 파라미터를 추가합니다.
+    // 단, URL이 이미 브라우저 내부의 blob: 형태인 경우 파라미터를 추가하면 깨지므로 분기 처리합니다.
+    let fetchUrl = url;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      const cacheUrl = new URL(url);
+      cacheUrl.searchParams.set("t", Date.now().toString());
+      fetchUrl = cacheUrl.toString();
+    }
+
+    const response = await fetch(fetchUrl, {
       mode: "cors",
       credentials: "include",
-      cache: "force-cache",
     });
 
     if (response.ok) {
@@ -226,8 +236,8 @@ const fetchImageAsBlob = async (url: string): Promise<string> => {
     console.warn("Direct S3 fetch failed, falling back to Next.js proxy:", error);
   }
 
-  // Fallback: Next.js Image Proxy 사용
-  const proxyUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=95`;
+  // Fallback: Next.js Image Proxy 사용 (3840은 부하가 커 1920으로 낮춤)
+  const proxyUrl = `/_next/image?url=${encodeURIComponent(url)}&w=1920&q=95`;
   const proxyResponse = await fetch(proxyUrl);
 
   if (!proxyResponse.ok) {

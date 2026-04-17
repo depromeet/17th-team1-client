@@ -292,6 +292,10 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
       const baseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
       const newImageUrl = `${baseUrl}${newPhotoCode}`;
 
+      if (targetMetadata.photoId && isEditMode) {
+        setPendingDeletePhotoIds(prev => [...prev, targetMetadata.photoId!]);
+      }
+
       setMetadataList(prev =>
         prev.map(item =>
           item.id === id
@@ -299,7 +303,7 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
                 ...item,
                 imagePreview: newImageUrl,
                 photoCode: newPhotoCode,
-                originalPhotoId: item.photoId,
+                originalPhotoId: undefined, // pendingDeletePhotoIds가 처리하므로 undefined
                 photoId: undefined,
                 isExisting: false,
                 originalImageUrl: item.originalImageUrl || item.imagePreview,

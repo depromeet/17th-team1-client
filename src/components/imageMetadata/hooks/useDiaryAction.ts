@@ -154,8 +154,12 @@ export const useDiaryAction = ({
       let currentMetadataList = metadataList;
 
       if (isEditMode && typeof diaryId === "number") {
-        for (const photoId of pendingDeletePhotoIds) {
-          await deleteDiaryPhoto({ diaryId, photoId });
+        if (pendingDeletePhotoIds.length > 0) {
+          for (const photoId of pendingDeletePhotoIds) {
+            await deleteDiaryPhoto({ diaryId, photoId });
+          }
+          // [Workaround] DB 복제 지연(Replication lag) 등을 고려하여 삭제 후 조금 더 기다림
+          await new Promise(r => setTimeout(r, 800));
         }
 
         const withoutPhotoId = metadataList.filter(item => item.photoId == null);
@@ -167,13 +171,6 @@ export const useDiaryAction = ({
             const payload = await buildPhotoPayload(metadata, fallbackMonth, 1);
 
             const createdPhoto = await addDiaryPhoto({ diaryId, photo: payload });
-
-            if (metadata.originalPhotoId) {
-              await deleteDiaryPhoto({
-                diaryId,
-                photoId: metadata.originalPhotoId,
-              });
-            }
             let resolvedPhotoId = createdPhoto.photoId;
 
             if (!resolvedPhotoId) {

@@ -233,6 +233,18 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
     }, 300);
   };
 
+  const sendReactionAddEvent = (glyph: string, currentReactionCount: number) => {
+    const screen = isOwner ? "my" : "other";
+    sendGAEvent("event", isOwner ? "endview_my_reaction_add" : "endview_other_reaction_add", {
+      flow: "endview",
+      screen,
+      click_code: `endview.${screen}.reaction.add`,
+      record_id: recordId,
+      emoji_type: glyph,
+      current_reaction_count: currentReactionCount,
+    });
+  };
+
   const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
@@ -304,15 +316,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
       // 성공 시 로컬 상태 업데이트
       const existingAtAdd = (localReactions ?? baseReactions).find(r => r.glyph === glyph);
-      const screen = isOwner ? "my" : "other";
-      sendGAEvent("event", isOwner ? "endview_my_reaction_add" : "endview_other_reaction_add", {
-        flow: "endview",
-        screen,
-        click_code: `endview.${screen}.reaction.add`,
-        record_id: recordId,
-        emoji_type: glyph,
-        current_reaction_count: existingAtAdd ? reactions.length : reactions.length + 1,
-      });
+      sendReactionAddEvent(glyph, existingAtAdd ? reactions.length : reactions.length + 1);
 
       setLocalReactions(prev => {
         const currentReactions = prev ?? baseReactions;
@@ -362,6 +366,8 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
             diaryId: recordId,
             code,
           });
+
+          sendReactionAddEvent(glyph, reactions.length);
 
           // 성공 시 로컬 상태 업데이트
           setLocalReactions(prev => {

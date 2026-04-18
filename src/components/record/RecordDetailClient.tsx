@@ -65,7 +65,9 @@ const RecordDetailClient = ({
   const maxScrollDepthRef = useRef<number>(0);
 
   const handleScroll = (newIndex: number) => {
-    if (newIndex !== currentIndex && currentRecord) {
+    const destinationRecord = countryRecords[newIndex];
+
+    if (newIndex !== currentIndex && destinationRecord) {
       const currentDepth = Math.round((newIndex / Math.max(countryRecords.length - 1, 1)) * 100);
       maxScrollDepthRef.current = Math.max(maxScrollDepthRef.current, currentDepth);
 
@@ -74,8 +76,8 @@ const RecordDetailClient = ({
         flow: "endview",
         screen,
         click_code: `endview.${screen}.scroll.vertical`,
-        record_id: currentRecord.id,
-        city_id: currentRecord.cityId,
+        record_id: destinationRecord.id,
+        city_id: destinationRecord.cityId,
         scroll_depth: maxScrollDepthRef.current,
         dwell_time_ms: Date.now() - pageEntryTimeRef.current,
       });

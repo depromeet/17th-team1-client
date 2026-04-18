@@ -101,12 +101,14 @@ export default async function RecordDetailPage({
 
   return (
     <>
-      <RecordDetailViewTracker
-        recordId={selectedRecord?.id ?? ""}
-        cityId={cityId}
-        photoCount={selectedRecord?.images.length ?? 0}
-        isOwner={isOwner}
-      />
+      {selectedRecord && !serverError && (
+        <RecordDetailViewTracker
+          recordId={selectedRecord.id}
+          cityId={cityId}
+          photoCount={selectedRecord.images.length}
+          isOwner={isOwner}
+        />
+      )}
       <RecordDetailClient
         initialRecords={initialRecords}
         serverError={serverError}

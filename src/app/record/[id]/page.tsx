@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 
 import RecordDetailClient from "@/components/record/RecordDetailClient";
+import RecordDetailViewTracker from "@/components/record/RecordDetailViewTracker";
 import { getDiariesByUuid } from "@/services/diaryService";
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
@@ -96,14 +97,24 @@ export default async function RecordDetailPage({
 
   const initialScrollIndex = scrollIndexParam ? Number(scrollIndexParam) : 0;
 
+  const selectedRecord = initialRecords.find(r => r.cityId === cityId);
+
   return (
-    <RecordDetailClient
-      initialRecords={initialRecords}
-      serverError={serverError}
-      cityId={cityId}
-      queryUuid={queryUuid || null}
-      isOwner={isOwner}
-      initialScrollIndex={initialScrollIndex}
-    />
+    <>
+      <RecordDetailViewTracker
+        recordId={selectedRecord?.id ?? ""}
+        cityId={cityId}
+        photoCount={selectedRecord?.images.length ?? 0}
+        isOwner={isOwner}
+      />
+      <RecordDetailClient
+        initialRecords={initialRecords}
+        serverError={serverError}
+        cityId={cityId}
+        queryUuid={queryUuid || null}
+        isOwner={isOwner}
+        initialScrollIndex={initialScrollIndex}
+      />
+    </>
   );
 }

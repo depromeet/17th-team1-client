@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { HeadlessToastProvider } from "@/components/common/Toast";
 import { RecordCard } from "@/components/record/RecordCard";
@@ -59,11 +61,28 @@ const RecordDetailClient = ({
   const isLastRecord = currentIndex === countryRecords.length - 1;
   const shouldShowScrollHint = showScrollHint && !isLastRecord;
 
-  const handleScroll = (index: number) => {
-    if (index !== currentIndex) {
+  const pageEntryTimeRef = useRef<number>(Date.now());
+  const maxScrollDepthRef = useRef<number>(0);
+
+  const handleScroll = (newIndex: number) => {
+    if (newIndex !== currentIndex && currentRecord) {
+      const currentDepth = Math.round((newIndex / Math.max(countryRecords.length - 1, 1)) * 100);
+      maxScrollDepthRef.current = Math.max(maxScrollDepthRef.current, currentDepth);
+
+      const screen = isOwner ? "my" : "other";
+      sendGAEvent("event", isOwner ? "endview_my_scroll" : "endview_other_scroll_vertical", {
+        flow: "endview",
+        screen,
+        click_code: `endview.${screen}.scroll.vertical`,
+        record_id: currentRecord.id,
+        city_id: currentRecord.cityId,
+        scroll_depth: maxScrollDepthRef.current,
+        dwell_time_ms: Date.now() - pageEntryTimeRef.current,
+      });
+
       setHasShownScrollHint(false);
     }
-    onScroll(index);
+    onScroll(newIndex);
   };
 
   const handleBack = () => {
@@ -110,6 +129,13 @@ const RecordDetailClient = ({
 
   const handleDelete = async () => {
     if (!currentRecord) return;
+    if (isOwner)
+      sendGAEvent("event", "endview_my_delete_click", {
+        flow: "endview",
+        screen: "my",
+        click_code: "endview.my.more.delete",
+        record_id: currentRecord.id,
+      });
     const confirmed = window.confirm("기록을 삭제하면 복구할 수 없습니다. 정말 삭제하시겠어요?");
     if (confirmed) {
       try {

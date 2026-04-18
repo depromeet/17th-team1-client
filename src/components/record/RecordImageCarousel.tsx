@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import useEmblaCarousel from "embla-carousel-react";
 
 type RecordImageCarouselProps = {
@@ -10,6 +11,8 @@ type RecordImageCarouselProps = {
   onImageChange?: (index: number) => void;
   userInfoHeight?: number;
   isFirstRecord?: boolean;
+  recordId?: string;
+  isOwner?: boolean;
 };
 
 const MIN_SCALE = 1;
@@ -21,6 +24,8 @@ export const RecordImageCarousel = ({
   onImageChange,
   userInfoHeight = 0,
   isFirstRecord = false,
+  recordId = "",
+  isOwner = false,
 }: RecordImageCarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,15 +37,31 @@ export const RecordImageCarousel = ({
   const initialDistanceRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isGestureActiveRef = useRef(false);
+  const previousIndexRef = useRef<number>(-1);
 
   // Embla 이벤트 리스너 설정
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     const index = emblaApi.selectedScrollSnap();
+
+    if (previousIndexRef.current !== -1 && previousIndexRef.current !== index) {
+      const screen = isOwner ? "my" : "other";
+      sendGAEvent("event", isOwner ? "endview_my_photo_swipe" : "endview_other_photo_swipe", {
+        flow: "endview",
+        screen,
+        click_code: `endview.${screen}.image.swipe`,
+        record_id: recordId,
+        photo_index_before: previousIndexRef.current,
+        photo_index_after: index,
+        photo_count: images.length,
+      });
+    }
+    previousIndexRef.current = index;
+
     setCurrentIndex(index);
     setScale(1); // 슬라이드 변경 시 줌 리셋
     onImageChange?.(index);
-  }, [emblaApi, onImageChange]);
+  }, [emblaApi, onImageChange, recordId, images.length, isOwner]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -103,6 +124,16 @@ export const RecordImageCarousel = ({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
+      if (!isGestureActiveRef.current) {
+        const screen = isOwner ? "my" : "other";
+        sendGAEvent("event", isOwner ? "endview_my_photo_zoom" : "endview_other_photo_zoom", {
+          flow: "endview",
+          screen,
+          click_code: `endview.${screen}.image.zoom`,
+          record_id: recordId,
+          photo_index: currentIndex,
+        });
+      }
       isGestureActiveRef.current = true;
     }
   };

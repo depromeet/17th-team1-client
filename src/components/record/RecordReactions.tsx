@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import type { EmojiClickData } from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -55,20 +56,28 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
   const { showToast, toastMessage, setShowToast, showOwnerToast } = useOwnerToast();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const reactionsContainerRef = useRef<HTMLDivElement>(null);
+  const attemptCountRef = useRef(0);
 
   // Cleanup: 컴포넌트 언마운트 시 모든 타이머 정리
   useEffect(() => {
+    const debounce = debounceTimerRef;
+    const scrollDebounce = scrollDebounceTimerRef;
+    const timers = timersRef;
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      if (debounce.current) {
+        clearTimeout(debounce.current);
       }
-      timersRef.current.forEach(timer => {
+      if (scrollDebounce.current) {
+        clearTimeout(scrollDebounce.current);
+      }
+      timers.current.forEach(timer => {
         clearTimeout(timer);
       });
-      timersRef.current = [];
+      timers.current = [];
     };
   }, []);
 
@@ -184,17 +193,65 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
     localTimers.push(animationEndTimer);
   };
 
+  const handleReactionScroll = () => {
+    if (isOwner) return;
+
+    if (scrollDebounceTimerRef.current) {
+      clearTimeout(scrollDebounceTimerRef.current);
+    }
+
+    scrollDebounceTimerRef.current = setTimeout(() => {
+      const container = reactionsContainerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const buttons = container.querySelectorAll("button[data-emoji-code]");
+
+      let visibleStart = -1;
+      let visibleEnd = -1;
+
+      buttons.forEach((btn, index) => {
+        const btnRect = btn.getBoundingClientRect();
+        const isVisible = btnRect.right > containerRect.left && btnRect.left < containerRect.right;
+        if (isVisible) {
+          if (visibleStart === -1) visibleStart = index;
+          visibleEnd = index;
+        }
+      });
+
+      if (visibleStart === -1) return;
+
+      sendGAEvent("event", "endview_other_reaction_horizontal_scroll", {
+        flow: "endview",
+        screen: "other",
+        click_code: "endview.other.reaction.horizontal_swipe",
+        record_id: recordId,
+        visible_index_start: visibleStart,
+        visible_index_end: visibleEnd,
+        total_reaction_type_count: reactions.length,
+      });
+    }, 300);
+  };
+
   const handleReactionClick = async (reactionCode: string, event: React.MouseEvent<HTMLButtonElement>) => {
     const reaction = reactions.find(({ code }) => code === reactionCode);
     if (!reaction) return;
 
-    // owner일 때: Toast 표시
+    const screen = isOwner ? "my" : "other";
+    sendGAEvent("event", isOwner ? "endview_my_reaction_attempt" : "endview_other_reaction_item_click", {
+      flow: "endview",
+      screen,
+      click_code: `endview.${screen}.reaction.item`,
+      record_id: recordId,
+      emoji_type: reaction.glyph,
+      ...(isOwner ? { attempt_count: ++attemptCountRef.current } : { current_reaction_count: reaction.count + 1 }),
+    });
+
     if (isOwner) {
       showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
       return;
     }
 
-    // owner가 아닐 때만 카운트 증가 및 애니메이션
     // 먼저 UI 업데이트 (낙관적 업데이트)
     setLocalReactions(prev => {
       const currentReactions = prev ?? baseReactions;
@@ -246,6 +303,17 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
 
       // 성공 시 로컬 상태 업데이트
+      const existingAtAdd = (localReactions ?? baseReactions).find(r => r.glyph === glyph);
+      const screen = isOwner ? "my" : "other";
+      sendGAEvent("event", isOwner ? "endview_my_reaction_add" : "endview_other_reaction_add", {
+        flow: "endview",
+        screen,
+        click_code: `endview.${screen}.reaction.add`,
+        record_id: recordId,
+        emoji_type: glyph,
+        current_reaction_count: existingAtAdd ? reactions.length : reactions.length + 1,
+      });
+
       setLocalReactions(prev => {
         const currentReactions = prev ?? baseReactions;
         const existingReaction = currentReactions.find(r => r.glyph === glyph);
@@ -387,6 +455,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
         <div
           ref={reactionsContainerRef}
           className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 p-2 pl-0"
+          onScroll={handleReactionScroll}
         >
           {reactions.map(({ code, glyph, count }, index) => (
             <motion.button

@@ -31,6 +31,7 @@ export const SettingItem = ({ label, onClick, className, href }: SettingItemProp
         style={{ textDecoration: "none" }}
         target={isExternal || isMailto ? "_blank" : undefined}
         rel={isExternal || isMailto ? "noopener noreferrer" : undefined}
+        onClick={onClick}
       >
         {content}
       </a>

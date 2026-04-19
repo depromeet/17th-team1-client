@@ -44,7 +44,6 @@ export const useRecordScroll = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: countryRecords 변경 시 initialIndex로 설정
   useEffect(() => {
     setCurrentIndex(initialIndex);
   }, [countryRecords, initialIndex]);

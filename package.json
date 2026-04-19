@@ -65,7 +65,9 @@
     "@types/three": "^0.180.0",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
-    "eslint": "8.57.0",
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9",
+    "eslint": "^9",
     "eslint-config-next": "15",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -82,7 +84,8 @@
   "packageManager": "pnpm@9.1.0",
   "pnpm": {
     "overrides": {
-      "@intellectronica/ruler>yargs": "17"
+      "@intellectronica/ruler>yargs": "17",
+      "baseline-browser-mapping": "latest"
     }
   }
 }

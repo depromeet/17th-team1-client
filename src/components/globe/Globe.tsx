@@ -150,7 +150,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
 
         const { angleOffset, dynamicDistance } = calculateLabelPosition(
           clusterData,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           visibleItems as ClusterData[]
         );
 

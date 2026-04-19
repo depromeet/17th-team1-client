@@ -120,16 +120,14 @@ export const LocationSelectBottomSheet = ({
         setIsSearching(false);
         setPredictions(result.suggestions.slice(0, 5));
         setErrorMessage(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setIsSearching(false);
         setPredictions([]);
 
-        const errMsg = err?.message || "";
-        if (errMsg.includes("ZERO_RESULTS")) {
-          setErrorMessage(null);
-        } else if (errMsg.includes("OVER_QUERY_LIMIT")) {
+        const errorCode = err instanceof Error && "code" in err ? (err as Error & { code: string }).code : "";
+        if (errorCode === "RESOURCE_EXHAUSTED") {
           setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
-        } else if (errMsg.includes("REQUEST_DENIED")) {
+        } else if (errorCode === "INVALID_ARGUMENT" || errorCode === "UNAUTHENTICATED") {
           setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
         } else {
           setErrorMessage("장소를 검색하는 중 문제가 발생했습니다.");
@@ -177,15 +175,15 @@ export const LocationSelectBottomSheet = ({
 
       setSelectedLocation(location);
       setActivePlaceId(location.placeId ?? null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setActivePlaceId(null);
 
-      const errMsg = err?.message || "";
-      if (errMsg.includes("ZERO_RESULTS")) {
+      const errorCode = err instanceof Error && "code" in err ? (err as Error & { code: string }).code : "";
+      if (errorCode === "NOT_FOUND") {
         setErrorMessage("선택한 장소의 상세 정보를 찾을 수 없습니다.");
-      } else if (errMsg.includes("OVER_QUERY_LIMIT")) {
+      } else if (errorCode === "RESOURCE_EXHAUSTED") {
         setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
-      } else if (errMsg.includes("REQUEST_DENIED")) {
+      } else if (errorCode === "INVALID_ARGUMENT" || errorCode === "UNAUTHENTICATED") {
         setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
       } else {
         setErrorMessage("장소 정보를 불러오지 못했습니다.");

@@ -9,8 +9,7 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  MouseSensor,
-  TouchSensor,
+  PointerSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -51,6 +50,7 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
     transition,
     opacity: isDragging ? 0 : 1, // Hide original item completely so DragOverlay is the only one visible
     zIndex: isDragging ? 0 : 1,
+    touchAction: "none" as const,
   };
 
   return (
@@ -70,6 +70,18 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
       onPointerCancel={e => {
         onPressEnd();
         listeners?.onPointerCancel?.(e);
+      }}
+      onTouchStart={e => {
+        onPressStart();
+        listeners?.onTouchStart?.(e);
+      }}
+      onTouchEnd={e => {
+        onPressEnd();
+        listeners?.onTouchEnd?.(e);
+      }}
+      onTouchCancel={e => {
+        onPressEnd();
+        listeners?.onTouchCancel?.(e);
       }}
       className="shrink-0 outline-none select-none relative"
     >
@@ -109,15 +121,9 @@ export const ImageUploadSection = ({
   const [pressingId, setPressingId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, {
+    useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 1000,
-        tolerance: 15,
+        distance: 6,
       },
     })
   );
@@ -156,7 +162,7 @@ export const ImageUploadSection = ({
   const renderContent = () => (
     <div
       className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
+      style={{ touchAction: isDndEnabled ? "pan-y" : "pan-x", minHeight: hasImages ? undefined : "460px" }}
     >
       {!hasImages && (
         <div className="shrink-0">

@@ -85,7 +85,6 @@ export const apiGet = async <T>(
     const response = await fetch(url, {
       method: "GET",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
-      cache: "no-store",
     });
 
     logger.log(`[API] Response status:`, response.status);

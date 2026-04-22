@@ -26,7 +26,7 @@ export const GlobeLoading = ({ duration = 3000, onComplete, selectedCount }: Glo
 
     return () => {
       // isCompletedRef는 DOM 노드 ref가 아닌 값 추적용 ref이므로, cleanup 시점의 최신값을 읽는 것이 의도적임
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+
       if (isCompletedRef.current) return;
 
       sendGAEvent("event", "onboarding_loading_exit", {

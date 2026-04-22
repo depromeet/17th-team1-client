@@ -36,6 +36,12 @@ const nextConfig: NextConfig = {
       test: /\.svg$/,
       use: ["@svgr/webpack"],
     });
+
+    // browserslist/Sentry 대용량 문자열로 인한 webpack 캐시 직렬화 경고 억제 (cosmetic warning)
+    config.infrastructureLogging = {
+      level: "error",
+    };
+
     return config;
   },
 };

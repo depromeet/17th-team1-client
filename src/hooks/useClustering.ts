@@ -207,7 +207,7 @@ export const useClustering = ({
         rotationTimerRef,
         setZoomStack
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [onSelectedDataChange]
   );
 

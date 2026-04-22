@@ -75,6 +75,8 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
         URL.revokeObjectURL(blobUrlToCleanup);
       }
     };
+    // 부모 컴포넌트 렌더링 시 onClose 참조값이 변경되어 이펙트가 무의미하게 재실행되고,
+    // 이로 인해 만들어둔 프리뷰용 Blob URL이 조기 해제(cleanup)되는 버그를 방지하기 위해 의존성 배열에서 제외합니다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
 

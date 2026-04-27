@@ -139,7 +139,11 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -182,7 +186,11 @@ export const apiPostWithHeaders = async <T>(
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -251,7 +259,11 @@ export const apiPatch = async <T>(endpoint: string, data?: unknown, token?: stri
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -285,7 +297,11 @@ export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: str
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);

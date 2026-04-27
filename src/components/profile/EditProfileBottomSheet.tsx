@@ -6,7 +6,6 @@ import Image from "next/image";
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { sendGAEvent } from "@next/third-parties/google";
-import heic2any from "heic2any";
 import { X } from "lucide-react";
 
 import {
@@ -98,6 +97,7 @@ export const EditProfileBottomSheet = ({
 
       if (isHeic) {
         try {
+          const heic2any = (await import("heic2any")).default;
           const convertedBlob = await heic2any({
             blob: originalFile,
             toType: "image/jpeg",

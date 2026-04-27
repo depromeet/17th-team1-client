@@ -141,7 +141,7 @@ export const RecordImageCarousel = ({
                 src={src}
                 alt={`Record image ${index + 1}`}
                 fill
-                quality={60}
+                unoptimized
                 sizes="(max-width: 512px) 100vw, 512px"
                 className="object-cover pointer-events-none"
                 style={{ transform: `scale(${scale})` }}

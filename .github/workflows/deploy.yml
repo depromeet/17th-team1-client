@@ -1,29 +1,61 @@
 name: Deploy Prod
-
 on:
   push:
     branches: ["main"]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/globber-frontend
+
 jobs:
+  # Job 1: GitHub Actions 서버에서 빌드 + GHCR에 push
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=https://globber.world/api
+            NEXT_PUBLIC_REDIRECT_ORIGIN=https://globber.world
+            NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_S3_BASE_URL=https://globber-prod.s3.ap-northeast-2.amazonaws.com/
+            GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 2: 프로덕션 서버에서 pull만
   deploy:
+    needs: build-and-push
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Sync project to production directory (exclude compose)
+      - name: Pull & Deploy
         run: |
-          rsync -av --delete \
-            --exclude=docker-compose-prod.yml \
-            ./ ~/17th-team1-client/
-
-      - name: Stop existing containers
-        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cd ~/17th-team1-client
-          docker compose -f docker-compose-prod.yml down || true
-
-      - name: Rebuild & start containers
-        run: |
-          cd ~/17th-team1-client
-          docker compose -f docker-compose-prod.yml up -d --build
+          docker compose -f docker-compose-prod.yml up -d --no-build
+          docker image prune -f

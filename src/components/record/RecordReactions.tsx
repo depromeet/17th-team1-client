@@ -64,20 +64,17 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
   // Cleanup: 컴포넌트 언마운트 시 모든 타이머 정리
   useEffect(() => {
-    const debounce = debounceTimerRef;
-    const scrollDebounce = scrollDebounceTimerRef;
-    const timers = timersRef;
     return () => {
-      if (debounce.current) {
-        clearTimeout(debounce.current);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-      if (scrollDebounce.current) {
-        clearTimeout(scrollDebounce.current);
+      if (scrollDebounceTimerRef.current) {
+        clearTimeout(scrollDebounceTimerRef.current);
       }
-      timers.current.forEach(timer => {
+      timersRef.current.forEach(timer => {
         clearTimeout(timer);
       });
-      timers.current = [];
+      timersRef.current = [];
     };
   }, []);
 

@@ -5,10 +5,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/globber-frontend
+  IMAGE_NAME: depromeet/17th-team1-client/globber-frontend
 
 jobs:
-  # Job 1: GitHub Actions 서버에서 빌드 + GHCR에 push
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
@@ -34,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ghcr.io/depromeet/17th-team1-client/globber-frontend:latest
           build-args: |
             NEXT_PUBLIC_API_BASE_URL=https://globber.world/api
             NEXT_PUBLIC_REDIRECT_ORIGIN=https://globber.world
@@ -44,7 +43,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Job 2: 프로덕션 서버에서 pull만
   deploy:
     needs: build-and-push
     runs-on: self-hosted
@@ -55,7 +53,7 @@ jobs:
 
       - name: Pull & Deploy
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker pull ghcr.io/depromeet/17th-team1-client/globber-frontend:latest
           cd ~/17th-team1-client
           docker compose -f docker-compose-prod.yml up -d --no-build
           docker image prune -f

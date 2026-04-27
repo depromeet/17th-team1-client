@@ -155,7 +155,7 @@ export const RecordScrollContainer = ({
   }, [currentIndex, hasNext, hasPrevious, isTransitioning, onIndexChange]);
 
   // 인덱스 변경 시 애니메이션
-  // biome-ignore lint/correctness/useExhaustiveDependencies: currentIndex 변경 시 애니메이션 트리거 필요
+
   useEffect(() => {
     setIsTransitioning(true);
     const timer = setTimeout(() => {
@@ -166,11 +166,10 @@ export const RecordScrollContainer = ({
   }, [currentIndex]);
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: div with complex ref management for swipe gestures
     <div
       role="region"
       aria-label="Record scroll container"
-      ref={(node) => {
+      ref={node => {
         containerRef.current = node;
         if (swipeHandlers.ref) {
           (swipeHandlers.ref as (node: HTMLDivElement | null) => void)(node);

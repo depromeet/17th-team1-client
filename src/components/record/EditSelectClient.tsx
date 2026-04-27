@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
 import { Header } from "@/components/common/Header";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
 import type { City } from "@/types/city";
@@ -88,12 +89,12 @@ export function EditSelectClient({
     >();
 
     // 기존 도시들 먼저 추가
-    existingAdded.forEach((city) => {
+    existingAdded.forEach(city => {
       cityMap.set(String(city.id), city);
     });
 
     // 새 도시들로 덮어쓰기 (같은 id면 새 것으로)
-    newCities.forEach((city) => {
+    newCities.forEach(city => {
       cityMap.set(String(city.id), city);
     });
 
@@ -121,7 +122,7 @@ export function EditSelectClient({
       onComplete={handleComplete}
       buttonLabel="내 지구본에 추가하기"
       customHeader={
-        <div className="max-w-[512px] mx-auto w-full">
+        <div className="max-w-lg mx-auto w-full">
           <Header
             variant="navy"
             leftIcon="back"

@@ -29,7 +29,7 @@ export const isValidImageUrl = (url: string): boolean => {
  * // ["https://example.com/1.jpg", "/image.png"]
  */
 export const filterValidImageUrls = (urls: string[]): string[] => {
-  return urls.filter((url) => {
+  return urls.filter(url => {
     if (!url || typeof url !== "string") return false;
     return isValidImageUrl(url);
   });

@@ -1,4 +1,5 @@
 # 자세한 예시/배경 설명은 src/docs/detailed-rules.md를 참고하세요.
+
 # Globber Tailwind CSS 핵심 규칙
 
 1. 표준 Tailwind 클래스 우선 사용, 임의 값 `[]` 최소화
@@ -8,12 +9,12 @@
 
 ## 표준 문법 규칙
 
-| 항목 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
-| **크기** | `w-36`, `h-20`, `p-4` | `w-[36px]`, `h-[20px]` |
-| **색상** | `bg-gray-800`, `text-white` | `bg-[#1f2937]` (토큰 있을 때) |
-| **둥글기** | `rounded-lg`, `rounded-2xl` | `rounded-[12px]` |
-| **그림자** | `shadow-lg`, `shadow-card` | `shadow-[0_0_10px]` |
+| 항목       | ✅ 허용 (Good)              | ❌ 금지 (Bad)                 |
+| ---------- | --------------------------- | ----------------------------- |
+| **크기**   | `w-36`, `h-20`, `p-4`       | `w-[36px]`, `h-[20px]`        |
+| **색상**   | `bg-gray-800`, `text-white` | `bg-[#1f2937]` (토큰 있을 때) |
+| **둥글기** | `rounded-lg`, `rounded-2xl` | `rounded-[12px]`              |
+| **그림자** | `shadow-lg`, `shadow-card`  | `shadow-[0_0_10px]`           |
 
 ## cn 사용 규칙
 
@@ -53,6 +54,7 @@ const styles = cva(`base-class here`, { ... });
 ## 예외 허용 케이스
 
 임의 값 `[]` 사용이 허용되는 경우:
+
 1. 디자인 명세의 정확한 값 필요 시
 2. Tailwind에 사전 정의되지 않은 값
 3. 외부 라이브러리 CSS 변수 사용 시

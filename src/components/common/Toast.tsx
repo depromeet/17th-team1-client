@@ -1,7 +1,8 @@
 "use client";
 
-import * as ToastPrimitive from "@radix-ui/react-toast";
 import * as React from "react";
+
+import * as ToastPrimitive from "@radix-ui/react-toast";
 
 export type HeadlessToastProviderProps = {
   children: React.ReactNode;
@@ -58,7 +59,7 @@ export const HeadlessToast = React.forwardRef<HTMLLIElement, HeadlessToastProps>
         </ToastPrimitive.Close>
       </ToastPrimitive.Root>
     );
-  },
+  }
 );
 HeadlessToast.displayName = "HeadlessToast";
 

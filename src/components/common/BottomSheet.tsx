@@ -1,6 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+
 import { cn } from "@/utils/cn";
 
 export const BottomSheet = ({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => {
@@ -26,7 +27,7 @@ export const BottomSheetOverlay = ({ className, ...props }: React.ComponentProps
       className={cn(
         "fixed inset-0 z-40 bg-black/60 transition-opacity duration-300",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
-        className,
+        className
       )}
       {...props}
     />
@@ -50,9 +51,9 @@ export const BottomSheetContent = ({
           "transition-all duration-300",
           "data-[state=open]:slide-in-from-bottom-0 data-[state=open]:animate-in",
           "data-[state=closed]:slide-out-to-bottom-0 data-[state=closed]:animate-out",
-          className,
+          className
         )}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={e => e.preventDefault()}
         {...props}
       >
         <DialogPrimitive.Description className="sr-only">description</DialogPrimitive.Description>
@@ -93,7 +94,7 @@ export const BottomSheetCloseButton = ({ className, ...props }: React.ComponentP
         "flex items-center justify-center w-8 h-8",
         "text-text-primary hover:bg-surface-placeholder--8 rounded-full",
         "transition-colors",
-        className,
+        className
       )}
       {...props}
     />

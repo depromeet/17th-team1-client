@@ -1,7 +1,9 @@
 "use client";
 
-import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
+
+import { X } from "lucide-react";
+
 import {
   BottomSheet,
   BottomSheetCloseButton,
@@ -68,7 +70,7 @@ export const BaseInputBottomSheet = ({
   }, [isOpen, onClose]);
 
   return (
-    <BottomSheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <BottomSheet open={isOpen} onOpenChange={open => !open && onClose()}>
       <BottomSheetContent className="max-w-[512px] h-[90dvh] !px-4 flex flex-col overflow-hidden">
         <BottomSheetHeader className="w-full h-11 relative !px-0 shrink-0">
           <BottomSheetTitle className="text-lg font-bold text-white text-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

@@ -17,7 +17,7 @@ export const createGlobeImageUrl = (): string => {
     0, // 내부 반지름
     256,
     415, // 외부 중심
-    361, // 외부 반지름 (512의 70.45%)
+    361 // 외부 반지름 (512의 70.45%)
   );
   gradient1.addColorStop(0, "#000000");
   gradient1.addColorStop(1, "#032f59");
@@ -34,7 +34,7 @@ export const createGlobeImageUrl = (): string => {
     0, // 내부 반지름
     256,
     256, // 외부 중심
-    256, // 외부 반지름 (512의 50%)
+    256 // 외부 반지름 (512의 50%)
   );
   gradient2.addColorStop(0, "rgba(255, 255, 255, 0.1)"); // 10% 투명도
   gradient2.addColorStop(0.1577, "rgba(255, 255, 255, 0)");

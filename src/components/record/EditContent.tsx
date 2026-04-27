@@ -30,7 +30,7 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
       </div>
 
       <div className="flex flex-col gap-2 pb-12">
-        {cities.map((c) => {
+        {cities.map(c => {
           const flag = COUNTRY_CODE_TO_FLAG[c.countryCode] || "🌍";
           const countryName = getCountryName(c.countryCode);
           return (

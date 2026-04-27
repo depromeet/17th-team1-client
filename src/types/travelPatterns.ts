@@ -1,4 +1,4 @@
-export interface CountryData {
+export type CountryData = {
   id: string;
   name: string;
   flag: string;
@@ -11,10 +11,10 @@ export interface CountryData {
   thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
   cityCount?: number; // 해당 국가의 도시 수 (초기 앵커링 기준)
   updatedAt?: string; // 최근 기록 시간 (동률 처리 기준, ISO 8601 형식)
-}
+};
 
-export interface TravelPattern {
+export type TravelPattern = {
   title: string;
   subtitle: string;
   countries: CountryData[];
-}
+};

@@ -1,11 +1,13 @@
 # API Client 사용법
 
 ## 개요
+
 통일된 API 클라이언트를 사용하여 HTTP 요청을 관리합니다. 모든 API 요청은 일관된 에러 핸들링과 헤더 관리를 제공합니다.
 
 ## 기본 사용법
 
 ### 1. GET 요청 (인증 없음)
+
 ```typescript
 import { apiGet } from "@/lib/apiClient";
 
@@ -17,6 +19,7 @@ const data = await apiGet("/some-endpoint");
 ```
 
 ### 2. GET 요청 (인증 필요)
+
 ```typescript
 import { apiGet } from "@/lib/apiClient";
 
@@ -24,6 +27,7 @@ const userProfile = await apiGet("/auth/profile", undefined, "your-jwt-token");
 ```
 
 ### 3. POST 요청
+
 ```typescript
 import { apiPost } from "@/lib/apiClient";
 
@@ -35,6 +39,7 @@ const newGlobe = await apiPost("/globe/create", { cities }, token);
 ```
 
 ### 4. PUT 요청
+
 ```typescript
 import { apiPut } from "@/lib/apiClient";
 
@@ -42,6 +47,7 @@ const updatedGlobe = await apiPut("/globe/123", { name: "새 이름" }, token);
 ```
 
 ### 5. DELETE 요청
+
 ```typescript
 import { apiDelete } from "@/lib/apiClient";
 
@@ -51,6 +57,7 @@ await apiDelete("/globe/123", token);
 ## 서비스 사용법
 
 ### 도시 서비스
+
 ```typescript
 import { fetchCities } from "@/services/cityService";
 
@@ -62,6 +69,7 @@ const initialCities = await fetchCities({ limit: 53 });
 ```
 
 ### 인증 서비스
+
 ```typescript
 import { authService } from "@/services/authService";
 
@@ -73,6 +81,7 @@ const profile = await authService.getProfile(token);
 ```
 
 ### 지구본 서비스
+
 ```typescript
 import { globeService } from "@/services/globeService";
 

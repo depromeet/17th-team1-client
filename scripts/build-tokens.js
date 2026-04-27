@@ -22,8 +22,8 @@ function resolveReference(value, allTokens) {
 const colors = {};
 
 // 토큰 그룹을 처리하는 함수
-const processTokenGroup = (groupData) => {
-  Object.keys(groupData).forEach((key) => {
+const processTokenGroup = groupData => {
+  Object.keys(groupData).forEach(key => {
     const token = groupData[key];
 
     // 색상 토큰인지 확인
@@ -54,7 +54,7 @@ const processTokenGroup = (groupData) => {
 };
 
 // tokens.json의 모든 최상위 그룹 순회
-Object.keys(tokensData).forEach((groupName) => {
+Object.keys(tokensData).forEach(groupName => {
   const group = tokensData[groupName];
 
   // 이 그룹 처리하기
@@ -64,9 +64,9 @@ Object.keys(tokensData).forEach((groupName) => {
 });
 
 // globals.css에 새로운 색상 토큰 업데이트
-const generateCSSVariables = (colors) => {
+const generateCSSVariables = colors => {
   return Object.keys(colors)
-    .map((key) => `  --color-${key}: ${colors[key]};`)
+    .map(key => `  --color-${key}: ${colors[key]};`)
     .join("\n");
 };
 

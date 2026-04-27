@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
+import { isCoordinateFormat } from "@/utils/geocoding";
 import { filterValidImageUrls } from "@/utils/imageValidation";
+
 import { RecordImageCarousel } from "./RecordImageCarousel";
 import { RecordMetaInfo } from "./RecordMetaInfo";
 import { RecordReactions } from "./RecordReactions";
@@ -19,10 +22,11 @@ type RecordCardProps = {
   reactions?: Emoji[];
   isOwner?: boolean;
   showScrollHint?: boolean;
+  isFirstRecord?: boolean;
 };
 
 const formatTakenMonth = (
-  takenMonth: string | { year: number; month: string; monthValue: number; leapYear: boolean } | null | undefined,
+  takenMonth: string | { year: number; month: string; monthValue: number; leapYear: boolean } | null | undefined
 ): string | undefined => {
   if (!takenMonth) return undefined;
   if (typeof takenMonth === "string") {
@@ -50,6 +54,7 @@ export const RecordCard = ({
   reactions,
   isOwner = false,
   showScrollHint = false,
+  isFirstRecord = false,
 }: RecordCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [userInfoHeight, setUserInfoHeight] = useState(0);
@@ -70,15 +75,6 @@ export const RecordCard = ({
   const currentCategory = currentMetadata?.tag && currentMetadata.tag !== "NONE" ? currentMetadata.tag : undefined;
   const currentDate = formatTakenMonth(currentMetadata?.takenMonth);
 
-  /**
-   * 기존 데이터에 좌표 형식("37.4850, 127.0178")으로 저장된 placeName 검증
-   * 새 데이터는 ImageMetadata에서 자동으로 reverse geocoding 처리됨
-   */
-  const isCoordinateFormat = (str: string | null | undefined): boolean => {
-    if (!str) return false;
-    return /^[\d.,\s]+$/.test(str.trim());
-  };
-
   // placeName이 있고 좌표 형식이 아닐 때만 표시, 없으면 undefined (도시명 fallback 사용 안함)
   const currentLocation =
     currentMetadata?.placeName && !isCoordinateFormat(currentMetadata.placeName)
@@ -89,7 +85,7 @@ export const RecordCard = ({
     <div className="w-full h-full bg-surface-secondary flex flex-col relative" data-record-card>
       <div
         className="relative min-h-0 flex-1 w-full"
-        onTouchStart={(e) => {
+        onTouchStart={e => {
           // 이미지 캐러셀 내부에서는 수평 스와이프만 허용
           const target = e.target as HTMLElement;
           if (target.closest(".swiper") || target.closest("[data-carousel]")) {
@@ -101,6 +97,7 @@ export const RecordCard = ({
           images={validImages}
           onImageChange={setCurrentImageIndex}
           userInfoHeight={userInfoHeight}
+          isFirstRecord={isFirstRecord}
         />
 
         {/* 상단 그라데이션 오버레이 */}
@@ -134,23 +131,22 @@ export const RecordCard = ({
 
       {/* 하단 영역 - 이모지 반응 */}
       {/* 힌트 표시 여부에 따라 패딩 동적 변경: 힌트 있음(20px+힌트높이+16px≈104px), 없음(30px) */}
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: div with stopPropagation for touch/mouse events, not a button */}
       <div
         className={`px-4 pr-0 shrink-0 relative z-20 ${showScrollHint ? "pb-[calc(20px+49px+16px)]" : "pb-[30px]"}`}
         data-emoji-reactions
-        onTouchStart={(e) => {
+        onTouchStart={e => {
           e.stopPropagation();
         }}
-        onTouchMove={(e) => {
+        onTouchMove={e => {
           e.stopPropagation();
         }}
-        onTouchEnd={(e) => {
+        onTouchEnd={e => {
           e.stopPropagation();
         }}
-        onMouseDown={(e) => {
+        onMouseDown={e => {
           e.stopPropagation();
         }}
-        onWheel={(e) => {
+        onWheel={e => {
           e.stopPropagation();
         }}
       >

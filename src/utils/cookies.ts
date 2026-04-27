@@ -4,7 +4,7 @@ export const getCookie = (name: string): string | null => {
 
   const value = document.cookie
     .split("; ")
-    .find((row) => row.startsWith(`${name}=`))
+    .find(row => row.startsWith(`${name}=`))
     ?.split("=")[1];
 
   return value || null;
@@ -76,7 +76,6 @@ export const clearAllCookies = (): void => {
     const cookieName = cookie.split("=")[0];
     for (const d of domainCandidates) {
       const domainAttr = d ? `; domain=${d}` : "";
-      // biome-ignore lint/suspicious/noDocumentCookie: 쿠키 삭제를 위해 document.cookie에 직접 할당해야 합니다.
       document.cookie = `${cookieName}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainAttr}`;
     }
   }

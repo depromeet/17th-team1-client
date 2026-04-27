@@ -1,6 +1,8 @@
+import type * as React from "react";
+
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+
 import { CloseIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
@@ -21,7 +23,7 @@ export const chipVariants = cva(
       variant: "gray",
       size: "md",
     },
-  },
+  }
 );
 
 export type ChipProps = React.ComponentProps<"div"> &

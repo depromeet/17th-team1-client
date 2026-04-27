@@ -17,8 +17,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "API Key not configured" }, { status: 500 });
+    }
+
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko`,
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&key=${apiKey}&language=ko`
     );
     const data = await response.json();
 

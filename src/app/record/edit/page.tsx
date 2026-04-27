@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+
 import { EditClient } from "@/components/record/EditClient";
 import { getMemberTravels } from "@/services/memberService";
 import { handleServerError } from "@/utils/serverErrorHandler";
@@ -78,10 +79,10 @@ export default async function EditRecordPage({
   }
 
   // 삭제된 도시 정보 추출 (원본 데이터에서)
-  const deletedCities = originalCities.filter((c) => removedIds.has(c.id));
+  const deletedCities = originalCities.filter(c => removedIds.has(c.id));
 
   // 삭제된 도시 제외
-  cities = cities.filter((c) => !removedIds.has(c.id));
+  cities = cities.filter(c => !removedIds.has(c.id));
 
   // 추가된 도시 추가
   if (addedParam) {
@@ -96,10 +97,10 @@ export default async function EditRecordPage({
             lat: Number(c.lat),
             lng: Number(c.lng),
             isNew: true,
-          }),
+          })
         );
-        const existingIds = new Set(cities.map((c) => c.id));
-        const merged = [...added.filter((c) => !existingIds.has(c.id)), ...cities];
+        const existingIds = new Set(cities.map(c => c.id));
+        const merged = [...added.filter(c => !existingIds.has(c.id)), ...cities];
         cities = merged;
       }
     } catch (error) {

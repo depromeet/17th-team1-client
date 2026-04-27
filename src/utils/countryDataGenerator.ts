@@ -1,4 +1,5 @@
 import worldCountries from "world-countries";
+
 import type { KoreanContinent, WorldCountry } from "../types/geography";
 
 const englishRegionToKorean = (region?: string, subregion?: string): KoreanContinent | "기타" => {
@@ -46,7 +47,7 @@ export const generateCountriesByContinent = (): Record<KoreanContinent, Record<s
       남아메리카: {},
       오세아니아: {},
       아프리카: {},
-    },
+    }
   );
 
   return {

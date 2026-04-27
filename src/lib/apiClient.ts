@@ -12,7 +12,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public endpoint: string,
+    public endpoint: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -64,7 +64,7 @@ export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   token?: string,
-  options?: { skipGlobalErrorHandling?: boolean },
+  options?: { skipGlobalErrorHandling?: boolean }
 ): Promise<T> => {
   try {
     const searchParams = new URLSearchParams();
@@ -85,7 +85,6 @@ export const apiGet = async <T>(
     const response = await fetch(url, {
       method: "GET",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
-      cache: "no-store",
     });
 
     logger.log(`[API] Response status:`, response.status);
@@ -140,7 +139,11 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -159,7 +162,7 @@ export const apiPost = async <T>(endpoint: string, data?: unknown, token?: strin
 export const apiPostWithHeaders = async <T>(
   endpoint: string,
   data?: unknown,
-  token?: string,
+  token?: string
 ): Promise<{ data: T; headers: Headers }> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -183,7 +186,11 @@ export const apiPostWithHeaders = async <T>(
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -252,7 +259,11 @@ export const apiPatch = async <T>(endpoint: string, data?: unknown, token?: stri
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);
@@ -286,7 +297,11 @@ export const apiDelete = async <T>(endpoint: string, data?: unknown, token?: str
       const responseText = await response.text().catch(() => "Unable to read response");
       logger.log(`[API] Error response body:`, responseText);
 
-      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (responseText) {
+        errorMessage += ` - ${responseText}`;
+      }
+      throw new ApiError(errorMessage, response.status, endpoint);
     }
 
     const result = await parseJsonSafely<T>(response);

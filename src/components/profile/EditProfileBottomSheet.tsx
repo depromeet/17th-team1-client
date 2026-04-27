@@ -1,11 +1,12 @@
 "use client";
 
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import heic2any from "heic2any";
-import { X } from "lucide-react";
-import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import Image from "next/image";
+
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { sendGAEvent } from "@next/third-parties/google";
+import { X } from "lucide-react";
 
 import {
   BottomSheet,
@@ -16,7 +17,7 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
-import { editProfileSchema, EditProfileFormData, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
+import { EditProfileFormData, editProfileSchema, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {
@@ -63,12 +64,10 @@ export const EditProfileBottomSheet = ({
   // prop 변경에 반응하는 effect 패턴을 의도적으로 사용합니다.
   useEffect(() => {
     if (isOpen && !prevIsOpenRef.current) {
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
       reset({
         nickname: initialName,
         imageFile: undefined,
       });
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change
       setSelectedImagePreview(null);
     }
     prevIsOpenRef.current = isOpen;
@@ -98,6 +97,7 @@ export const EditProfileBottomSheet = ({
 
       if (isHeic) {
         try {
+          const heic2any = (await import("heic2any")).default;
           const convertedBlob = await heic2any({
             blob: originalFile,
             toType: "image/jpeg",
@@ -151,6 +151,11 @@ export const EditProfileBottomSheet = ({
 
   const onSubmit = useCallback(
     async (data: EditProfileFormData) => {
+      sendGAEvent("event", "menu_profile_edit_save_click", {
+        flow: "menu",
+        screen: "profile_edit",
+        click_code: "menu.profile.edit.header.save",
+      });
       try {
         setIsLoading(true);
         await onSave(data.nickname, data.imageFile);
@@ -170,7 +175,14 @@ export const EditProfileBottomSheet = ({
       <BottomSheetContent className="h-[calc(100dvh-62px)] max-w-lg">
         <BottomSheetHeader className="w-full h-11 relative">
           <BottomSheetCloseButton
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              sendGAEvent("event", "menu_profile_edit_close_click", {
+                flow: "menu",
+                screen: "profile_edit",
+                click_code: "menu.profile.edit.header.close",
+              });
+              onOpenChange(false);
+            }}
             aria-label="닫기"
             className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6"
           >
@@ -209,6 +221,15 @@ export const EditProfileBottomSheet = ({
                   ? "text-text-thirdly cursor-not-allowed"
                   : "text-text-secondary cursor-pointer hover:text-text-primary"
               )}
+              onClick={() => {
+                if (isLoading) return;
+
+                sendGAEvent("event", "menu_profile_edit_photo_change_click", {
+                  flow: "menu",
+                  screen: "profile_edit",
+                  click_code: "menu.profile.edit.photo.change",
+                });
+              }}
             >
               {isLoading ? "저장 중..." : "이미지 변경"}
               <input

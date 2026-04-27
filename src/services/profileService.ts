@@ -49,7 +49,7 @@ export const getMyProfile = async (token?: string): Promise<ProfileData> => {
  */
 export const getS3UploadUrl = async (
   uploadData: S3UploadUrlParams,
-  token?: string,
+  token?: string
 ): Promise<{ presignedUrl: string; s3Key: string }> => {
   try {
     const authToken = getValidatedAuthToken(token);
@@ -86,7 +86,7 @@ export const uploadAndUpdateProfile = async (
   nickname: string,
   memberId: number,
   imageFile?: File,
-  token?: string,
+  token?: string
 ): Promise<ProfileData> => {
   try {
     const authToken = getValidatedAuthToken(token);
@@ -100,7 +100,7 @@ export const uploadAndUpdateProfile = async (
           fileName: imageFile.name,
           contentType: imageFile.type,
         },
-        authToken,
+        authToken
       );
 
       const uploadResponse = await fetch(presignedUrl, {

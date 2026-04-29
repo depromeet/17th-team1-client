@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+
 import { Button } from "@/components/common/Button";
 import { Dialog, DialogActions, DialogContent, DialogHeader, DialogTitle } from "@/components/common/Dialog";
 import { cn } from "@/utils/cn";
@@ -29,7 +30,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
       <DialogContent
         className={cn(
           "!w-[300px] !max-w-[300px] bg-[#1c2d45] border-0 rounded-2xl p-0 gap-0",
-          "shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]",
+          "shadow-[0px_2px_20px_0px_rgba(0,0,0,0.25)]"
         )}
       >
         <DialogHeader className="h-25 justify-center items-center self-stretch gap-[10px] py-[30px] px-[20px] rounded-t-[16px] border-0">
@@ -47,7 +48,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
             className={cn(
               "flex flex-1 rounded-2xl h-[45px] px-5 py-3 justify-center items-center",
               "bg-surface-placeholder--8",
-              "text-white text-[14px] font-bold leading-[1.5]",
+              "text-white text-[14px] font-bold leading-[1.5]"
             )}
           >
             아니요
@@ -60,7 +61,7 @@ export const LogoutDialog = ({ isOpen, onOpenChange, onConfirm, isLoading = fals
             className={cn(
               "flex flex-1 rounded-2xl h-[45px] px-5 py-3 justify-center items-center",
               "!bg-state-warning",
-              "text-white text-[14px] font-bold leading-[1.5]",
+              "text-white text-[14px] font-bold leading-[1.5]"
             )}
           >
             {isLoading ? "로그아웃 중..." : "로그아웃"}

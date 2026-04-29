@@ -1,15 +1,18 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+
 import type { EmojiClickData } from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+
 import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { HeadlessToast } from "@/components/common/Toast";
-import { pressEmoji, registerEmoji } from "@/services/emojiService";
+import { usePressEmojiMutation, useRegisterEmojiMutation } from "@/hooks/mutation/useEmojiMutations";
+import { useOwnerToast } from "@/hooks/useOwnerToast";
 import type { Emoji } from "@/types/emoji";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -33,32 +36,28 @@ const MAX_EMPTY_SLOTS = 4;
 
 export const RecordReactions = ({ recordId, initialReactions = [], isOwner = false }: RecordReactionsProps) => {
   const router = useRouter();
-  const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
+  const { mutateAsync: pressEmoji } = usePressEmojiMutation();
+  const { mutateAsync: registerEmoji } = useRegisterEmojiMutation();
+  const buildInitialReactions = (sourceReactions: Reaction[]) => {
+    const reactionsWithAdjustedCount = sourceReactions.map(reaction => ({
+      ...reaction,
+      count: isOwner ? reaction.count : reaction.count + 1,
+    }));
+    return [...reactionsWithAdjustedCount].sort((a, b) => b.count - a.count);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const baseReactions = useMemo(() => buildInitialReactions(initialReactions), [initialReactions, isOwner]);
+  const [localReactions, setLocalReactions] = useState<Reaction[] | null>(null);
+  const reactions = localReactions ?? baseReactions;
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
+  const { showToast, toastMessage, setShowToast, showOwnerToast } = useOwnerToast();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastToastTimeRef = useRef<number>(0);
   const isAnimatingRef = useRef(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const reactionsContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isInitialLoad) {
-      // 초기 로딩 시 서버 카운트 + 1로 설정
-      const reactionsWithIncreasedCount = initialReactions.map((reaction) => ({
-        ...reaction,
-        count: reaction.count + 1,
-      }));
-      const sortedReactions = [...reactionsWithIncreasedCount].sort((a, b) => b.count - a.count);
-      setReactions(sortedReactions);
-      setIsInitialLoad(false);
-    }
-  }, [initialReactions, isInitialLoad]);
 
   // Cleanup: 컴포넌트 언마운트 시 모든 타이머 정리
   useEffect(() => {
@@ -66,10 +65,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
-      timersRef.current.forEach((timer) => {
+      timersRef.current.forEach(timer => {
         clearTimeout(timer);
       });
       timersRef.current = [];
@@ -162,10 +158,10 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           y: scaledY,
         };
 
-        setFloatingEmojis((prev) => [...prev, floatingEmoji]);
+        setFloatingEmojis(prev => [...prev, floatingEmoji]);
 
         const removeTimer = setTimeout(() => {
-          setFloatingEmojis((prev) => prev.filter((e) => e.id !== floatingEmoji.id));
+          setFloatingEmojis(prev => prev.filter(e => e.id !== floatingEmoji.id));
         }, 2000);
 
         timersRef.current.push(removeTimer);
@@ -181,7 +177,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       () => {
         isAnimatingRef.current = false;
       },
-      emojiCount * 150 + 300,
+      emojiCount * 150 + 300
     );
 
     timersRef.current.push(animationEndTimer);
@@ -194,36 +190,15 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
     // owner일 때: Toast 표시
     if (isOwner) {
-      const now = Date.now();
-      const timeSinceLastToast = now - lastToastTimeRef.current;
-
-      // 1.5초(1500ms) 이내 연속 클릭: Toast 재노출 X (중복 방지)
-      if (timeSinceLastToast < 1500) {
-        return;
-      }
-
-      // 1.5초 이후 재클릭: Toast 재노출
-      lastToastTimeRef.current = now;
-      setToastMessage("친구들만 이모지를 눌러줄 수 있어요!");
-      setShowToast(true);
-
-      // 기존 타이머 정리
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
-
-      // 1.5초 후 Toast 자동 닫기
-      toastTimerRef.current = setTimeout(() => {
-        setShowToast(false);
-      }, 1500);
-
+      showOwnerToast("친구들만 이모지를 눌러줄 수 있어요!");
       return;
     }
 
     // owner가 아닐 때만 카운트 증가 및 애니메이션
     // 먼저 UI 업데이트 (낙관적 업데이트)
-    setReactions((prev) => {
-      const updatedReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
+    setLocalReactions(prev => {
+      const currentReactions = prev ?? baseReactions;
+      const updatedReactions = currentReactions.map(r => (r.code === reactionCode ? { ...r, count: r.count + 1 } : r));
       return updatedReactions;
     });
 
@@ -246,8 +221,11 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
     } catch (error) {
       // owner가 아닐 때만 롤백 처리
-      setReactions((prev) => {
-        const rolledBackReactions = prev.map((r) => (r.code === reactionCode ? { ...r, count: r.count - 1 } : r));
+      setLocalReactions(prev => {
+        const currentReactions = prev ?? baseReactions;
+        const rolledBackReactions = currentReactions.map(r =>
+          r.code === reactionCode ? { ...r, count: r.count - 1 } : r
+        );
         return rolledBackReactions;
       });
 
@@ -268,17 +246,18 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       });
 
       // 성공 시 로컬 상태 업데이트
-      setReactions((prev) => {
-        const existingReaction = prev.find((r) => r.glyph === glyph);
+      setLocalReactions(prev => {
+        const currentReactions = prev ?? baseReactions;
+        const existingReaction = currentReactions.find(r => r.glyph === glyph);
 
-        // owner가 아닐 때만 카운트 증가
+        // owner가 아닐 때만 카운트 증가, owner는 카운트 0으로 추가
         if (existingReaction) {
-          const updatedReactions = prev.map((r) =>
-            r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r,
+          const updatedReactions = currentReactions.map(r =>
+            r.glyph === glyph ? { ...r, count: isOwner ? r.count : r.count + 1 } : r
           );
 
-          const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
-          const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
+          const clickedReaction = updatedReactions.find(r => r.glyph === glyph);
+          const otherReactions = updatedReactions.filter(r => r.glyph !== glyph);
           const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
           return newOrder;
@@ -290,7 +269,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           count: isOwner ? 0 : 1,
         };
 
-        const newReactions = [newReaction, ...prev];
+        const newReactions = [newReaction, ...currentReactions];
         return newReactions;
       });
 
@@ -303,21 +282,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
       if (isDuplicateError) {
         // owner일 때: Toast 표시
         if (isOwner) {
-          const now = Date.now();
-          lastToastTimeRef.current = now;
-          setToastMessage("이미 등록된 이모지입니다.");
-          setShowToast(true);
-
-          // 기존 타이머 정리
-          if (toastTimerRef.current) {
-            clearTimeout(toastTimerRef.current);
-          }
-
-          // 1.5초 후 Toast 자동 닫기
-          toastTimerRef.current = setTimeout(() => {
-            setShowToast(false);
-          }, 1500);
-
+          showOwnerToast("이미 등록된 이모지입니다.");
           setShowEmojiPicker(false);
           return;
         }
@@ -331,25 +296,28 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           });
 
           // 성공 시 로컬 상태 업데이트
-          setReactions((prev) => {
-            const existingReaction = prev.find((r) => r.glyph === glyph);
+          setLocalReactions(prev => {
+            const currentReactions = prev ?? baseReactions;
+            const existingReaction = currentReactions.find(r => r.glyph === glyph);
 
             if (existingReaction) {
-              const updatedReactions = prev.map((r) => (r.glyph === glyph ? { ...r, count: r.count + 1 } : r));
+              const updatedReactions = currentReactions.map(r =>
+                r.glyph === glyph ? { ...r, count: r.count + 1 } : r
+              );
 
-              const clickedReaction = updatedReactions.find((r) => r.glyph === glyph);
-              const otherReactions = updatedReactions.filter((r) => r.glyph !== glyph);
+              const clickedReaction = updatedReactions.find(r => r.glyph === glyph);
+              const otherReactions = updatedReactions.filter(r => r.glyph !== glyph);
               const newOrder = clickedReaction ? [clickedReaction, ...otherReactions] : updatedReactions;
 
               return newOrder;
             }
 
-            return prev;
+            return currentReactions;
           });
 
           // 애니메이션 실행 - 해당 이모지 버튼 찾기
           const reactionButton = reactionsContainerRef.current?.querySelector(
-            `button[data-emoji-code="${code}"]`,
+            `button[data-emoji-code="${code}"]`
           ) as HTMLButtonElement;
 
           if (reactionButton) {
@@ -425,7 +393,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
               key={`${code}-${glyph}-${index}`}
               type="button"
               data-emoji-code={code}
-              onClick={(e) => handleReactionClick(code, e)}
+              onClick={e => handleReactionClick(code, e)}
               whileTap={canInteract ? { scale: 0.85 } : {}}
               whileHover={canInteract ? { scale: 1.05 } : {}}
               className="w-[66px] h-[66px] rounded-full flex flex-col items-center justify-center gap-0.5 shrink-0"
@@ -441,11 +409,11 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
           ))}
 
           {hasEmptySlots &&
-            Array.from({ length: emptySlots }, (_, i) => `empty-${reactions.length + i}`).map((uniqueKey) => (
+            Array.from({ length: emptySlots }, (_, i) => `empty-${reactions.length + i}`).map(uniqueKey => (
               <button
                 key={uniqueKey}
                 type="button"
-                onClick={(e) => handleAddEmoji(e)}
+                onClick={e => handleAddEmoji(e)}
                 className="w-[66px] h-[66px] rounded-full flex items-center justify-center shrink-0"
                 style={{
                   backgroundImage:
@@ -461,7 +429,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
         {typeof document !== "undefined" &&
           createPortal(
             <AnimatePresence>
-              {floatingEmojis.map((floatingEmoji) => (
+              {floatingEmojis.map(floatingEmoji => (
                 <motion.div
                   key={floatingEmoji.id}
                   className="fixed pointer-events-none z-40 text-5xl drop-shadow-lg"
@@ -493,7 +461,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
                 </motion.div>
               ))}
             </AnimatePresence>,
-            document.body,
+            document.body
           )}
 
         {showEmojiPicker &&
@@ -504,13 +472,13 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
                 type="button"
                 className="fixed inset-0 bg-black/50 z-50"
                 onClick={() => setShowEmojiPicker(false)}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === "Escape") setShowEmojiPicker(false);
                 }}
                 aria-label="이모지 피커 닫기"
               />
               <div
-                className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-[24px] bg-[#0E1724] overflow-hidden"
+                className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto rounded-t-3xl bg-[#0E1724] overflow-hidden"
                 style={{
                   paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : "env(safe-area-inset-bottom)",
                 }}
@@ -529,7 +497,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
                 />
               </div>
             </>,
-            document.body,
+            document.body
           )}
 
         {/* Toast 알림 - owner가 클릭했을 때 */}

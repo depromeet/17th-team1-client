@@ -1,5 +1,6 @@
 import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { ApiError, apiDelete, apiGet, apiPost } from "@/lib/apiClient";
+
+import { apiDelete, ApiError, apiGet, apiPost } from "@/lib/apiClient";
 import type { City } from "@/types/city";
 import type {
   CreateTravelRecordsResponse,
@@ -133,7 +134,7 @@ export const getTravelInsight = async (memberId: number, useToken = true): Promi
 // 멤버 여행 기록 삭제 API
 export const deleteMemberTravel = async (
   travelRecord: DeleteTravelRecord,
-  token?: string,
+  token?: string
 ): Promise<DeleteTravelRecordsResponse> => {
   try {
     let authToken = token;

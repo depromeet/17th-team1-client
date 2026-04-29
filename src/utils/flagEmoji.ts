@@ -1,10 +1,11 @@
 import worldCountries from "world-countries";
+
 import type { WorldCountry } from "../types/geography";
 
 // A-Z를 지역 표시 문자로 변환하여 국기 이모지 생성
 export const alpha2ToFlagEmoji = (alpha2: string): string => {
   if (!alpha2 || alpha2.length !== 2) return "";
-  const codePoints = [...alpha2.toUpperCase()].map((c) => 0x1f1e6 + (c.charCodeAt(0) - 65));
+  const codePoints = [...alpha2.toUpperCase()].map(c => 0x1f1e6 + (c.charCodeAt(0) - 65));
   return String.fromCodePoint(...codePoints);
 };
 

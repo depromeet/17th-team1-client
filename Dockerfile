@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:20-alpine AS base
 
 FROM base AS builder
@@ -8,7 +9,9 @@ RUN npm install -g pnpm@9.1.0
 
 # pnpm 설정 파일들 복사
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# 빌드 간 pnpm 스토어 캐시 재사용으로 의존성 설치 시간 단축 (--store-dir로 경로 명시, sharing=locked으로 동시 빌드 충돌 방지)
+RUN --mount=type=cache,id=globber-pnpm-store,sharing=locked,target=/pnpm-store \
+    pnpm install --frozen-lockfile --store-dir /pnpm-store
 
 COPY . .
 
@@ -23,8 +26,12 @@ ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
 ENV NEXT_PUBLIC_REDIRECT_ORIGIN=${NEXT_PUBLIC_REDIRECT_ORIGIN}
 ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 ENV NODE_ENV=production
+# 빌드 중 Node.js 최대 힙 메모리 명시 (self-hosted runner OOM kill 방지)
+ENV NODE_OPTIONS="--max-old-space-size=3072"
 
-RUN pnpm run build
+# 빌드 간 webpack 캐시 재사용으로 빌드 시간 단축 (sharing=locked으로 동시 빌드 캐시 충돌 방지)
+RUN --mount=type=cache,id=globber-nextjs-cache,sharing=locked,target=/app/.next/cache \
+    pnpm run build
 
 FROM base AS runner
 WORKDIR /app

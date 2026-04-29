@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic'; 
+
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
 import { fetchCities } from "@/services/cityService";
-
-export const dynamic = "force-dynamic";
 
 export default async function NationSelectPage() {
   try {

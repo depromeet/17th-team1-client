@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { ChevronDown } from "lucide-react";
 
 type RecordScrollHintProps = {
   show: boolean;

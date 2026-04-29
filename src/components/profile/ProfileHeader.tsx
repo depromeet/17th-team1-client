@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+import { ChevronLeft } from "lucide-react";
 
 type ProfileHeaderProps = {
   title: string;

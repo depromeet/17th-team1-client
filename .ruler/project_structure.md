@@ -1,4 +1,5 @@
 # 자세한 예시/배경 설명은 src/docs/detailed-rules.md를 참고하세요.
+
 ```
 src/
 ├── app/                    # Next.js App Router (페이지 및 API 라우트)

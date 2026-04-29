@@ -1,6 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+
 import { cn } from "@/utils/cn";
 
 export const Dialog = ({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => {
@@ -26,7 +27,7 @@ export const DialogOverlay = ({ className, ...props }: React.ComponentProps<type
       className={cn(
         "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
-        className,
+        className
       )}
       {...props}
     />
@@ -59,9 +60,9 @@ export const DialogContent = ({
           "transition-all duration-300",
           "data-[state=open]:scale-100 data-[state=open]:opacity-100",
           "data-[state=closed]:pointer-events-none data-[state=closed]:scale-95 data-[state=closed]:opacity-0",
-          className,
+          className
         )}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={e => e.preventDefault()}
         {...props}
       >
         <DialogPrimitive.Description className="sr-only">{ariaDescription}</DialogPrimitive.Description>

@@ -7,24 +7,23 @@ tone_instructions: >
 
 # 코드 리뷰 설정
 reviews:
-  profile: chill                      # 리뷰 스타일: 편안하고 친근한 톤
-  request_changes_workflow: false     # Request Change 요청시 병합 비활성화 해제
-  high_level_summary: true            # PR 전체 요약 제공
-  changed_files_summary: false        # 개별 파일 요약은 비활성화 (중복 방지)
-  sequence_diagrams: true            # 시퀀스 다이어그램 생성 활성화
-  assess_linked_issues: true          # 연결된 이슈 분석 활성화
-  related_issues: false               # 관련 이슈 추천 비활성화
-  related_prs: false                  # 관련 PR 추천 비활성화
-  suggested_labels: false             # 라벨 추천 비활성화
-  auto_apply_labels: false            # 자동 라벨 적용 비활성화
-  suggested_reviewers: false          # 리뷰어 추천 비활성화
-  auto_assign_reviewers: false        # 자동 리뷰어 할당 비활성화
-  poem: true                          # 리뷰 완료 후 시 작성 활성화 (재미 요소)
+  profile: chill # 리뷰 스타일: 편안하고 친근한 톤
+  request_changes_workflow: false # Request Change 요청시 병합 비활성화 해제
+  high_level_summary: true # PR 전체 요약 제공
+  changed_files_summary: false # 개별 파일 요약은 비활성화 (중복 방지)
+  sequence_diagrams: true # 시퀀스 다이어그램 생성 활성화
+  assess_linked_issues: true # 연결된 이슈 분석 활성화
+  related_issues: false # 관련 이슈 추천 비활성화
+  related_prs: false # 관련 PR 추천 비활성화
+  suggested_labels: false # 라벨 추천 비활성화
+  auto_apply_labels: false # 자동 라벨 적용 비활성화
+  suggested_reviewers: false # 리뷰어 추천 비활성화
+  auto_assign_reviewers: false # 자동 리뷰어 할당 비활성화
+  poem: true # 리뷰 완료 후 시 작성 활성화 (재미 요소)
 
   # 특정 경로별 상세 리뷰 지침 설정
   path_instructions:
-
-    - path: src/**   # Frontend 코드
+    - path: src/** # Frontend 코드
       instructions: |
         - 1. 팀 컨벤션, 가독성, 예외처리, 테스트/확장/유지보수성, 모듈화, React/TypeScript/Next.js 모범사례를 기반으로 리뷰해주세요.
         - 2. 최신 트렌드, 불필요한 로직, 클린코드, 리팩터링, 컴포넌트 설계, 상태관리, 성능 최적화, 접근성도 함께 확인해주세요.
@@ -37,11 +36,11 @@ reviews:
         - 9. Tailwind CSS 사용법과 접근성(aria-*, alt 등) 가이드라인 준수도 확인해주세요.
 
   # 자동 리뷰 기능 설정
-  abort_on_close: true               # PR이 닫히면 리뷰 중지
-  disable_cache: false               # 빠르고 효율적인 리뷰를 위해 캐시 기능 활성화
+  abort_on_close: true # PR이 닫히면 리뷰 중지
+  disable_cache: false # 빠르고 효율적인 리뷰를 위해 캐시 기능 활성화
   auto_review:
-    enabled: true                    # 자동 리뷰 활성화
-    auto_incremental_review: false    # 증분 리뷰 비활성화 (PR 이후 커밋/변경에 대해서는 리뷰하지 않도록 비활성화)
+    enabled: true # 자동 리뷰 활성화
+    auto_incremental_review: false # 증분 리뷰 비활성화 (PR 이후 커밋/변경에 대해서는 리뷰하지 않도록 비활성화)
     base_branches: ["develop", "main"]
 
   # 코드 분석 도구(Tools)
@@ -55,23 +54,23 @@ reviews:
 
 # 채팅 및 상호작용 설정
 chat:
-  auto_reply: true                    # 질문 시 자동 응답 활성화
+  auto_reply: true # 질문 시 자동 응답 활성화
 
 # 지식 베이스 설정 (CodeRabbit이 참고할 문서들)
 knowledge_base:
-  opt_out: false                      # 지식베이스 사용 허용 (프로젝트의 리뷰들 확인)
+  opt_out: false # 지식베이스 사용 허용 (프로젝트의 리뷰들 확인)
 
   web_search:
-    enabled: true                     # 웹 검색을 통한 최신 정보 활용
+    enabled: true # 웹 검색을 통한 최신 정보 활용
 
   learnings:
-    scope: local                      # 학습 데이터를 현재 저장소로 제한
+    scope: local # 학습 데이터를 현재 저장소로 제한
 
   issues:
-    scope: local                      # 이슈 참조를 현재 저장소로 제한
+    scope: local # 이슈 참조를 현재 저장소로 제한
 
   pull_requests:
-    scope: local                      # PR 참조를 현재 저장소로 제한
+    scope: local # PR 참조를 현재 저장소로 제한
 
 # 공통 그라운드 룰 (Frontend 공통)
 common_ground_rules:
@@ -104,40 +103,40 @@ common_ground_rules:
 
   # 작업 목표 설정 (Frontend 공통) - 효율적인 개발 프로세스를 위한 규칙
   work_guidelines:
-    goal_setting:                     # 작업 계획 및 범위 설정
+    goal_setting: # 작업 계획 및 범위 설정
       - "이슈 티켓 발행 시 목표 명확히 설정"
       - "큰 작업은 여러 개의 작은 티켓으로 분할"
-      - "PR은 최대 500 Line 제한"                    # 리뷰 품질 유지를 위한 크기 제한
+      - "PR은 최대 500 Line 제한" # 리뷰 품질 유지를 위한 크기 제한
       - "주요 변경사항이나 새로운 패턴 도입 시 반드시 사전 논의"
 
-    deadline:                         # 리뷰 프로세스 시간 관리
-      - "리뷰 완료 기준 24시간 이내"                   # 빠른 피드백 사이클 유지
+    deadline: # 리뷰 프로세스 시간 관리
+      - "리뷰 완료 기준 24시간 이내" # 빠른 피드백 사이클 유지
       - "피드백 마감기한을 팀과 설정하여 준수"
 
   # 리뷰어 자세와 원칙 (Frontend 공통) - 건설적인 리뷰 문화 조성
   reviewer_principles:
-    basic_rules:                      # 리뷰의 기본 원칙
-      - "피드백은 코드, 프로세스, 사양만을 대상으로 함"     # 개인 공격 방지
+    basic_rules: # 리뷰의 기본 원칙
+      - "피드백은 코드, 프로세스, 사양만을 대상으로 함" # 개인 공격 방지
       - "리뷰이와 리뷰어의 인격과는 분리"
       - "언어 폭력이나 비난이 섮인 지적 금지"
       - "시간에 쫓겨 리뷰 품질을 낮추지 말 것"
 
-    reviewer_attitude:                # 리뷰어가 가져야 할 마음가짐
+    reviewer_attitude: # 리뷰어가 가져야 할 마음가짐
       - "리뷰는 모두를 위한 것 (나 자신, 팀, 서비스)"
       - "적절한 시간 분배로 피드백 마감기한 준수"
       - "우선순위를 정해 필요한 부분만 간단히 리뷰"
 
-    feedback_method:                  # 효과적인 피드백 방법
-      constructive:                   # 건설적인 표현 방법
+    feedback_method: # 효과적인 피드백 방법
+      constructive: # 건설적인 표현 방법
         good: "이 부분을 다음과 같이 개선할 수 있을 것 같습니다"
         bad: "이 코드는 잘못되었다"
-      specific:                       # 구체적인 제안 방법
+      specific: # 구체적인 제안 방법
         good: "useMemo를 사용하면 불필요한 리렌더링을 방지할 수 있을 것 같습니다"
         bad: "성능이 안 좋다"
-      discussion:                     # 토론 방식
+      discussion: # 토론 방식
         - "토론을 하되, 납득할 수 있는 이유와 근거 충분히 제시"
 
-    mindset:                          # 리뷰 문화에 대한 기본 마인드셋
+    mindset: # 리뷰 문화에 대한 기본 마인드셋
       - "리뷰는 모두를 위한 것"
       - "사람은 누구나 실수한다 - 빠르게 인정하고 열린 마음으로 토론"
       - "칭찬도 좋은 코드 리뷰 - 특별한 의견이 없다면 칭찬하기"
@@ -149,7 +148,7 @@ code_generation:
   docstrings:
     language: ko-KR
     path_instructions:
-      - path:  src/**
+      - path: src/**
         instructions: |
           - JSDoc 공식 형식으로, 한글로 Docstring을 작성해주세요.
           - 컴포넌트/함수 목적, 파라미터, 반환값, 예외 정보를 명확하게 기술해 주세요.
@@ -157,7 +156,7 @@ code_generation:
 
   unit_tests:
     path_instructions:
-      - path:  src/**
+      - path: src/**
         instructions: |
           - React 컴포넌트는 React Testing Library를 사용한 컴포넌트 테스트, 나머지 영역은 함수/클래스 단위의 단위 테스트
           - given-when-then 패턴을 적용으로 테스트 작성

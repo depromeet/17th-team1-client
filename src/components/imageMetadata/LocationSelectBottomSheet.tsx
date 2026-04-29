@@ -1,10 +1,14 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { sendGAEvent } from "@next/third-parties/google";
+import { Loader2 } from "lucide-react";
+
 import { SearchInput } from "@/components/common/Input";
 import { useGoogleMapsScript } from "@/hooks/useGoogleMapsScript";
 import { cn } from "@/utils/cn";
+
 import { BaseInputBottomSheet } from "./BaseInputBottomSheet";
 
 export type LocationSelection = {
@@ -20,6 +24,8 @@ type LocationSelectBottomSheetProps = {
   onClose: () => void;
   onConfirm?: (location: LocationSelection) => void;
   initialLocation?: LocationSelection | null;
+  photoIndex?: number;
+  hasExistingLocation?: boolean;
 };
 
 export const LocationSelectBottomSheet = ({
@@ -27,9 +33,11 @@ export const LocationSelectBottomSheet = ({
   onClose,
   onConfirm,
   initialLocation,
+  photoIndex = 0,
+  hasExistingLocation = false,
 }: LocationSelectBottomSheetProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [predictions, setPredictions] = useState<google.maps.places.AutocompleteSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationSelection | null>(null);
@@ -47,10 +55,8 @@ export const LocationSelectBottomSheet = ({
     region: "KR",
   });
 
-  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
-  const placesContainerRef = useRef<HTMLDivElement | null>(null);
   const wasOpenRef = useRef(false);
+  const searchAttemptCountRef = useRef(0);
 
   const isInputDisabled = useMemo(() => !isReady || isLoading || !!scriptError, [isReady, isLoading, scriptError]);
 
@@ -70,25 +76,14 @@ export const LocationSelectBottomSheet = ({
   }, [isOpen, load]);
 
   useEffect(() => {
-    if (!isOpen || !isReady) return;
-
-    if (!autocompleteServiceRef.current) {
-      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-    }
-
-    if (!placesServiceRef.current) {
-      const container = placesContainerRef.current ?? document.createElement("div");
-      if (!placesContainerRef.current) {
-        container.style.display = "none";
-        document.body.appendChild(container);
-        placesContainerRef.current = container;
-      }
-      placesServiceRef.current = new window.google.maps.places.PlacesService(container);
-    }
-  }, [isOpen, isReady]);
-
-  useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
+      searchAttemptCountRef.current = 0;
+      sendGAEvent("event", "record_meta_location_view", {
+        flow: "editor",
+        screen: "record_edit_meta_location",
+        photo_index: photoIndex,
+        has_value: hasExistingLocation,
+      });
       if (initialLocation) {
         setSelectedLocation(initialLocation);
         setActivePlaceId(initialLocation.placeId ?? null);
@@ -98,7 +93,7 @@ export const LocationSelectBottomSheet = ({
       }
     }
     wasOpenRef.current = isOpen;
-  }, [initialLocation, isOpen, resetState]);
+  }, [initialLocation, isOpen, resetState, photoIndex, hasExistingLocation]);
 
   useEffect(() => {
     if (!isOpen || !isReady) return;
@@ -115,110 +110,101 @@ export const LocationSelectBottomSheet = ({
     setHasTyped(true);
     setIsSearching(true);
 
-    const timeoutId = window.setTimeout(() => {
-      autocompleteServiceRef.current?.getPlacePredictions(
-        {
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const result = await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
           input: trimmed,
           language: "ko",
           region: "KR",
-        },
-        (results, status) => {
-          setIsSearching(false);
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-            setPredictions(results.slice(0, 5));
-            setErrorMessage(null);
-          } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            setPredictions([]);
-            setErrorMessage(null);
-          } else if (status === window.google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
-            setPredictions([]);
-            setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
-          } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-            setPredictions([]);
-            setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
-          } else if (status === window.google.maps.places.PlacesServiceStatus.INVALID_REQUEST) {
-            setPredictions([]);
-            setErrorMessage("잘못된 검색 요청입니다.");
-          } else if (status === window.google.maps.places.PlacesServiceStatus.NOT_FOUND) {
-            setPredictions([]);
-            setErrorMessage("검색 결과를 찾을 수 없습니다.");
-          } else {
-            setPredictions([]);
-            setErrorMessage("장소를 검색하는 중 문제가 발생했습니다.");
-          }
-        },
-      );
+        });
+        setIsSearching(false);
+        setPredictions(result.suggestions.slice(0, 5));
+        setErrorMessage(null);
+      } catch (err: unknown) {
+        setIsSearching(false);
+        setPredictions([]);
+
+        const errorCode = err instanceof Error && "code" in err ? (err as Error & { code: string }).code : "";
+        if (errorCode === "RESOURCE_EXHAUSTED") {
+          setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
+        } else if (errorCode === "INVALID_ARGUMENT" || errorCode === "UNAUTHENTICATED") {
+          setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
+        } else {
+          setErrorMessage("장소를 검색하는 중 문제가 발생했습니다.");
+        }
+      }
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
   }, [isOpen, isReady, searchQuery]);
 
-  useEffect(() => {
-    return () => {
-      if (placesContainerRef.current) {
-        document.body.removeChild(placesContainerRef.current);
-        placesContainerRef.current = null;
-      }
-    };
-  }, []);
+  const handlePredictionSelect = async (suggestion: google.maps.places.AutocompleteSuggestion) => {
+    const placeId = suggestion.placePrediction?.placeId;
+    if (!placeId) return;
 
-  const handlePredictionSelect = (prediction: google.maps.places.AutocompletePrediction) => {
-    if (!prediction.place_id || !placesServiceRef.current) return;
-
-    setActivePlaceId(prediction.place_id);
+    setActivePlaceId(placeId);
     setIsFetchingDetails(true);
     setErrorMessage(null);
 
-    const request: google.maps.places.PlaceDetailsRequest = {
-      placeId: prediction.place_id,
-      fields: ["name", "formatted_address", "geometry"],
-      language: "ko",
-      region: "KR",
-    };
+    try {
+      const place = new window.google.maps.places.Place({ id: placeId });
+      await place.fetchFields({
+        fields: ["displayName", "formattedAddress", "location"],
+      });
 
-    placesServiceRef.current.getDetails(request, (details, status) => {
-      setIsFetchingDetails(false);
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && details?.geometry?.location) {
-        const lat = details.geometry.location.lat();
-        const lng = details.geometry.location.lng();
-        const name =
-          details.name || prediction.structured_formatting?.main_text || prediction.description || "선택한 장소";
-        const formattedAddress =
-          details.formatted_address ||
-          prediction.structured_formatting?.secondary_text ||
-          prediction.description ||
-          name;
+      const lat = place.location?.lat();
+      const lng = place.location?.lng();
 
-        const location: LocationSelection = {
-          placeId: prediction.place_id,
-          name,
-          address: formattedAddress,
-          latitude: lat,
-          longitude: lng,
-        };
+      if (lat === undefined || lng === undefined) {
+        throw new Error("Location not found");
+      }
 
-        setSelectedLocation(location);
-        setActivePlaceId(location.placeId ?? null);
-      } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-        setActivePlaceId(null);
+      const mainText = suggestion.placePrediction?.mainText?.text || suggestion.placePrediction?.text?.text || "";
+      const secondaryText = suggestion.placePrediction?.secondaryText?.text || "";
+
+      const name = place.displayName || mainText || "선택한 장소";
+      const formattedAddress = place.formattedAddress || secondaryText || name;
+
+      const location: LocationSelection = {
+        placeId,
+        name,
+        address: formattedAddress,
+        latitude: lat,
+        longitude: lng,
+      };
+
+      setSelectedLocation(location);
+      setActivePlaceId(location.placeId ?? null);
+    } catch (err: unknown) {
+      setActivePlaceId(null);
+
+      const errorCode = err instanceof Error && "code" in err ? (err as Error & { code: string }).code : "";
+      if (errorCode === "NOT_FOUND") {
         setErrorMessage("선택한 장소의 상세 정보를 찾을 수 없습니다.");
-      } else if (status === window.google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
-        setActivePlaceId(null);
+      } else if (errorCode === "RESOURCE_EXHAUSTED") {
         setErrorMessage("잠시 후 다시 시도해주세요. (쿼리 한도 초과)");
-      } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-        setActivePlaceId(null);
+      } else if (errorCode === "INVALID_ARGUMENT" || errorCode === "UNAUTHENTICATED") {
         setErrorMessage("Google Maps API 요청이 거부되었습니다. API 키를 확인해주세요.");
       } else {
-        setActivePlaceId(null);
         setErrorMessage("장소 정보를 불러오지 못했습니다.");
       }
-    });
+    } finally {
+      setIsFetchingDetails(false);
+    }
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
     setSelectedLocation(null);
     setActivePlaceId(null);
+    searchAttemptCountRef.current += 1;
+    sendGAEvent("event", "record_meta_location_search", {
+      flow: "editor",
+      screen: "record_edit_meta_location",
+      click_code: "editor.record.edit.meta.location.search.input.change",
+      photo_index: photoIndex,
+      search_attempt_count: searchAttemptCountRef.current,
+    });
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -230,6 +216,13 @@ export const LocationSelectBottomSheet = ({
 
   const handleConfirm = () => {
     if (!selectedLocation) return;
+    sendGAEvent("event", "record_meta_location_confirm", {
+      flow: "editor",
+      screen: "record_edit_meta_location",
+      click_code: "editor.record.edit.meta.location.cta.confirm",
+      photo_index: photoIndex,
+      has_value: true,
+    });
     onConfirm?.(selectedLocation);
     handleClose();
   };
@@ -293,13 +286,16 @@ export const LocationSelectBottomSheet = ({
 
               {!isSearching && predictions.length > 0 && (
                 <ul className="flex flex-col gap-3">
-                  {predictions.map((prediction) => {
-                    const isSelected = prediction.place_id === (activePlaceId ?? selectedLocation?.placeId ?? null);
-                    const mainText = prediction.structured_formatting?.main_text || prediction.description || "";
-                    const secondaryText =
-                      prediction.structured_formatting?.secondary_text || prediction.description || "상세 정보 없음";
+                  {predictions.map((prediction, index) => {
+                    const placeId = prediction.placePrediction?.placeId;
+                    const isSelected = placeId === (activePlaceId ?? selectedLocation?.placeId ?? null);
+                    const mainText =
+                      prediction.placePrediction?.mainText?.text ||
+                      prediction.placePrediction?.text?.text ||
+                      "알 수 없는 장소";
+                    const secondaryText = prediction.placePrediction?.secondaryText?.text || "상세 정보 없음";
                     return (
-                      <li key={prediction.place_id}>
+                      <li key={placeId || index}>
                         <button
                           type="button"
                           onClick={() => handlePredictionSelect(prediction)}
@@ -307,7 +303,7 @@ export const LocationSelectBottomSheet = ({
                             "w-full rounded-2xl border text-left transition-colors cursor-pointer flex flex-col items-start gap-1 px-5 py-[15px]",
                             isSelected
                               ? "border-[#00D9FF] bg-transparent hover:border-[#00D9FF]"
-                              : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]",
+                              : "border-[#243246] bg-transparent hover:border-[#36506C] hover:bg-[#1C2B43]"
                           )}
                         >
                           <div className="text-base font-bold text-white truncate w-full">{mainText}</div>

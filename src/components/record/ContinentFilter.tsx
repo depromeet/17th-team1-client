@@ -1,3 +1,5 @@
+import { sendGAEvent } from "@next/third-parties/google";
+
 import type { Continent } from "@/types/record";
 
 interface ContinentFilterProps {
@@ -15,7 +17,7 @@ export function ContinentFilter({
 }: ContinentFilterProps) {
   return (
     <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
-      {continents.map((continent) => {
+      {continents.map(continent => {
         const count = continentStats[continent];
         const isSelected = selectedContinent === continent;
         const isDisabled = count === 0;
@@ -23,7 +25,15 @@ export function ContinentFilter({
           <button
             type="button"
             key={continent}
-            onClick={() => onContinentChange(continent)}
+            onClick={() => {
+              sendGAEvent("event", "record_filter_select", {
+                flow: "editor",
+                screen: "record",
+                click_code: "editor.record.filter.item",
+                continent,
+              });
+              onContinentChange(continent);
+            }}
             className={`shrink-0 inline-flex justify-center items-center gap-1 rounded-xl ${
               isSelected
                 ? "px-3.5 py-2 bg-state-enabled"

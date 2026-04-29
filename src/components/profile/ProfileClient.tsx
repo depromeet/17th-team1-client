@@ -1,7 +1,10 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { Button } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import { EditProfileBottomSheet } from "@/components/profile/EditProfileBottomSheet";
@@ -9,6 +12,7 @@ import { LogoutDialog } from "@/components/profile/LogoutDialog";
 import { ProfileCard } from "@/components/profile/ProfileCard";
 import { SettingItem } from "@/components/profile/SettingItem";
 import { SettingSection } from "@/components/profile/SettingSection";
+import { ApiError } from "@/lib/apiClient";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
@@ -23,6 +27,22 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<ProfileData | null>(initialProfile);
+
+  useEffect(() => {
+    sendGAEvent("event", "menu_profile_view", { flow: "menu", screen: "profile_main" });
+  }, []);
+
+  useEffect(() => {
+    if (!isEditProfileOpen) return;
+    sendGAEvent("event", "menu_profile_edit_view", { flow: "menu", screen: "profile_edit" });
+  }, [isEditProfileOpen]);
+
+  // 프로필 데이터가 없으면 (토큰 만료 등) 에러 페이지로 리다이렉트
+  useEffect(() => {
+    if (initialProfile === null) {
+      router.replace("/error?type=401");
+    }
+  }, [initialProfile, router]);
 
   const handleLogoutConfirm = useCallback(async () => {
     try {
@@ -49,10 +69,20 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   }, [router]);
 
   const handleLogoutClick = useCallback(() => {
+    sendGAEvent("event", "menu_profile_logout_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.logout",
+    });
     setIsLogoutDialogOpen(true);
   }, []);
 
   const handleEditProfile = useCallback(() => {
+    sendGAEvent("event", "menu_profile_edit_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.edit",
+    });
     setIsEditProfileOpen(true);
   }, []);
 
@@ -75,32 +105,63 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       } catch (error) {
         console.error("프로필 업데이트 실패", error);
 
+        // 401 에러인 경우 에러 페이지로 리다이렉트
+        if (error instanceof ApiError && error.status === 401) {
+          router.replace("/error?type=401");
+          return;
+        }
+
         alert("프로필 업데이트에 실패했습니다. 다시 시도해주세요.");
       } finally {
         setIsLoading(false);
       }
     },
-    [userProfile],
+    [userProfile, router]
   );
 
   const handleTermsClick = useCallback(() => {
+    sendGAEvent("event", "menu_profile_terms_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.terms",
+    });
     // TODO: 약관 페이지로 이동
     router.push("/terms");
   }, [router]);
 
   const handleWithdrawalClick = useCallback(() => {
+    sendGAEvent("event", "menu_profile_withdraw_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.withdraw",
+    });
     // TODO: 회원탈퇴 페이지로 이동
     router.push("/withdrawal");
   }, [router]);
 
+  const handleFeedbackClick = useCallback(() => {
+    sendGAEvent("event", "menu_profile_feedback_click", {
+      flow: "menu",
+      screen: "profile_main",
+      click_code: "menu.profile.feedback",
+    });
+  }, []);
+
   return (
     <main className="flex items-center justify-center min-h-dvh w-full bg-surface-secondary">
-      <div className="bg-surface-secondary relative w-full max-w-[512px] h-dvh flex flex-col">
-        <div className="max-w-[512px] mx-auto w-full">
+      <div className="bg-surface-secondary relative w-full max-w-lg h-dvh flex flex-col">
+        <div className="max-w-lg mx-auto w-full">
           <Header
             variant="navy"
             leftIcon="back"
-            onLeftClick={() => router.back()}
+            onLeftClick={() => {
+              sendGAEvent("event", "menu_profile_back_click", {
+                flow: "menu",
+                screen: "profile_main",
+                click_code: "menu.profile.header.back",
+              });
+              router.back();
+            }}
             title="나의 프로필"
             style={{
               backgroundColor: "transparent",
@@ -124,6 +185,11 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
             {/* Usage Info Section */}
             <SettingSection title="이용 정보">
               <SettingItem label="약관 및 정책" onClick={handleTermsClick} />
+              <SettingItem
+                label="서비스 의견 보내기"
+                onClick={handleFeedbackClick}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=globber.official@gmail.com&su=${encodeURIComponent("[서비스 의견] ")}`}
+              />
               <SettingItem label="회원 탈퇴하기" onClick={handleWithdrawalClick} />
             </SettingSection>
           </div>

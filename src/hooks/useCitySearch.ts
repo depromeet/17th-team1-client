@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { searchCities } from "@/services/cityService";
 import type { City } from "@/types/city";
 

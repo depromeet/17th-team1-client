@@ -14,7 +14,7 @@ const toastListeners: Set<(toast: ToastState) => void> = new Set();
 let toastTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const notifyListeners = () => {
-  toastListeners.forEach((listener) => {
+  toastListeners.forEach(listener => {
     listener(toastState);
   });
 };

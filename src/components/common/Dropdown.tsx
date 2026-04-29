@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -33,6 +34,7 @@ export const VARIANT_STYLES = {
 type DropdownProps = {
   value?: string;
   onValueChange?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
   options: Array<{
     label: string;
     value: string;
@@ -49,6 +51,7 @@ type DropdownProps = {
 export const Dropdown = ({
   value,
   onValueChange,
+  onOpenChange,
   options,
   placeholder = "선택해주세요",
   className,
@@ -58,6 +61,11 @@ export const Dropdown = ({
   asMenu = false,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const handleItemClick = (option: { value: string; onClick?: () => void }) => {
     if (asMenu) {
@@ -72,7 +80,7 @@ export const Dropdown = ({
 
   if (asMenu) {
     return (
-      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuPrimitive.Root open={isOpen} onOpenChange={handleOpenChange}>
         <DropdownMenuPrimitive.Trigger asChild className={className}>
           {trigger}
         </DropdownMenuPrimitive.Trigger>
@@ -88,12 +96,12 @@ export const Dropdown = ({
               "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
               "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
               "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
-              "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+              "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
             )}
             side="bottom"
             align="end"
             sideOffset={8}
-            onCloseAutoFocus={(e) => e.preventDefault()}
+            onCloseAutoFocus={e => e.preventDefault()}
           >
             {options.map((option, index) => (
               <div key={option.value}>
@@ -111,7 +119,7 @@ export const Dropdown = ({
                     index === 0 && "rounded-t-lg",
                     index === options.length - 1 && "rounded-b-lg",
                     styles.item.base,
-                    styles.item.hover,
+                    styles.item.hover
                   )}
                 >
                   <span className="shrink-0">{option.label}</span>
@@ -126,13 +134,13 @@ export const Dropdown = ({
   }
 
   return (
-    <SelectPrimitive.Root value={value} onValueChange={onValueChange} open={isOpen} onOpenChange={setIsOpen}>
+    <SelectPrimitive.Root value={value} onValueChange={onValueChange} open={isOpen} onOpenChange={handleOpenChange}>
       <SelectPrimitive.Trigger
         className={cn(
           "flex items-center gap-1 text-white text-base font-medium hover:opacity-80 transition-opacity cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           "focus-visible:ring-(--color-surface-inverseprimary)",
-          className,
+          className
         )}
         aria-label={`정렬 선택: 현재 ${value}`}
       >
@@ -153,7 +161,7 @@ export const Dropdown = ({
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
-            "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
           )}
           position="popper"
           side="bottom"
@@ -174,7 +182,7 @@ export const Dropdown = ({
                     index === options.length - 1 && "rounded-b-lg",
                     styles.item.base,
                     styles.item.hover,
-                    value === option.value && styles.item.checked,
+                    value === option.value && styles.item.checked
                   )}
                 >
                   {showCheckIcon && (

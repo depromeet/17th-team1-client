@@ -53,3 +53,6 @@ certificates
 /CLAUDE.md
 /CLAUDE.md.bak
 # END Ruler Generated Files
+
+# Sentry Config File
+.env.sentry-build-plugin

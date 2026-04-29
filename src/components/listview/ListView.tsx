@@ -1,7 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import Image from "next/image";
+
+import { sendGAEvent } from "@next/third-parties/google";
 
 import { getContinent, getCountryName } from "@/constants/countryMapping";
 import type { KoreanContinent } from "@/types/geography";
@@ -20,7 +22,7 @@ const CONTINENT_DISPLAY_NAME: Record<KoreanContinent, string> = {
 
 type ListViewProps = {
   travelPatterns: TravelPattern[];
-  uuid?: string;
+  isMyGlobe?: boolean;
 };
 
 type GroupedByCountry = {
@@ -39,16 +41,15 @@ type GroupedByCountry = {
   }>;
 };
 
-const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
-  const router = useRouter();
+const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
   // travelPatterns의 countries를 countryCode로 그룹화
   const groupedCountries = useMemo(() => {
     const groups: Map<string, GroupedByCountry> = new Map();
 
-    travelPatterns.forEach((pattern) => {
-      pattern.countries.forEach((country) => {
+    travelPatterns.forEach(pattern => {
+      pattern.countries.forEach(country => {
         if (!groups.has(country.id)) {
           groups.set(country.id, {
             countryCode: country.id,
@@ -78,7 +79,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
     // 대륙으로 필터링
     if (selectedContinent !== "전체") {
-      result = result.filter((group) => group.continent === selectedContinent);
+      result = result.filter(group => group.continent === selectedContinent);
     }
 
     return result;
@@ -97,8 +98,8 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
     };
 
     const allGrouped: Map<string, GroupedByCountry> = new Map();
-    travelPatterns.forEach((pattern) => {
-      pattern.countries.forEach((country) => {
+    travelPatterns.forEach(pattern => {
+      pattern.countries.forEach(country => {
         if (!allGrouped.has(country.id)) {
           allGrouped.set(country.id, {
             countryCode: country.id,
@@ -112,7 +113,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
     });
 
     counts.전체 = allGrouped.size;
-    allGrouped.forEach((group) => {
+    allGrouped.forEach(group => {
       if (group.continent in counts) {
         counts[group.continent as KoreanContinent]++;
       }
@@ -123,21 +124,28 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
   // 여행 기록이 있는 대륙을 앞에, 없는 대륙을 뒤에 배치 (원래 순서 유지)
   const sortedContinents = useMemo(() => {
-    const withRecords = CONTINENTS.filter((continent) => continentCounts[continent] > 0);
-    const withoutRecords = CONTINENTS.filter((continent) => continentCounts[continent] === 0);
+    const withRecords = CONTINENTS.filter(continent => continentCounts[continent] > 0);
+    const withoutRecords = CONTINENTS.filter(continent => continentCounts[continent] === 0);
     return [...withRecords, ...withoutRecords];
   }, [continentCounts]);
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex flex-col gap-0 items-start w-full max-w-[512px] mx-auto h-full">
+      <div className="flex flex-col gap-0 items-start w-full max-w-lg mx-auto h-full">
         {/* 탭 영역 */}
         <div className="flex gap-2 items-center px-4 pb-5 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* 전체 탭 */}
           <button
             type="button"
-            onClick={() => setSelectedContinent("전체")}
-            className={`px-3.5 py-2 rounded-[12px] font-bold text-sm whitespace-nowrap transition-colors cursor-pointer ${
+            onClick={() => {
+              sendGAEvent("event", "home_list_tab_select", {
+                flow: "home",
+                screen: isMyGlobe ? "list_main" : "list_other",
+                click_code: isMyGlobe ? "home.list.tab.select" : "home.other.list.tab.select",
+              });
+              setSelectedContinent("전체");
+            }}
+            className={`px-3.5 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-colors cursor-pointer ${
               selectedContinent === "전체"
                 ? "bg-white text-black"
                 : "border border-gray-600 text-white hover:border-gray-400"
@@ -147,15 +155,22 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
           </button>
 
           {/* 대륙 탭 */}
-          {sortedContinents.map((continent) => {
+          {sortedContinents.map(continent => {
             const isDisabled = continentCounts[continent] === 0;
             return (
               <button
                 key={continent}
                 type="button"
                 disabled={isDisabled}
-                onClick={() => setSelectedContinent(continent)}
-                className={`flex items-center gap-1 px-3.5 py-2 rounded-[12px] text-sm whitespace-nowrap transition-colors ${
+                onClick={() => {
+                  sendGAEvent("event", "home_list_tab_select", {
+                    flow: "home",
+                    screen: isMyGlobe ? "list_main" : "list_other",
+                    click_code: isMyGlobe ? "home.list.tab.select" : "home.other.list.tab.select",
+                  });
+                  setSelectedContinent(continent);
+                }}
+                className={`flex items-center gap-1 px-3.5 py-2 rounded-xl text-sm whitespace-nowrap transition-colors ${
                   isDisabled
                     ? "border border-gray-600 text-gray-600 font-medium cursor-not-allowed opacity-50"
                     : selectedContinent === continent
@@ -172,7 +187,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
         {/* 국가 목록 */}
         <div className="flex-1 flex flex-col gap-0 items-start p-4 w-full overflow-y-auto scrollbar-hide">
-          {groupedCountries.map((group) => (
+          {groupedCountries.map(group => (
             <div
               key={group.countryCode}
               className="w-full border-b pt-4 pb-5"
@@ -186,7 +201,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                   </p>
                   {group.cities.length > 1 && (
                     <div
-                      className="flex items-center justify-center size-[20px] rounded-[1000px]"
+                      className="flex items-center justify-center size-5 rounded-[1000px]"
                       style={{ backgroundColor: "rgba(105, 212, 255, 0.3)" }}
                     >
                       <p
@@ -201,37 +216,41 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map(({ cityId, name, hasRecords, thumbnails }) => {
+                  {group.cities.map(({ name, hasRecords, thumbnails }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
-                    const isClickable = hasRecords && cityId;
-
-                    const handleCityClick = () => {
-                      const path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
-                      router.push(path);
-                    };
 
                     return (
                       <button
                         key={`${group.countryCode}-${name}`}
                         type="button"
-                        className="border rounded-[12px] border-none"
-                        onClick={handleCityClick}
-                        disabled={!isClickable}
+                        className="border rounded-xl border-none"
+                        onClick={() =>
+                          sendGAEvent("event", "home_list_city_select", {
+                            flow: "home",
+                            screen: isMyGlobe ? "list_main" : "list_other",
+                            click_code: isMyGlobe ? "home.list.city.select" : "home.other.list.city.select",
+                          })
+                        }
                       >
                         <div
-                          className="flex gap-2 items-center rounded-[inherit] bg-[var(--color-surface-placeholder--8)]"
+                          className="flex gap-2 items-center rounded-[inherit] bg-(--color-surface-placeholder--8)"
                           style={{
                             paddingLeft: "12px",
                             paddingRight: hasRecords && thumbnails ? "8px" : "12px",
                             paddingTop: "7px",
                             paddingBottom: "7px",
                             height: "100%",
-                            cursor: isClickable ? "pointer" : "default",
                             border: "1px solid var(--color-border-absolutewhite--8)",
                           }}
                         >
-                          <p className="font-medium text-white" style={{ fontSize: "14px", letterSpacing: "-0.28px" }}>
+                          <p
+                            className="font-medium text-white"
+                            style={{
+                              fontSize: "14px",
+                              letterSpacing: "-0.28px",
+                            }}
+                          >
                             {cityName}
                           </p>
                           {/* 여행기록이 있는 경우 썸네일 표시 */}
@@ -240,13 +259,15 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                               {thumbnails.length === 1 ? (
                                 // 썸네일이 1개인 경우
                                 <div
-                                  className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                  className="border border-white rounded-sm shrink-0 overflow-hidden"
                                   style={{ width: "24px", height: "24px" }}
                                 >
-                                  <img
+                                  <Image
                                     src={thumbnails[0]}
                                     alt={cityName}
-                                    className="w-full h-full object-cover rounded-[4px]"
+                                    width={24}
+                                    height={24}
+                                    className="w-full h-full object-cover rounded-sm"
                                   />
                                 </div>
                               ) : (
@@ -254,7 +275,7 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                 <>
                                   {/* 이전 썸네일 (왼쪽, z-index 낮음) */}
                                   <div
-                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
                                     style={{
                                       width: "24px",
                                       height: "24px",
@@ -263,15 +284,17 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                       marginRight: "-8px",
                                     }}
                                   >
-                                    <img
+                                    <Image
                                       src={thumbnails[1]}
                                       alt={`${cityName} 이전`}
-                                      className="w-full h-full object-cover rounded-[4px]"
+                                      width={24}
+                                      height={24}
+                                      className="w-full h-full object-cover rounded-sm"
                                     />
                                   </div>
                                   {/* 최신 썸네일 (우측, z-index 높음) */}
                                   <div
-                                    className="border border-white rounded-[4px] shrink-0 overflow-hidden"
+                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
                                     style={{
                                       width: "24px",
                                       height: "24px",
@@ -279,10 +302,12 @@ const ListView = ({ travelPatterns, uuid }: ListViewProps) => {
                                       zIndex: 2,
                                     }}
                                   >
-                                    <img
+                                    <Image
                                       src={thumbnails[0]}
                                       alt={`${cityName} 최신`}
-                                      className="w-full h-full object-cover rounded-[4px]"
+                                      width={24}
+                                      height={24}
+                                      className="w-full h-full object-cover rounded-sm"
                                     />
                                   </div>
                                 </>

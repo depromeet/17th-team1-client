@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import type { ImageMetadataFromDiary } from "@/types/diary";
 import type { Emoji } from "@/types/emoji";
 
@@ -43,7 +44,6 @@ export const useRecordScroll = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: countryRecords 변경 시 initialIndex로 설정
   useEffect(() => {
     setCurrentIndex(initialIndex);
   }, [countryRecords, initialIndex]);
@@ -67,7 +67,7 @@ export const useRecordScroll = ({
         }
       }
     },
-    [countryRecords.length, showScrollHint],
+    [countryRecords.length, showScrollHint]
   );
 
   // 힌트 수동 숨김

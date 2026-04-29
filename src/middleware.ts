@@ -7,10 +7,12 @@ const PUBLIC_PATHS: readonly string[] = [
   "/_next",
   "/api",
   "/assets",
+  "/data",
   "/favicon.png",
   "/robots.txt",
   "/sitemap.xml",
   "/public",
+  "/icons",
   "/test",
 ];
 
@@ -21,11 +23,11 @@ const AUTH_REQUIRED_BUT_ALLOW_ROUTING: readonly string[] = [
 const GLOBE_SHARED_PREFIX = "/globe/";
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 function allowRouting(pathname: string): boolean {
-  return AUTH_REQUIRED_BUT_ALLOW_ROUTING.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return AUTH_REQUIRED_BUT_ALLOW_ROUTING.some(p => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 export function middleware(request: NextRequest) {
@@ -45,7 +47,7 @@ export function middleware(request: NextRequest) {
     console.log(
       `[Middleware] Redirecting authenticated user from /login to /globe (Token: exists, MemberID: ${
         memberId || "none"
-      }, UUID: ${uuid || "none"})`,
+      }, UUID: ${uuid || "none"})`
     );
     const url = request.nextUrl.clone();
     url.pathname = `/globe/${uuid}`;
@@ -64,7 +66,7 @@ export function middleware(request: NextRequest) {
     console.log(
       `[Middleware] Allowing routing logic for ${pathname} (Token: exists, MemberID: ${
         memberId || "none"
-      }, UUID: ${uuid || "none"})`,
+      }, UUID: ${uuid || "none"})`
     );
     return NextResponse.next();
   }
@@ -72,7 +74,7 @@ export function middleware(request: NextRequest) {
   console.log(
     `[Middleware] Allowing access to ${pathname} (Token: ${
       token ? "exists" : "none"
-    }, MemberID: ${memberId || "none"}, UUID: ${uuid || "none"})`,
+    }, MemberID: ${memberId || "none"}, UUID: ${uuid || "none"})`
   );
   return NextResponse.next();
 }

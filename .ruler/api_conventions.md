@@ -1,4 +1,5 @@
 # 자세한 예시/배경 설명은 src/docs/detailed-rules.md를 참고하세요.
+
 # Globber API 핵심 규칙
 
 1. 모든 API 요청은 `lib/apiClient.ts`의 함수 사용 (apiGet, apiPost, apiPut, apiPatch, apiDelete)
@@ -10,17 +11,17 @@
 
 ## Service Layer 규칙
 
-| 항목 | ✅ 허용 (Good) | ❌ 금지 (Bad) |
-| --- | --- | --- |
+| 항목             | ✅ 허용 (Good)                                      | ❌ 금지 (Bad)                       |
+| ---------------- | --------------------------------------------------- | ----------------------------------- |
 | **Service 함수** | `const response = await apiGet<DiaryResponse>(...)` | `const response = await fetch(...)` |
-| **데이터 반환** | `return response.data;` | `return response;` |
-| **토큰 처리** | `getAuthInfo()` 또는 파라미터 | 하드코딩된 토큰 |
-| **에러 메시지** | 한국어 사용자 친화적 메시지 | 기술적 에러 메시지 |
+| **데이터 반환**  | `return response.data;`                             | `return response;`                  |
+| **토큰 처리**    | `getAuthInfo()` 또는 파라미터                       | 하드코딩된 토큰                     |
+| **에러 메시지**  | 한국어 사용자 친화적 메시지                         | 기술적 에러 메시지                  |
 
 ## 타입 네이밍 규칙
 
-| 용도 | 패턴 | 예시 |
-| --- | --- | --- |
-| **요청 파라미터** | `[Name]Params` | `CreateDiaryParams`, `UpdateDiaryParams` |
-| **API 응답** | `[Name]Response` | `DiaryDetailResponse`, `DiariesListResponse` |
-| **변환된 데이터** | `[Name]Detail` | `DiaryDetail`, `CityDetail` |
+| 용도              | 패턴             | 예시                                         |
+| ----------------- | ---------------- | -------------------------------------------- |
+| **요청 파라미터** | `[Name]Params`   | `CreateDiaryParams`, `UpdateDiaryParams`     |
+| **API 응답**      | `[Name]Response` | `DiaryDetailResponse`, `DiariesListResponse` |
+| **변환된 데이터** | `[Name]Detail`   | `DiaryDetail`, `CityDetail`                  |

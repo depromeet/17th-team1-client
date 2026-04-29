@@ -1,15 +1,18 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { BackButton } from "@/components/common/Button";
 import { Header } from "@/components/common/Header";
 import type { GlobeRef } from "@/components/globe/Globe";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
-import { useGlobeState } from "@/hooks/useGlobeState";
+import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
@@ -25,9 +28,11 @@ const Globe = dynamic(() => import("@/components/globe/Globe"), {
 
 const GlobePage = () => {
   const router = useRouter();
+
   const { id: urlUuid } = useParams<{ id: string }>();
-  const { uuid: cookieUuid } = getAuthInfo();
+
   const globeRef = useRef<GlobeRef | null>(null);
+
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [travelInsight, setTravelInsight] = useState<string>("");
   const [cityCount, setCityCount] = useState<number>(0);
@@ -39,17 +44,21 @@ const GlobePage = () => {
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
   const [countryThumbnails, setCountryThumbnails] = useState<Record<string, string>>({});
   const [fromSavedGlobe, setFromSavedGlobe] = useState<boolean>(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Globe 상태 관리
-  const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
-    useGlobeState(travelPatterns);
+  // Globe UI 표시 상태 (Globe 이벤트로부터 동기화)
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [hasClusterSelected, setHasClusterSelected] = useState(false);
+
+  useEffect(() => {
+    if (!isDataLoaded || !urlUuid) return;
+    sendGAEvent("event", "home_view", { flow: "home", screen: isMyGlobe ? "globe_main" : "globe_other" });
+  }, [isDataLoaded, isMyGlobe, urlUuid]);
 
   // 이전 경로 확인 (sessionStorage 사용)
   useEffect(() => {
     const fromPage = sessionStorage.getItem("fromSavedGlobe");
-    if (fromPage === "true") {
-      setFromSavedGlobe(true);
-    }
+    if (fromPage === "true") setFromSavedGlobe(true);
   }, []);
 
   // Variables
@@ -59,7 +68,7 @@ const GlobePage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { uuid: myUuid, memberId } = getAuthInfo();
+        const { uuid: myUuid } = getAuthInfo();
         if (!urlUuid) {
           router.push("/error?type=404");
           return;
@@ -73,9 +82,7 @@ const GlobePage = () => {
         const globeResponse = await getGlobeData(urlUuid, undefined, false);
         let insightResponse: string | undefined;
 
-        if (globeResponse?.data?.memberId) {
-          insightResponse = await getTravelInsight(globeResponse.data.memberId, false);
-        }
+        if (globeResponse?.data?.memberId) insightResponse = await getTravelInsight(globeResponse.data.memberId, false);
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
         const diaryData = await getDiariesList(urlUuid);
@@ -108,9 +115,8 @@ const GlobePage = () => {
             // 북마크 상태 확인
             try {
               const bookmarks = await getBookmarks();
-              const isAlreadyBookmarked = bookmarks.some(
-                (bookmark) => bookmark.memberId === globeResponse.data.memberId,
-              );
+              const isAlreadyBookmarked = bookmarks.some(({ memberId }) => memberId === globeResponse.data.memberId);
+
               setIsBookmarked(isAlreadyBookmarked);
             } catch {
               // 북마크 목록 조회 실패 시 기본값 유지
@@ -118,8 +124,11 @@ const GlobePage = () => {
           }
         }
         setTravelInsight(insightResponse || "");
-      } catch {
+      } catch (err) {
         // TODO: 에러 처리 로직 추가
+        console.error("Globe data load failed:", err);
+      } finally {
+        setIsDataLoaded(true);
       }
     };
 
@@ -127,36 +136,56 @@ const GlobePage = () => {
     loadData();
   }, [urlUuid, router]);
 
-  const hasBackButton = isZoomed || selectedClusterData !== null;
+  const hasBackButton = isZoomed || hasClusterSelected;
+
+  if (!isDataLoaded) return null;
 
   if (travelPatterns.length === 0) {
     return (
-      <div></div>
-      // <div className="w-full h-dvh flex items-center justify-center">
-      //   <div className="text-white text-xl text-center">
-      //     <div>🌍 여행 데이터가 없습니다</div>
-      //     <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
-      //   </div>
-      // </div>
+      <div className="w-full h-dvh flex items-center justify-center">
+        <div className="text-white text-xl text-center">
+          <div>🌍 여행 데이터가 없습니다</div>
+          <div className="text-sm text-gray-400 mt-2">사진을 업로드하여 여행 기록을 만들어보세요</div>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="overflow-hidden text-text-primary relative flex flex-col h-dvh">
-      <div className="max-w-[512px] mx-auto w-full relative z-20">
+      <div className="max-w-lg mx-auto w-full relative z-20">
         <Header
           title={`${nickname}님의 지구본`}
           variant="navy"
           {...(isMyGlobe && {
             leftIcon: "menu",
-            onLeftClick: () => router.push("/profile"),
+            onLeftClick: () => {
+              sendGAEvent("event", "home_menu_click", {
+                flow: "home",
+                screen: viewMode === "globe" ? "globe_main" : "list_main",
+                click_code: "home.header.menu",
+              });
+              router.push("/profile");
+            },
             rightIcon: "people",
-            onRightClick: () => router.push("/saved-globe"),
+            onRightClick: () => {
+              sendGAEvent("event", "home_friends_click", {
+                flow: "home",
+                screen: viewMode === "globe" ? "globe_main" : "list_main",
+                click_code: "home.header.friends",
+              });
+              router.push("/saved-globe");
+            },
           })}
           {...(!isMyGlobe &&
             fromSavedGlobe && {
               leftIcon: "back",
               onLeftClick: () => {
+                sendGAEvent("event", "home_back_click", {
+                  flow: "home",
+                  screen: viewMode === "globe" ? "globe_other" : "list_other",
+                  click_code: "home.other.header.back",
+                });
                 sessionStorage.removeItem("fromSavedGlobe");
                 router.push(`/saved-globe`);
               },
@@ -171,7 +200,7 @@ const GlobePage = () => {
           {/* 상단 헤더 - position absolute */}
           <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-20">
             <GlobeHeader
-              isZoomed={isZoomed || selectedClusterData !== null}
+              isZoomed={hasBackButton}
               travelInsight={travelInsight}
               cityCount={cityCount}
               countryCount={countryCount}
@@ -184,8 +213,18 @@ const GlobePage = () => {
               ref={globeRef}
               travelPatterns={travelPatterns}
               currentGlobeIndex={0}
-              onClusterSelect={handleClusterSelect}
-              onZoomChange={handleZoomChange}
+              onZoomChange={zoom => {
+                const zoomed = zoom < ZOOM_LEVELS.ZOOM_THRESHOLD;
+                setIsZoomed(zoomed);
+                if (!zoomed) setHasClusterSelected(false);
+              }}
+              onClusterSelect={() => setHasClusterSelected(true)}
+              onInteractionStart={() =>
+                sendGAEvent("event", "home_globe_interaction_start", {
+                  flow: "home",
+                  screen: isMyGlobe ? "globe_main" : "globe_other",
+                })
+              }
               countryThumbnails={countryThumbnails}
               isMyGlobe={isMyGlobe}
               uuid={urlUuid}
@@ -195,7 +234,7 @@ const GlobePage = () => {
           {/* 하단 버튼들 - position absolute */}
           <div className="absolute bottom-[46px] left-0 right-0 z-10 px-4">
             <GlobeFooter
-              isZoomed={isZoomed}
+              isZoomed={hasBackButton}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               isMyGlobe={isMyGlobe}
@@ -206,7 +245,19 @@ const GlobePage = () => {
           </div>
 
           {/* 돌아가기 버튼 */}
-          <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
+          <BackButton
+            isZoomed={hasBackButton}
+            globeRef={globeRef}
+            onReset={() => {
+              sendGAEvent("event", "home_globe_view_reset", {
+                flow: "home",
+                screen: isMyGlobe ? "globe_main" : "globe_other",
+                click_code: isMyGlobe ? "home.globe.view.reset" : "home.other.globe.view.reset",
+              });
+              setIsZoomed(false);
+              setHasClusterSelected(false);
+            }}
+          />
         </div>
       ) : (
         <>
@@ -224,8 +275,8 @@ const GlobePage = () => {
 
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
           <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
-            <div className="max-w-[512px] w-full h-full mt-4">
-              <ListView travelPatterns={travelPatterns} uuid={urlUuid} />
+            <div className="max-w-lg w-full h-full mt-4">
+              <ListView travelPatterns={travelPatterns} isMyGlobe={isMyGlobe} />
             </div>
           </div>
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
 import type { ApiError } from "@/lib/apiClient";
 

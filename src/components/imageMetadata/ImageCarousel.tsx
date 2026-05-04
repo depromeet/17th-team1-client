@@ -216,7 +216,15 @@ export const ImageCarousel = ({
           aria-label="이미지 편집"
           disabled={isCropUploading}
         >
-          <Image src={currentImage} alt={shown.fileName} fill sizes="251px" className="object-cover" unoptimized />
+          <Image
+            src={currentImage}
+            alt={shown.fileName}
+            fill
+            sizes="251px"
+            className="object-cover"
+            unoptimized
+            draggable={false}
+          />
           {isCropUploading && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <div className="text-white text-sm">업로드 중...</div>

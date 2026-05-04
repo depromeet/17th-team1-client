@@ -126,7 +126,6 @@ const GlobeList = ({
       {/* Globe List */}
       <div className="px-4 flex flex-col gap-2 pb-4">
         {sortedGlobes.map(({ memberId, uuid, nickname, profileImageUrl, bookmarked }, index) => (
-          // biome-ignore lint: Container with multiple buttons for different actions
           <div
             key={memberId}
             role="button"

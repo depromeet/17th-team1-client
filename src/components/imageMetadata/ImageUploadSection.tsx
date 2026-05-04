@@ -1,5 +1,20 @@
 "use client";
 
+import { useState } from "react";
+
+import {
+  closestCenter,
+  defaultDropAnimationSideEffects,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { PlusIcon } from "lucide-react";
 
 import type { ImageTag } from "@/types/imageMetadata";
@@ -16,7 +31,76 @@ interface ImageUploadSectionProps {
   handleTagChange: (id: string, tag: ImageTag | null) => void;
   handleDateChange: (id: string, date: string | null) => void;
   handleLocationChange: (id: string, location: LocationSelection | null) => void;
+  handleReorder?: (oldIndex: number, newIndex: number) => void;
 }
+
+interface SortableImageCardProps {
+  id: string;
+  isPressing: boolean;
+  onPressStart: () => void;
+  onPressEnd: () => void;
+  children: React.ReactNode;
+}
+
+const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children }: SortableImageCardProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1, // Hide original item completely so DragOverlay is the only one visible
+    zIndex: isDragging ? 0 : 1,
+    touchAction: "none" as const,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onPointerDown={e => {
+        onPressStart();
+        listeners?.onPointerDown?.(e);
+      }}
+      onPointerUp={e => {
+        onPressEnd();
+        listeners?.onPointerUp?.(e);
+      }}
+      onPointerCancel={e => {
+        onPressEnd();
+        listeners?.onPointerCancel?.(e);
+      }}
+      onTouchStart={e => {
+        onPressStart();
+        listeners?.onTouchStart?.(e);
+      }}
+      onTouchEnd={e => {
+        onPressEnd();
+        listeners?.onTouchEnd?.(e);
+      }}
+      onTouchCancel={e => {
+        onPressEnd();
+        listeners?.onTouchCancel?.(e);
+      }}
+      className="shrink-0 outline-none select-none relative"
+    >
+      <div
+        style={{
+          transform: isPressing && !isDragging ? "scale(0.96)" : "scale(1)",
+          transition: "transform 0.2s ease, filter 0.2s ease",
+          borderRadius: "0.75rem", // match xl
+        }}
+        className="relative origin-center"
+      >
+        {isPressing && !isDragging && (
+          <div className="absolute inset-0 bg-black/40 rounded-xl z-20 pointer-events-none" />
+        )}
+        {children}
+      </div>
+    </div>
+  );
+};
 
 export const ImageUploadSection = ({
   metadataList,
@@ -26,20 +110,59 @@ export const ImageUploadSection = ({
   handleTagChange,
   handleDateChange,
   handleLocationChange,
+  handleReorder,
 }: ImageUploadSectionProps) => {
   const hasImages = metadataList.length > 0;
   const MAX_IMAGES = 3;
   const metadataCount = metadataList.length;
   const placeholderCount = Math.max(0, MAX_IMAGES - metadataCount - (hasImages ? 0 : 1));
 
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [pressingId, setPressingId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    })
+  );
+
   const triggerFileInput = () => {
     document.getElementById(fileUploadId)?.click();
   };
 
-  return (
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+    setPressingId(null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    setPressingId(null);
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = metadataList.findIndex(item => item.id === active.id);
+      const newIndex = metadataList.findIndex(item => item.id === over.id);
+      if (handleReorder) {
+        handleReorder(oldIndex, newIndex);
+      }
+    }
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setPressingId(null);
+  };
+
+  const activeMetadata = metadataList.find(m => m.id === activeId);
+  const isDndEnabled = metadataList.length > 1;
+
+  const renderContent = () => (
     <div
       className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
+      style={{ touchAction: isDndEnabled ? "pan-y" : "pan-x", minHeight: hasImages ? undefined : "460px" }}
     >
       {!hasImages && (
         <div className="shrink-0">
@@ -62,19 +185,45 @@ export const ImageUploadSection = ({
           </button>
         </div>
       )}
-      {metadataList.map((metadata, index) => (
-        <div key={metadata.id} className="shrink-0">
-          <ImageCarousel
-            image={metadata}
-            onRemove={handleRemove}
-            onImageUpdate={handleImageUpdate}
-            onTagChange={tag => handleTagChange(metadata.id, tag)}
-            onDateChange={yearMonth => handleDateChange(metadata.id, yearMonth)}
-            onLocationChange={location => handleLocationChange(metadata.id, location)}
-            photoIndex={index}
-          />
-        </div>
-      ))}
+
+      {isDndEnabled ? (
+        <SortableContext items={metadataList.map(m => m.id)} strategy={horizontalListSortingStrategy}>
+          {metadataList.map(metadata => (
+            <SortableImageCard
+              key={metadata.id}
+              id={metadata.id}
+              isPressing={pressingId === metadata.id}
+              onPressStart={() => setPressingId(metadata.id)}
+              onPressEnd={() => {
+                if (pressingId === metadata.id) setPressingId(null);
+              }}
+            >
+              <ImageCarousel
+                image={metadata}
+                onRemove={handleRemove}
+                onImageUpdate={handleImageUpdate}
+                onTagChange={tag => handleTagChange(metadata.id, tag)}
+                onDateChange={yearMonth => handleDateChange(metadata.id, yearMonth)}
+                onLocationChange={location => handleLocationChange(metadata.id, location)}
+              />
+            </SortableImageCard>
+          ))}
+        </SortableContext>
+      ) : (
+        metadataList.map(metadata => (
+          <div key={metadata.id} className="shrink-0">
+            <ImageCarousel
+              image={metadata}
+              onRemove={handleRemove}
+              onImageUpdate={handleImageUpdate}
+              onTagChange={tag => handleTagChange(metadata.id, tag)}
+              onDateChange={yearMonth => handleDateChange(metadata.id, yearMonth)}
+              onLocationChange={location => handleLocationChange(metadata.id, location)}
+            />
+          </div>
+        ))
+      )}
+
       {Array.from({ length: placeholderCount }).map((_, index) => (
         <div key={`empty-${index}`} className="shrink-0">
           <button
@@ -92,5 +241,56 @@ export const ImageUploadSection = ({
         </div>
       ))}
     </div>
+  );
+
+  return (
+    <>
+      {isDndEnabled ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          {renderContent()}
+          <DragOverlay
+            dropAnimation={{
+              sideEffects: defaultDropAnimationSideEffects({
+                styles: {
+                  active: {
+                    opacity: "1",
+                  },
+                },
+              }),
+            }}
+          >
+            {activeMetadata ? (
+              <div
+                style={{
+                  transform: "scale(1.08) rotate(-2deg)",
+                  transformOrigin: "center center",
+                  transition: "none", // dnd-kit will handle overlay transition if needed, but we keep it static while moving
+                }}
+                className="shrink-0 relative outline-none select-none"
+              >
+                <div className="absolute inset-0 border-2 border-[#0097C1] rounded-xl z-20 pointer-events-none" />
+                <ImageCarousel
+                  image={activeMetadata}
+                  // pass empty handlers or actual handlers for overlay visual completeness
+                  onRemove={() => {}}
+                  onImageUpdate={handleImageUpdate}
+                  onTagChange={() => {}}
+                  onDateChange={() => {}}
+                  onLocationChange={() => {}}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        renderContent()
+      )}
+    </>
   );
 };

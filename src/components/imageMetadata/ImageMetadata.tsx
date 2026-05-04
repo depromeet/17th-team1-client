@@ -50,6 +50,7 @@ export const ImageMetadataComponent = ({
     handleTagChange,
     handleDateChange,
     handleLocationChange,
+    handleReorder,
   } = useImageMetadata({ diaryId, isEditMode });
 
   const hasSavedRef = useRef(false);
@@ -85,19 +86,30 @@ export const ImageMetadataComponent = ({
       screen: "record_edit",
     });
     return () => {
+      // 언마운트 시점의 최신 ref 값을 GA 이벤트에 사용하기 위한 의도적인 패턴
+      /* eslint-disable react-hooks/exhaustive-deps */
+      const hasSaved = hasSavedRef.current;
+      const photoCount = metadataListRef.current.length;
+      const textLength = diaryTextRef.current.length;
+      const saveStarted = saveStartedRef.current;
+      const saveCompleted = saveCompletedRef.current;
+      const savePhotoCount = savePhotoCountRef.current;
+      const saveTextLength = saveTextLengthRef.current;
+      /* eslint-enable react-hooks/exhaustive-deps */
+
       sendGAEvent("event", "editor_record_edit_exit", {
         flow: "editor",
         screen: "record_edit",
-        has_saved: hasSavedRef.current,
-        photo_count: metadataListRef.current.length,
-        text_length: diaryTextRef.current.length,
+        has_saved: hasSaved,
+        photo_count: photoCount,
+        text_length: textLength,
       });
-      if (saveStartedRef.current && !saveCompletedRef.current) {
+      if (saveStarted && !saveCompleted) {
         sendGAEvent("event", "record_save_exit", {
           flow: "editor",
           screen: "record_save",
-          photo_count: savePhotoCountRef.current,
-          text_length: saveTextLengthRef.current,
+          photo_count: savePhotoCount,
+          text_length: saveTextLength,
         });
       }
     };
@@ -163,6 +175,7 @@ export const ImageMetadataComponent = ({
         handleTagChange={handleTagChange}
         handleDateChange={handleDateChange}
         handleLocationChange={handleLocationChange}
+        handleReorder={handleReorder}
       />
 
       <input

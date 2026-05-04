@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
 
@@ -74,7 +75,10 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
         URL.revokeObjectURL(blobUrlToCleanup);
       }
     };
-  }, [image, onClose]);
+    // 부모 컴포넌트 렌더링 시 onClose 참조값이 변경되어 이펙트가 무의미하게 재실행되고,
+    // 이로 인해 만들어둔 프리뷰용 Blob URL이 조기 해제(cleanup)되는 버그를 방지하기 위해 의존성 배열에서 제외합니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [image]);
 
   const handleGestureActivity = (isZoom: boolean) => {
     const now = Date.now();
@@ -147,36 +151,30 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
     }
   };
 
-  const handleClose = () => {
-    const modified = interactionCountRef.current > 0;
-    sendGAEvent("event", "record_crop_exit", {
-      flow: "editor",
-      screen: "record_edit_crop",
-      click_code: "editor.record.edit.crop.header.close",
-      photo_index: photoIndex,
-      interaction_count: interactionCountRef.current,
-      modified,
-    });
-    onClose();
-  };
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   if (!imageBlobUrl) {
-    return (
-      <div className="image-crop-modal fixed inset-0 z-50 bg-black flex items-center justify-center">
+    if (!mounted) return null;
+    return createPortal(
+      <div className="image-crop-modal fixed inset-0 z-[100] bg-black flex items-center justify-center">
         <div className="text-white text-sm">이미지 로딩 중...</div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
-    <div className="image-crop-modal fixed inset-0 z-50 bg-black">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="image-crop-modal fixed inset-0 z-[100] bg-black">
       <div className="max-w-md mx-auto w-full h-full relative">
         {/* Header - Absolute positioned */}
         <div className="absolute top-0 left-0 right-0 z-10">
           <Header
             variant="dark"
             leftIcon="close"
-            onLeftClick={handleClose}
+            onLeftClick={onClose}
             rightButtonTitle="완료"
             rightButtonVariant="white"
             onRightClick={createCroppedImage}
@@ -184,7 +182,7 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
         </div>
 
         {/* Crop Area - Full screen */}
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full pb-[env(safe-area-inset-bottom)]">
           <Cropper
             image={imageBlobUrl}
             crop={crop}
@@ -203,7 +201,8 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -215,10 +214,19 @@ export const ImageCropModal = ({ image, onClose, onSave, photoIndex = 0 }: Image
  */
 const fetchImageAsBlob = async (url: string): Promise<string> => {
   try {
-    const response = await fetch(url, {
+    // S3 등 외부 요소를 fetch할 때 브라우저 디스크 캐시(<img> 태그가 로드한 CORS 헤더 없는 캐시)를
+    // 사용할 경우 CORS 에러가 발생할 수 있으므로, 캐시 우회를 위해 파라미터를 추가합니다.
+    // 단, URL이 이미 브라우저 내부의 blob: 형태인 경우 파라미터를 추가하면 깨지므로 분기 처리합니다.
+    let fetchUrl = url;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      const cacheUrl = new URL(url);
+      cacheUrl.searchParams.set("t", Date.now().toString());
+      fetchUrl = cacheUrl.toString();
+    }
+
+    const response = await fetch(fetchUrl, {
       mode: "cors",
       credentials: "include",
-      cache: "force-cache",
     });
 
     if (response.ok) {
@@ -230,8 +238,8 @@ const fetchImageAsBlob = async (url: string): Promise<string> => {
     console.warn("Direct S3 fetch failed, falling back to Next.js proxy:", error);
   }
 
-  // Fallback: Next.js Image Proxy 사용
-  const proxyUrl = `/_next/image?url=${encodeURIComponent(url)}&w=3840&q=95`;
+  // Fallback: Next.js Image Proxy 사용 (3840은 부하가 커 1920으로 낮춤)
+  const proxyUrl = `/_next/image?url=${encodeURIComponent(url)}&w=1920&q=95`;
   const proxyResponse = await fetch(proxyUrl);
 
   if (!proxyResponse.ok) {

@@ -120,8 +120,14 @@ const RecordDetailClient = ({
   const isLastRecord = currentIndex === countryRecords.length - 1;
   const shouldShowScrollHint = showScrollHint && !isLastRecord;
 
-  const pageEntryTimeRef = useRef<number>(Date.now());
+  const pageEntryTimeRef = useRef<number | null>(null);
   const maxScrollDepthRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (pageEntryTimeRef.current === null) {
+      pageEntryTimeRef.current = Date.now();
+    }
+  }, []);
 
   const handleScroll = (newIndex: number) => {
     const destinationRecord = countryRecords[newIndex];
@@ -138,7 +144,7 @@ const RecordDetailClient = ({
         record_id: destinationRecord.id,
         city_id: destinationRecord.cityId,
         scroll_depth: maxScrollDepthRef.current,
-        dwell_time_ms: Date.now() - pageEntryTimeRef.current,
+        dwell_time_ms: Date.now() - (pageEntryTimeRef.current ?? Date.now()),
       });
 
       setHasShownScrollHint(false);

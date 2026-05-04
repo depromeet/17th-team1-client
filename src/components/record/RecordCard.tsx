@@ -98,6 +98,8 @@ export const RecordCard = ({
           onImageChange={setCurrentImageIndex}
           userInfoHeight={userInfoHeight}
           isFirstRecord={isFirstRecord}
+          recordId={id}
+          isOwner={isOwner}
         />
 
         {/* 상단 그라데이션 오버레이 */}

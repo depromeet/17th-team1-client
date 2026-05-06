@@ -146,10 +146,10 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       click_code: "menu.profile.feedback",
     });
 
-    // 모바일 기기 감지
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      typeof navigator !== "undefined" ? navigator.userAgent : ""
-    );
+    const ua = navigator.userAgent;
+    const isMobile =
+      /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+      (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
 
     const subject = encodeURIComponent("[서비스 의견] ");
 

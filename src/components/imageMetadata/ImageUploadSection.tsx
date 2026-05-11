@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   closestCenter,
@@ -9,7 +9,7 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
@@ -51,6 +51,7 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
     transition,
     opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 0 : 1,
+    // pan-x: 터치 가로 스크롤 허용 (DnD 라이브러리가 delay 이후 override함)
     touchAction: "pan-x" as const,
   };
 
@@ -60,18 +61,6 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
       style={style}
       {...attributes}
       {...listeners}
-      onPointerDown={e => {
-        onPressStart();
-        listeners?.onPointerDown?.(e);
-      }}
-      onPointerUp={e => {
-        onPressEnd();
-        listeners?.onPointerUp?.(e);
-      }}
-      onPointerCancel={e => {
-        onPressEnd();
-        listeners?.onPointerCancel?.(e);
-      }}
       onTouchStart={e => {
         onPressStart();
         listeners?.onTouchStart?.(e);
@@ -83,6 +72,22 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
       onTouchCancel={e => {
         onPressEnd();
         listeners?.onTouchCancel?.(e);
+      }}
+      onPointerDown={e => {
+        // 터치 이벤트는 onTouchStart에서 처리하므로 마우스만
+        if (e.pointerType === "mouse") onPressStart();
+        listeners?.onPointerDown?.(e);
+      }}
+      onPointerUp={e => {
+        if (e.pointerType === "mouse") onPressEnd();
+        listeners?.onPointerUp?.(e);
+      }}
+      onPointerCancel={e => {
+        onPressEnd();
+        listeners?.onPointerCancel?.(e);
+      }}
+      onContextMenu={e => {
+        e.preventDefault();
       }}
       className="shrink-0 outline-none select-none relative"
     >
@@ -120,20 +125,30 @@ export const ImageUploadSection = ({
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pressingId, setPressingId] = useState<string | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
+  const touchSensors = useSensors(
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 1000,
-        tolerance: 8,
+        tolerance: 10,
       },
     })
   );
+
+  const mouseSensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    })
+  );
+
+  const sensors = isTouchDevice ? touchSensors : mouseSensors;
 
   const triggerFileInput = () => {
     document.getElementById(fileUploadId)?.click();
@@ -169,7 +184,7 @@ export const ImageUploadSection = ({
   const renderContent = () => (
     <div
       className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      style={{ touchAction: isDndEnabled ? "pan-y" : "pan-x", minHeight: hasImages ? undefined : "460px" }}
+      style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
     >
       {!hasImages && (
         <div className="shrink-0">

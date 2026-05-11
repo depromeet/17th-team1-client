@@ -10,6 +10,7 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -48,9 +49,9 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1, // Hide original item completely so DragOverlay is the only one visible
+    opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 0 : 1,
-    touchAction: "none" as const,
+    touchAction: "pan-x" as const,
   };
 
   return (
@@ -89,7 +90,7 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
         style={{
           transform: isPressing && !isDragging ? "scale(0.96)" : "scale(1)",
           transition: "transform 0.2s ease, filter 0.2s ease",
-          borderRadius: "0.75rem", // match xl
+          borderRadius: "0.75rem",
         }}
         className="relative origin-center"
       >
@@ -124,6 +125,12 @@ export const ImageUploadSection = ({
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 6,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 1000,
+        tolerance: 8,
       },
     })
   );
@@ -270,14 +277,13 @@ export const ImageUploadSection = ({
                 style={{
                   transform: "scale(1.08) rotate(-2deg)",
                   transformOrigin: "center center",
-                  transition: "none", // dnd-kit will handle overlay transition if needed, but we keep it static while moving
+                  transition: "none",
                 }}
                 className="shrink-0 relative outline-none select-none"
               >
                 <div className="absolute inset-0 border-2 border-[#0097C1] rounded-xl z-20 pointer-events-none" />
                 <ImageCarousel
                   image={activeMetadata}
-                  // pass empty handlers or actual handlers for overlay visual completeness
                   onRemove={() => {}}
                   onImageUpdate={handleImageUpdate}
                   onTagChange={() => {}}

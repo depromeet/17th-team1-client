@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   closestCenter,
@@ -40,19 +40,28 @@ interface SortableImageCardProps {
   isPressing: boolean;
   onPressStart: () => void;
   onPressEnd: () => void;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
 }
 
-const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children }: SortableImageCardProps) => {
+const SortableImageCard = ({
+  id,
+  isPressing,
+  onPressStart,
+  onPressEnd,
+  scrollContainerRef,
+  children,
+}: SortableImageCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const touchStartXRef = useRef(0);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 0 : 1,
-    // pan-x: 터치 가로 스크롤 허용 (DnD 라이브러리가 delay 이후 override함)
-    touchAction: "pan-x" as const,
+    touchAction: "none" as const,
+    WebkitTouchCallout: "none" as const,
   };
 
   return (
@@ -62,8 +71,16 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
       {...attributes}
       {...listeners}
       onTouchStart={e => {
+        touchStartXRef.current = e.touches[0].clientX;
         onPressStart();
         listeners?.onTouchStart?.(e);
+      }}
+      onTouchMove={e => {
+        if (!isDragging && scrollContainerRef.current) {
+          const dx = e.touches[0].clientX - touchStartXRef.current;
+          scrollContainerRef.current.scrollLeft -= dx;
+          touchStartXRef.current = e.touches[0].clientX;
+        }
       }}
       onTouchEnd={e => {
         onPressEnd();
@@ -73,22 +90,7 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
         onPressEnd();
         listeners?.onTouchCancel?.(e);
       }}
-      onPointerDown={e => {
-        // 터치 이벤트는 onTouchStart에서 처리하므로 마우스만
-        if (e.pointerType === "mouse") onPressStart();
-        listeners?.onPointerDown?.(e);
-      }}
-      onPointerUp={e => {
-        if (e.pointerType === "mouse") onPressEnd();
-        listeners?.onPointerUp?.(e);
-      }}
-      onPointerCancel={e => {
-        onPressEnd();
-        listeners?.onPointerCancel?.(e);
-      }}
-      onContextMenu={e => {
-        e.preventDefault();
-      }}
+      onContextMenu={e => e.preventDefault()}
       className="shrink-0 outline-none select-none relative"
     >
       <div
@@ -126,6 +128,7 @@ export const ImageUploadSection = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pressingId, setPressingId] = useState<string | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
@@ -183,6 +186,7 @@ export const ImageUploadSection = ({
 
   const renderContent = () => (
     <div
+      ref={scrollContainerRef}
       className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
     >
@@ -219,6 +223,7 @@ export const ImageUploadSection = ({
               onPressEnd={() => {
                 if (pressingId === metadata.id) setPressingId(null);
               }}
+              scrollContainerRef={scrollContainerRef}
             >
               <ImageCarousel
                 image={metadata}

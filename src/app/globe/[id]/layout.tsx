@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: `${nickname}님의 여행 지구본`,
-            type: "image/png",
+            type: "image/webp",
           },
         ],
         type: "website",

@@ -186,16 +186,16 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
         const remainingSlots = MAX_IMAGES - metadataCount;
         if (remainingSlots <= 0) return;
 
-        const tasks: Promise<{ metadata: ImageMetadata; file: File }>[] = [];
+        const tasks: Promise<{ metadata: ImageMetadata; uploadFile: File }>[] = [];
         const filesToProcess = Math.min(files.length, remainingSlots);
 
         for (let i = 0; i < filesToProcess; i++) {
           const f = files[i];
           if (f.type.startsWith("image/")) {
             tasks.push(
-              processSingleFile(f).then(metadata => ({
+              processSingleFile(f).then(({ metadata, uploadFile }) => ({
                 metadata,
-                file: f,
+                uploadFile,
               }))
             );
           }
@@ -203,13 +203,15 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
 
         const settled = await Promise.allSettled(tasks);
         const results = settled
-          .filter((r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; file: File }> => r.status === "fulfilled")
+          .filter(
+            (r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; uploadFile: File }> => r.status === "fulfilled"
+          )
           .map(r => r.value);
 
         if (results.length === 0) return;
 
-        const uploadPromises = results.map(({ metadata, file }) =>
-          uploadTravelPhoto({ file }).then(photoCode => ({
+        const uploadPromises = results.map(({ metadata, uploadFile }) =>
+          uploadTravelPhoto({ file: uploadFile }).then(photoCode => ({
             photoCode,
             metadata,
           }))

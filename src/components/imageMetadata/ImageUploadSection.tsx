@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   closestCenter,
@@ -9,8 +9,7 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  MouseSensor,
-  TouchSensor,
+  PointerSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -127,31 +126,16 @@ export const ImageUploadSection = ({
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pressingId, setPressingId] = useState<string | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
-
-  const touchSensors = useSensors(
-    useSensor(TouchSensor, {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 1000,
-        tolerance: 10,
+        delay: 500,
+        tolerance: 15,
       },
     })
   );
-
-  const mouseSensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    })
-  );
-
-  const sensors = isTouchDevice ? touchSensors : mouseSensors;
 
   const triggerFileInput = () => {
     document.getElementById(fileUploadId)?.click();

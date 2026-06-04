@@ -43,11 +43,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: "Globber",
         images: [
           {
-            url: "https://www.globber.world/assets/thumbnail.png",
+            url: "https://www.globber.world/assets/thumbnail.webp",
             width: 1200,
             height: 630,
             alt: `${nickname}님의 여행 지구본`,
-            type: "image/png",
+            type: "image/webp",
           },
         ],
         type: "website",
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: pageTitle,
         description: pageDescription,
-        images: ["https://www.globber.world/assets/thumbnail.png"],
+        images: ["https://www.globber.world/assets/thumbnail.webp"],
       },
       alternates: {
         canonical: shareUrl,

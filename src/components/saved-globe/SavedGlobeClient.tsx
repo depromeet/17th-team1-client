@@ -65,7 +65,7 @@ const EmptyState = () => {
           {/* Globe Image */}
           <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/globe-empty.png" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
+            <img src="/assets/globe-empty.webp" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
           </div>
         </div>
 

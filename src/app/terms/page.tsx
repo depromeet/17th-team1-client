@@ -122,8 +122,8 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-bold text-text-primary mb-2">책임의 한계</h2>
               <p className="text-sm text-text-secondary leading-relaxed">
-                글로버(Globber)는 Depromeet 동아리 내에서 운영되는 비영리 프로젝트로, 외부 지도 API, 카카오 로그인
-                시스템, 네트워크 장애 등 제3자 시스템 문제로 발생한 손해에 대해 책임을 지지 않습니다.
+                글로버(Globber)는 Depromeet에서 시작된 프로젝트로, 외부 지도 API, 카카오 로그인 시스템, 네트워크 장애 등
+                제3자 시스템 문제로 발생한 손해에 대해 책임을 지지 않습니다.
               </p>
             </section>
           </div>

@@ -37,7 +37,7 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
   });
 }
 
-export async function processSingleFile(file: File): Promise<ImageMetadata> {
+export async function processSingleFile(file: File): Promise<{ metadata: ImageMetadata; uploadFile: File }> {
   const id = Math.random().toString(36).substr(2, 9);
   const extracted: ImageMetadata = {
     id,
@@ -48,7 +48,15 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
     status: "processing",
   };
 
-  const isHeic = file.type.toLowerCase().includes("heic") || /\.heic$/i.test(file.name);
+  // HEIC/HEIF 파일 여부 판별 (MIME 타입 또는 확장자 기준)
+  const isHeic =
+    file.type.toLowerCase().includes("heic") ||
+    file.type.toLowerCase().includes("heif") ||
+    /\.heic$/i.test(file.name) ||
+    /\.heif$/i.test(file.name);
+  // S3에 실제로 올릴 파일 (HEIC → JPEG 변환 성공 시 교체, 아니면 원본 유지)
+  let uploadFile: File = file;
+
   if (isHeic) {
     try {
       const { default: heic2any } = await import("heic2any");
@@ -59,10 +67,14 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
       });
       const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
       if (jpegBlob instanceof Blob) {
-        // 메모리 누수 방지: 기존 Object URL 해제
+        // 미리보기 URL 교체 (메모리 누수 방지: 기존 Object URL 해제)
         const newUrl = URL.createObjectURL(jpegBlob);
         URL.revokeObjectURL(extracted.imagePreview);
         extracted.imagePreview = newUrl;
+
+        // S3 업로드용 JPEG File 객체 생성 (.heic → .jpg, MIME 타입 image/jpeg)
+        const jpegFileName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+        uploadFile = new File([jpegBlob], jpegFileName, { type: "image/jpeg" });
       }
     } catch {
       try {
@@ -130,11 +142,11 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
     if (exifData.DateTimeOriginal) extracted.timestamp = new Date(exifData.DateTimeOriginal as string).toISOString();
     if (exifData.Orientation) extracted.orientation = exifData.Orientation as number;
     extracted.status = "completed";
-    return extracted;
+    return { metadata: extracted, uploadFile };
   } catch (e: unknown) {
     const error = e as Error;
     extracted.status = "error";
     extracted.error = error?.message || "알 수 없는 오류";
-    return extracted;
+    return { metadata: extracted, uploadFile };
   }
 }

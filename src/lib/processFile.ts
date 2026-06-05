@@ -48,8 +48,12 @@ export async function processSingleFile(file: File): Promise<{ metadata: ImageMe
     status: "processing",
   };
 
-  // HEIC 파일 여부 판별 (MIME 타입 또는 확장자 기준)
-  const isHeic = file.type.toLowerCase().includes("heic") || /\.heic$/i.test(file.name);
+  // HEIC/HEIF 파일 여부 판별 (MIME 타입 또는 확장자 기준)
+  const isHeic =
+    file.type.toLowerCase().includes("heic") ||
+    file.type.toLowerCase().includes("heif") ||
+    /\.heic$/i.test(file.name) ||
+    /\.heif$/i.test(file.name);
   // S3에 실제로 올릴 파일 (HEIC → JPEG 변환 성공 시 교체, 아니면 원본 유지)
   let uploadFile: File = file;
 

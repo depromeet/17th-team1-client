@@ -52,13 +52,14 @@ export const ImageCarousel = ({
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [isCropUploading, setIsCropUploading] = useState(false);
   const [currentImage, setCurrentImage] = useState(image.imagePreview);
-  const [customDate, setCustomDate] = useState<string | null>(image.customDate ?? toYearMonth(image.timestamp));
+  const [customDate, setCustomDate] = useState<string | null>(
+    image.customDate === undefined ? toYearMonth(image.timestamp) : image.customDate
+  );
   const [customLocation, setCustomLocation] = useState<string | null>(
     image.location?.nearbyPlaces?.[1] || image.location?.address || null
   );
 
-  const baseDate = toYearMonth(image.timestamp);
-  const displayedYearMonth = customDate ?? baseDate;
+  const displayedYearMonth = customDate;
   const displayDate = formatYearMonth(displayedYearMonth);
   const hasDate = !!displayedYearMonth;
 
@@ -67,7 +68,7 @@ export const ImageCarousel = ({
   }, [image.selectedTag, image.tag]);
 
   useEffect(() => {
-    setCustomDate(image.customDate ?? toYearMonth(image.timestamp));
+    setCustomDate(image.customDate === undefined ? toYearMonth(image.timestamp) : image.customDate);
   }, [image.customDate, image.timestamp]);
 
   useEffect(() => {
@@ -101,12 +102,12 @@ export const ImageCarousel = ({
 
   const handleConfirmDate = (date: string) => {
     const normalized = date.replace(".", "");
-    const changeType = !customDate ? "add" : "update";
+    const changeType = !displayedYearMonth ? "add" : "update";
     sendGAEvent("event", "record_meta_date_change", {
       flow: "editor",
       screen: "record_edit",
       click_code: "editor.record.edit.meta.date.edit",
-      date_before: formatDateForGA(customDate),
+      date_before: formatDateForGA(displayedYearMonth),
       date_after: formatDateForGA(normalized),
       change_type: changeType,
     });
@@ -119,12 +120,21 @@ export const ImageCarousel = ({
       flow: "editor",
       screen: "record_edit",
       click_code: "editor.record.edit.meta.date.remove",
-      date_before: formatDateForGA(customDate),
+      date_before: formatDateForGA(displayedYearMonth),
       date_after: null,
       change_type: "remove",
     });
     setCustomDate(null);
     onDateChange?.(null);
+  };
+
+  const handleDateChipClick = () => {
+    if (hasDate) {
+      handleDateClear();
+      return;
+    }
+
+    setIsDateSelectModalOpen(true);
   };
 
   const handleSaveCroppedImage = async (croppedImage: string) => {
@@ -256,7 +266,7 @@ export const ImageCarousel = ({
         <MetadataChip
           iconType="calendar"
           text={hasDate && displayDate ? displayDate : "날짜 추가"}
-          onClick={() => setIsDateSelectModalOpen(true)}
+          onClick={handleDateChipClick}
           onRemove={hasDate ? handleDateClear : undefined}
           isPlaceholder={!hasDate || !displayDate}
         />

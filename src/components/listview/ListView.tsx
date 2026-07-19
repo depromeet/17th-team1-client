@@ -36,6 +36,7 @@ type GroupedByCountry = {
     lng: number;
     thumbnailUrl?: string;
     thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
+    recordCount?: number; // 해당 도시의 총 여행 기록 개수
     hasRecords: boolean;
     cityId?: number;
   }>;
@@ -68,6 +69,7 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
             lng: country.lng,
             thumbnailUrl: country.thumbnailUrl,
             thumbnails: country.thumbnails,
+            recordCount: country.recordCount,
             hasRecords: country.hasRecords ?? false,
             cityId: country.cityId,
           });
@@ -216,9 +218,11 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map(({ name, hasRecords, thumbnails }) => {
+                  {group.cities.map(({ name, hasRecords, thumbnails, recordCount }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
+                    const totalRecords = recordCount ?? thumbnails?.length ?? 0;
+                    const extraCount = totalRecords - 1;
 
                     return (
                       <button
@@ -253,64 +257,36 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
                           >
                             {cityName}
                           </p>
-                          {/* 여행기록이 있는 경우 썸네일 표시 */}
+                          {/* 여행기록이 있는 경우 가장 최근 썸네일만 표시 */}
                           {hasRecords && thumbnails && thumbnails.length > 0 && (
-                            <div className="flex items-center" style={{ position: "relative" }}>
-                              {thumbnails.length === 1 ? (
-                                // 썸네일이 1개인 경우
+                            <div
+                              className="border rounded-sm shrink-0 overflow-hidden relative"
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderColor: "rgba(255, 255, 255, 0.16)",
+                              }}
+                            >
+                              <Image
+                                src={thumbnails[0]}
+                                alt={cityName}
+                                width={24}
+                                height={24}
+                                className="w-full h-full object-cover rounded-sm"
+                              />
+                              {/* 기록이 2개 이상인 경우 딤드 + 잔여 개수 뱃지 표시 */}
+                              {extraCount > 0 && (
                                 <div
-                                  className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                  style={{ width: "24px", height: "24px" }}
+                                  className="absolute inset-0 flex items-center justify-center"
+                                  style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
                                 >
-                                  <Image
-                                    src={thumbnails[0]}
-                                    alt={cityName}
-                                    width={24}
-                                    height={24}
-                                    className="w-full h-full object-cover rounded-sm"
-                                  />
+                                  <p
+                                    className="font-bold text-white"
+                                    style={{ fontSize: "12px", letterSpacing: "-0.24px" }}
+                                  >
+                                    +{extraCount}
+                                  </p>
                                 </div>
-                              ) : (
-                                // 썸네일이 2개 이상인 경우 겹침 표시 (최대 2개)
-                                <>
-                                  {/* 이전 썸네일 (왼쪽, z-index 낮음) */}
-                                  <div
-                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                    style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      position: "relative",
-                                      zIndex: 1,
-                                      marginRight: "-8px",
-                                    }}
-                                  >
-                                    <Image
-                                      src={thumbnails[1]}
-                                      alt={`${cityName} 이전`}
-                                      width={24}
-                                      height={24}
-                                      className="w-full h-full object-cover rounded-sm"
-                                    />
-                                  </div>
-                                  {/* 최신 썸네일 (우측, z-index 높음) */}
-                                  <div
-                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                    style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      position: "relative",
-                                      zIndex: 2,
-                                    }}
-                                  >
-                                    <Image
-                                      src={thumbnails[0]}
-                                      alt={`${cityName} 최신`}
-                                      width={24}
-                                      height={24}
-                                      className="w-full h-full object-cover rounded-sm"
-                                    />
-                                  </div>
-                                </>
                               )}
                             </div>
                           )}

@@ -90,13 +90,19 @@ const GlobePage = () => {
           cityThumbnails,
           countryThumbnails: countryThumbMap,
           cityThumbnailsArray,
+          cityDiaryCount,
         } = getDiaryThumbnails(diaryData);
 
         // 국가 썸네일 state 설정
         setCountryThumbnails(countryThumbMap);
 
         if (globeResponse?.data) {
-          const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data, cityThumbnails, cityThumbnailsArray);
+          const mappedPatterns = mapGlobeDataToTravelPatterns(
+            globeResponse.data,
+            cityThumbnails,
+            cityThumbnailsArray,
+            cityDiaryCount
+          );
           setTravelPatterns(mappedPatterns);
 
           // 도시와 국가 개수 설정

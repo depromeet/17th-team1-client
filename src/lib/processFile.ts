@@ -58,37 +58,27 @@ export async function processSingleFile(file: File): Promise<{ metadata: ImageMe
   let uploadFile: File = file;
 
   if (isHeic) {
-    try {
-      const { default: heic2any } = await import("heic2any");
-      const converted = await heic2any({
-        blob: file as unknown as Blob,
-        toType: "image/jpeg",
-        quality: 0.92,
-      });
-      const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-      if (jpegBlob instanceof Blob) {
-        // 미리보기 URL 교체 (메모리 누수 방지: 기존 Object URL 해제)
-        const newUrl = URL.createObjectURL(jpegBlob);
-        URL.revokeObjectURL(extracted.imagePreview);
-        extracted.imagePreview = newUrl;
-
-        // S3 업로드용 JPEG File 객체 생성 (.heic → .jpg, MIME 타입 image/jpeg)
-        const jpegFileName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
-        uploadFile = new File([jpegBlob], jpegFileName, { type: "image/jpeg" });
-      }
-    } catch {
-      try {
-        const thumb = await exifr.thumbnail(file);
-        if (thumb) {
-          // Uint8Array를 새로운 Uint8Array로 복사하여 타입 안전성 확보
-          const thumbArray = new Uint8Array(thumb);
-          // 메모리 누수 방지: 기존 Object URL 해제
-          const newUrl = URL.createObjectURL(new Blob([thumbArray], { type: "image/jpeg" }));
-          URL.revokeObjectURL(extracted.imagePreview);
-          extracted.imagePreview = newUrl;
-        }
-      } catch {}
+    // HEIC → JPEG 변환 실패 시 원본 HEIC를 그대로 업로드하지 않도록,
+    // 실패를 삼키지 않고 호출부(useImageMetadata)로 전파해 업로드 자체를 막는다.
+    const { default: heic2any } = await import("heic2any");
+    const converted = await heic2any({
+      blob: file as unknown as Blob,
+      toType: "image/jpeg",
+      quality: 0.92,
+    });
+    const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+    if (!(jpegBlob instanceof Blob)) {
+      throw new Error(`HEIC 변환에 실패했습니다: ${file.name}`);
     }
+
+    // 미리보기 URL 교체 (메모리 누수 방지: 기존 Object URL 해제)
+    const newUrl = URL.createObjectURL(jpegBlob);
+    URL.revokeObjectURL(extracted.imagePreview);
+    extracted.imagePreview = newUrl;
+
+    // S3 업로드용 JPEG File 객체 생성 (.heic → .jpg, MIME 타입 image/jpeg)
+    const jpegFileName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+    uploadFile = new File([jpegBlob], jpegFileName, { type: "image/jpeg" });
   }
 
   try {

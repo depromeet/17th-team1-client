@@ -46,12 +46,16 @@ export const MetadataChip = ({
   if (onClick && onRemove) {
     return (
       <div className={`${baseClasses} relative`}>
-        <button onClick={onClick} className="flex items-center gap-2" type="button">
+        <button
+          onClick={onClick}
+          className="flex items-center gap-2 -m-1.5 pl-1.5 pr-7 py-1.5 cursor-pointer"
+          type="button"
+        >
           {/* Left Icon */}
           <div className="flex-shrink-0">{renderIcon()}</div>
 
           {/* Center Text */}
-          <span className={`text-sm font-medium truncate max-w-[170px] ${textClasses} pr-[18px]`}>{text}</span>
+          <span className={`text-sm font-medium truncate max-w-[170px] ${textClasses}`}>{text}</span>
         </button>
 
         {/* Right X Icon */}
@@ -69,7 +73,7 @@ export const MetadataChip = ({
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={baseClasses} type="button">
+      <button onClick={onClick} className={`${baseClasses} cursor-pointer`} type="button">
         {/* Left Icon */}
         <div className="flex-shrink-0">{renderIcon()}</div>
 

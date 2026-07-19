@@ -80,13 +80,14 @@ export const calculateLabelPosition = (d: ClusterData, htmlElements: ClusterData
  * @param thumbnailUrl - 썸네일 URL (선택)
  * @param isMyGlobe - 나의 지구본 여부
  * @param isFirstGlobe - 최초 지구본 여부
+ * @param recordCount - 해당 도시의 총 여행 기록 개수 (선택)
  * @returns 도시 HTML 문자열
  * @responsibility 개별 도시 마커 HTML 생성
  *
  * @description
  * - 기록 없음 + 타인의 지구본/최초 지구본: + 버튼 없음
  * - 기록 없음 + 나의 지구본: + 버튼 표시
- * - 기록 있음: 썸네일 이미지 표시
+ * - 기록 있음: 썸네일 이미지 표시 (기록이 2개 이상이면 딤드 + "+N" 뱃지 표시)
  */
 export const createCityHTML = (
   styles: CityStyles,
@@ -95,7 +96,8 @@ export const createCityHTML = (
   hasRecords: boolean = true,
   thumbnailUrl?: string,
   isMyGlobe: boolean = true,
-  isFirstGlobe: boolean = false
+  isFirstGlobe: boolean = false,
+  recordCount?: number
 ) => {
   const { dot, horizontalLine, label, actionButton, thumbnailCard } = styles;
 
@@ -170,6 +172,13 @@ export const createCityHTML = (
         style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
         data-thumb="true"
       />
+      ${
+        recordCount && recordCount > 1
+          ? `<div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.2); border-radius: 4px; pointer-events: none;">
+        <span style="color: #fff; font-size: 12px; font-weight: 700; letter-spacing: -0.24px;">+${recordCount - 1}</span>
+      </div>`
+          : ""
+      }
     </div>`
         : ""
     }

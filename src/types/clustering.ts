@@ -16,6 +16,7 @@ export type ClusterData = {
   isExpanded?: boolean;
   hasRecords?: boolean; // 해당 클러스터에 여행 기록이 있는지 여부
   thumbnailUrl?: string; // 클러스터의 대표 썸네일
+  recordCount?: number; // 해당 클러스터(도시)의 총 여행 기록 개수
 };
 
 export type ClusteringState = {

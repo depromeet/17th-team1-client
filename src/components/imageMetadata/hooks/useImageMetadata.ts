@@ -208,6 +208,11 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           )
           .map(r => r.value);
 
+        const hasFailure = settled.some(r => r.status === "rejected");
+        if (hasFailure) {
+          alert("업로드에 실패했습니다");
+        }
+
         if (results.length === 0) return;
 
         const uploadPromises = results.map(({ metadata, uploadFile }) =>

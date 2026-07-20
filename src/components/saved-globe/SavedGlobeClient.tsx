@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
@@ -152,7 +153,13 @@ const GlobeList = ({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={profileImageUrl} alt={nickname} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-linear-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
+                  <Image
+                    src="/assets/default-profile.png"
+                    alt={nickname}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
 

@@ -16,6 +16,7 @@ import { ApiError } from "@/lib/apiClient";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
+import { buildErrorPagePath } from "@/utils/errorType";
 
 type ProfileClientProps = {
   initialProfile: ProfileData | null;
@@ -40,7 +41,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   // 프로필 데이터가 없으면 (토큰 만료 등) 에러 페이지로 리다이렉트
   useEffect(() => {
     if (initialProfile === null) {
-      router.replace("/error?type=401");
+      router.replace(buildErrorPagePath("401"));
     }
   }, [initialProfile, router]);
 
@@ -107,7 +108,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
         // 401 에러인 경우 에러 페이지로 리다이렉트
         if (error instanceof ApiError && error.status === 401) {
-          router.replace("/error?type=401");
+          router.replace(buildErrorPagePath("401"));
           return;
         }
 

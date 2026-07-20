@@ -1,5 +1,6 @@
 import { ProfileClient } from "@/components/profile/ProfileClient";
 import { getMyProfile } from "@/services/profileService";
+import { buildErrorPagePath } from "@/utils/errorType";
 import { getServerAuthToken } from "@/utils/serverCookies";
 import { handleServerError } from "@/utils/serverErrorHandler";
 
@@ -19,6 +20,6 @@ export default async function ProfilePage() {
     // handleServerError가 처리하지 않은 에러인 경우에도 에러 페이지로 이동
     console.error("프로필 로드 실패:", error);
     const { redirect } = await import("next/navigation");
-    redirect("/error?type=500");
+    redirect(buildErrorPagePath("500"));
   }
 }

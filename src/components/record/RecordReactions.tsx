@@ -15,6 +15,7 @@ import { HeadlessToast } from "@/components/common/Toast";
 import { usePressEmojiMutation, useRegisterEmojiMutation } from "@/hooks/mutation/useEmojiMutations";
 import { useOwnerToast } from "@/hooks/useOwnerToast";
 import type { Emoji } from "@/types/emoji";
+import { buildErrorPagePath } from "@/utils/errorType";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
@@ -120,7 +121,7 @@ export const RecordReactions = ({ recordId, initialReactions = [], isOwner = fal
 
     if (is401Error) {
       if (window.confirm(errorMessage)) {
-        router.push("/error?type=401");
+        router.push(buildErrorPagePath("401"));
       }
     } else {
       alert(errorMessage);

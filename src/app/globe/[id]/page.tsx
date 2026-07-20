@@ -13,12 +13,14 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
+import { ApiError } from "@/lib/apiClient";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { getDiaryThumbnails } from "@/utils/diaryThumbnailMapper";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
@@ -70,7 +72,7 @@ const GlobePage = () => {
       try {
         const { uuid: myUuid } = getAuthInfo();
         if (!urlUuid) {
-          router.push("/error?type=404");
+          router.push(buildErrorPagePath("404"));
           return;
         }
 
@@ -131,8 +133,16 @@ const GlobePage = () => {
         }
         setTravelInsight(insightResponse || "");
       } catch (err) {
-        // TODO: 에러 처리 로직 추가
         console.error("Globe data load failed:", err);
+
+        if (err instanceof ApiError) {
+          const errorType = toErrorTypeFromStatus(err.status);
+
+          if (errorType === "401" || errorType === "500") {
+            router.replace(buildErrorPagePath(errorType));
+            return;
+          }
+        }
       } finally {
         setIsDataLoaded(true);
       }

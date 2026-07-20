@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 const PUBLIC_PATHS: readonly string[] = [
   "/login",
   "/login/oauth/success",
+  "/error",
   "/_next",
   "/api",
   "/assets",

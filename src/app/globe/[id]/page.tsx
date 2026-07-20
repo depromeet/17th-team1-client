@@ -13,6 +13,7 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
+import { ApiError } from "@/lib/apiClient";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
@@ -131,8 +132,19 @@ const GlobePage = () => {
         }
         setTravelInsight(insightResponse || "");
       } catch (err) {
-        // TODO: 에러 처리 로직 추가
         console.error("Globe data load failed:", err);
+
+        // 5xx는 서버 오류 화면으로, 401은 로그인 만료 화면으로 이동
+        if (err instanceof ApiError) {
+          if (err.status === 401) {
+            router.replace("/error?type=401");
+            return;
+          }
+          if (err.status >= 500) {
+            router.replace("/error?type=500");
+            return;
+          }
+        }
       } finally {
         setIsDataLoaded(true);
       }

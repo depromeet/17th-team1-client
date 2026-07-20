@@ -72,7 +72,8 @@ export function ErrorPageContent({ errorType }: ErrorPageContentProps) {
             </Button>
           ),
         };
-      default: // 500
+      case "500":
+      default:
         return {
           icon: Error500Icon,
           title: "일시적인 오류가 발생했어요.",

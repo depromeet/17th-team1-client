@@ -4,27 +4,19 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
-
-type ErrorType = "401" | "404" | "500";
-
-const ERROR_TYPES: readonly ErrorType[] = ["401", "404", "500"];
-
-function isErrorType(value: string | null): value is ErrorType {
-  return value !== null && ERROR_TYPES.includes(value as ErrorType);
-}
+import { DEFAULT_ERROR_TYPE, ERROR_TYPE_PARAM } from "@/constants/error";
+import { toErrorType } from "@/utils/errorType";
 
 function ErrorPageContentWrapper() {
   const searchParams = useSearchParams();
-  const type = searchParams.get("type");
-  // 알 수 없는 값(?type=abc 등)이 오면 서버 오류 화면으로 폴백
-  const errorType: ErrorType = isErrorType(type) ? type : "500";
+  const errorType = toErrorType(searchParams.get(ERROR_TYPE_PARAM));
 
   return <ErrorPageContent errorType={errorType} />;
 }
 
 export default function ErrorPage() {
   return (
-    <Suspense fallback={<ErrorPageContent errorType="500" />}>
+    <Suspense fallback={<ErrorPageContent errorType={DEFAULT_ERROR_TYPE} />}>
       <ErrorPageContentWrapper />
     </Suspense>
   );

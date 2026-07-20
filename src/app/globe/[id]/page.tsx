@@ -20,6 +20,7 @@ import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { getDiaryThumbnails } from "@/utils/diaryThumbnailMapper";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
@@ -71,7 +72,7 @@ const GlobePage = () => {
       try {
         const { uuid: myUuid } = getAuthInfo();
         if (!urlUuid) {
-          router.push("/error?type=404");
+          router.push(buildErrorPagePath("404"));
           return;
         }
 
@@ -134,14 +135,11 @@ const GlobePage = () => {
       } catch (err) {
         console.error("Globe data load failed:", err);
 
-        // 5xx는 서버 오류 화면으로, 401은 로그인 만료 화면으로 이동
         if (err instanceof ApiError) {
-          if (err.status === 401) {
-            router.replace("/error?type=401");
-            return;
-          }
-          if (err.status >= 500) {
-            router.replace("/error?type=500");
+          const errorType = toErrorTypeFromStatus(err.status);
+
+          if (errorType === "401" || errorType === "500") {
+            router.replace(buildErrorPagePath(errorType));
             return;
           }
         }

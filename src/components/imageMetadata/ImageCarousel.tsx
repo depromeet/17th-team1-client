@@ -223,6 +223,7 @@ export const ImageCarousel = ({
             });
             setIsCropModalOpen(true);
           }}
+          onContextMenu={e => e.preventDefault()}
           aria-label="이미지 편집"
           disabled={isCropUploading}
         >
@@ -234,6 +235,7 @@ export const ImageCarousel = ({
             className="object-cover"
             unoptimized
             draggable={false}
+            onContextMenu={e => e.preventDefault()}
           />
           {isCropUploading && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
 
+import { DeleteConfirmModal } from "@/components/common/DeleteConfirmModal";
 import { HeadlessToastProvider } from "@/components/common/Toast";
 import { RecordCard } from "@/components/record/RecordCard";
 import { RecordDetailHeader } from "@/components/record/RecordDetailHeader";
@@ -99,7 +100,7 @@ const RecordDetailClient = ({
           if (isChanged) {
             return { ...record, images: newImages, imageMetadata: newMetadata };
           }
-        } catch (e) {
+        } catch {
           return record;
         }
       }
@@ -108,6 +109,8 @@ const RecordDetailClient = ({
     setCountryRecords(reorderedRecords);
   }, [initialRecords]);
   const [hasShownScrollHint, setHasShownScrollHint] = useState(true);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { mutateAsync: deleteDiary } = useDeleteDiaryMutation();
 
   // 스크롤 상태 관리
@@ -194,7 +197,7 @@ const RecordDetailClient = ({
     router.push(`/image-metadata?${params.toString()}`);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!currentRecord) return;
     if (isOwner)
       sendGAEvent("event", "endview_my_delete_click", {
@@ -203,62 +206,39 @@ const RecordDetailClient = ({
         click_code: "endview.my.more.delete",
         record_id: currentRecord.id,
       });
-    const confirmed = window.confirm("기록을 삭제하면 복구할 수 없습니다. 정말 삭제하시겠어요?");
-    if (confirmed) {
-      try {
-        await deleteDiary({ diaryId: id });
-        router.push("/");
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "기록 삭제 중 오류가 발생했습니다";
-        alert(errorMessage);
-      }
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await deleteDiary({ diaryId: id });
+      router.push("/");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "기록 삭제 중 오류가 발생했습니다";
+      alert(errorMessage);
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
-  if (countryRecords.length === 1) {
-    return (
-      <HeadlessToastProvider viewportClassName="fixed bottom-40 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px] max-w-[calc(100%-32px)]">
-        <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
-          <div className="absolute top-0 left-0 right-0 z-10">
-            <RecordDetailHeader
-              city={city}
-              country={country}
-              onBack={handleBack}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              isOwner={isOwner}
-            />
-          </div>
-          <RecordCard
-            id={id}
-            images={images}
-            imageMetadata={imageMetadata}
-            userName={userName}
-            userAvatar={userAvatar}
-            description={description}
-            reactions={reactions}
-            isOwner={isOwner}
-            showScrollHint={shouldShowScrollHint}
-            isFirstRecord={true}
-          />
-        </div>
-      </HeadlessToastProvider>
-    );
-  }
-
-  return (
-    <HeadlessToastProvider viewportClassName="fixed bottom-40 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px] max-w-[calc(100%-32px)]">
-      <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
-        <div className="absolute top-0 left-0 right-0 z-10">
-          <RecordDetailHeader
-            city={city}
-            country={country}
-            onBack={handleBack}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isOwner={isOwner}
-          />
-        </div>
+  const recordContent =
+    countryRecords.length === 1 ? (
+      <RecordCard
+        id={id}
+        images={images}
+        imageMetadata={imageMetadata}
+        userName={userName}
+        userAvatar={userAvatar}
+        description={description}
+        reactions={reactions}
+        isOwner={isOwner}
+        showScrollHint={shouldShowScrollHint}
+        isFirstRecord={true}
+      />
+    ) : (
+      <>
         <RecordScrollHint show={shouldShowScrollHint} />
         <RecordScrollContainer
           currentIndex={currentIndex}
@@ -282,7 +262,30 @@ const RecordDetailClient = ({
             />
           ))}
         </RecordScrollContainer>
+      </>
+    );
+
+  return (
+    <HeadlessToastProvider viewportClassName="fixed bottom-40 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[370px] max-w-[calc(100%-32px)]">
+      <div className="w-full h-dvh bg-surface-secondary relative max-w-lg mx-auto">
+        <div className="absolute top-0 left-0 right-0 z-10">
+          <RecordDetailHeader
+            city={city}
+            country={country}
+            onBack={handleBack}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isOwner={isOwner}
+          />
+        </div>
+        {recordContent}
       </div>
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        isProcessing={isDeleting}
+      />
     </HeadlessToastProvider>
   );
 };

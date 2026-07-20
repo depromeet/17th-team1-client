@@ -11,7 +11,6 @@ type Props = {
 };
 
 const RecordDetailViewTracker = ({ recordId, cityId, photoCount, isOwner }: Props) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const screen = isOwner ? "my" : "other";
     const eventName = isOwner ? "endview_my_view" : "endview_other_view";
@@ -22,6 +21,7 @@ const RecordDetailViewTracker = ({ recordId, cityId, photoCount, isOwner }: Prop
       city_id: cityId,
       photo_count: photoCount,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <></>;
 };

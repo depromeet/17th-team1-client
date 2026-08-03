@@ -60,7 +60,6 @@ const SortableImageCard = ({
     opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 0 : 1,
     touchAction: "none" as const,
-    WebkitTouchCallout: "none" as const,
   };
 
   return (
@@ -90,7 +89,7 @@ const SortableImageCard = ({
         listeners?.onTouchCancel?.(e);
       }}
       onContextMenu={e => e.preventDefault()}
-      className="shrink-0 outline-none select-none relative"
+      className="shrink-0 outline-none select-none relative dnd-no-image-menu"
     >
       <div
         style={{
@@ -283,7 +282,7 @@ export const ImageUploadSection = ({
                   transformOrigin: "center center",
                   transition: "none",
                 }}
-                className="shrink-0 relative outline-none select-none"
+                className="shrink-0 relative outline-none select-none dnd-no-image-menu"
               >
                 <div className="absolute inset-0 border-2 border-[#0097C1] rounded-xl z-20 pointer-events-none" />
                 <ImageCarousel

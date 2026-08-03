@@ -233,6 +233,14 @@ export const ImageCarousel = ({
             fill
             sizes="251px"
             className="object-cover"
+            style={
+              {
+                WebkitTouchCallout: "none",
+                WebkitUserDrag: "none",
+                userSelect: "none",
+                pointerEvents: "none",
+              } as React.CSSProperties
+            }
             unoptimized
             draggable={false}
             onContextMenu={e => e.preventDefault()}

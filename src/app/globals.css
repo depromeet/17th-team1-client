@@ -187,3 +187,18 @@ body {
 .image-crop-modal .reactEasyCrop_CropAreaGrid {
   border-radius: 12px;
 }
+
+/* Prevent native long-press image save popup on mobile browsers (iOS Safari / Android Chrome) */
+.dnd-no-image-menu,
+.dnd-no-image-menu * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.dnd-no-image-menu img {
+  pointer-events: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-drag: none !important;
+}

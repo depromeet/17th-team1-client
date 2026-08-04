@@ -70,7 +70,7 @@ const GlobePage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { uuid: myUuid } = getAuthInfo();
+        const { uuid: myUuid, token } = getAuthInfo();
         if (!urlUuid) {
           router.push(buildErrorPagePath("404"));
           return;
@@ -87,7 +87,7 @@ const GlobePage = () => {
         if (globeResponse?.data?.memberId) insightResponse = await getTravelInsight(globeResponse.data.memberId, false);
 
         // 여행 기록 데이터를 가져와서 도시별/국가별 썸네일 생성
-        const diaryData = await getDiariesList(urlUuid);
+        const diaryData = await getDiariesList(urlUuid, token || undefined);
         const {
           cityThumbnails,
           countryThumbnails: countryThumbMap,

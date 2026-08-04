@@ -358,9 +358,9 @@ export const addDiaryPhoto = async (
  * @example
  * const diaries = await getDiariesByUuid('uuid');
  */
-export const getDiariesList = async (uuid: string) => {
+export const getDiariesList = async (uuid: string, token?: string) => {
   try {
-    const response = await apiGet<DiariesListResponse>("/api/v1/diaries", { uuid });
+    const response = await apiGet<DiariesListResponse>("/api/v1/diaries", { uuid }, token);
 
     // response.data.diaryResponses가 없거나 배열이 아닌 경우 빈 배열 반환
     if (!response.data?.diaryResponses || !Array.isArray(response.data.diaryResponses)) {

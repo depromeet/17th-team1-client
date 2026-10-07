@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // 프로필 편집 폼 검증 상수
 export const PROFILE_VALIDATION = {
-  MAX_NICKNAME_LENGTH: 10,
+  MAX_NICKNAME_LENGTH: 20,
   MAX_IMAGE_SIZE_MB: 5,
   MAX_IMAGE_SIZE_BYTES: 5 * 1024 * 1024,
   ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/heic", "image/heif"],
@@ -11,12 +11,18 @@ export const PROFILE_VALIDATION = {
 const isAllowedImageType = (type: string): type is (typeof PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES)[number] =>
   PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES.includes(type as (typeof PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES)[number]);
 
+// 이모지 감지 정규식
+const EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Component}/u;
+
 // 닉네임 스키마
 export const nicknameSchema = z
   .string()
   .min(1, { message: "닉네임을 입력해주세요." })
   .max(PROFILE_VALIDATION.MAX_NICKNAME_LENGTH, {
     message: `닉네임은 ${PROFILE_VALIDATION.MAX_NICKNAME_LENGTH}자 이하여야 합니다.`,
+  })
+  .refine(value => !EMOJI_REGEX.test(value), {
+    message: "이모지는 사용할 수 없습니다.",
   });
 
 // 이미지 파일 스키마 (클라이언트 사이드 검증용)

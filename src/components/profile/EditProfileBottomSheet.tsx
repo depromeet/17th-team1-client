@@ -254,6 +254,21 @@ export const EditProfileBottomSheet = ({
                 {...register("nickname")}
                 maxLength={PROFILE_VALIDATION.MAX_NICKNAME_LENGTH}
                 placeholder="닉네임을 입력하세요"
+                onKeyDown={e => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                }}
+                onInput={e => {
+                  const input = e.currentTarget;
+                  const emojiRegex =
+                    /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Component}/gu;
+                  if (emojiRegex.test(input.value)) {
+                    const cleaned = input.value.replace(emojiRegex, "");
+                    setValue("nickname", cleaned, { shouldValidate: true, shouldDirty: true });
+                  }
+                }}
                 className={cn(
                   "w-full h-[50px] px-4 py-3.5",
                   "rounded-2xl border",

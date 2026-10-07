@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { getContinent, getCountryName } from "@/constants/countryMapping";
+import { buildCityNavigationPath } from "@/lib/globe/eventHandlers";
 import type { KoreanContinent } from "@/types/geography";
 import type { TravelPattern } from "@/types/travelPatterns";
 
@@ -23,6 +25,7 @@ const CONTINENT_DISPLAY_NAME: Record<KoreanContinent, string> = {
 type ListViewProps = {
   travelPatterns: TravelPattern[];
   isMyGlobe?: boolean;
+  uuid?: string;
 };
 
 type GroupedByCountry = {
@@ -42,7 +45,8 @@ type GroupedByCountry = {
   }>;
 };
 
-const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
+const ListView = ({ travelPatterns, isMyGlobe = true, uuid }: ListViewProps) => {
+  const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
   // travelPatterns의 countries를 countryCode로 그룹화
@@ -218,24 +222,28 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map(({ name, hasRecords, thumbnails, recordCount }) => {
+                  {group.cities.map(({ name, hasRecords, thumbnails, recordCount, cityId }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
                     const totalRecords = recordCount ?? thumbnails?.length ?? 0;
                     const extraCount = totalRecords - 1;
+                    // 타인의 지구본에서 기록이 없는 경우 클릭 비활성화 (글로브 뷰와 동일)
+                    const isClickDisabled = !isMyGlobe && !hasRecords;
 
                     return (
                       <button
                         key={`${group.countryCode}-${name}`}
                         type="button"
-                        className="border rounded-xl border-none"
-                        onClick={() =>
+                        disabled={isClickDisabled}
+                        className="border rounded-xl border-none cursor-pointer disabled:cursor-not-allowed"
+                        onClick={() => {
                           sendGAEvent("event", "home_list_city_select", {
                             flow: "home",
                             screen: isMyGlobe ? "list_main" : "list_other",
                             click_code: isMyGlobe ? "home.list.city.select" : "home.other.list.city.select",
-                          })
-                        }
+                          });
+                          router.push(buildCityNavigationPath(name, cityId, hasRecords, uuid));
+                        }}
                       >
                         <div
                           className="flex gap-2 items-center rounded-[inherit] bg-(--color-surface-placeholder--8)"

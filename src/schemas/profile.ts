@@ -11,8 +11,8 @@ export const PROFILE_VALIDATION = {
 const isAllowedImageType = (type: string): type is (typeof PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES)[number] =>
   PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES.includes(type as (typeof PROFILE_VALIDATION.ALLOWED_IMAGE_TYPES)[number]);
 
-// 이모지 감지 정규식
-const EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Component}/u;
+// 이모지 감지 정규식 (Emoji_Component는 0-9, #, * 등 일반 문자를 포함하므로 제외)
+const EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}/u;
 
 // 닉네임 스키마
 export const nicknameSchema = z

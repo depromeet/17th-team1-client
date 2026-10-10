@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 
@@ -17,7 +17,7 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
-import { EditProfileFormData, editProfileSchema, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
+import { createEditProfileSchema, EditProfileFormData, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {
@@ -43,6 +43,9 @@ export const EditProfileBottomSheet = ({
 
   const prevIsOpenRef = useRef(isOpen);
 
+  // 기존 닉네임(이모지 포함 가능)은 변경하지 않은 경우 이모지 검증에서 제외
+  const profileSchema = useMemo(() => createEditProfileSchema(initialName), [initialName]);
+
   const {
     register,
     handleSubmit,
@@ -51,7 +54,7 @@ export const EditProfileBottomSheet = ({
     reset,
     formState: { errors, isDirty },
   } = useForm<EditProfileFormData>({
-    resolver: standardSchemaResolver(editProfileSchema),
+    resolver: standardSchemaResolver(profileSchema),
     defaultValues: {
       nickname: initialName,
       imageFile: undefined,

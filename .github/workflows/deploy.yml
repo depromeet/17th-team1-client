@@ -50,8 +50,20 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Pull & Deploy
+        env:
+          SENTRY_WEBHOOK_SECRET: ${{ secrets.SENTRY_WEBHOOK_SECRET }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           cd ~/17th-team1-client
+          # 런타임 비밀값을 서버 compose 파일에 직접 쓰지 않고, 배포 시 보조 compose 파일로 주입
+          umask 077
+          cat > docker-compose.secrets.yml <<EOF
+          services:
+            frontend:
+              environment:
+                SENTRY_WEBHOOK_SECRET: "${SENTRY_WEBHOOK_SECRET}"
+                DISCORD_WEBHOOK_URL: "${DISCORD_WEBHOOK_URL}"
+          EOF
           docker compose -f docker-compose-prod.yml pull frontend
-          docker compose -f docker-compose-prod.yml up -d --force-recreate --no-build frontend
+          docker compose -f docker-compose-prod.yml -f docker-compose.secrets.yml up -d --force-recreate --no-build frontend
           docker image prune -f

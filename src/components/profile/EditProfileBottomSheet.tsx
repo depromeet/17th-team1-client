@@ -17,7 +17,14 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
-import { createEditProfileSchema, EditProfileFormData, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
+import {
+  containsEmoji,
+  createEditProfileSchema,
+  EditProfileFormData,
+  PROFILE_VALIDATION,
+  removeEmoji,
+  validateImageFile,
+} from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {
@@ -264,11 +271,9 @@ export const EditProfileBottomSheet = ({
                   }
                 }}
                 onInput={e => {
-                  const input = e.currentTarget;
-                  const emojiRegex = /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}/gu;
-                  if (emojiRegex.test(input.value)) {
-                    const cleaned = input.value.replace(emojiRegex, "");
-                    setValue("nickname", cleaned, { shouldValidate: true, shouldDirty: true });
+                  const { value } = e.currentTarget;
+                  if (containsEmoji(value)) {
+                    setValue("nickname", removeEmoji(value), { shouldValidate: true, shouldDirty: true });
                   }
                 }}
                 className={cn(

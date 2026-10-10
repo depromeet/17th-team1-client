@@ -12,6 +12,7 @@ import { getDiaryDetail } from "@/services/diaryService";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { toYearMonth } from "@/utils/dateUtils";
 import { isCoordinateFormat, reverseGeocode } from "@/utils/geocoding";
+import { reportError } from "@/utils/sentry";
 
 import type { LocationSelection } from "../LocationSelectBottomSheet";
 
@@ -208,8 +209,11 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           )
           .map(r => r.value);
 
-        const hasFailure = settled.some(r => r.status === "rejected");
-        if (hasFailure) {
+        const failures = settled.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+        failures.forEach(({ reason }) => {
+          reportError(reason, { tags: { feature: "photo_upload", step: "process_file" } });
+        });
+        if (failures.length > 0) {
           alert("업로드에 실패했습니다");
         }
 
@@ -266,6 +270,7 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           });
         }
       } catch (error) {
+        reportError(error, { tags: { feature: "photo_upload", step: "upload" } });
         alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
       } finally {
         (e.target as HTMLInputElement).value = "";
@@ -319,6 +324,7 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
         )
       );
     } catch (error) {
+      reportError(error, { tags: { feature: "photo_upload", step: "crop_upload" } });
       alert("크롭된 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
       throw error;
     }

@@ -42,6 +42,9 @@ importers:
       '@globber/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@globber/query':
+        specifier: workspace:*
+        version: link:../../packages/query
       '@globber/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -263,6 +266,37 @@ importers:
       eslint-plugin-simple-import-sort:
         specifier: ^12.1.1
         version: 12.1.1(eslint@9.39.4(jiti@2.6.1))
+
+  packages/query:
+    dependencies:
+      '@globber/api':
+        specifier: workspace:*
+        version: link:../api
+      '@globber/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@globber/config':
+        specifier: workspace:*
+        version: link:../config
+      '@tanstack/react-query':
+        specifier: ^5.85.9
+        version: 5.90.7(react@19.2.3)
+      '@types/node':
+        specifier: ^20
+        version: 20.19.24
+      '@types/react':
+        specifier: ^19
+        version: 19.2.2
+      eslint:
+        specifier: ^9
+        version: 9.39.4(jiti@2.6.1)
+      react:
+        specifier: 19.2.3
+        version: 19.2.3
+      typescript:
+        specifier: ^5
+        version: 5.9.3
 
   packages/shared:
     dependencies:

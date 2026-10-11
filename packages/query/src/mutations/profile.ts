@@ -8,23 +8,26 @@ import type {
 } from "@globber/shared/types/member";
 import { useMutation } from "@tanstack/react-query";
 
-import { getS3UploadUrl, uploadAndUpdateProfile, withdrawMember } from "@/services/profileService";
+import { useApi } from "../provider";
 
 export const useGetS3UploadUrlMutation = () => {
+  const api = useApi();
   return useMutation<{ presignedUrl: string; s3Key: string }, Error, GetS3UploadUrlRequest>({
-    mutationFn: ({ uploadData, token }) => getS3UploadUrl(uploadData, token),
+    mutationFn: ({ uploadData, token }) => api.profile.getS3UploadUrl(uploadData, token),
   });
 };
 
 export const useUploadAndUpdateProfileMutation = () => {
+  const api = useApi();
   return useMutation<ProfileData, Error, UploadAndUpdateProfileRequest>({
     mutationFn: ({ nickname, memberId, imageFile, token }) =>
-      uploadAndUpdateProfile(nickname, memberId, imageFile, token),
+      api.profile.uploadAndUpdateProfile(nickname, memberId, imageFile, token),
   });
 };
 
 export const useWithdrawMemberMutation = () => {
+  const api = useApi();
   return useMutation<void, Error, WithdrawMemberRequest | void>({
-    mutationFn: request => withdrawMember(request?.token),
+    mutationFn: request => api.profile.withdrawMember(request?.token),
   });
 };

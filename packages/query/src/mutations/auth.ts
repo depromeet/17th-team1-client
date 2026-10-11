@@ -2,14 +2,15 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-import { logout } from "@/services/authService";
+import { useApi } from "../provider";
 
 type LogoutResponse = {
   token?: string;
 };
 
 export const useLogoutMutation = () => {
+  const api = useApi();
   return useMutation<void, Error, LogoutResponse | void>({
-    mutationFn: variables => logout(variables?.token),
+    mutationFn: variables => api.auth.logout(variables?.token),
   });
 };

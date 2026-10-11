@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useCreateMemberTravelsMutation, useDeleteMemberTravelMutation } from "@globber/query";
 import { getCountryName } from "@globber/shared/constants/countryMapping";
 import type { City } from "@globber/shared/types/city";
 import type { CreateTravelRecordsResponse } from "@globber/shared/types/member";
@@ -19,7 +20,6 @@ import {
 } from "@/components/common/Dialog";
 import { Header } from "@/components/common/Header";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
-import { useCreateMemberTravelsMutation, useDeleteMemberTravelMutation } from "@/hooks/mutation/useMemberMutation";
 import { getAuthInfo } from "@/utils/cookies";
 
 import { EditContent } from "./EditContent";

@@ -2,8 +2,10 @@
 
 # Globber API 핵심 규칙
 
+> 모노레포: API 클라이언트와 도메인 서비스 구현은 `packages/api`(@globber/api)에 있습니다. 웹은 `apps/web/src/lib/api.ts`에서 웹 플랫폼 어댑터(쿠키, window 등)를 주입해 `api` 인스턴스를 만들고, `lib/apiClient.ts`·`services/*Service.ts`는 그 인스턴스를 re-export 하는 얇은 래퍼입니다. 새 API 함수는 `packages/api/src/services/`에 추가하고, 플랫폼 의존 코드(쿠키/window/process.env/next)는 어댑터로 주입하세요. react-query mutation 훅은 `packages/query`(@globber/query)에 있습니다.
+
 1. 모든 API 요청은 `lib/apiClient.ts`의 함수 사용 (apiGet, apiPost, apiPut, apiPatch, apiDelete)
-2. Service 함수는 `services/` 디렉토리에 분리, 순수 데이터만 반환
+2. Service 함수는 `packages/api/src/services/`에 분리, 순수 데이터만 반환 (웹은 `services/`에서 import)
 3. 환경변수는 `config/env.ts`에서 중앙 관리
 4. 인증 토큰: 서버는 파라미터로 전달, 클라이언트는 `getAuthInfo()` 사용
 5. 에러 처리: ApiError 클래스 사용, 401/500은 전역 리다이렉트

@@ -3,15 +3,15 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 
-import { toYearMonth } from "@globber/shared/utils/dateUtils";
-import { sendGAEvent } from "@next/third-parties/google";
-
 import {
   useAddDiaryPhotoMutation,
   useCreateDiaryMutation,
   useDeleteDiaryPhotoMutation,
   useUpdateDiaryMutation,
-} from "@/hooks/mutation/useDiaryMutations";
+} from "@globber/query";
+import { toYearMonth } from "@globber/shared/utils/dateUtils";
+import { sendGAEvent } from "@next/third-parties/google";
+
 import { ApiError } from "@/lib/apiClient";
 import { getDiaryDetail } from "@/services/diaryService";
 import { getAuthInfo } from "@/utils/cookies";

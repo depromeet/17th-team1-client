@@ -4,11 +4,11 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { arrayMove } from "@dnd-kit/sortable";
+import { useUploadTravelPhotoMutation } from "@globber/query";
 import type { ImageMetadata, ImageTag } from "@globber/shared/types/imageMetadata";
 import { toYearMonth } from "@globber/shared/utils/dateUtils";
 import { sendGAEvent } from "@next/third-parties/google";
 
-import { useUploadTravelPhotoMutation } from "@/hooks/mutation/useDiaryMutations";
 import { processSingleFile } from "@/lib/processFile";
 import { getDiaryDetail } from "@/services/diaryService";
 import { isCoordinateFormat, reverseGeocode } from "@/utils/geocoding";

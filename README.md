@@ -101,7 +101,12 @@ pnpm start
 │       ├── scripts/           # 유틸리티 스크립트 (디자인 토큰 빌드 등)
 │       ├── public/            # 정적 파일
 │       └── tokens.json        # 디자인 토큰
-├── packages/                  # 앱 간 공유 패키지 (예정)
+├── packages/                  # 앱 간 공유 패키지
+│   ├── config/                # tsconfig, eslint 공통 설정
+│   ├── shared/                # 공용 types, constants, schemas, utils
+│   ├── tokens/                # 디자인 토큰 (웹 CSS + 네이티브용 TS)
+│   ├── api/                   # API 클라이언트/서비스 (플랫폼 어댑터 주입)
+│   └── query/                 # react-query 훅 (ApiProvider)
 ├── .ruler/                    # AI 어시스턴트 설정
 ├── turbo.json                 # Turborepo 태스크 설정
 └── pnpm-workspace.yaml        # pnpm 워크스페이스 설정

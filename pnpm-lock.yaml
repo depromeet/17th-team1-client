@@ -39,6 +39,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.3)
+      '@globber/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@globber/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -223,6 +226,28 @@ importers:
       tailwindcss:
         specifier: ^4
         version: 4.1.17
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/api:
+    dependencies:
+      '@globber/shared':
+        specifier: workspace:*
+        version: link:../shared
+      http-status-codes:
+        specifier: ^2.3.0
+        version: 2.3.0
+    devDependencies:
+      '@globber/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.24
+      eslint:
+        specifier: ^9
+        version: 9.39.4(jiti@2.6.1)
       typescript:
         specifier: ^5
         version: 5.9.3

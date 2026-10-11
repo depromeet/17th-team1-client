@@ -11,6 +11,7 @@ RUN npm install -g pnpm@9.1.0
 # 새 workspace 패키지(packages/*)를 추가하면 해당 package.json 복사 라인도 추가해야 합니다.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/package.json
+COPY packages/api/package.json ./packages/api/package.json
 COPY packages/config/package.json ./packages/config/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/tokens/package.json ./packages/tokens/package.json

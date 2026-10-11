@@ -15,9 +15,8 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import type { ImageTag } from "@globber/shared/types/imageMetadata";
 import { PlusIcon } from "lucide-react";
-
-import type { ImageTag } from "@/types/imageMetadata";
 
 import type { UploadMetadata } from "./hooks/useImageMetadata";
 import { ImageCarousel } from "./ImageCarousel";

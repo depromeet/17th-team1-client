@@ -1,6 +1,7 @@
+import type { GeoJSONFeature } from "@globber/shared/types/geography";
+import type { CountryData } from "@globber/shared/types/travelPatterns";
+
 import { COLORS, ISO_CODE_MAP } from "@/constants/globeConfig";
-import type { GeoJSONFeature } from "@/types/geography";
-import type { CountryData } from "@/types/travelPatterns";
 
 // ISO 코드 변환 유틸리티
 export const getISOCode = (countryId: string): string => {

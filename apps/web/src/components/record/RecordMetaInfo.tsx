@@ -1,7 +1,8 @@
 "use client";
 
+import type { ImageTag } from "@globber/shared/types/imageMetadata";
+
 import { MetadataChip } from "@/components/imageMetadata/MetadataChip";
-import type { ImageTag } from "@/types/imageMetadata";
 
 type RecordMetaInfoProps = {
   category?: ImageTag;

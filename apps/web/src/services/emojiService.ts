@@ -1,7 +1,12 @@
+import type {
+  PressEmojiParams,
+  PressEmojiResponse,
+  RegisterEmojiParams,
+  RegisterEmojiResponse,
+} from "@globber/shared/types/emoji";
 import { StatusCodes } from "http-status-codes";
 
 import { ApiError, apiPost } from "@/lib/apiClient";
-import type { PressEmojiParams, PressEmojiResponse, RegisterEmojiParams, RegisterEmojiResponse } from "@/types/emoji";
 import { getAuthInfo } from "@/utils/cookies";
 
 /**

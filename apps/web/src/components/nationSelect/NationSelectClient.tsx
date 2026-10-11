@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { City } from "@globber/shared/types/city";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { SearchInput } from "@/components/common/Input";
 import { useCreateMemberTravelsMutation } from "@/hooks/mutation/useMemberMutation";
 import { useCitySearch } from "@/hooks/useCitySearch";
-import type { City } from "@/types/city";
 
 import { NationSelectFooter } from "./NationSelectFooter";
 import { PopularCitiesList } from "./PopularCitiesList";

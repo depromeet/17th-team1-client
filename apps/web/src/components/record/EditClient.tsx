@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { getCountryName } from "@globber/shared/constants/countryMapping";
+import type { City } from "@globber/shared/types/city";
+import type { CreateTravelRecordsResponse } from "@globber/shared/types/member";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { IconExclamationCircleMonoIcon } from "@/assets/icons";
@@ -16,10 +19,7 @@ import {
 } from "@/components/common/Dialog";
 import { Header } from "@/components/common/Header";
 import { LoadingOverlay } from "@/components/imageMetadata/LoadingOverlay";
-import { getCountryName } from "@/constants/countryMapping";
 import { useCreateMemberTravelsMutation, useDeleteMemberTravelMutation } from "@/hooks/mutation/useMemberMutation";
-import type { City } from "@/types/city";
-import type { CreateTravelRecordsResponse } from "@/types/member";
 import { getAuthInfo } from "@/utils/cookies";
 
 import { EditContent } from "./EditContent";

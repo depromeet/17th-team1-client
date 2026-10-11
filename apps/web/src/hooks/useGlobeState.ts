@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { COUNTRY_CODE_TO_FLAG } from "@globber/shared/constants/countryMapping";
+import type { CountryData, TravelPattern } from "@globber/shared/types/travelPatterns";
+
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
-import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
-import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const currentGlobeIndex = 0; // 항상 첫 번째 패턴만 사용

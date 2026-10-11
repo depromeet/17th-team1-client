@@ -1,5 +1,6 @@
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@globber/shared/utils/errorType";
+
 import { env } from "@/config/env";
-import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 
 const API_BASE_URL = env.API_BASE_URL;
 

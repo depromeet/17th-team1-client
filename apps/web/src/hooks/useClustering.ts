@@ -18,6 +18,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import type { CountryData } from "@globber/shared/types/travelPatterns";
+
 import { clusterLocations } from "@/lib/globe/clustering/clusteringAlgorithm";
 import {
   createClusterTransitionHandler,
@@ -25,7 +27,6 @@ import {
   createZoomChangeHandler,
 } from "@/lib/globe/eventHandlers";
 import type { ClusterData, ClusteringState, UseClusteringProps } from "@/types/clustering";
-import type { CountryData } from "@/types/travelPatterns";
 
 /**
  * 클러스터링 훅

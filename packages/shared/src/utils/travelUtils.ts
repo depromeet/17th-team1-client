@@ -1,6 +1,6 @@
-import type { City } from "@/types/city";
-import type { MemberTravelsResponse, TravelRecord } from "@/types/member";
-import type { RecordResponse } from "@/types/record";
+import type { City } from "../types/city";
+import type { MemberTravelsResponse, TravelRecord } from "../types/member";
+import type { RecordResponse } from "../types/record";
 
 // City 타입을 TravelRecord로 변환하는 함수
 export const convertCitiesToTravelRecords = (cities: City[]): TravelRecord[] => {

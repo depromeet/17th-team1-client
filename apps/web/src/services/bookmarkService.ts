@@ -1,5 +1,6 @@
+import type { BookmarkListResponse, BookmarkUser } from "@globber/shared/types/bookmark";
+
 import { apiDelete, ApiError, apiGet, apiPost, apiPostWithHeaders } from "@/lib/apiClient";
-import type { BookmarkListResponse, BookmarkUser } from "@/types/bookmark";
 import { clearAllCookies, getAuthInfo } from "@/utils/cookies";
 
 /**

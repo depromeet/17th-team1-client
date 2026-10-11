@@ -4,6 +4,12 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 
+import {
+  EditProfileFormData,
+  editProfileSchema,
+  PROFILE_VALIDATION,
+  validateImageFile,
+} from "@globber/shared/schemas/profile";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { sendGAEvent } from "@next/third-parties/google";
 import { X } from "lucide-react";
@@ -17,7 +23,6 @@ import {
   BottomSheetTitle,
 } from "@/components/common/BottomSheet";
 import { Button } from "@/components/common/Button";
-import { EditProfileFormData, editProfileSchema, PROFILE_VALIDATION, validateImageFile } from "@/schemas/profile";
 import { cn } from "@/utils/cn";
 
 type EditProfileBottomSheetProps = {

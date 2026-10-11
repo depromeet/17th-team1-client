@@ -1,4 +1,3 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
 import type {
   AddCityRequest,
   AddCityResponse,
@@ -7,8 +6,10 @@ import type {
   CityApiResponse,
   CitySearchResponse,
   DeleteCityResponse,
-} from "@/types/city";
-import { transformApiDataToCity } from "@/utils/countryFlagMapping";
+} from "@globber/shared/types/city";
+import { transformApiDataToCity } from "@globber/shared/utils/countryFlagMapping";
+
+import { apiDelete, apiGet, apiPost } from "@/lib/apiClient";
 
 export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {
   try {

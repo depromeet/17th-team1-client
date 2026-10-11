@@ -1,4 +1,4 @@
-import type { ErrorType } from "@/types/error";
+import type { ErrorType } from "../types/error";
 
 export const ERROR_TYPES = ["401", "404", "500"] as const satisfies readonly ErrorType[];
 

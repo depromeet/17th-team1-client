@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { Continent, RecordResponse } from "@globber/shared/types/record";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { Header } from "@/components/common/Header";
-import type { Continent, RecordResponse } from "@/types/record";
 import { getAuthInfo } from "@/utils/cookies";
 
 import { RecordContent } from "./RecordContent";

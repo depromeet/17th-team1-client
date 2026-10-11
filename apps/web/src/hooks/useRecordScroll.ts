@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { ImageMetadataFromDiary } from "@/types/diary";
-import type { Emoji } from "@/types/emoji";
+import type { ImageMetadataFromDiary } from "@globber/shared/types/diary";
+import type { Emoji } from "@globber/shared/types/emoji";
 
 type RecordScrollItem = {
   id: string;

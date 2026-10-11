@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import type { MemberTravelsResponse } from "@globber/shared/types/member";
+
 import { getMemberTravels } from "@/services/memberService";
-import type { MemberTravelsResponse } from "@/types/member";
 import { handleServerError } from "@/utils/serverErrorHandler";
 
 export default async function Home() {

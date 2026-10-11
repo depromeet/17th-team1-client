@@ -1,7 +1,8 @@
 import { memo } from "react";
 
+import type { City } from "@globber/shared/types/city";
+
 import { AddIcon, CloseIcon } from "@/assets/icons";
-import type { City } from "@/types/city";
 
 type CityItemProps = {
   city: City;

@@ -1,4 +1,3 @@
-import { apiDelete, ApiError, apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import type {
   CreateDiaryParams,
   CreateDiaryPhotoParams,
@@ -11,9 +10,11 @@ import type {
   DiaryPhoto,
   DiaryPhotoResponse,
   UpdateDiaryParams,
-} from "@/types/diary";
+} from "@globber/shared/types/diary";
+import { logger } from "@globber/shared/utils/logger";
+
+import { apiDelete, ApiError, apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import { getAuthInfo } from "@/utils/cookies";
-import { logger } from "@/utils/logger";
 
 import { getS3UploadUrl } from "./profileService";
 

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { City } from "@globber/shared/types/city";
+
 import { searchCities } from "@/services/cityService";
-import type { City } from "@/types/city";
 
 type UseCitySearchOptions = {
   debounceDelay?: number;

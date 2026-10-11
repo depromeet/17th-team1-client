@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { ProfileData } from "@globber/shared/types/member";
+import { buildErrorPagePath } from "@globber/shared/utils/errorType";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { Button } from "@/components/common/Button";
@@ -15,8 +17,6 @@ import { SettingSection } from "@/components/profile/SettingSection";
 import { ApiError } from "@/lib/apiClient";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
-import type { ProfileData } from "@/types/member";
-import { buildErrorPagePath } from "@/utils/errorType";
 
 type ProfileClientProps = {
   initialProfile: ProfileData | null;

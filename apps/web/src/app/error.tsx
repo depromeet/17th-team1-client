@@ -3,10 +3,11 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import { DEFAULT_ERROR_TYPE } from "@globber/shared/constants/error";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@globber/shared/utils/errorType";
+
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
-import { DEFAULT_ERROR_TYPE } from "@/constants/error";
 import type { ApiError } from "@/lib/apiClient";
-import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };

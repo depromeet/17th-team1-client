@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
+import type { ImageMetadata, ImageTag } from "@globber/shared/types/imageMetadata";
+import { formatYearMonth, toYearMonth } from "@globber/shared/utils/dateUtils";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { DeleteConfirmModal } from "@/components/common/DeleteConfirmModal";
-import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
-import { formatYearMonth, toYearMonth } from "@/utils/dateUtils";
 
 import { CircleCloseButton } from "./CircleCloseButton";
 import { DateSelectBottomSheet } from "./DateSelectBottomSheet";

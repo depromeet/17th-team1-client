@@ -2,8 +2,12 @@
 
 import { useMemo } from "react";
 
-import type { Continent, RecordResponse } from "@/types/record";
-import { calculateContinentStats, filterRegionsByContinent, sortContinentsByCount } from "@/utils/recordUtils";
+import type { Continent, RecordResponse } from "@globber/shared/types/record";
+import {
+  calculateContinentStats,
+  filterRegionsByContinent,
+  sortContinentsByCount,
+} from "@globber/shared/utils/recordUtils";
 
 import { CityList } from "./CityList";
 import { ContinentFilter } from "./ContinentFilter";

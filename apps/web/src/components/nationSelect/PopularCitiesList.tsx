@@ -2,7 +2,7 @@
 
 import { memo, useId } from "react";
 
-import type { City } from "@/types/city";
+import type { City } from "@globber/shared/types/city";
 
 import { CityItem } from "./CityItem";
 

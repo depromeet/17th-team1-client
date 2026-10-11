@@ -5,6 +5,8 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
+import type { GeoJSONFeature, PointOfView } from "@globber/shared/types/geography";
+import type { TravelPattern } from "@globber/shared/types/travelPatterns";
 import { sendGAEvent } from "@next/third-parties/google";
 import type { GlobeInstance } from "globe.gl";
 
@@ -30,8 +32,6 @@ import {
   createSingleLabelStyles,
 } from "@/lib/globe/labelStyles";
 import { createZoomPreventListeners, getISOCode, getPolygonColor } from "@/lib/globe/polygonRenderer";
-import type { GeoJSONFeature, PointOfView } from "@/types/geography";
-import type { TravelPattern } from "@/types/travelPatterns";
 
 const GlobeComponent = dynamic(() => import("react-globe.gl"), {
   ssr: false,

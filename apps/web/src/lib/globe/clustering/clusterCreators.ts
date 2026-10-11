@@ -4,9 +4,10 @@
  * @responsibility 다양한 타입의 클러스터(국가, 도시, 대륙) 생성 로직 제공
  */
 
-import { getCountryName } from "@/constants/countryMapping";
+import { getCountryName } from "@globber/shared/constants/countryMapping";
+import type { CountryData } from "@globber/shared/types/travelPatterns";
+
 import type { ClusterData } from "@/types/clustering";
-import type { CountryData } from "@/types/travelPatterns";
 
 /**
  * 국가별 클러스터 생성

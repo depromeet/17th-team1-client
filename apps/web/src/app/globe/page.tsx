@@ -4,6 +4,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 
+import type { TravelPattern } from "@globber/shared/types/travelPatterns";
+import { mapGlobeDataToTravelPatterns } from "@globber/shared/utils/globeDataMapper";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { BackButton } from "@/components/common/Button";
@@ -13,9 +15,7 @@ import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
-import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
-import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
   ssr: false,

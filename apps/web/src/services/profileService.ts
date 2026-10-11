@@ -1,5 +1,11 @@
+import type {
+  ProfileData,
+  ProfileResponse,
+  S3UploadUrlParams,
+  S3UploadUrlResponse,
+} from "@globber/shared/types/member";
+
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/apiClient";
-import type { ProfileData, ProfileResponse, S3UploadUrlParams, S3UploadUrlResponse } from "@/types/member";
 import { getValidatedAuthToken } from "@/utils/cookies";
 
 /**

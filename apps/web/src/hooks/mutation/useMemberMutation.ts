@@ -1,14 +1,14 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-
-import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
 import {
   CreateMemberTravelsRequest,
   CreateTravelRecordsResponse,
   DeleteMemberTravelRequest,
   DeleteTravelRecordsResponse,
-} from "@/types/member";
+} from "@globber/shared/types/member";
+import { useMutation } from "@tanstack/react-query";
+
+import { createMemberTravels, deleteMemberTravel } from "@/services/memberService";
 
 export const useCreateMemberTravelsMutation = () => {
   return useMutation<CreateTravelRecordsResponse, Error, CreateMemberTravelsRequest>({

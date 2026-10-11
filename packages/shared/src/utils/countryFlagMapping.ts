@@ -1,5 +1,5 @@
 // 나라 이름을 국기 이모지로 매핑하는 유틸리티
-import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
+import { COUNTRY_CODE_TO_FLAG } from "../constants/countryMapping";
 
 // 주요 나라들의 한국어 이름을 국기 이모지로 매핑
 // export const COUNTRY_NAME_TO_FLAG: Record<string, string> = {

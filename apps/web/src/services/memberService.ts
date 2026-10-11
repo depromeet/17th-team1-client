@@ -1,7 +1,6 @@
 import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
-import { apiDelete, ApiError, apiGet, apiPost } from "@/lib/apiClient";
-import type { City } from "@/types/city";
+import type { City } from "@globber/shared/types/city";
 import type {
   CreateTravelRecordsResponse,
   DeleteTravelRecord,
@@ -10,10 +9,12 @@ import type {
   MemberIdResponse,
   MemberTravelsResponse,
   TravelInsightResponse,
-} from "@/types/member";
-import type { RecordResponse } from "@/types/record";
+} from "@globber/shared/types/member";
+import type { RecordResponse } from "@globber/shared/types/record";
+import { convertCitiesToTravelRecords } from "@globber/shared/utils/travelUtils";
+
+import { apiDelete, ApiError, apiGet, apiPost } from "@/lib/apiClient";
 import { getAuthInfo } from "@/utils/cookies";
-import { convertCitiesToTravelRecords } from "@/utils/travelUtils";
 
 // 멤버 ID 조회 API
 export const getMemberId = async (token: string): Promise<number> => {

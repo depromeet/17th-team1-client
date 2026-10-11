@@ -3,7 +3,7 @@
  * 나라 클러스터 클릭 시 해당 국가의 모든 도시들이 화면에 fit되도록 계산
  */
 
-import type { CountryData } from "@/types/travelPatterns";
+import type { CountryData } from "@globber/shared/types/travelPatterns";
 
 import { haversineDistance } from "./calculations";
 

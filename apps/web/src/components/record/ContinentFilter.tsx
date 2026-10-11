@@ -1,6 +1,5 @@
+import type { Continent } from "@globber/shared/types/record";
 import { sendGAEvent } from "@next/third-parties/google";
-
-import type { Continent } from "@/types/record";
 
 interface ContinentFilterProps {
   continents: Continent[];

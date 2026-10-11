@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { ImageMetadataFromDiary } from "@globber/shared/types/diary";
+import type { Emoji } from "@globber/shared/types/emoji";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { DeleteConfirmModal } from "@/components/common/DeleteConfirmModal";
@@ -13,8 +15,6 @@ import { RecordScrollContainer } from "@/components/record/RecordScrollContainer
 import { RecordScrollHint } from "@/components/record/RecordScrollHint";
 import { useDeleteDiaryMutation } from "@/hooks/mutation/useDiaryMutations";
 import { useRecordScroll } from "@/hooks/useRecordScroll";
-import type { ImageMetadataFromDiary } from "@/types/diary";
-import type { Emoji } from "@/types/emoji";
 
 type RecordData = {
   id: string;

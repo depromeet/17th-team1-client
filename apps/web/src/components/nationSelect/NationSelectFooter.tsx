@@ -1,7 +1,8 @@
 import { memo } from "react";
 
+import type { City } from "@globber/shared/types/city";
+
 import { Button } from "@/components/common/Button";
-import type { City } from "@/types/city";
 
 import { SelectedCities } from "./SelectedCities";
 

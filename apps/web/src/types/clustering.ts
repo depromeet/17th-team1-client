@@ -1,7 +1,6 @@
 // 클러스터링 관련 타입 정의
+import type { CountryData } from "@globber/shared/types/travelPatterns";
 import type { GlobeInstance } from "globe.gl";
-
-import type { CountryData } from "@/types/travelPatterns";
 
 export type ClusterData = {
   id: string;

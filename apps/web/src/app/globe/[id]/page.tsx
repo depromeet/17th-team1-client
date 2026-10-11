@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 
+import type { TravelPattern } from "@globber/shared/types/travelPatterns";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@globber/shared/utils/errorType";
+import { mapGlobeDataToTravelPatterns } from "@globber/shared/utils/globeDataMapper";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { BackButton } from "@/components/common/Button";
@@ -17,11 +20,8 @@ import { ApiError } from "@/lib/apiClient";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
-import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { getDiaryThumbnails } from "@/utils/diaryThumbnailMapper";
-import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
-import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
   ssr: false,

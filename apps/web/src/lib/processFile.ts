@@ -1,6 +1,6 @@
+import type { ImageMetadata } from "@globber/shared/types/imageMetadata";
 import exifr from "exifr";
 
-import type { ImageMetadata } from "@/types/imageMetadata";
 import { reverseGeocode } from "@/utils/geocoding";
 
 // 서버 API로 근처 장소 가져오기

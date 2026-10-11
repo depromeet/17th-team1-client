@@ -1,6 +1,7 @@
+import { buildErrorPagePath } from "@globber/shared/utils/errorType";
+
 import { ProfileClient } from "@/components/profile/ProfileClient";
 import { getMyProfile } from "@/services/profileService";
-import { buildErrorPagePath } from "@/utils/errorType";
 import { getServerAuthToken } from "@/utils/serverCookies";
 import { handleServerError } from "@/utils/serverErrorHandler";
 

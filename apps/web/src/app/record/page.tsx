@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 
+import type { RecordResponse } from "@globber/shared/types/record";
+import { convertMemberTravelsToRecordResponse } from "@globber/shared/utils/travelUtils";
+
 import { RecordClient } from "@/components/record/RecordClient";
 import { getMemberTravels } from "@/services/memberService";
-import type { RecordResponse } from "@/types/record";
 import { handleServerError } from "@/utils/serverErrorHandler";
-import { convertMemberTravelsToRecordResponse } from "@/utils/travelUtils";
 
 export const dynamic = "force-dynamic";
 

@@ -1,10 +1,10 @@
 import { useRouter } from "next/navigation";
 
+import { COUNTRY_CODE_TO_FLAG } from "@globber/shared/constants/countryMapping";
+import type { RecordResponse } from "@globber/shared/types/record";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { ICEditIcon } from "@/assets/icons";
-import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
-import type { RecordResponse } from "@/types/record";
 
 interface CityListProps {
   filteredRegions: RecordResponse["data"]["regions"];

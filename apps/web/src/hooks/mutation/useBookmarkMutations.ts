@@ -1,9 +1,9 @@
 "use client";
 
+import { AddBookmarkRequest, RemoveBookmarkRequest } from "@globber/shared/types/bookmark";
 import { useMutation } from "@tanstack/react-query";
 
 import { addBookmark, removeBookmark } from "@/services/bookmarkService";
-import { AddBookmarkRequest, RemoveBookmarkRequest } from "@/types/bookmark";
 
 export const useAddBookmarkMutation = (onLoginGate?: () => void) => {
   return useMutation<void, Error, AddBookmarkRequest>({

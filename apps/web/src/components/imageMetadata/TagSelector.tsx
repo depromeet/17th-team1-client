@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 
+import { IMAGE_TAGS, type ImageTag, TAG_LABELS } from "@globber/shared/types/imageMetadata";
+
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@/assets/icons";
-import { IMAGE_TAGS, type ImageTag, TAG_LABELS } from "@/types/imageMetadata";
 import { cn } from "@/utils/cn";
 
 interface TagSelectorProps {

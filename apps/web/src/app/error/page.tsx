@@ -3,9 +3,10 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
+import { DEFAULT_ERROR_TYPE, ERROR_TYPE_PARAM } from "@globber/shared/constants/error";
+import { toErrorType } from "@globber/shared/utils/errorType";
+
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
-import { DEFAULT_ERROR_TYPE, ERROR_TYPE_PARAM } from "@/constants/error";
-import { toErrorType } from "@/utils/errorType";
 
 function ErrorPageContentWrapper() {
   const searchParams = useSearchParams();

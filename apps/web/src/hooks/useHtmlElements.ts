@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
-import type { ClusterData } from "@/types/globe";
-import type { CountryData } from "@/types/travelPatterns";
+import type { ClusterData } from "@globber/shared/types/globe";
+import type { CountryData } from "@globber/shared/types/travelPatterns";
 
 type UseHtmlElementsParams = {
   isAnimating: boolean;

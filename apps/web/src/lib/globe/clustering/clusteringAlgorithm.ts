@@ -6,6 +6,8 @@
 
 import type React from "react";
 
+import { getContinent } from "@globber/shared/constants/countryMapping";
+import type { CountryData } from "@globber/shared/types/travelPatterns";
 import type { GlobeInstance } from "globe.gl";
 
 import {
@@ -13,10 +15,8 @@ import {
   GEO_DISTANCE_THRESHOLD,
   OVERLAP_THRESHOLD_RATIO,
 } from "@/constants/clusteringConstants";
-import { getContinent } from "@/constants/countryMapping";
 import { estimateBubbleWidth, haversineDistance } from "@/lib/globe/calculations";
 import type { ClusterData } from "@/types/clustering";
-import type { CountryData } from "@/types/travelPatterns";
 
 import { createCountryClusters, createIndividualCityClusters } from "./clusterCreators";
 

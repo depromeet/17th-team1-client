@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 
+import type { City } from "@globber/shared/types/city";
+
 import { Header } from "@/components/common/Header";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
-import type { City } from "@/types/city";
 
 interface EditSelectClientProps {
   initialCities: City[];

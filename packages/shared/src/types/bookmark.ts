@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/types/api";
+import type { ApiResponse } from "./api";
 
 /**
  * 북마크된 사용자 정보

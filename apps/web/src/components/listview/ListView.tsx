@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { getContinent, getCountryName } from "@globber/shared/constants/countryMapping";
+import type { KoreanContinent } from "@globber/shared/types/geography";
+import type { TravelPattern } from "@globber/shared/types/travelPatterns";
 import { sendGAEvent } from "@next/third-parties/google";
 
-import { getContinent, getCountryName } from "@/constants/countryMapping";
 import { buildCityNavigationPath } from "@/lib/globe/eventHandlers";
-import type { KoreanContinent } from "@/types/geography";
-import type { TravelPattern } from "@/types/travelPatterns";
 
 const CONTINENTS: KoreanContinent[] = ["아시아", "유럽", "북아메리카", "남아메리카", "오세아니아", "아프리카"];
 

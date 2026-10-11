@@ -1,5 +1,5 @@
-import { getContinent as getKoreanContinent } from "@/constants/countryMapping";
-import type { Continent, RecordRegion } from "@/types/record";
+import { getContinent as getKoreanContinent } from "../constants/countryMapping";
+import type { Continent, RecordRegion } from "../types/record";
 
 export const getContinentFromCountryCode = (countryCode: string): Continent => {
   const korean = getKoreanContinent(countryCode);

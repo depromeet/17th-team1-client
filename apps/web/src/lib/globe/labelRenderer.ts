@@ -4,8 +4,9 @@
  * @responsibility 클러스터 라벨 HTML 생성, 라벨 위치 계산
  */
 
+import { escapeHtml } from "@globber/shared/utils/htmlEscape";
+
 import type { ClusterData } from "@/types/clustering";
-import { escapeHtml } from "@/utils/htmlEscape";
 
 import { calculateCityLabelWidth, calculateCountryLabelWidth } from "./calculations";
 import type { createContinentClusterStyles, createCountryClusterStyles, createSingleLabelStyles } from "./labelStyles";

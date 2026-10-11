@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 
+import type { ImageMetadataFromDiary } from "@globber/shared/types/diary";
+import type { Emoji } from "@globber/shared/types/emoji";
+import { sortDiariesByCountryGrouping } from "@globber/shared/utils/recordUtils";
+
 import RecordDetailClient from "@/components/record/RecordDetailClient";
 import RecordDetailViewTracker from "@/components/record/RecordDetailViewTracker";
 import { getDiariesByUuid } from "@/services/diaryService";
-import type { ImageMetadataFromDiary } from "@/types/diary";
-import type { Emoji } from "@/types/emoji";
-import { sortDiariesByCountryGrouping } from "@/utils/recordUtils";
 
 type RecordData = {
   id: string;

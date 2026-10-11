@@ -1,7 +1,8 @@
 "use client";
 
+import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@globber/shared/constants/countryMapping";
+
 import { ICPlusIcon, ICXIcon } from "@/assets/icons";
-import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 
 interface EditContentProps {
   cities: { id: string; name: string; countryCode: string; isNew?: boolean }[];

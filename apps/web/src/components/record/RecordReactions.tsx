@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
+import type { Emoji } from "@globber/shared/types/emoji";
+import { buildErrorPagePath } from "@globber/shared/utils/errorType";
 import { sendGAEvent } from "@next/third-parties/google";
 import type { EmojiClickData } from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
@@ -14,8 +16,6 @@ import { AddEmojiIcon, EmojiHintIcon } from "@/assets/icons";
 import { HeadlessToast } from "@/components/common/Toast";
 import { usePressEmojiMutation, useRegisterEmojiMutation } from "@/hooks/mutation/useEmojiMutations";
 import { useOwnerToast } from "@/hooks/useOwnerToast";
-import type { Emoji } from "@/types/emoji";
-import { buildErrorPagePath } from "@/utils/errorType";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 

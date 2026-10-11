@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/types/api";
+import type { ApiResponse } from "./api";
 
 /**
  * 이모지 정보

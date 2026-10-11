@@ -1,5 +1,14 @@
 "use client";
 
+import type {
+  AddDiaryPhotoRequest,
+  CreateDiaryRequest,
+  DeleteDiaryPhotoRequest,
+  DeleteDiaryRequest,
+  DiaryPhoto,
+  UpdateDiaryRequest,
+  UploadTravelPhotoRequest,
+} from "@globber/shared/types/diary";
 import { useMutation } from "@tanstack/react-query";
 
 import {
@@ -10,15 +19,6 @@ import {
   updateDiary,
   uploadTravelPhoto,
 } from "@/services/diaryService";
-import type {
-  AddDiaryPhotoRequest,
-  CreateDiaryRequest,
-  DeleteDiaryPhotoRequest,
-  DeleteDiaryRequest,
-  DiaryPhoto,
-  UpdateDiaryRequest,
-  UploadTravelPhotoRequest,
-} from "@/types/diary";
 
 export const useUploadTravelPhotoMutation = () => {
   return useMutation<string, Error, UploadTravelPhotoRequest>({

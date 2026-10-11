@@ -1,6 +1,6 @@
-import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
-import type { GlobeData } from "@/types/member";
-import type { CountryData, TravelPattern } from "@/types/travelPatterns";
+import { COUNTRY_CODE_TO_FLAG, getCountryName } from "../constants/countryMapping";
+import type { GlobeData } from "../types/member";
+import type { CountryData, TravelPattern } from "../types/travelPatterns";
 
 // 색상 팔레트 - 지역별 색상 할당
 const REGION_COLORS = [

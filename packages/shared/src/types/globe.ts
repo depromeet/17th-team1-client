@@ -1,4 +1,4 @@
-import type { CountryData, TravelPattern } from "@/types/travelPatterns";
+import type { CountryData, TravelPattern } from "./travelPatterns";
 
 export interface ClusterData {
   id: string;

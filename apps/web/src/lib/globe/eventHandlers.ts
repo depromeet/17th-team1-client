@@ -6,6 +6,8 @@
 
 import type React from "react";
 
+import type { CountryData } from "@globber/shared/types/travelPatterns";
+
 import {
   AUTO_CLUSTER_DELAY,
   CONTINENT_MODE_ZOOM_MULTIPLIER,
@@ -15,7 +17,6 @@ import {
   ZOOM_LEVELS,
 } from "@/constants/clusteringConstants";
 import type { ClusterData, ClusteringState } from "@/types/clustering";
-import type { CountryData } from "@/types/travelPatterns";
 
 import { isSignificantRotation } from "./calculations";
 

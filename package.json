@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=@globber/web",
     "dev:web": "turbo run dev --filter=@globber/web",
     "build": "turbo run build",
     "build:web": "turbo run build --filter=@globber/web",
@@ -14,7 +14,10 @@
     "check": "turbo run lint:check && prettier --check .",
     "tokens:build": "pnpm --filter @globber/tokens build",
     "ruler:apply": "pnpm exec ruler apply",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:mobile": "pnpm --filter @globber/mobile start",
+    "ios": "pnpm --filter @globber/mobile ios",
+    "android": "pnpm --filter @globber/mobile android"
   },
   "devDependencies": {
     "@intellectronica/ruler": "^0.3.10",
@@ -27,7 +30,8 @@
   "pnpm": {
     "overrides": {
       "@intellectronica/ruler>yargs": "17",
-      "baseline-browser-mapping": "latest"
+      "baseline-browser-mapping": "latest",
+      "@types/react": "~19.2.4"
     }
   }
 }

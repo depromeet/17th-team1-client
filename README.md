@@ -90,6 +90,11 @@ pnpm start
 
 ```
 ├── apps/
+│   ├── mobile/                # Expo(React Native) 앱 (@globber/mobile)
+│   │   └── src/
+│   │       ├── app/           # Expo Router 화면 (login, index)
+│   │       ├── auth/          # SecureStore 세션, 카카오 로그인(딥링크)
+│   │       └── lib/api.ts     # 모바일 플랫폼 어댑터로 createApi() 생성
 │   └── web/                   # Next.js 웹 앱 (@globber/web)
 │       ├── src/
 │       │   ├── app/           # Next.js App Router (api/ 라우트 포함)
@@ -113,6 +118,18 @@ pnpm start
 ```
 
 > 이 저장소는 **pnpm workspaces + Turborepo** 모노레포입니다. 루트에서 `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`를 실행하면 turbo가 각 워크스페이스의 동일 이름 스크립트를 실행합니다. 특정 앱만 실행하려면 `pnpm dev:web` / `pnpm build:web`을 사용하세요.
+
+### 모바일 앱 실행
+
+```bash
+pnpm dev:mobile   # Expo 개발 서버 (Expo Go 또는 개발 빌드)
+pnpm ios          # iOS 시뮬레이터
+pnpm android      # Android 에뮬레이터
+```
+
+- 환경변수: `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_S3_BASE_URL` (미설정 시 기본값 사용)
+- 번들링만 검증하려면 `pnpm --filter @globber/mobile bundle:check`
+- 앱 로그인은 백엔드의 `redirect_uri` 허용 설정이 필요합니다. 협의 항목은 [docs/mobile/backend-questions.md](docs/mobile/backend-questions.md) 참고
 
 ## AI Assistant Configuration
 

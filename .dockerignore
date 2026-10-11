@@ -10,3 +10,4 @@ daily-logs
 claudedocs
 .env*
 output
+apps/mobile

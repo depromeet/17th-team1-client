@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "world.globber.app"
+      "bundleIdentifier": "world.globber.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "여행 사진을 촬영해 기록에 추가하기 위해 카메라 접근이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "여행 사진을 선택해 기록에 추가하기 위해 사진 보관함 접근이 필요합니다."
+      }
     },
     "android": {
       "package": "world.globber.app",
@@ -23,9 +27,6 @@
       "predictiveBackGestureEnabled": false
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store",
-      "expo-web-browser",
       [
         "expo-splash-screen",
         {
@@ -34,9 +35,6 @@
           "imageWidth": 200
         }
       ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }

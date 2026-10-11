@@ -53,7 +53,7 @@ src/
 0. 모노레포(pnpm workspaces + Turborepo): 웹은 `apps/web`, 공용 코드는 `packages/*`
    - `@globber/shared`: 플랫폼 무관 types/constants/schemas/utils (`@globber/shared/types/...` 형태로 import)
    - `@globber/api`: API 클라이언트·도메인 서비스 (플랫폼 어댑터 주입)
-   - `@globber/query`: react-query mutation 훅 (`ApiProvider`로 api 주입)
+   - `@globber/query`: react-query mutation 훅 (웹 전용으로 사용 중, 앱은 WebView 셸) (`ApiProvider`로 api 주입)
    - `@globber/tokens`: 디자인 토큰 (`pnpm tokens:build`)
    - `@globber/config`: tsconfig/eslint 공통 설정
    - 공용 패키지에서는 `next/*`, `react-dom`, `@/` alias, DOM/쿠키 직접 접근 금지

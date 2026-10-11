@@ -4,7 +4,7 @@ export default [
   ...base,
   { ignores: [".expo/", ".expo-export/", "expo-env.d.ts", "metro.config.js"] },
   {
-    // 앱 내부에서는 `@/` alias를 사용하므로 허용하고, 웹 전용 API만 계속 제한합니다.
+    // 앱 셸에서는 웹 전용 API만 제한합니다.
     files: ["**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [

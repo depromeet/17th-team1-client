@@ -11,7 +11,6 @@
     "format": "prettier --write .",
     "fix": "eslint . --fix && prettier --write .",
     "check": "eslint . && prettier --check .",
-    "tokens:build": "node scripts/build-tokens.js",
     "typecheck": "tsc --noEmit",
     "lint:fix": "eslint . --fix",
     "lint:check": "eslint ."
@@ -21,6 +20,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@globber/shared": "workspace:*",
+    "@globber/tokens": "workspace:*",
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@hookform/resolvers": "^5.2.2",
     "@next/third-parties": "^16.1.3",

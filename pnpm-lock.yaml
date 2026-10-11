@@ -42,6 +42,9 @@ importers:
       '@globber/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@globber/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       '@googlemaps/google-maps-services-js':
         specifier: ^3.4.2
         version: 3.4.2
@@ -251,6 +254,18 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.24
+      eslint:
+        specifier: ^9
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/tokens:
+    devDependencies:
+      '@globber/config':
+        specifier: workspace:*
+        version: link:../config
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.6.1)

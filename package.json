@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "fix": "turbo run lint:fix && prettier --write .",
     "check": "turbo run lint:check && prettier --check .",
-    "tokens:build": "pnpm --filter @globber/web tokens:build",
+    "tokens:build": "pnpm --filter @globber/tokens build",
     "ruler:apply": "pnpm exec ruler apply",
     "prepare": "husky"
   },

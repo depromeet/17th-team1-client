@@ -1,7 +1,13 @@
 const fs = require("fs");
+const path = require("path");
+
+// 실행 위치(cwd)와 무관하게 동작하도록 패키지 기준 경로 사용
+const PACKAGE_ROOT = path.resolve(__dirname, "..");
+const WEB_GLOBALS_PATH = path.resolve(PACKAGE_ROOT, "../../apps/web/src/app/globals.css");
+const NATIVE_COLORS_PATH = path.join(PACKAGE_ROOT, "src/colors.ts");
 
 // tokens.json 파일 읽기
-const tokensData = JSON.parse(fs.readFileSync("./tokens.json", "utf8"));
+const tokensData = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, "tokens.json"), "utf8"));
 
 // 토큰 참조를 해결하는 헬퍼 함수
 function resolveReference(value, allTokens) {
@@ -71,7 +77,7 @@ const generateCSSVariables = colors => {
 };
 
 // 현재 globals.css 읽기
-const globalsPath = "./src/app/globals.css";
+const globalsPath = WEB_GLOBALS_PATH;
 const globalsContent = fs.readFileSync(globalsPath, "utf8");
 
 // 새로운 CSS 변수 생성
@@ -115,3 +121,21 @@ ${afterTheme}`;
 
 console.log("✅ 디자인 토큰이 globals.css에 성공적으로 적용되었습니다.");
 console.log(`📊 ${Object.keys(colors).length}개의 색상 토큰이 생성되었습니다.`);
+
+// 앱(React Native) 등 CSS를 쓰지 않는 플랫폼용 색상 객체 생성
+const generateColorsModule = colors => {
+  const entries = Object.keys(colors)
+    .map(key => `  ${JSON.stringify(key)}: ${JSON.stringify(colors[key])},`)
+    .join("\n");
+
+  return `// 이 파일은 scripts/build-tokens.js 로 생성됩니다. 직접 수정하지 마세요.
+export const colors = {
+${entries}
+} as const;
+
+export type ColorToken = keyof typeof colors;
+`;
+};
+
+fs.writeFileSync(NATIVE_COLORS_PATH, generateColorsModule(colors));
+console.log("✅ src/colors.ts (RN용 색상 토큰)가 생성되었습니다.");

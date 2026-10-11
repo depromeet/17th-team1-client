@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // 모노레포 루트를 기준으로 standalone 트레이싱 (workspace 패키지/루트 node_modules 포함)
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {
     optimizePackageImports: [
       "lucide-react",

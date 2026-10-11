@@ -89,24 +89,25 @@ pnpm start
 ## Project Structure
 
 ```
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── api/               # API routes
-│   │   └── page.tsx           # Main page
-│   ├── components/            # React components
-│   │   ├── react-globe/       # Globe 관련 컴포넌트
-│   │   └── image-metadata/    # 이미지 메타데이터 컴포넌트
-│   ├── hooks/                 # Custom React hooks
-│   ├── lib/                   # 유틸리티 함수
-│   ├── constants/             # 상수 정의
-│   └── types/                 # TypeScript 타입 정의
+├── apps/
+│   └── web/                   # Next.js 웹 앱 (@globber/web)
+│       ├── src/
+│       │   ├── app/           # Next.js App Router (api/ 라우트 포함)
+│       │   ├── components/    # React components
+│       │   ├── hooks/         # Custom React hooks
+│       │   ├── lib/           # 유틸리티 함수
+│       │   ├── constants/     # 상수 정의
+│       │   └── types/         # TypeScript 타입 정의
+│       ├── scripts/           # 유틸리티 스크립트 (디자인 토큰 빌드 등)
+│       ├── public/            # 정적 파일
+│       └── tokens.json        # 디자인 토큰
+├── packages/                  # 앱 간 공유 패키지 (예정)
 ├── .ruler/                    # AI 어시스턴트 설정
-│   ├── AGENTS.md             # AI 가이드 진입점
-│   ├── CONVENTIONS.md        # 코드 컨벤션
-│   └── GLOBBER.md            # 프로젝트별 가이드
-├── scripts/                   # 유틸리티 스크립트
-└── public/                    # 정적 파일
+├── turbo.json                 # Turborepo 태스크 설정
+└── pnpm-workspace.yaml        # pnpm 워크스페이스 설정
 ```
+
+> 이 저장소는 **pnpm workspaces + Turborepo** 모노레포입니다. 루트에서 `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`를 실행하면 turbo가 각 워크스페이스의 동일 이름 스크립트를 실행합니다. 특정 앱만 실행하려면 `pnpm dev:web` / `pnpm build:web`을 사용하세요.
 
 ## AI Assistant Configuration
 

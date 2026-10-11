@@ -154,6 +154,9 @@ importers:
       '@eslint/js':
         specifier: ^9
         version: 9.39.4
+      '@globber/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@svgr/webpack':
         specifier: ^8.1.0
         version: 8.1.0(typescript@5.9.3)
@@ -217,6 +220,18 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+
+  packages/config:
+    dependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.52.0
+        version: 8.52.0(@typescript-eslint/parser@8.52.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.52.0
+        version: 8.52.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+      eslint-plugin-simple-import-sort:
+        specifier: ^12.1.1
+        version: 12.1.1(eslint@9.39.4(jiti@2.6.1))
 
 packages:
 

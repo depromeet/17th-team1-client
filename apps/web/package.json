@@ -58,6 +58,9 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9",
+    "@globber/config": "workspace:*",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.83.1",
@@ -68,8 +71,6 @@
     "@types/three": "^0.180.0",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
-    "@eslint/eslintrc": "^3",
-    "@eslint/js": "^9",
     "eslint": "^9",
     "eslint-config-next": "15",
     "eslint-config-prettier": "^10.1.8",

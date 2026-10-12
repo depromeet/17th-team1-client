@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(artifacts/**)",
+      "Write(artifacts/**)",
+      "Bash(pnpm exec tsc --noEmit)",
+      "Bash(pnpm check)",
+      "Bash(pnpm test)"
+    ],
+    "ask": [
+      "Edit(/.claude/**)",
+      "Write(/.claude/**)",
+      "Edit(/CLAUDE.md)",
+      "Write(/CLAUDE.md)",
+      "Edit(/docs/agent-rules/**)",
+      "Edit(/docs/agent-contracts/**)",
+      "Edit(/AGENTS.md)",
+      "Edit(/.codex/**)",
+      "Edit(/.agents/**)",
+      "Write(/docs/agent-rules/**)",
+      "Write(/docs/agent-contracts/**)",
+      "Write(/AGENTS.md)",
+      "Write(/.codex/**)",
+      "Write(/.agents/**)"
+    ]
+  },
+  "language": "korean",
+  "worktree": {
+    "baseRef": "head"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/git-safety-guard.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

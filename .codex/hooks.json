@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "sh \"$(git rev-parse --show-toplevel)/.codex/hooks/git-safety-guard.sh\"" }
+        ]
+      }
+    ]
+  }
+}

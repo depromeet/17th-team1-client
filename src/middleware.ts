@@ -23,13 +23,13 @@ const AUTH_REQUIRED_BUT_ALLOW_ROUTING: readonly string[] = [
 
 const GLOBE_SHARED_PREFIX = "/globe/";
 
-function isPublicPath(pathname: string): boolean {
+const isPublicPath = (pathname: string): boolean => {
   return PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`));
-}
+};
 
-function allowRouting(pathname: string): boolean {
+const allowRouting = (pathname: string): boolean => {
   return AUTH_REQUIRED_BUT_ALLOW_ROUTING.some(p => pathname === p || pathname.startsWith(`${p}/`));
-}
+};
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

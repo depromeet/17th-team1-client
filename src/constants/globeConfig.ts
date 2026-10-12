@@ -43,7 +43,7 @@ export const COLORS = {
   POLYGON_SIDE: "rgba(105,105,105, 0.1)", // 폴리곤 측면 색상 (dimgray와 동일한 색상)
   POLYGON_STROKE: "dimgray", // 국경선 색상
   INACTIVE_POLYGON: "#94cbff33", // 비활성 폴리곤 색상 (매우 연한 회색)
-  // Globe Leveling Color (디자인 시스템 기준)
+  // Globe 레벨 색상 (디자인 시스템 기준)
   GLOBE_LV1: "#0084B0", // Blue 200 - 1개 이상 도시
   GLOBE_LV2: "#00CAED", // Blue 100 - 5개 이상 도시
   GLOBE_LV3: "#67E8FF", // Blue 0 - 8개 이상 도시

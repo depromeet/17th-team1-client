@@ -1,6 +1,7 @@
+import { env } from "@/config/env";
 import type { DiariesListResponse } from "@/types/diary";
 
-const S3_BASE_URL = process.env.NEXT_PUBLIC_S3_BASE_URL || "https://globber-dev.s3.ap-northeast-2.amazonaws.com/";
+const S3_BASE_URL = env.S3_BASE_URL;
 
 type DiaryThumbnails = {
   cityThumbnails: Record<number, string>;

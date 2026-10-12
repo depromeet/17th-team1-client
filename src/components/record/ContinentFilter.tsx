@@ -2,19 +2,19 @@ import { sendGAEvent } from "@next/third-parties/google";
 
 import type { Continent } from "@/types/record";
 
-interface ContinentFilterProps {
+type ContinentFilterProps = {
   continents: Continent[];
   continentStats: Record<Continent, number>;
   selectedContinent: Continent;
   onContinentChange: (continent: Continent) => void;
-}
+};
 
-export function ContinentFilter({
+export const ContinentFilter = ({
   continents,
   continentStats,
   selectedContinent,
   onContinentChange,
-}: ContinentFilterProps) {
+}: ContinentFilterProps) => {
   return (
     <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
       {continents.map(continent => {
@@ -70,4 +70,4 @@ export function ContinentFilter({
       })}
     </div>
   );
-}
+};

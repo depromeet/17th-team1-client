@@ -1,0 +1,32 @@
+{
+  "name": "@globber/query",
+  "version": "0.0.0",
+  "private": true,
+  "description": "웹/앱 공용 react-query 훅 (ApiProvider로 API 인스턴스 주입)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "dependencies": {
+    "@globber/api": "workspace:*",
+    "@globber/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@globber/config": "workspace:*",
+    "@tanstack/react-query": "^5.85.9",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "eslint": "^9",
+    "react": "19.2.3",
+    "typescript": "^5"
+  }
+}

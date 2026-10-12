@@ -44,5 +44,10 @@ Claude와 Codex 하네스는 쌍으로 관리한다. 한쪽을 고치면 짝도 
 
 ## 하네스 변경 이력
 
-- 공용(규칙, 인계 계약): `docs/agent-harness/CHANGELOG.md`
-- Claude 하네스: `.claude/CHANGELOG.md`
+`docs/agent-harness/CHANGELOG.md` (Claude·Codex·공용 규칙 통합)
+
+## 하네스 수정 규칙
+
+- Agent·Skill(Claude판·Codex판)을 만들거나 고치기 전에 `harness-lab` Skill(`.agents/skills/harness-lab/`)의 `references/agent-team-design.md`(Agent), `orchestrator-artifacts-template.md`(Orchestrator), `skill-authoring-guide.md`(Skill)를 읽고 그 절 구조를 따른다.
+- 하네스 누락·drift 점검은 레퍼런스 프로젝트와의 비교로 끝내지 않고 위 템플릿과 `testing-qa-evolution.md`의 하네스 테스트 체크리스트를 기준에 포함한다.
+- 필수 절은 `scripts/harnessSpec.test.ts`가 검사한다.

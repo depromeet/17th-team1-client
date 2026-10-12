@@ -13,9 +13,9 @@ Claude Code·Codex 하네스(Task Team / Bug Team)가 실행 중에 남기는 �
 
 ## 실행별 파일
 
-**task-team/{run id}/**: `00-input.md`, `requirements.md`, `design-spec.md`, `impl-notes.md`, `code-review-{n}.md`, `security-review-{n}.md`, `triage-{n}.md`, `qa-report-{n}.md`, `screenshots/`, `summary.md`, `improvement-log.md`
+**task-team/{run id}/**: `00-input.md`, `requirements.md`, `design-spec.md`, `impl-notes.md`, `code-review-{n}.md`, `security-review-{n}.md`, `triage-{n}.md`, `qa-report-{n}.md`, `screenshots/`, `handoff.md`(필요 시), `summary.md`, `improvement-log.md`
 
-**bug-team/{run id}/**: `ticket.md`, `localize.md`, `fix.md`, `postmortem.md`, `screenshots/`, `summary.md`
+**bug-team/{run id}/**: `00-input.md`, `ticket.md`, `localize.md`, `fix.md`, `postmortem.md`, `screenshots/`, `handoff.md`(필요 시), `summary.md`, `improvement-log.md`
 
 ## 다음 실행이 읽는 것
 

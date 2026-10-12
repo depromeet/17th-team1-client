@@ -14,16 +14,17 @@
 
 원본은 `docs/agent-rules/`(Codex와 공용)이고, `.claude/rules/`의 심볼릭 링크를 통해 경로가 지정된 규칙은 해당 파일을 다룰 때 자동으로 로드된다. 규칙을 고칠 때는 `docs/agent-rules/`를 수정한다.
 
-| 문서                   | 내용                                             |
-| ---------------------- | ------------------------------------------------ |
-| `project-structure.md` | 디렉터리 배치, 기술 스택                         |
-| `git-workflow.md`      | 브랜치·커밋·PR 형식, 병렬 작업(worktree) 수칙    |
-| `code-conventions.md`  | 네이밍, `type`/화살표 함수, Next 특수 파일 예외  |
-| `api.md`               | services, apiClient, TanStack Query, 타입 네이밍 |
-| `hooks.md`             | 커스텀 훅                                        |
-| `styling.md`           | Tailwind v4 토큰, CVA, cn                        |
-| `env-ssr.md`           | `config/env.ts`, SSR 호환성                      |
-| `mobile-web.md`        | iOS/Android에서 실제로 났던 버그 패턴            |
+| 문서                       | 내용                                             |
+| -------------------------- | ------------------------------------------------ |
+| `project-structure.md`     | 디렉터리 배치, 기술 스택                         |
+| `git-workflow.md`          | 브랜치·커밋·PR 형식, 병렬 작업(worktree) 수칙    |
+| `code-conventions.md`      | 네이밍, `type`/화살표 함수, Next 특수 파일 예외  |
+| `api.md`                   | services, apiClient, TanStack Query, 타입 네이밍 |
+| `hooks.md`                 | 커스텀 훅                                        |
+| `styling.md`               | Tailwind v4 토큰, CVA, cn                        |
+| `env-ssr.md`               | `config/env.ts`, SSR 호환성                      |
+| `mobile-web.md`            | iOS/Android에서 실제로 났던 버그 패턴            |
+| `enforcement-placement.md` | 검사를 Hook·pre-commit·테스트 중 어디에 둘지     |
 
 ## Task Team 하네스
 
@@ -77,5 +78,10 @@
 
 ## 하네스 변경 이력
 
-- Claude 하네스: `.claude/CHANGELOG.md`
-- 공용(규칙, 인계 계약, Codex 미러): `docs/agent-harness/CHANGELOG.md`
+`docs/agent-harness/CHANGELOG.md` (Claude·Codex·공용 규칙 통합)
+
+## 하네스 수정 규칙
+
+- Agent·Skill(Claude판·Codex판)을 만들거나 고치기 전에 `harness-lab` Skill(`.claude/skills/harness-lab/`)의 `references/agent-team-design.md`(Agent), `orchestrator-artifacts-template.md`(Orchestrator), `skill-authoring-guide.md`(Skill)를 읽고 그 절 구조를 따른다.
+- 하네스 누락·drift 점검은 레퍼런스 프로젝트와의 비교로 끝내지 않고 위 템플릿과 `testing-qa-evolution.md`의 하네스 테스트 체크리스트를 기준에 포함한다.
+- 필수 절은 `scripts/harnessSpec.test.ts`가 검사한다.

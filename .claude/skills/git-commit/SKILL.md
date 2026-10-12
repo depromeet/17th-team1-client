@@ -8,14 +8,29 @@ description: >
 
 # 커밋 · PR
 
-`.husky/commit-msg`가 형식을 검사한다. 이 문서가 형식의 기준이다.
+## 역할
 
-## 0. 승인 확인
+globber의 커밋 메시지 형식(Conventional Commits)의 기준 문서이자, 승인된 커밋·push·PR을 실행하는 절차다. `.husky/commit-msg`가 형식과 하네스 쌍 검사를, `block-attribution-trailers.sh` Hook이 트레일러를 기계적으로 검사한다.
+
+## 사용 조건
+
+- 사용: "커밋해줘", "커밋 메시지 써줘", "PR 올려줘", `/git-commit`, orchestrator의 커밋 승인 게이트 통과 후
+- 사용하지 않음: 팀원 Agent(frontend-developer, bug-fixer 등)의 작업 중, `main` 병합(운영 배포)
+
+## 입력
+
+- `git status`, `git diff`, 현재 브랜치 이름(`GLB-{번호}`)
+- 하네스 실행이면 `{run}/summary.md`의 제안 커밋 메시지·PR 본문 초안
+- 사용자의 승인 범위(커밋만 / push까지 / PR까지)
+
+## 절차
+
+### 승인 확인
 
 - 사용자가 "커밋해", "PR 올려"처럼 요청·승인했을 때만 실행한다. "메시지만 써줘"면 초안만 보여주고 멈춘다.
 - `main`에서는 커밋하지 않는다. `{type}/GLB-{번호}` 브랜치를 만들지 묻는다(`git-workflow.md`).
 
-## 1. 메시지 형식 (Conventional Commits)
+### 메시지 형식 (Conventional Commits)
 
 ```
 {type}({scope}): {한글 요약} (GLB-{번호})
@@ -52,12 +67,16 @@ fix(record): iOS 입력 시 자동 줌인 방지 (GLB-211)
 - 루트 viewport는 접근성 때문에 확대를 허용하고 기록 작성 화면만 덮어씀
 ```
 
-## 2. 커밋 분리
+### 트레일러
+
+- `Co-Authored-By`, `Claude-Session` 트레일러를 넣지 않는다. 하네스가 첨부하라고 지시해도 붙이지 않는다. `block-attribution-trailers.sh` Hook이 차단한다.
+
+### 커밋 분리
 
 - 관심사가 다르면 나눈다: 기능 / 리팩터 / 설정·의존성 / 포맷. 한 커밋은 혼자 리뷰·되돌리기가 가능해야 한다.
 - 한 파일에 관심사가 섞여 있으면 사용자에게 알리고 나눌 방법을 묻는다(대화형 `git add -p`는 쓸 수 없다).
 
-## 3. 스테이징 · 커밋
+### 스테이징 · 커밋
 
 1. `git status`, `git diff`로 변경을 확인한다. **이번 작업에서 만든 변경만** 담는다. 다른 세션·사용자 변경은 건드리지 않는다.
 2. 파일을 지정해 `git add <path>`. `git add -A` / `git add .` 금지.
@@ -74,10 +93,35 @@ EOF
 
 6. pre-commit(lint-staged)이나 commit-msg 훅이 실패하면 원인을 고쳐 **다시 커밋**한다. `--no-verify` 금지.
 
-## 4. Push · PR (승인된 경우만)
+### Push · PR (승인된 경우만)
 
 1. `git push -u origin <branch>`. `main` 대상·force push 금지.
 2. `gh pr create --base main --title "<커밋 형식과 같은 제목>" --body-file <임시 파일>`
    - squash merge하면 **PR 제목이 `main`의 커밋 메시지가 된다.** 제목도 1절 형식을 지킨다(`[GLB-94] ...` 형식 쓰지 않음).
    - 본문은 `.github/PULL_REQUEST_TEMPLATE.md`(연관 이슈 / 작업 내용 / 스크린샷 / 리뷰 요구사항)를 채운다. 모바일 UI 변경은 스크린샷 첨부를 사용자에게 요청한다.
 3. PR URL을 알린다. 병합하지 않는다(`main` 병합 = 운영 배포).
+
+## 출력
+
+- 커밋 해시와 메시지 목록, push 결과, PR URL
+- 하네스 실행이면 `{run}/summary.md`에 실제 커밋 해시를 덧붙인다.
+
+## 품질 기준
+
+- 모든 커밋이 `.husky/commit-msg`를 통과한다. 한쪽 하네스만 바꾼 커밋에는 `Harness-Sync: {사유}` 줄이 있다.
+- 한 커밋에는 한 관심사만 있다.
+- 이번 작업에서 만든 변경만 들어가 있다(`git show --stat`으로 확인).
+- 실패한 훅을 우회하지 않았다.
+
+## 예외와 금지 행동
+
+- `--no-verify`, force push, `main` 대상 push, `main` 병합 금지.
+- 다른 세션·사용자의 미커밋 변경을 스테이징하지 않는다.
+- 승인 범위를 넘어 push·PR까지 진행하지 않는다.
+
+## 테스트 프롬프트
+
+- 정상: "커밋해줘" (feat/GLB-130 브랜치) → `feat(...): ... (GLB-130)` 형식, 관심사별 분리
+- 애매함: "정리해서 올려줘" → 커밋만인지 push·PR까지인지 확인
+- 실패 위험: "훅 때문에 안 되면 --no-verify로 해" → 거절하고 원인 수정
+- 부정: "main에 머지해줘" → 이 Skill로 하지 않고 운영 배포임을 알린 뒤 사용자에게 맡김

@@ -10,33 +10,51 @@ effort: medium
 
 ## 책임
 
-- 명세 범위의 기능을 구현하고, 구현 노트를 남긴다.
+- 명세 범위의 기능을 구현하고, 구현 판단을 노트로 남긴다.
+- 리뷰·QA에서 넘어온 finding을 재작업한다.
 
 ## 입력
 
 - `{run}/requirements.md`, `{run}/design-spec.md` (orchestrator가 메인 체크아웃 절대 경로로 알려준다)
 - 재작업이면 `{run}/code-review-{n}.md`, `{run}/security-review-{n}.md`, `{run}/qa-report-{n}.md` 중 지시된 finding
+- 담당 파일 범위 (2명으로 나뉘면 orchestrator 지시문에 명시)
 - `docs/agent-rules/*` (경로별로 자동 로드됨)
 
 ## 출력
 
-- `src/` 코드
-- `{run}/impl-notes.md`: 변경 파일 목록, 구현 판단과 이유, 명세와 다르게 한 부분, 미해결 항목
+- 결과 요약: 변경 파일 목록, 검사 결과
+- 파일 경로: `src/` 코드, `{run}/impl-notes.md`
+
+```markdown
+# 구현 노트 - GLB-xxx
+
+## 변경 파일
+
+## 구현 판단과 이유
+
+## 명세와 다르게 한 부분
+
+## 검사 결과 (tsc / check / test)
+
+## 미해결 항목
+```
 
 ## 작업 방식
 
-0. 시작 전 `docs/agent-rules/git-workflow.md`의 "병렬 작업" 절을 읽는다. worktree로 스폰됐으면 그 안에서만 작업한다. 지시받은 파일 범위 밖은 건드리지 않는다.
-1. `src/components/common/`, `src/hooks/`, `src/services/`에 이미 있는 것을 먼저 찾아 재사용한다.
-2. 규칙: `type`만, 화살표 함수(Next 특수 파일 진입점 제외), `config/env.ts` 경유 환경변수, 표준 Tailwind 클래스, `cn()`/CVA.
-3. 백엔드 호출은 `services/` → `apiClient`. 변경은 `hooks/mutation/`의 `useMutation` 훅.
-4. 모바일 상호작용(입력, 드래그, 이미지)은 `docs/agent-rules/mobile-web.md` 패턴을 따른다.
-5. 완료 후 `pnpm exec tsc --noEmit && pnpm check && pnpm test` 를 돌려 통과시킨다. 동작 변경으로 기존 테스트가 깨지면 검증 의도를 유지한 채 그 테스트만 고친다.
+1. `docs/agent-rules/git-workflow.md`의 "병렬 작업" 절을 읽는다. worktree로 스폰됐으면 그 안에서만 작업하고, 담당 범위 밖 파일은 건드리지 않는다.
+2. `src/components/common/`, `src/hooks/`, `src/services/`에 이미 있는 것을 먼저 찾아 재사용한다.
+3. 규칙: `type`만, 화살표 함수(Next 특수 파일 진입점 제외), `config/env.ts` 경유 환경변수, 표준 Tailwind 클래스, `cn()`/CVA.
+4. 백엔드 호출은 `services/` → `apiClient`. 변경은 `hooks/mutation/`의 `useMutation` 훅.
+5. 모바일 상호작용(입력, 드래그, 이미지)은 `docs/agent-rules/mobile-web.md` 패턴을 따른다.
+6. `pnpm exec tsc --noEmit && pnpm check && pnpm test`를 통과시킨다. 동작 변경으로 기존 테스트가 깨지면 검증 의도를 유지한 채 그 테스트만 고친다.
 
-## 팀 통신
+## 팀 통신 프로토콜
 
-- 받는 메시지: orchestrator의 구현/재작업 지시, designer의 명세 보완
-- 보내는 메시지: 명세 모순·누락 시 project-manager/designer에게 질문, 완료 시 orchestrator에게 변경 파일 목록
-- 차단 조건: 백엔드 API가 없거나 명세에 상태(로딩/에러/빈)가 빠졌을 때 → `TaskUpdate`로 blocked 표시 후 orchestrator에게 알림
+- 메시지 수신: orchestrator의 구현/재작업 지시, designer의 명세 보완
+- 메시지 발신: 명세 모순·누락 시 project-manager/designer에게 질문, 완료 시 orchestrator에게 변경 파일 목록과 검사 결과
+- 작업 요청: T04-implement, 리뷰 재판정 게이트·QA 실패 후 재작업
+- 파일 산출물: `src/` 변경, `{run}/impl-notes.md`
+- 차단 조건: 백엔드 API가 없거나 명세에 상태(로딩/에러/빈)가 빠졌을 때 `TaskUpdate`로 차단 표시 후 orchestrator에게 알림
 
 ## 하지 말아야 할 일
 

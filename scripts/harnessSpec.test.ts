@@ -16,6 +16,9 @@ const ORCHESTRATOR_SECTIONS = [
   "## 산출물 계약",
   "## 테스트 프롬프트",
 ];
+// 제목은 줄 전체가 일치해야 한다("## 실행 모드"가 "## 실행 모드 확인"에 맞지 않도록)
+const hasHeading = (spec: string, heading: string) => new RegExp(`^${heading}\\s*$`, "m").test(spec);
+
 const SKILL_SECTIONS = [
   "## 역할",
   "## 사용 조건",
@@ -30,7 +33,8 @@ describe("Agent 명세가 harness-lab 템플릿 절을 모두 갖는다", () => 
   for (const file of readdirSync(".claude/agents")) {
     it(file, () => {
       const spec = readFileSync(`.claude/agents/${file}`, "utf8");
-      for (const heading of [...AGENT_SECTIONS, ...PROTOCOL_ITEMS]) expect(spec).toContain(heading);
+      for (const heading of AGENT_SECTIONS) expect(hasHeading(spec, heading), heading).toBe(true);
+      for (const item of PROTOCOL_ITEMS) expect(spec).toContain(item);
     });
   }
 });
@@ -41,7 +45,7 @@ describe("Skill 명세가 harness-lab 템플릿 절을 모두 갖는다", () => 
     it(dir, () => {
       const spec = readFileSync(`.claude/skills/${dir}/SKILL.md`, "utf8");
       const required = dir.endsWith("-orchestrator") ? ORCHESTRATOR_SECTIONS : SKILL_SECTIONS;
-      for (const heading of required) expect(spec).toContain(heading);
+      for (const heading of required) expect(hasHeading(spec, heading), heading).toBe(true);
     });
   }
 });

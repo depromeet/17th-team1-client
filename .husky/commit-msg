@@ -17,4 +17,7 @@ printf '%s' "$subject" | grep -qE '^(feat|fix|refactor|design|style|perf|test|do
   || fail "type 또는 형식이 맞지 않습니다: $subject"
 printf '%s' "$subject" | grep -qE '\.$' && fail "요약 끝에 마침표를 붙이지 않습니다."
 [ -z "$(sed -n '2p' "$1" | grep -v '^#')" ] || fail "요약과 본문 사이에 빈 줄을 둡니다."
+
+# Claude/Codex 하네스 쌍 검사 (한쪽만 바꾸면 Harness-Sync: 사유 줄 필요)
+sh scripts/check-agent-harness-sync.sh "$1" || exit 1
 exit 0

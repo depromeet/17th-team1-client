@@ -1,7 +1,9 @@
 #!/bin/sh
-# pre-commit(lint-staged): Claude/Codex 하네스 쌍 파일 중 한쪽만 staged된 커밋을 막는다.
+# commit-msg 훅: Claude/Codex 하네스 쌍 파일 중 한쪽만 staged된 커밋을 막는다.
 # 쌍: .claude/agents/*.md <-> .codex/agents/*.toml, .claude/hooks/*.sh <-> .codex/hooks/*.sh,
 #     .claude/skills/** <-> .agents/skills/** (같은 상대 경로)
+# 한쪽만 바꾸는 게 맞으면 커밋 메시지에 `Harness-Sync: {사유}` 줄을 넣어 통과시킨다(사유가 이력에 남는다).
+msg_file="$1"
 staged=$(git diff --cached --name-only)
 found=0
 
@@ -23,8 +25,10 @@ for f in $staged; do
   esac
 done
 
-if [ "$found" -eq 1 ]; then
-  echo ""
-  echo "❌ Claude/Codex 하네스 파일은 쌍으로 관리합니다(AGENTS.md '하네스 파일 쌍'). 짝도 함께 수정해 staged하세요."
-  exit 1
-fi
+[ "$found" -eq 0 ] && exit 0
+[ -n "$msg_file" ] && grep -qE '^Harness-Sync: *[^ ]' "$msg_file" && exit 0
+
+echo ""
+echo "❌ Claude/Codex 하네스 파일은 쌍으로 관리합니다. 짝도 함께 수정해 staged하세요."
+echo "   한쪽만 바꾸는 게 맞다면 커밋 메시지 끝에 사유 줄을 추가하세요: Harness-Sync: Codex만 - {사유}"
+exit 1

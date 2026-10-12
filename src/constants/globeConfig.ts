@@ -68,7 +68,7 @@ export const EXTERNAL_URLS = {
   NIGHT_SKY_IMAGE: "//unpkg.com/three-globe/example/img/night-sky.png", // 배경 별하늘 이미지 URL
 } as const;
 
-// 브라우저 뷰포트 기본값 (SSR 폴백용) — Globe.tsx에서 window 접근 불가 시 사용
+// 브라우저 뷰포트 기본값 (SSR 폴백용) - Globe.tsx에서 window 접근 불가 시 사용
 export const VIEWPORT_DEFAULTS = {
   WIDTH: 600, // SSR 시 기본 너비
   HEIGHT: 800, // SSR 시 기본 높이

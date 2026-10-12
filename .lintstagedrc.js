@@ -10,4 +10,7 @@ module.exports = {
   "*.{js,jsx,ts,tsx}": [buildNextLintCommand],
   // 모든 지원 파일: Prettier 자동 포맷
   "*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write"],
+  // Claude/Codex 하네스 쌍 파일 동기화 검사 (파일 인자 없이 staged 전체를 본다)
+  "{.claude/{agents,skills,hooks}/**,.codex/{agents,hooks}/**,.agents/skills/**}": () =>
+    "sh scripts/check-agent-harness-sync.sh",
 };

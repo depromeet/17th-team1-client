@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { ErrorPageContent } from "@/components/common/ErrorPageContent";
+import { env } from "@/config/env";
 import { DEFAULT_ERROR_TYPE } from "@/constants/error";
 import type { ApiError } from "@/lib/apiClient";
 import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
@@ -19,7 +20,7 @@ export default function ErrorBoundary({ error }: ErrorPageProps) {
   const errorType = toErrorTypeFromStatus((error as ApiError).status);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
+    if (env.IS_LOCAL_DEV) {
       console.error("Error boundary caught an error:", error);
     }
 

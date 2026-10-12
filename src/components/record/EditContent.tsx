@@ -3,13 +3,13 @@
 import { ICPlusIcon, ICXIcon } from "@/assets/icons";
 import { COUNTRY_CODE_TO_FLAG, getCountryName } from "@/constants/countryMapping";
 
-interface EditContentProps {
+type EditContentProps = {
   cities: { id: string; name: string; countryCode: string; isNew?: boolean }[];
   onAddClick?: () => void;
   onRemoveClick?: (cityId: string, isNew?: boolean) => void;
-}
+};
 
-export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentProps) {
+export const EditContent = ({ cities, onAddClick, onRemoveClick }: EditContentProps) => {
   return (
     <div>
       <div className="mt-5 mb-8">
@@ -58,4 +58,4 @@ export function EditContent({ cities, onAddClick, onRemoveClick }: EditContentPr
       </div>
     </div>
   );
-}
+};

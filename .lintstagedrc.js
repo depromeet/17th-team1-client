@@ -8,6 +8,8 @@ const buildNextLintCommand = filenames =>
 module.exports = {
   // JS/TS 파일: ESLint auto-fix
   "*.{js,jsx,ts,tsx}": [buildNextLintCommand],
+  // src 소스: em dash(—) 금지
+  "src/**/*.{js,jsx,ts,tsx}": ["sh scripts/check-em-dash-in-source.sh"],
   // 모든 지원 파일: Prettier 자동 포맷
   "*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write"],
 };

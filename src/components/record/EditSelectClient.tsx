@@ -6,19 +6,19 @@ import { Header } from "@/components/common/Header";
 import { NationSelectClient } from "@/components/nationSelect/NationSelectClient";
 import type { City } from "@/types/city";
 
-interface EditSelectClientProps {
+type EditSelectClientProps = {
   initialCities: City[];
   registeredCityNames?: string[];
   addedParam?: string | string[];
   removedParam?: string | string[];
-}
+};
 
-export function EditSelectClient({
+export const EditSelectClient = ({
   initialCities,
   registeredCityNames = [],
   addedParam,
   removedParam,
-}: EditSelectClientProps) {
+}: EditSelectClientProps) => {
   const router = useRouter();
 
   const handleBack = () => {
@@ -138,4 +138,4 @@ export function EditSelectClient({
       }
     />
   );
-}
+};

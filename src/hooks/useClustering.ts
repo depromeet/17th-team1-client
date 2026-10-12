@@ -18,6 +18,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { env } from "@/config/env";
 import { clusterLocations } from "@/lib/globe/clustering/clusteringAlgorithm";
 import {
   createClusterTransitionHandler,
@@ -128,7 +129,7 @@ export const useClustering = ({
         expandedContinentCountryIds.size > 0 ? expandedContinentCountryIds : undefined
       );
     } catch (error) {
-      if (process.env.NODE_ENV === "development") console.error("Clustering calculation failed:", error);
+      if (env.IS_LOCAL_DEV) console.error("Clustering calculation failed:", error);
 
       return [];
     }
@@ -235,9 +236,9 @@ export const useClustering = ({
 
   useEffect(() => {
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- timer refs must be read at unmount time to cancel any in-flight timers
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- 언마운트 시점에 타이머 ref를 읽어 진행 중인 타이머를 취소해야 하므로 필요
       clearTimeout(zoomAnimTimerRef.current ?? undefined);
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- timer refs must be read at unmount time to cancel any in-flight timers
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- 언마운트 시점에 타이머 ref를 읽어 진행 중인 타이머를 취소해야 하므로 필요
       clearTimeout(rotationTimerRef.current ?? undefined);
     };
   }, []);

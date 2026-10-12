@@ -8,7 +8,7 @@ import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
  * @param error - 발생한 에러
  * @returns 에러가 401/500이면 리다이렉트되고, 그렇지 않으면 false 반환
  */
-export function handleServerError(error: unknown): boolean {
+export const handleServerError = (error: unknown): boolean => {
   if (error instanceof ApiError) {
     const errorType = toErrorTypeFromStatus(error.status);
 
@@ -18,4 +18,4 @@ export function handleServerError(error: unknown): boolean {
     return true;
   }
   return false;
-}
+};

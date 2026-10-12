@@ -11,8 +11,8 @@
     "format": "prettier --write .",
     "fix": "eslint . --fix && prettier --write .",
     "check": "eslint . && prettier --check .",
+    "test": "vitest run",
     "tokens:build": "node scripts/build-tokens.js",
-    "ruler:apply": "pnpm exec ruler apply",
     "prepare": "husky"
   },
   "dependencies": {
@@ -57,7 +57,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@intellectronica/ruler": "^0.3.10",
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.83.1",
@@ -68,8 +69,6 @@
     "@types/three": "^0.180.0",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
-    "@eslint/eslintrc": "^3",
-    "@eslint/js": "^9",
     "eslint": "^9",
     "eslint-config-next": "15",
     "eslint-config-prettier": "^10.1.8",
@@ -82,12 +81,12 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.7.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3"
   },
   "packageManager": "pnpm@9.1.0",
   "pnpm": {
     "overrides": {
-      "@intellectronica/ruler>yargs": "17",
       "baseline-browser-mapping": "latest"
     }
   }

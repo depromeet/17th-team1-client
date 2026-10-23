@@ -87,7 +87,7 @@ export const createCountryClusters = (
  */
 export const createIndividualCityClusters = (locations: CountryData[]): ClusterData[] => {
   return locations.map(location => {
-    const { id, lat, lng, name, flag, color, hasRecords, thumbnailUrl } = location;
+    const { id, lat, lng, name, flag, color, hasRecords, thumbnailUrl, recordCount } = location;
 
     return {
       id: `${id}_${lat}_${lng}`,
@@ -101,6 +101,7 @@ export const createIndividualCityClusters = (locations: CountryData[]): ClusterD
       clusterType: "individual_city" as const,
       hasRecords,
       thumbnailUrl,
+      recordCount,
     };
   });
 };

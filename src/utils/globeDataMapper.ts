@@ -20,7 +20,8 @@ const REGION_COLORS = [
 export const mapGlobeDataToTravelPatterns = (
   globeData: GlobeData,
   cityThumbnails?: Record<number, string>,
-  cityThumbnailsArray?: Record<number, string[]>
+  cityThumbnailsArray?: Record<number, string[]>,
+  cityDiaryCount?: Record<number, number>
 ): TravelPattern[] => {
   if (!globeData.regions || globeData.regions.length === 0) return [];
 
@@ -44,6 +45,7 @@ export const mapGlobeDataToTravelPatterns = (
       const countryName = getCountryName(countryCode);
       const thumbnailUrl = cityThumbnails?.[cityId];
       const thumbnails = cityThumbnailsArray?.[cityId];
+      const recordCount = cityDiaryCount?.[cityId];
 
       // 국가별 도시 수 집계
       if (!countryStats.has(countryCode)) {
@@ -64,6 +66,7 @@ export const mapGlobeDataToTravelPatterns = (
         hasRecords: !!thumbnailUrl || (thumbnails?.length ?? 0) > 0, // 썸네일이 있으면 기록이 있는 것으로 간주
         thumbnailUrl, // 도시별 최신 사진 썸네일 (없으면 undefined)
         thumbnails, // 도시별 썸네일 배열 (최대 2개, 최신순)
+        recordCount, // 도시별 총 여행 기록 개수
         cityId, // API에서 제공하는 도시 ID
       });
     }

@@ -17,7 +17,12 @@ type DeleteConfirmModalProps = {
 
 export const DeleteConfirmModal = ({ isOpen, onCancel, onConfirm, isProcessing = false }: DeleteConfirmModalProps) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onCancel}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open && !isProcessing) onCancel();
+      }}
+    >
       <DialogContent className="w-[300px] rounded-3xl bg-gray-750 px-5 pt-[30px] pb-5">
         <DialogBody className="flex flex-col items-center px-0 py-0">
           <DialogHeader className="items-center gap-0">
@@ -32,7 +37,10 @@ export const DeleteConfirmModal = ({ isOpen, onCancel, onConfirm, isProcessing =
             <button
               type="button"
               onClick={onCancel}
-              className="w-[125px] h-11 rounded-xl bg-[#2E3E54] px-5 py-2 text-sm font-bold text-text-primary transition-opacity hover:opacity-90"
+              disabled={isProcessing}
+              className={`w-[125px] h-11 rounded-xl bg-[#2E3E54] px-5 py-2 text-sm font-bold text-text-primary transition-opacity ${
+                isProcessing ? "cursor-not-allowed opacity-70" : "hover:opacity-90"
+              }`}
             >
               취소
             </button>

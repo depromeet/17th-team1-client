@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
@@ -9,7 +10,9 @@ import BookmarkIcon from "@/assets/icons/bookmark.svg";
 import BookmarkFilledIcon from "@/assets/icons/bookmark-filled.svg";
 import { Dropdown } from "@/components/common/Dropdown";
 import { Header } from "@/components/common/Header";
+import { DEFAULT_PROFILE_IMAGE } from "@/constants/image";
 import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@/hooks/mutation/useBookmarkMutations";
+import { useImageLoadError } from "@/hooks/useImageLoadError";
 import { getBookmarks } from "@/services/bookmarkService";
 import type { BookmarkUser } from "@/types/bookmark";
 import { getAuthInfo } from "@/utils/cookies";
@@ -65,7 +68,7 @@ const EmptyState = () => {
           {/* Globe Image */}
           <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/globe-empty.png" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
+            <img src="/assets/globe-empty.webp" alt="저장된 지구본이 없어요" className="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -78,6 +81,30 @@ const EmptyState = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const SavedGlobeProfileImage = ({ src, alt }: { src?: string | null; alt: string }) => {
+  const { hasError, handleError } = useImageLoadError(src);
+
+  if (!src || hasError) {
+    return (
+      <Image src={DEFAULT_PROFILE_IMAGE} alt={alt} width={44} height={44} className="w-full h-full object-cover" />
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      // 하이드레이션 전에 로드에 실패하면 onError가 호출되지 않으므로 마운트 시점에 한 번 더 확인합니다.
+      ref={img => {
+        if (img?.complete && img.naturalWidth === 0) handleError();
+      }}
+      src={src}
+      alt={alt}
+      className="w-full h-full object-cover"
+      onError={handleError}
+    />
   );
 };
 
@@ -148,12 +175,7 @@ const GlobeList = ({
             <div className="flex items-center gap-2.5">
               {/* Profile Image */}
               <div className="w-11 h-11 rounded-full bg-[rgba(255,255,255,0.1)] shrink-0 overflow-hidden">
-                {profileImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profileImageUrl} alt={nickname} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-linear-to-br from-[rgba(0,217,255,0.3)] to-[rgba(0,217,255,0.1)]" />
-                )}
+                <SavedGlobeProfileImage src={profileImageUrl} alt={nickname} />
               </div>
 
               {/* Name */}

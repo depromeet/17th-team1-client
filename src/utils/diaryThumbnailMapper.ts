@@ -6,6 +6,7 @@ type DiaryThumbnails = {
   cityThumbnails: Record<number, string>;
   countryThumbnails: Record<string, string>;
   cityThumbnailsArray: Record<number, string[]>; // 도시별 최대 2개의 썸네일 배열
+  cityDiaryCount: Record<number, number>; // 도시별 총 여행 기록(다이어리) 개수
 };
 
 /**
@@ -27,11 +28,13 @@ export const getDiaryThumbnails = (
       cityThumbnails: {},
       countryThumbnails: {},
       cityThumbnailsArray: {},
+      cityDiaryCount: {},
     };
   }
 
   const cityThumbnailMap: Record<number, string> = {};
   const cityThumbnailsArrayMap: Record<number, string[]> = {}; // 도시별 썸네일 배열
+  const cityDiaryCountMap: Record<number, number> = {}; // 도시별 총 기록 개수
   const countryDiariesMap: Record<string, Array<{ thumbnailUrl: string; timestamp: number }>> = {};
 
   // 각 diaryResponse를 순회 (이미 city별로 그룹화되어 있음)
@@ -44,6 +47,8 @@ export const getDiaryThumbnails = (
 
     const cityId = city.cityId;
     const countryCode = city.countryCode;
+
+    cityDiaryCountMap[cityId] = diaries.length;
 
     // diaries를 updatedAt 또는 createdAt 기준으로 정렬 (최신 순)
     const sortedDiaries = [...diaries].sort((a, b) => {
@@ -112,5 +117,6 @@ export const getDiaryThumbnails = (
     cityThumbnails: cityThumbnailMap,
     countryThumbnails: countryThumbnailMap,
     cityThumbnailsArray: cityThumbnailsArrayMap,
+    cityDiaryCount: cityDiaryCountMap,
   };
 };

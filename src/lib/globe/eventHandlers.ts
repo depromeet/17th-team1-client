@@ -291,6 +291,36 @@ export const createClusterDOMClickHandler = (clusterId: string, onClusterClick: 
 };
 
 /**
+ * 도시 클릭 시 이동할 경로 생성
+ * @param cityName - 도시명 (형식: "도시명, 국가명")
+ * @param cityId - 도시 ID
+ * @param hasRecords - 기록 존재 여부
+ * @param uuid - 사용자 UUID (선택)
+ * @returns 이동할 경로
+ * @responsibility 기록 유무에 따른 이동 경로 결정
+ *
+ * @description
+ * - 기록 있음: 엔드뷰(상세 기록)로 이동
+ * - 기록 없음: 기록하기 페이지로 이동
+ */
+export const buildCityNavigationPath = (
+  cityName: string,
+  cityId?: number,
+  hasRecords: boolean = true,
+  uuid?: string
+): string => {
+  if (hasRecords && cityId) return uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
+
+  const parts = cityName.split(",").map(s => s.trim());
+  const params = new URLSearchParams();
+  if (cityId) params.set("cityId", String(cityId));
+  params.set("city", parts[0]);
+  params.set("country", parts[1] || "");
+
+  return `/image-metadata?${params.toString()}`;
+};
+
+/**
  * 도시 클릭 핸들러 생성
  * @param cityName - 도시명 (형식: "도시명, 국가명")
  * @param cityId - 도시 ID
@@ -320,20 +350,7 @@ export const createCityClickHandler = (
 
     if (disableCityClick) return;
 
-    const parts = cityName.split(",").map(s => s.trim());
-    const cityNameOnly = parts[0];
-    const countryName = parts[1] || "";
-
-    let path: string;
-
-    if (hasRecords && cityId) path = uuid ? `/record/${cityId}?uuid=${uuid}` : `/record/${cityId}`;
-    else {
-      const params = new URLSearchParams();
-      if (cityId) params.set("cityId", String(cityId));
-      params.set("city", cityNameOnly);
-      params.set("country", countryName);
-      path = `/image-metadata?${params.toString()}`;
-    }
+    const path = buildCityNavigationPath(cityName, cityId, hasRecords, uuid);
 
     if (onNavigate) onNavigate(path);
     else window.location.href = path;

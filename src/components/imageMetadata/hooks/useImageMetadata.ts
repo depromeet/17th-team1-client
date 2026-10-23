@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { arrayMove } from "@dnd-kit/sortable";
 import { sendGAEvent } from "@next/third-parties/google";
 
+import { IMAGE_UPLOAD_ERROR_MESSAGE } from "@/constants/image";
 import { useUploadTravelPhotoMutation } from "@/hooks/mutation/useDiaryMutations";
 import { processSingleFile } from "@/lib/processFile";
 import { getDiaryDetail } from "@/services/diaryService";
@@ -186,16 +187,16 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
         const remainingSlots = MAX_IMAGES - metadataCount;
         if (remainingSlots <= 0) return;
 
-        const tasks: Promise<{ metadata: ImageMetadata; file: File }>[] = [];
+        const tasks: Promise<{ metadata: ImageMetadata; uploadFile: File }>[] = [];
         const filesToProcess = Math.min(files.length, remainingSlots);
 
         for (let i = 0; i < filesToProcess; i++) {
           const f = files[i];
           if (f.type.startsWith("image/")) {
             tasks.push(
-              processSingleFile(f).then(metadata => ({
+              processSingleFile(f).then(({ metadata, uploadFile }) => ({
                 metadata,
-                file: f,
+                uploadFile,
               }))
             );
           }
@@ -203,13 +204,20 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
 
         const settled = await Promise.allSettled(tasks);
         const results = settled
-          .filter((r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; file: File }> => r.status === "fulfilled")
+          .filter(
+            (r): r is PromiseFulfilledResult<{ metadata: ImageMetadata; uploadFile: File }> => r.status === "fulfilled"
+          )
           .map(r => r.value);
+
+        const hasFailure = settled.some(r => r.status === "rejected");
+        if (hasFailure) {
+          alert("업로드에 실패했습니다");
+        }
 
         if (results.length === 0) return;
 
-        const uploadPromises = results.map(({ metadata, file }) =>
-          uploadTravelPhoto({ file }).then(photoCode => ({
+        const uploadPromises = results.map(({ metadata, uploadFile }) =>
+          uploadTravelPhoto({ file: uploadFile }).then(photoCode => ({
             photoCode,
             metadata,
           }))
@@ -259,7 +267,8 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           });
         }
       } catch (error) {
-        alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
+        console.error("이미지 업로드 실패", error);
+        alert(IMAGE_UPLOAD_ERROR_MESSAGE);
       } finally {
         (e.target as HTMLInputElement).value = "";
         setIsProcessing(false);

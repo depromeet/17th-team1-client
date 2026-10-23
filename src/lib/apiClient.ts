@@ -1,4 +1,5 @@
 import { env } from "@/config/env";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 
 const API_BASE_URL = env.API_BASE_URL;
 
@@ -53,10 +54,10 @@ const handleGlobalError = (status: number, skipGlobalErrorHandling?: boolean): v
   // 클라이언트 사이드에서만 자동 리다이렉트
   if (typeof window === "undefined") return;
 
-  if (status === 401) {
-    window.location.href = "/error?type=401";
-  } else if (status >= 500) {
-    window.location.href = "/error?type=500";
+  const errorType = toErrorTypeFromStatus(status);
+
+  if (errorType === "401" || errorType === "500") {
+    window.location.href = buildErrorPagePath(errorType);
   }
 };
 

@@ -16,6 +16,7 @@ import { ApiError } from "@/lib/apiClient";
 import { logout } from "@/services/authService";
 import { uploadAndUpdateProfile } from "@/services/profileService";
 import type { ProfileData } from "@/types/member";
+import { buildErrorPagePath } from "@/utils/errorType";
 
 type ProfileClientProps = {
   initialProfile: ProfileData | null;
@@ -40,7 +41,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
   // 프로필 데이터가 없으면 (토큰 만료 등) 에러 페이지로 리다이렉트
   useEffect(() => {
     if (initialProfile === null) {
-      router.replace("/error?type=401");
+      router.replace(buildErrorPagePath("401"));
     }
   }, [initialProfile, router]);
 
@@ -107,7 +108,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
         // 401 에러인 경우 에러 페이지로 리다이렉트
         if (error instanceof ApiError && error.status === 401) {
-          router.replace("/error?type=401");
+          router.replace(buildErrorPagePath("401"));
           return;
         }
 
@@ -145,6 +146,25 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       screen: "profile_main",
       click_code: "menu.profile.feedback",
     });
+
+    const ua = navigator.userAgent;
+    const isMobile =
+      /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+      (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+
+    const subject = encodeURIComponent("[서비스 의견] ");
+
+    if (isMobile) {
+      // 모바일: 기기 내장 메일앱 실행
+      window.location.href = `mailto:globber.official@gmail.com?subject=${subject}`;
+    } else {
+      // PC: Gmail 웹 compose 창 열기
+      window.open(
+        `https://mail.google.com/mail/?view=cm&fs=1&to=globber.official@gmail.com&su=${subject}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
   }, []);
 
   return (
@@ -185,11 +205,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
             {/* Usage Info Section */}
             <SettingSection title="이용 정보">
               <SettingItem label="약관 및 정책" onClick={handleTermsClick} />
-              <SettingItem
-                label="서비스 의견 보내기"
-                onClick={handleFeedbackClick}
-                href={`https://mail.google.com/mail/?view=cm&fs=1&to=globber.official@gmail.com&su=${encodeURIComponent("[서비스 의견] ")}`}
-              />
+              <SettingItem label="서비스 의견 보내기" onClick={handleFeedbackClick} />
               <SettingItem label="회원 탈퇴하기" onClick={handleWithdrawalClick} />
             </SettingSection>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   closestCenter,
@@ -39,16 +39,25 @@ interface SortableImageCardProps {
   isPressing: boolean;
   onPressStart: () => void;
   onPressEnd: () => void;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
 }
 
-const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children }: SortableImageCardProps) => {
+const SortableImageCard = ({
+  id,
+  isPressing,
+  onPressStart,
+  onPressEnd,
+  scrollContainerRef,
+  children,
+}: SortableImageCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const touchStartXRef = useRef(0);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1, // Hide original item completely so DragOverlay is the only one visible
+    opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 0 : 1,
     touchAction: "none" as const,
   };
@@ -59,21 +68,17 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
       style={style}
       {...attributes}
       {...listeners}
-      onPointerDown={e => {
-        onPressStart();
-        listeners?.onPointerDown?.(e);
-      }}
-      onPointerUp={e => {
-        onPressEnd();
-        listeners?.onPointerUp?.(e);
-      }}
-      onPointerCancel={e => {
-        onPressEnd();
-        listeners?.onPointerCancel?.(e);
-      }}
       onTouchStart={e => {
+        touchStartXRef.current = e.touches[0].clientX;
         onPressStart();
         listeners?.onTouchStart?.(e);
+      }}
+      onTouchMove={e => {
+        if (!isDragging && scrollContainerRef.current) {
+          const dx = e.touches[0].clientX - touchStartXRef.current;
+          scrollContainerRef.current.scrollLeft -= dx;
+          touchStartXRef.current = e.touches[0].clientX;
+        }
       }}
       onTouchEnd={e => {
         onPressEnd();
@@ -83,13 +88,14 @@ const SortableImageCard = ({ id, isPressing, onPressStart, onPressEnd, children 
         onPressEnd();
         listeners?.onTouchCancel?.(e);
       }}
-      className="shrink-0 outline-none select-none relative"
+      onContextMenu={e => e.preventDefault()}
+      className="shrink-0 outline-none select-none relative dnd-no-image-menu"
     >
       <div
         style={{
           transform: isPressing && !isDragging ? "scale(0.96)" : "scale(1)",
           transition: "transform 0.2s ease, filter 0.2s ease",
-          borderRadius: "0.75rem", // match xl
+          borderRadius: "0.75rem",
         }}
         className="relative origin-center"
       >
@@ -119,11 +125,13 @@ export const ImageUploadSection = ({
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pressingId, setPressingId] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 6,
+        delay: 500,
+        tolerance: 15,
       },
     })
   );
@@ -161,8 +169,9 @@ export const ImageUploadSection = ({
 
   const renderContent = () => (
     <div
+      ref={scrollContainerRef}
       className="flex gap-4 overflow-x-auto px-4 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      style={{ touchAction: isDndEnabled ? "pan-y" : "pan-x", minHeight: hasImages ? undefined : "460px" }}
+      style={{ touchAction: "pan-x", minHeight: hasImages ? undefined : "460px" }}
     >
       {!hasImages && (
         <div className="shrink-0">
@@ -197,6 +206,7 @@ export const ImageUploadSection = ({
               onPressEnd={() => {
                 if (pressingId === metadata.id) setPressingId(null);
               }}
+              scrollContainerRef={scrollContainerRef}
             >
               <ImageCarousel
                 image={metadata}
@@ -270,14 +280,13 @@ export const ImageUploadSection = ({
                 style={{
                   transform: "scale(1.08) rotate(-2deg)",
                   transformOrigin: "center center",
-                  transition: "none", // dnd-kit will handle overlay transition if needed, but we keep it static while moving
+                  transition: "none",
                 }}
-                className="shrink-0 relative outline-none select-none"
+                className="shrink-0 relative outline-none select-none dnd-no-image-menu"
               >
                 <div className="absolute inset-0 border-2 border-[#0097C1] rounded-xl z-20 pointer-events-none" />
                 <ImageCarousel
                   image={activeMetadata}
-                  // pass empty handlers or actual handlers for overlay visual completeness
                   onRemove={() => {}}
                   onImageUpdate={handleImageUpdate}
                   onTagChange={() => {}}

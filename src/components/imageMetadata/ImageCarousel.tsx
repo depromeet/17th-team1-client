@@ -5,16 +5,21 @@ import Image from "next/image";
 
 import { sendGAEvent } from "@next/third-parties/google";
 
+import { DeleteConfirmModal } from "@/components/common/DeleteConfirmModal";
+import { ImageFallback } from "@/components/common/ImageFallback";
+import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
+import { useImageLoadError } from "@/hooks/useImageLoadError";
 import type { ImageMetadata, ImageTag } from "@/types/imageMetadata";
 import { formatYearMonth, toYearMonth } from "@/utils/dateUtils";
 
 import { CircleCloseButton } from "./CircleCloseButton";
 import { DateSelectBottomSheet } from "./DateSelectBottomSheet";
-import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { ImageCropModal } from "./ImageCropModal";
 import { LocationSelectBottomSheet, type LocationSelection } from "./LocationSelectBottomSheet";
 import { MetadataChip } from "./MetadataChip";
 import { TagSelector } from "./TagSelector";
+
+const TOAST_DURATION = 1500;
 
 type ExtendedImageMetadata = ImageMetadata & {
   selectedTag?: ImageTag | null;
@@ -52,13 +57,16 @@ export const ImageCarousel = ({
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [isCropUploading, setIsCropUploading] = useState(false);
   const [currentImage, setCurrentImage] = useState(image.imagePreview);
-  const [customDate, setCustomDate] = useState<string | null>(image.customDate ?? toYearMonth(image.timestamp));
+  const [isLoadErrorToastOpen, setIsLoadErrorToastOpen] = useState(false);
+  const { hasError: hasImageError, handleError: handleImageError } = useImageLoadError(currentImage);
+  const [customDate, setCustomDate] = useState<string | null>(
+    image.customDate === undefined ? toYearMonth(image.timestamp) : image.customDate
+  );
   const [customLocation, setCustomLocation] = useState<string | null>(
     image.location?.nearbyPlaces?.[1] || image.location?.address || null
   );
 
-  const baseDate = toYearMonth(image.timestamp);
-  const displayedYearMonth = customDate ?? baseDate;
+  const displayedYearMonth = customDate;
   const displayDate = formatYearMonth(displayedYearMonth);
   const hasDate = !!displayedYearMonth;
 
@@ -67,7 +75,7 @@ export const ImageCarousel = ({
   }, [image.selectedTag, image.tag]);
 
   useEffect(() => {
-    setCustomDate(image.customDate ?? toYearMonth(image.timestamp));
+    setCustomDate(image.customDate === undefined ? toYearMonth(image.timestamp) : image.customDate);
   }, [image.customDate, image.timestamp]);
 
   useEffect(() => {
@@ -101,12 +109,12 @@ export const ImageCarousel = ({
 
   const handleConfirmDate = (date: string) => {
     const normalized = date.replace(".", "");
-    const changeType = !customDate ? "add" : "update";
+    const changeType = !displayedYearMonth ? "add" : "update";
     sendGAEvent("event", "record_meta_date_change", {
       flow: "editor",
       screen: "record_edit",
       click_code: "editor.record.edit.meta.date.edit",
-      date_before: formatDateForGA(customDate),
+      date_before: formatDateForGA(displayedYearMonth),
       date_after: formatDateForGA(normalized),
       change_type: changeType,
     });
@@ -119,12 +127,21 @@ export const ImageCarousel = ({
       flow: "editor",
       screen: "record_edit",
       click_code: "editor.record.edit.meta.date.remove",
-      date_before: formatDateForGA(customDate),
+      date_before: formatDateForGA(displayedYearMonth),
       date_after: null,
       change_type: "remove",
     });
     setCustomDate(null);
     onDateChange?.(null);
+  };
+
+  const handleDateChipClick = () => {
+    if (hasDate) {
+      handleDateClear();
+      return;
+    }
+
+    setIsDateSelectModalOpen(true);
   };
 
   const handleSaveCroppedImage = async (croppedImage: string) => {
@@ -206,6 +223,10 @@ export const ImageCarousel = ({
           type="button"
           className="w-full h-full bg-black relative cursor-pointer overflow-hidden"
           onClick={() => {
+            if (hasImageError) {
+              setIsLoadErrorToastOpen(true);
+              return;
+            }
             sendGAEvent("event", "record_photo_ratio_entry", {
               flow: "editor",
               screen: "record_edit",
@@ -213,18 +234,33 @@ export const ImageCarousel = ({
             });
             setIsCropModalOpen(true);
           }}
+          onContextMenu={e => e.preventDefault()}
           aria-label="이미지 편집"
           disabled={isCropUploading}
         >
-          <Image
-            src={currentImage}
-            alt={shown.fileName}
-            fill
-            sizes="251px"
-            className="object-cover"
-            unoptimized
-            draggable={false}
-          />
+          {hasImageError ? (
+            <ImageFallback size="md" />
+          ) : (
+            <Image
+              src={currentImage}
+              alt={shown.fileName}
+              fill
+              sizes="251px"
+              className="object-cover"
+              style={
+                {
+                  WebkitTouchCallout: "none",
+                  WebkitUserDrag: "none",
+                  userSelect: "none",
+                  pointerEvents: "none",
+                } as React.CSSProperties
+              }
+              unoptimized
+              draggable={false}
+              onContextMenu={e => e.preventDefault()}
+              onError={handleImageError}
+            />
+          )}
           {isCropUploading && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <div className="text-white text-sm">업로드 중...</div>
@@ -256,7 +292,7 @@ export const ImageCarousel = ({
         <MetadataChip
           iconType="calendar"
           text={hasDate && displayDate ? displayDate : "날짜 추가"}
-          onClick={() => setIsDateSelectModalOpen(true)}
+          onClick={handleDateChipClick}
           onRemove={hasDate ? handleDateClear : undefined}
           isPlaceholder={!hasDate || !displayDate}
         />
@@ -283,6 +319,23 @@ export const ImageCarousel = ({
         photoIndex={photoIndex}
         hasExistingLocation={hasLocation}
       />
+      <HeadlessToastProvider viewportClassName="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[calc(100%-32px)] max-w-[370px]">
+        <HeadlessToast
+          open={isLoadErrorToastOpen}
+          onOpenChange={setIsLoadErrorToastOpen}
+          duration={TOAST_DURATION}
+          className="flex items-center w-full h-[48px] rounded-lg border text-white px-4"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.08)",
+            borderColor: "rgba(255, 255, 255, 0.04)",
+            paddingTop: "14px",
+            paddingBottom: "14px",
+          }}
+          contentClassName="font-medium text-sm leading-none flex items-center"
+        >
+          사진을 불러오지 못해 편집할 수 없어요
+        </HeadlessToast>
+      </HeadlessToastProvider>
       {isCropModalOpen && (
         <ImageCropModal
           image={image.originalImageUrl || currentImage}

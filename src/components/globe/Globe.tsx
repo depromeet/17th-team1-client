@@ -16,6 +16,7 @@ import { calculateAnimationDuration, calculateAutoFitCamera } from "@/lib/globe/
 import { createCityClickHandler, createClusterDOMClickHandler } from "@/lib/globe/eventHandlers";
 import { createGlobeImageUrl } from "@/lib/globe/imageGenerator";
 import {
+  attachThumbnailFallback,
   calculateLabelPosition,
   type CityStyles,
   type ContinentClusterStyles,
@@ -147,6 +148,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
         el.style.overflow = "visible";
         el.style.pointerEvents = "none"; // 컨테이너는 이벤트 차단
         el.style.zIndex = "999";
+        attachThumbnailFallback(el);
 
         const { angleOffset, dynamicDistance } = calculateLabelPosition(
           clusterData,
@@ -178,6 +180,7 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
           const cityHasRecords = clusterData.hasRecords ?? false;
           const thumbnailUrl = clusterData.thumbnailUrl;
           const cityId = clusterData.items?.[0]?.cityId;
+          const recordCount = clusterData.recordCount;
 
           el.innerHTML = createCityHTML(
             styles as CityStyles,
@@ -186,7 +189,8 @@ const Globe = forwardRef<GlobeRef, GlobeProps>(
             cityHasRecords,
             thumbnailUrl,
             isMyGlobe,
-            isFirstGlobe
+            isFirstGlobe,
+            recordCount
           );
 
           // 타인의 지구본에서 기록이 없는 경우 클릭 비활성화

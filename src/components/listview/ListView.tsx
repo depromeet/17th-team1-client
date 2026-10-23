@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { sendGAEvent } from "@next/third-parties/google";
 
+import { ImageFallback } from "@/components/common/ImageFallback";
 import { getContinent, getCountryName } from "@/constants/countryMapping";
+import { useImageLoadError } from "@/hooks/useImageLoadError";
+import { buildCityNavigationPath } from "@/lib/globe/eventHandlers";
 import type { KoreanContinent } from "@/types/geography";
 import type { TravelPattern } from "@/types/travelPatterns";
 
@@ -23,6 +27,7 @@ const CONTINENT_DISPLAY_NAME: Record<KoreanContinent, string> = {
 type ListViewProps = {
   travelPatterns: TravelPattern[];
   isMyGlobe?: boolean;
+  uuid?: string;
 };
 
 type GroupedByCountry = {
@@ -36,12 +41,33 @@ type GroupedByCountry = {
     lng: number;
     thumbnailUrl?: string;
     thumbnails?: string[]; // 여행기록 썸네일 배열 (최대 2개, 최신순)
+    recordCount?: number; // 해당 도시의 총 여행 기록 개수
     hasRecords: boolean;
     cityId?: number;
   }>;
 };
 
-const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
+const CityThumbnail = ({ src, alt }: { src: string; alt: string }) => {
+  const { hasError, handleError } = useImageLoadError(src);
+
+  if (hasError) {
+    return <ImageFallback className="rounded-sm" />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={24}
+      height={24}
+      className="w-full h-full object-cover rounded-sm"
+      onError={handleError}
+    />
+  );
+};
+
+const ListView = ({ travelPatterns, isMyGlobe = true, uuid }: ListViewProps) => {
+  const router = useRouter();
   const [selectedContinent, setSelectedContinent] = useState<KoreanContinent | "전체">("전체");
 
   // travelPatterns의 countries를 countryCode로 그룹화
@@ -68,6 +94,7 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
             lng: country.lng,
             thumbnailUrl: country.thumbnailUrl,
             thumbnails: country.thumbnails,
+            recordCount: country.recordCount,
             hasRecords: country.hasRecords ?? false,
             cityId: country.cityId,
           });
@@ -216,22 +243,28 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
 
                 {/* 도시 칩 목록 */}
                 <div className="flex flex-wrap gap-2">
-                  {group.cities.map(({ name, hasRecords, thumbnails }) => {
+                  {group.cities.map(({ name, hasRecords, thumbnails, recordCount, cityId }) => {
                     // "도시명, 국가명" 형식에서 도시명만 추출
                     const cityName = name.split(",")[0].trim();
+                    const totalRecords = recordCount ?? thumbnails?.length ?? 0;
+                    const extraCount = totalRecords - 1;
+                    // 타인의 지구본에서 기록이 없는 경우 클릭 비활성화 (글로브 뷰와 동일)
+                    const isClickDisabled = !isMyGlobe && !hasRecords;
 
                     return (
                       <button
                         key={`${group.countryCode}-${name}`}
                         type="button"
-                        className="border rounded-xl border-none"
-                        onClick={() =>
+                        disabled={isClickDisabled}
+                        className="border rounded-xl border-none cursor-pointer disabled:cursor-not-allowed"
+                        onClick={() => {
                           sendGAEvent("event", "home_list_city_select", {
                             flow: "home",
                             screen: isMyGlobe ? "list_main" : "list_other",
                             click_code: isMyGlobe ? "home.list.city.select" : "home.other.list.city.select",
-                          })
-                        }
+                          });
+                          router.push(buildCityNavigationPath(name, cityId, hasRecords, uuid));
+                        }}
                       >
                         <div
                           className="flex gap-2 items-center rounded-[inherit] bg-(--color-surface-placeholder--8)"
@@ -253,64 +286,30 @@ const ListView = ({ travelPatterns, isMyGlobe = true }: ListViewProps) => {
                           >
                             {cityName}
                           </p>
-                          {/* 여행기록이 있는 경우 썸네일 표시 */}
+                          {/* 여행기록이 있는 경우 가장 최근 썸네일만 표시 */}
                           {hasRecords && thumbnails && thumbnails.length > 0 && (
-                            <div className="flex items-center" style={{ position: "relative" }}>
-                              {thumbnails.length === 1 ? (
-                                // 썸네일이 1개인 경우
+                            <div
+                              className="border rounded-sm shrink-0 overflow-hidden relative"
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderColor: "rgba(255, 255, 255, 0.16)",
+                              }}
+                            >
+                              <CityThumbnail src={thumbnails[0]} alt={cityName} />
+                              {/* 기록이 2개 이상인 경우 딤드 + 잔여 개수 뱃지 표시 */}
+                              {extraCount > 0 && (
                                 <div
-                                  className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                  style={{ width: "24px", height: "24px" }}
+                                  className="absolute inset-0 flex items-center justify-center"
+                                  style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
                                 >
-                                  <Image
-                                    src={thumbnails[0]}
-                                    alt={cityName}
-                                    width={24}
-                                    height={24}
-                                    className="w-full h-full object-cover rounded-sm"
-                                  />
+                                  <p
+                                    className="font-bold text-white"
+                                    style={{ fontSize: "12px", letterSpacing: "-0.24px" }}
+                                  >
+                                    +{extraCount}
+                                  </p>
                                 </div>
-                              ) : (
-                                // 썸네일이 2개 이상인 경우 겹침 표시 (최대 2개)
-                                <>
-                                  {/* 이전 썸네일 (왼쪽, z-index 낮음) */}
-                                  <div
-                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                    style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      position: "relative",
-                                      zIndex: 1,
-                                      marginRight: "-8px",
-                                    }}
-                                  >
-                                    <Image
-                                      src={thumbnails[1]}
-                                      alt={`${cityName} 이전`}
-                                      width={24}
-                                      height={24}
-                                      className="w-full h-full object-cover rounded-sm"
-                                    />
-                                  </div>
-                                  {/* 최신 썸네일 (우측, z-index 높음) */}
-                                  <div
-                                    className="border border-white rounded-sm shrink-0 overflow-hidden"
-                                    style={{
-                                      width: "24px",
-                                      height: "24px",
-                                      position: "relative",
-                                      zIndex: 2,
-                                    }}
-                                  >
-                                    <Image
-                                      src={thumbnails[0]}
-                                      alt={`${cityName} 최신`}
-                                      width={24}
-                                      height={24}
-                                      className="w-full h-full object-cover rounded-sm"
-                                    />
-                                  </div>
-                                </>
                               )}
                             </div>
                           )}

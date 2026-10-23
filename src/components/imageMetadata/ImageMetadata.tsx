@@ -166,6 +166,7 @@ export const ImageMetadataComponent = ({
         rightButtonTitle="저장"
         rightButtonDisabled={!hasImages || isProcessing || isInitialLoading || !isCityIdValid}
         onRightClick={handleSaveClick}
+        className="sticky top-0 z-50"
       />
       <ImageUploadSection
         metadataList={metadataList}

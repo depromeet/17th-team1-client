@@ -13,12 +13,14 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import ListView from "@/components/listview/ListView";
 import { ZOOM_LEVELS } from "@/constants/clusteringConstants";
+import { ApiError } from "@/lib/apiClient";
 import { getBookmarks } from "@/services/bookmarkService";
 import { getDiariesList } from "@/services/diaryService";
 import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { getDiaryThumbnails } from "@/utils/diaryThumbnailMapper";
+import { buildErrorPagePath, toErrorTypeFromStatus } from "@/utils/errorType";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 
 const Globe = dynamic(() => import("@/components/globe/Globe"), {
@@ -70,7 +72,7 @@ const GlobePage = () => {
       try {
         const { uuid: myUuid } = getAuthInfo();
         if (!urlUuid) {
-          router.push("/error?type=404");
+          router.push(buildErrorPagePath("404"));
           return;
         }
 
@@ -90,13 +92,19 @@ const GlobePage = () => {
           cityThumbnails,
           countryThumbnails: countryThumbMap,
           cityThumbnailsArray,
+          cityDiaryCount,
         } = getDiaryThumbnails(diaryData);
 
         // 국가 썸네일 state 설정
         setCountryThumbnails(countryThumbMap);
 
         if (globeResponse?.data) {
-          const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data, cityThumbnails, cityThumbnailsArray);
+          const mappedPatterns = mapGlobeDataToTravelPatterns(
+            globeResponse.data,
+            cityThumbnails,
+            cityThumbnailsArray,
+            cityDiaryCount
+          );
           setTravelPatterns(mappedPatterns);
 
           // 도시와 국가 개수 설정
@@ -125,8 +133,16 @@ const GlobePage = () => {
         }
         setTravelInsight(insightResponse || "");
       } catch (err) {
-        // TODO: 에러 처리 로직 추가
         console.error("Globe data load failed:", err);
+
+        if (err instanceof ApiError) {
+          const errorType = toErrorTypeFromStatus(err.status);
+
+          if (errorType === "401" || errorType === "500") {
+            router.replace(buildErrorPagePath(errorType));
+            return;
+          }
+        }
       } finally {
         setIsDataLoaded(true);
       }
@@ -276,7 +292,7 @@ const GlobePage = () => {
           {/* 리스트뷰 콘텐츠 - 헤더 아래, 푸터 위 */}
           <div className="flex-1 flex flex-col items-center overflow-hidden pb-[120px]">
             <div className="max-w-lg w-full h-full mt-4">
-              <ListView travelPatterns={travelPatterns} isMyGlobe={isMyGlobe} />
+              <ListView travelPatterns={travelPatterns} isMyGlobe={isMyGlobe} uuid={urlUuid} />
             </div>
           </div>
 

@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useCreateMemberTravelsMutation } from "@globber/query";
 import type { City } from "@globber/shared/types/city";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { SearchInput } from "@/components/common/Input";
+import { useCreateMemberTravelsMutation } from "@/hooks/mutation/useMemberMutation";
 import { useCitySearch } from "@/hooks/useCitySearch";
 
 import { NationSelectFooter } from "./NationSelectFooter";

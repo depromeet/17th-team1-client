@@ -8,18 +8,16 @@ import type {
 } from "@globber/shared/types/emoji";
 import { useMutation } from "@tanstack/react-query";
 
-import { useApi } from "../provider";
+import { pressEmoji, registerEmoji } from "@/services/emojiService";
 
 export const useRegisterEmojiMutation = () => {
-  const api = useApi();
   return useMutation<RegisterEmojiResponse, Error, RegisterEmojiParams>({
-    mutationFn: (params: RegisterEmojiParams) => api.emoji.registerEmoji(params),
+    mutationFn: (params: RegisterEmojiParams) => registerEmoji(params),
   });
 };
 
 export const usePressEmojiMutation = () => {
-  const api = useApi();
   return useMutation<PressEmojiResponse, Error, PressEmojiParams>({
-    mutationFn: (params: PressEmojiParams) => api.emoji.pressEmoji(params),
+    mutationFn: (params: PressEmojiParams) => pressEmoji(params),
   });
 };

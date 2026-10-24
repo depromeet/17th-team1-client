@@ -80,38 +80,3 @@ export const clearAllCookies = (): void => {
     }
   }
 };
-
-/**
- * 인증 관련 쿠키(토큰, 멤버 ID, UUID)만 삭제합니다.
- * 클라이언트 전용 함수입니다.
- */
-export const clearAuthCookies = (): void => {
-  if (typeof document === "undefined") return;
-
-  const cookies = ["kakao_access_token", "member_id", "uuid"];
-  const hostname = window.location.hostname;
-  const isLocalhost = hostname === "localhost" || /^[0-9.]+$/.test(hostname);
-
-  // domain 후보: (1) 지정 안 함, (2) 현재 호스트, (3) 부모 도메인들(.example.com 등)
-  const parentDomains = isLocalhost
-    ? []
-    : (() => {
-        const parts = hostname.split(".");
-        const acc: string[] = [];
-        for (let i = 1; i < parts.length - 0; i++) {
-          const d = `.${parts.slice(i).join(".")}`;
-          acc.push(d);
-        }
-        return Array.from(new Set([hostname, ...acc]));
-      })();
-
-  const domainCandidates: (string | undefined)[] = [undefined, ...parentDomains];
-
-  for (const name of cookies) {
-    for (const d of domainCandidates) {
-      const domainAttr = d ? `; domain=${d}` : "";
-
-      document.cookie = `${name}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainAttr}`;
-    }
-  }
-};

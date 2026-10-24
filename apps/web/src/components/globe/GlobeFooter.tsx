@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@globber/query";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { BookmarkFilledIcon, BookmarkIcon } from "@/assets/icons";
@@ -11,6 +10,7 @@ import GlobeIcon from "@/assets/icons/globe.svg";
 import ListIcon from "@/assets/icons/list.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
 import { HeadlessToast, HeadlessToastProvider } from "@/components/common/Toast";
+import { useAddBookmarkMutation, useRemoveBookmarkMutation } from "@/hooks/mutation/useBookmarkMutations";
 import { cn } from "@/utils/cn";
 import { getAuthInfo } from "@/utils/cookies";
 

@@ -3,18 +3,16 @@
 import { AddBookmarkRequest, RemoveBookmarkRequest } from "@globber/shared/types/bookmark";
 import { useMutation } from "@tanstack/react-query";
 
-import { useApi } from "../provider";
+import { addBookmark, removeBookmark } from "@/services/bookmarkService";
 
 export const useAddBookmarkMutation = (onLoginGate?: () => void) => {
-  const api = useApi();
   return useMutation<void, Error, AddBookmarkRequest>({
-    mutationFn: ({ targetMemberId, useToken }) => api.bookmark.addBookmark(targetMemberId, useToken, onLoginGate),
+    mutationFn: ({ targetMemberId, useToken }) => addBookmark(targetMemberId, useToken, onLoginGate),
   });
 };
 
 export const useRemoveBookmarkMutation = () => {
-  const api = useApi();
   return useMutation<void, Error, RemoveBookmarkRequest>({
-    mutationFn: ({ targetMemberId }) => api.bookmark.removeBookmark(targetMemberId),
+    mutationFn: ({ targetMemberId }) => removeBookmark(targetMemberId),
   });
 };

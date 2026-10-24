@@ -1,4 +1,0 @@
-{
-  "extends": "@globber/config/tsconfig.lib.json",
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
-}

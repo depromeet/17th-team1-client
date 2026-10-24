@@ -8,7 +8,7 @@ import type {
 } from "@globber/shared/types/city";
 import { useMutation } from "@tanstack/react-query";
 
-import { useApi } from "../provider";
+import { addCity, deleteCity } from "@/services/cityService";
 
 export type AddCityVariables = {
   request: AddCityRequest;
@@ -21,15 +21,13 @@ export type DeleteCityVariables = {
 };
 
 export const useAddCityMutation = () => {
-  const api = useApi();
   return useMutation<AddCityResponse, Error, AddCityVariables>({
-    mutationFn: ({ request, token }) => api.city.addCity(request, token),
+    mutationFn: ({ request, token }) => addCity(request, token),
   });
 };
 
 export const useDeleteCityMutation = () => {
-  const api = useApi();
   return useMutation<DeleteCityResponse, Error, DeleteCityVariables>({
-    mutationFn: ({ request, token }) => api.city.deleteCity(request.cityId, token),
+    mutationFn: ({ request, token }) => deleteCity(request.cityId, token),
   });
 };

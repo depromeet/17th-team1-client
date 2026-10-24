@@ -11,46 +11,47 @@ import type {
 } from "@globber/shared/types/diary";
 import { useMutation } from "@tanstack/react-query";
 
-import { useApi } from "../provider";
+import {
+  addDiaryPhoto,
+  createDiary,
+  deleteDiary,
+  deleteDiaryPhoto,
+  updateDiary,
+  uploadTravelPhoto,
+} from "@/services/diaryService";
 
 export const useUploadTravelPhotoMutation = () => {
-  const api = useApi();
   return useMutation<string, Error, UploadTravelPhotoRequest>({
-    mutationFn: ({ file, token }) => api.diary.uploadTravelPhoto(file, token),
+    mutationFn: ({ file, token }) => uploadTravelPhoto(file, token),
   });
 };
 
 export const useCreateDiaryMutation = () => {
-  const api = useApi();
   return useMutation<number, Error, CreateDiaryRequest>({
-    mutationFn: ({ params, token }) => api.diary.createDiary(params, token),
+    mutationFn: ({ params, token }) => createDiary(params, token),
   });
 };
 
 export const useDeleteDiaryMutation = () => {
-  const api = useApi();
   return useMutation<void, Error, DeleteDiaryRequest>({
-    mutationFn: ({ diaryId, token }) => api.diary.deleteDiary(diaryId, token),
+    mutationFn: ({ diaryId, token }) => deleteDiary(diaryId, token),
   });
 };
 
 export const useDeleteDiaryPhotoMutation = () => {
-  const api = useApi();
   return useMutation<void, Error, DeleteDiaryPhotoRequest>({
-    mutationFn: ({ diaryId, photoId, token }) => api.diary.deleteDiaryPhoto(diaryId, photoId, token),
+    mutationFn: ({ diaryId, photoId, token }) => deleteDiaryPhoto(diaryId, photoId, token),
   });
 };
 
 export const useAddDiaryPhotoMutation = () => {
-  const api = useApi();
   return useMutation<DiaryPhoto, Error, AddDiaryPhotoRequest>({
-    mutationFn: ({ diaryId, photo, token }) => api.diary.addDiaryPhoto(diaryId, photo, token),
+    mutationFn: ({ diaryId, photo, token }) => addDiaryPhoto(diaryId, photo, token),
   });
 };
 
 export const useUpdateDiaryMutation = () => {
-  const api = useApi();
   return useMutation<void, Error, UpdateDiaryRequest>({
-    mutationFn: ({ diaryId, params, token }) => api.diary.updateDiary(diaryId, params, token),
+    mutationFn: ({ diaryId, params, token }) => updateDiary(diaryId, params, token),
   });
 };

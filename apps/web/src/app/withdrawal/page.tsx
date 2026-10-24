@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useWithdrawMemberMutation } from "@globber/query";
 import { sendGAEvent } from "@next/third-parties/google";
 
 import { Header } from "@/components/common/Header";
 import { WithdrawalDialog } from "@/components/profile/WithdrawalDialog";
+import { useWithdrawMemberMutation } from "@/hooks/mutation/useProfileMutations";
 import { clearAllCookies } from "@/utils/cookies";
 
 export default function WithdrawalPage() {

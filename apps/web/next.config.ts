@@ -6,7 +6,7 @@ import path from "node:path";
 const nextConfig: NextConfig = {
   output: "standalone",
   // 워크스페이스 패키지는 TS 소스를 그대로 노출하므로 Next가 직접 트랜스파일
-  transpilePackages: ["@globber/shared", "@globber/api", "@globber/query", "@globber/tokens"],
+  transpilePackages: ["@globber/shared", "@globber/tokens"],
   // 모노레포 루트를 기준으로 standalone 트레이싱 (workspace 패키지/루트 node_modules 포함)
   outputFileTracingRoot: path.join(__dirname, "../../"),
   experimental: {

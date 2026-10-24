@@ -9,6 +9,7 @@ import type { ImageMetadata, ImageTag } from "@globber/shared/types/imageMetadat
 import { toYearMonth } from "@globber/shared/utils/dateUtils";
 import { sendGAEvent } from "@next/third-parties/google";
 
+import { IMAGE_UPLOAD_ERROR_MESSAGE } from "@/constants/image";
 import { processSingleFile } from "@/lib/processFile";
 import { getDiaryDetail } from "@/services/diaryService";
 import { isCoordinateFormat, reverseGeocode } from "@/utils/geocoding";
@@ -266,7 +267,8 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
           });
         }
       } catch (error) {
-        alert(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
+        console.error("이미지 업로드 실패", error);
+        alert(IMAGE_UPLOAD_ERROR_MESSAGE);
       } finally {
         (e.target as HTMLInputElement).value = "";
         setIsProcessing(false);

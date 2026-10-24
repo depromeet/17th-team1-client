@@ -13,12 +13,12 @@ type ReportContext = {
 const reportedErrors = new WeakSet<object>();
 
 // 서비스 레이어가 토큰이 없을 때 던지는 에러 메시지 (ApiError가 아닌 일반 Error)
-const AUTH_MISSING_MESSAGE = "인증 정보가 없습니다";
+const AUTH_MISSING_MESSAGE = "인증 정보가 없습니다. 다시 로그인해주세요.";
 
-// 4xx(인증 만료 포함)와 토큰 없음은 화면에서 처리하는 정상 흐름이므로 보고하지 않음
+// 인증 만료(401)와 토큰 없음은 다시 로그인해야 하는 상황이므로 보고하지 않음
 const shouldIgnore = (error: unknown) => {
-  if (error instanceof ApiError) return error.status >= 400 && error.status < 500;
-  return error instanceof Error && error.message.includes(AUTH_MISSING_MESSAGE);
+  if (error instanceof ApiError) return error.status === 401;
+  return error instanceof Error && error.message === AUTH_MISSING_MESSAGE;
 };
 
 /**

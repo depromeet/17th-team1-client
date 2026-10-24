@@ -220,11 +220,17 @@ export const useImageMetadata = ({ diaryId, isEditMode }: UseImageMetadataProps)
 
         if (results.length === 0) return;
 
+        // Promise.all은 첫 실패만 넘기므로, 동시에 실패한 업로드도 모두 보고되도록 개별로 보고
         const uploadPromises = results.map(({ metadata, uploadFile }) =>
-          uploadTravelPhoto({ file: uploadFile }).then(photoCode => ({
-            photoCode,
-            metadata,
-          }))
+          uploadTravelPhoto({ file: uploadFile })
+            .then(photoCode => ({
+              photoCode,
+              metadata,
+            }))
+            .catch(error => {
+              reportError(error, { tags: { feature: "photo_upload", step: "upload" } });
+              throw error;
+            })
         );
 
         const uploadedResults = await Promise.all(uploadPromises);

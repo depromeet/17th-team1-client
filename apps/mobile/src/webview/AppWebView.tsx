@@ -8,6 +8,7 @@ import Constants from "expo-constants";
 import { env } from "../config/env";
 import { theme } from "../theme";
 import { ErrorView } from "./ErrorView";
+import { type IntentUrl, parseIntentUrl } from "./intentUrl";
 import { shouldLoadInWebView } from "./navigationPolicy";
 
 type AppWebViewProps = {
@@ -42,16 +43,54 @@ export const AppWebView = ({ onReady }: AppWebViewProps) => {
     canGoBackRef.current = state.canGoBack;
   }, []);
 
-  const handleShouldStartLoad = useCallback((request: ShouldStartLoadRequest) => {
-    // iframe 등 하위 프레임 요청은 제한하지 않습니다. (iOS만 isTopFrame 제공)
-    if (request.isTopFrame === false) return true;
+  /**
+   * Android `intent:` URL 처리 (카카오톡으로 로그인 등)
+   * 앱 스킴 URL로 실행 → 실패 시 대체 URL → 그것도 없으면 Play 스토어
+   */
+  const openIntent = useCallback(async ({ appUrl, fallbackUrl, packageName }: IntentUrl) => {
+    if (appUrl) {
+      try {
+        await Linking.openURL(appUrl);
+        return;
+      } catch {
+        // 앱이 설치되어 있지 않음 → 대체 경로로 진행
+      }
+    }
 
-    if (shouldLoadInWebView(request.url, env.WEB_URL)) return true;
+    if (fallbackUrl) {
+      if (shouldLoadInWebView(fallbackUrl, env.WEB_URL)) {
+        // 허용 도메인이면 WebView 안에서 이동 (이동 시 onShouldStartLoadWithRequest 정책을 다시 거침)
+        webViewRef.current?.injectJavaScript(`window.location.href = ${JSON.stringify(fallbackUrl)}; true;`);
+      } else {
+        Linking.openURL(fallbackUrl).catch(() => undefined);
+      }
+      return;
+    }
 
-    // 외부 링크/커스텀 스킴(kakaotalk://, tel: 등)은 시스템에 위임
-    Linking.openURL(request.url).catch(() => undefined);
-    return false;
+    if (packageName) {
+      Linking.openURL(`market://details?id=${encodeURIComponent(packageName)}`).catch(() => undefined);
+    }
   }, []);
+
+  const handleShouldStartLoad = useCallback(
+    (request: ShouldStartLoadRequest) => {
+      // iframe 등 하위 프레임 요청은 제한하지 않습니다. (iOS만 isTopFrame 제공)
+      if (request.isTopFrame === false) return true;
+
+      const intent = parseIntentUrl(request.url);
+      if (intent) {
+        openIntent(intent).catch(() => undefined);
+        return false;
+      }
+
+      if (shouldLoadInWebView(request.url, env.WEB_URL)) return true;
+
+      // 외부 링크/커스텀 스킴(kakaotalk://, tel: 등)은 시스템에 위임
+      Linking.openURL(request.url).catch(() => undefined);
+      return false;
+    },
+    [openIntent]
+  );
 
   const handleRetry = useCallback(() => {
     setHasError(false);

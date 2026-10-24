@@ -12,8 +12,14 @@ type ReportContext = {
 // 같은 에러가 mutation 캐시와 호출부 catch에서 중복 보고되지 않도록 기록
 const reportedErrors = new WeakSet<object>();
 
-// 인증 만료(401)는 로그인 페이지로 이동시키는 정상 흐름이므로 보고하지 않음
-const shouldIgnore = (error: unknown) => error instanceof ApiError && error.status === 401;
+// 서비스 레이어가 토큰이 없을 때 던지는 에러 메시지 (ApiError가 아닌 일반 Error)
+const AUTH_MISSING_MESSAGE = "인증 정보가 없습니다";
+
+// 4xx(인증 만료 포함)와 토큰 없음은 화면에서 처리하는 정상 흐름이므로 보고하지 않음
+const shouldIgnore = (error: unknown) => {
+  if (error instanceof ApiError) return error.status >= 400 && error.status < 500;
+  return error instanceof Error && error.message.includes(AUTH_MISSING_MESSAGE);
+};
 
 /**
  * catch로 처리한 에러를 Sentry에 보고합니다.

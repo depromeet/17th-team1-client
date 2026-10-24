@@ -19,10 +19,9 @@ export const ClientLayout = ({ children }: ClientLayoutProps) => {
       new QueryClient({
         mutationCache: new MutationCache({
           onError: (error, _variables, _context, mutation) => {
-            reportError(error, {
-              tags: { source: "react-query" },
-              extra: { mutationKey: mutation.options.mutationKey },
-            });
+            // 호출부 catch에서 작업별 태그를 붙여 직접 보고하는 mutation은 건너뜀
+            if (mutation.meta?.reportHandled) return;
+            reportError(error, { tags: { source: "react-query" } });
           },
         }),
       })

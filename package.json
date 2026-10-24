@@ -17,7 +17,8 @@
     "prepare": "husky",
     "dev:mobile": "pnpm --filter @globber/mobile start",
     "ios": "pnpm --filter @globber/mobile ios",
-    "android": "pnpm --filter @globber/mobile android"
+    "android": "pnpm --filter @globber/mobile android",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@intellectronica/ruler": "^0.3.10",

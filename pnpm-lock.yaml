@@ -62,6 +62,9 @@ importers:
       '@globber/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.24
       '@types/react':
         specifier: ~19.2.4
         version: 19.2.18

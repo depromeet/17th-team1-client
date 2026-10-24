@@ -14,9 +14,16 @@
       "outputs": [".next/**", "!.next/cache/**"],
       "env": ["NEXT_PUBLIC_*", "GOOGLE_MAPS_API_KEY", "SENTRY_AUTH_TOKEN"]
     },
-    "lint": { "dependsOn": ["^lint"] },
-    "lint:fix": { "cache": false },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "lint:fix": {
+      "cache": false
+    },
     "lint:check": {},
-    "typecheck": { "dependsOn": ["^typecheck"] }
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {}
   }
 }
